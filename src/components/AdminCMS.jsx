@@ -2930,7 +2930,7 @@ export default function AdminCMS({
                           <div className="space-y-1 text-right">
                             <div className="flex flex-wrap items-center gap-2">
                               <a 
-                                href={`?article=${art.slug || art.id}`}
+                                href={`/${art.slug || art.id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => {
@@ -2972,7 +2972,7 @@ export default function AdminCMS({
                         <div className="flex items-center justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800 font-simple">
                           {/* View Live Article in New Tab Button */}
                           <a
-                            href={`?article=${art.slug || art.id}`}
+                            href={`/${art.slug || art.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2 bg-emerald-950/60 text-emerald-300 hover:bg-emerald-900 border border-emerald-800 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"

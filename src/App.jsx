@@ -383,7 +383,13 @@ export default function App() {
   useEffect(() => {
     const handleUrlNavigation = () => {
       const params = new URLSearchParams(window.location.search);
-      const articleParam = params.get('article') || params.get('slug');
+      
+        const path = window.location.pathname.substring(1).replace(//$/, '');
+        let articleParam = params.get('article') || params.get('slug');
+        if (!articleParam && path && !path.startsWith('api') && path !== 'admin' && path !== 'login') {
+            articleParam = path;
+        }
+
       const portalParam = params.get('portal') || params.get('tab');
 
       if (portalParam === 'doctor' || portalParam === 'doctor-dashboard') {
