@@ -2959,7 +2959,7 @@ export default function AdminCMS({
                             </div>
 
                             <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 font-sans">
-                              <span>کیٹیگری: <strong>{art.categoryName}</strong></span>
+                              <span>کیٹیگری: <strong>{art.categoryName || art.category}</strong></span>
                               <span>•</span>
                               <span>مصنف: {art.author}</span>
                               <span>•</span>

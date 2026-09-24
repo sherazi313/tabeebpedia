@@ -23,7 +23,7 @@ export default function BlogSection({ onSelectArticle, selectedCategory, setSele
 
   // Filter Articles
   const filteredArticles = allArticles.filter(article => {
-    const matchCategory = selectedCategory === 'all' || article.category === selectedCategory;
+    const matchCategory = selectedCategory === 'all' || (article.categoryName || article.category) === selectedCategory;
     const matchTag = !selectedTag || (Array.isArray(article.tags) ? article.tags.includes(selectedTag) : article.tags?.includes(selectedTag));
     const matchSearch = !searchQuery.trim() ||
       article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
