@@ -36,7 +36,7 @@ export default function Navbar({
     { id: 'doctors', label: 'اطباء و حکماء ڈائریکٹری', icon: Stethoscope },
     { id: 'blog', label: 'طبی مضامین و ریسرچ', icon: BookOpen },
     
-    { id: 'qanoon', label: 'قانون مفرد اعضاء', icon: Cpu },
+    
   ];
 
   const isNavy = theme === 'navy';
