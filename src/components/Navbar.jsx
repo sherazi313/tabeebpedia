@@ -35,7 +35,7 @@ export default function Navbar({
     { id: 'home', label: 'ہوم', icon: Sparkles },
     { id: 'doctors', label: 'اطباء و حکماء ڈائریکٹری', icon: Stethoscope },
     { id: 'blog', label: 'طبی مضامین و ریسرچ', icon: BookOpen },
-    { id: 'herbs', label: 'جڑی بوٹیوں کی انسائیکلوپیڈیا', icon: Leaf },
+    
     { id: 'qanoon', label: 'قانون مفرد اعضاء', icon: Cpu },
   ];
 
