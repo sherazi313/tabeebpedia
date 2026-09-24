@@ -384,7 +384,7 @@ export default function App() {
     const handleUrlNavigation = () => {
       const params = new URLSearchParams(window.location.search);
       
-        const path = window.location.pathname.substring(1).replace(//$/, '');
+        const path = window.location.pathname.substring(1).replace(/\/$/, '');
         let articleParam = params.get('article') || params.get('slug');
         if (!articleParam && path && !path.startsWith('api') && path !== 'admin' && path !== 'login') {
             articleParam = path;
