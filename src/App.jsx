@@ -397,7 +397,7 @@ export default function App() {
       }
 
       if (articleParam) {
-        const found = articlesList.find(a => String(a.id) === articleParam || a.slug === articleParam);
+        const found = articlesList.find(a => String(a.id) === articleParam || a.slug === articleParam || (a.slug && decodeURIComponent(a.slug) === articleParam) || (a.slug && a.slug === encodeURIComponent(articleParam)));
         if (found) {
           setSelectedArticle(found);
           setActiveTab('article-detail');
