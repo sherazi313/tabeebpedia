@@ -397,7 +397,15 @@ export default function App() {
       }
 
       if (articleParam) {
-        const found = articlesList.find(a => String(a.id) === articleParam || a.slug === articleParam || (a.slug && decodeURIComponent(a.slug) === articleParam) || (a.slug && a.slug === encodeURIComponent(articleParam)));
+        const found = articlesList.find(a => {
+            if (String(a.id) === articleParam || a.slug === articleParam) return true;
+            if (!a.slug) return false;
+            try {
+              if (decodeURIComponent(a.slug) === articleParam) return true;
+              if (a.slug === encodeURIComponent(articleParam)) return true;
+            } catch(e) {}
+            return false;
+          });
         if (found) {
           setSelectedArticle(found);
           setActiveTab('article-detail');
