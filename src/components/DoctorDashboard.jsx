@@ -30,10 +30,14 @@ import {
   Check,
   ExternalLink,
   ChevronLeft,
-  X
+  X,
+  Image as ImageIcon,
+  Camera,
+  Loader2
 } from 'lucide-react';
 import { CITIES, SPECIALTIES, TREATMENT_TYPES } from '../data/mockData';
 import CityCombobox from './CityCombobox';
+import { uploadImageApi } from '../api';
 
 export default function DoctorDashboard({ 
   doctor, 
@@ -50,6 +54,9 @@ export default function DoctorDashboard({
   const [activeTab, setActiveTab] = useState('profile'); // 'profile', 'inquiries', 'articles', 'stats'
   const [notification, setNotification] = useState(null);
   const fileInputRef = useRef(null);
+  const galleryFileInputRef = useRef(null);
+  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
+  const [newGalleryUrlInput, setNewGalleryUrlInput] = useState('');
 
   const safeCitiesList = (citiesList && Array.isArray(citiesList) && citiesList.length > 0) ? citiesList : CITIES;
 
@@ -70,14 +77,22 @@ export default function DoctorDashboard({
     timing: doctor?.timing || 'روزانہ: شام 4:00 تا رات 9:00 (اتوار چھٹی)',
     phone: doctor?.phone || '',
     whatsapp: doctor?.whatsapp || '',
-    image: doctor?.image || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80',
+    image: doctor?.image || '/images/default_doctor.webp',
+    gallery: (doctor?.gallery && Array.isArray(doctor.gallery)) ? [...doctor.gallery] : [],
     about: doctor?.about || '',
     specialties: (doctor?.specialties && Array.isArray(doctor.specialties) && doctor.specialties.length > 0) ? doctor.specialties : ['امراض معدہ، گیس و تبخیر'],
     services: (doctor?.services && Array.isArray(doctor.services) && doctor.services.length > 0) ? doctor.services : ['نبض کی 6 اقسام سے مزاج کی تشخیص', 'معدے اور جگر کی اصلاح', 'قدرتی ہربل نسخہ جات'],
+    onlineFee: doctor?.onlineFee || (doctor?.fee ? doctor.fee + 300 : 800),
+    waitTime: doctor?.waitTime || '15 منٹ سے کم',
+    languages: (doctor?.languages && Array.isArray(doctor.languages) && doctor.languages.length > 0) ? doctor.languages : ['اردو', 'پنجابی'],
+    memberships: (doctor?.memberships && Array.isArray(doctor.memberships) && doctor.memberships.length > 0) ? doctor.memberships : ['قومی کونسل برائے طب (NCT)'],
+    conditions: (doctor?.conditions && Array.isArray(doctor.conditions) && doctor.conditions.length > 0) ? doctor.conditions : ['معدے کی تیزابیت و السر', 'جوڑوں کا درد اور عرق النساء', 'دائمی قبض و آئی بی ایس'],
   });
 
   // Services input helper
   const [newServiceInput, setNewServiceInput] = useState('');
+  const [newConditionInput, setNewConditionInput] = useState('');
+  const [newMembershipInput, setNewMembershipInput] = useState('');
 
   // Sample Patient Leads & Consultation Requests
   const [inquiriesList, setInquiriesList] = useState([
@@ -118,15 +133,19 @@ export default function DoctorDashboard({
   const isNavy = theme === 'navy';
 
   // Handle Photo Upload
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+  const handleImageUpload = async (e) => {
+    const file = e.target.files && e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        setFormData(prev => ({ ...prev, image: uploadEvent.target.result }));
-        showNotification('پروفائل تصویر کامیابی سے لوڈ ہو گئی');
-      };
-      reader.readAsDataURL(file);
+      try {
+        const url = await uploadImageApi(file);
+        if (url) {
+          setFormData(prev => ({ ...prev, image: url }));
+          showNotification('پروفائل تصویر کامیابی سے اپلوڈ ہو گئی');
+        }
+      } catch (err) {
+        console.error(err);
+        showNotification('پروفائل تصویر اپلوڈ کرنے میں مسئلہ آیا');
+      }
     }
   };
 
@@ -157,6 +176,12 @@ export default function DoctorDashboard({
     const trimmed = customSpecialtyInput.trim();
     if (!trimmed) return;
     setSpecialtyNotice('');
+
+    const containsUrdu = (text) => /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text || '');
+    if (/[a-zA-Z]/.test(trimmed) && !containsUrdu(trimmed)) {
+      setSpecialtyNotice('برائے مہربانی مرض یا شعبہ کا نام صرف اردو رسم الخط میں درج فرمائیں (مثلاً: جوڑوں کا درد، تبخیر معدہ)');
+      return;
+    }
 
     if (formData.specialties.length >= 3) {
       setSpecialtyNotice('زیادہ سے زیادہ 3 امراض منتخب ہو سکتے ہیں۔ نیا مرض شامل کرنے کے لیے پہلے کسی ایک کو ہٹائیں۔');
@@ -204,9 +229,118 @@ export default function DoctorDashboard({
     }));
   };
 
+  // Add Condition tag
+  const handleAddCondition = () => {
+    if (!newConditionInput.trim()) return;
+    if (!formData.conditions.includes(newConditionInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        conditions: [...(prev.conditions || []), newConditionInput.trim()]
+      }));
+    }
+    setNewConditionInput('');
+  };
+
+  // Remove Condition tag
+  const handleRemoveCondition = (condToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      conditions: (prev.conditions || []).filter(c => c !== condToRemove)
+    }));
+  };
+
+  // Add Membership tag
+  const handleAddMembership = () => {
+    if (!newMembershipInput.trim()) return;
+    if (!formData.memberships.includes(newMembershipInput.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        memberships: [...(prev.memberships || []), newMembershipInput.trim()]
+      }));
+    }
+    setNewMembershipInput('');
+  };
+
+  // Remove Membership tag
+  const handleRemoveMembership = (memToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      memberships: (prev.memberships || []).filter(m => m !== memToRemove)
+    }));
+  };
+
+  // Handle Gallery Upload from File (Mobile/PC)
+  const handleGalleryFileUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    setIsUploadingGallery(true);
+    try {
+      const uploadedUrls = [];
+      for (const file of files) {
+        const url = await uploadImageApi(file);
+        if (url) uploadedUrls.push(url);
+      }
+      if (uploadedUrls.length > 0) {
+        setFormData(prev => ({
+          ...prev,
+          gallery: [...(prev.gallery || []), ...uploadedUrls]
+        }));
+        showNotification(`${uploadedUrls.length} تصویر/تصاویر کامیابی سے شامل ہو گئیں`);
+      }
+    } catch (err) {
+      console.error(err);
+      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا');
+    } finally {
+      setIsUploadingGallery(false);
+      if (galleryFileInputRef.current) galleryFileInputRef.current.value = '';
+    }
+  };
+
+  // Add Gallery Image via URL
+  const handleAddGalleryUrl = () => {
+    if (!newGalleryUrlInput.trim()) return;
+    setFormData(prev => ({
+      ...prev,
+      gallery: [...(prev.gallery || []), newGalleryUrlInput.trim()]
+    }));
+    setNewGalleryUrlInput('');
+    showNotification('تصویر کا لنک کامیابی سے شامل کر دیا گیا');
+  };
+
+  // Remove Gallery Image
+  const handleRemoveGalleryImage = (indexToRemove) => {
+    setFormData(prev => ({
+      ...prev,
+      gallery: (prev.gallery || []).filter((_, idx) => idx !== indexToRemove)
+    }));
+    showNotification('تصویر گیلری سے ہٹا دی گئی');
+  };
+
   // Save Profile Form
   const handleSaveProfile = (e) => {
     if (e) e.preventDefault();
+
+    const containsUrdu = (text) => /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text || '');
+    const isPureEnglish = (text) => /[a-zA-Z]/.test(text || '') && !containsUrdu(text || '');
+
+    if (formData.name && isPureEnglish(formData.name)) {
+      showNotification('براہ کرم اپنا نام اردو زبان میں درج فرمائیں (مثلاً: حکیم محمد احمد)', 'error');
+      return;
+    }
+    if (formData.clinicName && isPureEnglish(formData.clinicName)) {
+      showNotification('براہ کرم مطب / کلینک کا نام اردو زبان میں درج فرمائیں', 'error');
+      return;
+    }
+    if (formData.address && isPureEnglish(formData.address)) {
+      showNotification('براہ کرم مطب کا پتہ اردو زبان میں درج فرمائیں', 'error');
+      return;
+    }
+    for (const spec of (formData.specialties || [])) {
+      if (isPureEnglish(spec)) {
+        showNotification(`براہ کرم مرض یا شعبہ کا نام اردو میں لکھیں: "${spec}"`, 'error');
+        return;
+      }
+    }
     
     let finalCityName = formData.cityName || '';
     let finalCityId = formData.city || '';
@@ -214,6 +348,11 @@ export default function DoctorDashboard({
     if (!finalCityName) {
       const cObj = (citiesList || CITIES).find(c => c.id === finalCityId);
       finalCityName = cObj ? cObj.name : finalCityId || 'لاہور';
+    }
+
+    if (finalCityName && isPureEnglish(finalCityName)) {
+      showNotification('براہ کرم شہر کا نام صرف اردو زبان میں درج فرمائیں', 'error');
+      return;
     }
 
     if (finalCityName && onAddCity) {
@@ -227,6 +366,7 @@ export default function DoctorDashboard({
     const updatedDoctor = {
       ...doctor,
       ...formData,
+      gallery: formData.gallery || [],
       city: finalCityId,
       cityName: finalCityName,
       experience: Number(formData.experience) || 1,
@@ -466,6 +606,22 @@ export default function DoctorDashboard({
         {activeTab === 'profile' && (
           <form onSubmit={handleSaveProfile} className="space-y-8">
             
+            {/* Urdu Language Guidelines Notice */}
+            <div className="bg-emerald-50 border border-emerald-200/90 rounded-2xl p-4 flex items-start gap-3 shadow-xs">
+              <div className="p-2 bg-emerald-100 text-emerald-800 rounded-xl shrink-0">
+                <Sparkles className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div className="text-xs space-y-1">
+                <h4 className="font-bold text-emerald-950 font-simple flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>لازمی رہنمائی برائے پروفائل (صرف اردو زبان):</span>
+                </h4>
+                <p className="text-emerald-800 font-simple leading-relaxed">
+                  طبیب پیڈیا خالصتاً قومی اردو پورٹل ہے۔ تمام معالجین سے التماس ہے کہ <strong>اپنا نام، مطب کا نام، پتہ، شہر، تعارف، ڈگری اور خدمات تمام تفصیلات لازمی طور پر اردو زبان میں درج فرمائیں</strong>۔
+                </p>
+              </div>
+            </div>
+
             {/* 1. Doctor Avatar & Main Identity */}
             <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
@@ -516,6 +672,17 @@ export default function DoctorDashboard({
                       <UploadCloud className="w-4 h-4" />
                       <span>کمپیوٹر / موبائل سے تصویر چنیں</span>
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, image: '/images/default_doctor.webp' }));
+                        showNotification('ڈیفالٹ (غیر تصدیق شدہ) تصویر سیٹ کر دی گئی');
+                      }}
+                      className="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition-colors"
+                      title="ڈیفالٹ غیر تصدیق شدہ بیج لگائیں"
+                    >
+                      ڈیفالٹ بیج لگائیں
+                    </button>
                   </div>
                 </div>
               </div>
@@ -562,7 +729,7 @@ export default function DoctorDashboard({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple">
                     کونسل رجسٹریشن نمبر:
@@ -590,7 +757,9 @@ export default function DoctorDashboard({
                     ))}
                   </select>
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple">
                     کلینکل تجربہ (سال):
@@ -605,7 +774,7 @@ export default function DoctorDashboard({
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple">
-                    مشورہ فیس (PKR):
+                    مطب وزٹ فیس (PKR):
                   </label>
                   <input
                     type="number"
@@ -613,6 +782,33 @@ export default function DoctorDashboard({
                     onChange={(e) => setFormData({ ...formData, fee: e.target.value })}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple">
+                    آن لائن ویڈیو فیس (PKR):
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.onlineFee}
+                    onChange={(e) => setFormData({ ...formData, onlineFee: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple">
+                    اوسط انتظار کا وقت (Wait Time):
+                  </label>
+                  <select
+                    value={formData.waitTime}
+                    onChange={(e) => setFormData({ ...formData, waitTime: e.target.value })}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans"
+                  >
+                    <option value="15 منٹ سے کم">15 منٹ سے کم (Under 15 Min)</option>
+                    <option value="15 تا 30 منٹ">15 تا 30 منٹ</option>
+                    <option value="فوری معائنہ (بغیر انتظار)">فوری معائنہ (بغیر انتظار)</option>
+                  </select>
                 </div>
               </div>
 
@@ -907,8 +1103,138 @@ export default function DoctorDashboard({
                 </div>
               </div>
 
+              {/* Conditions Treated (Oladoc Style) */}
+              <div className="pt-2 border-t border-slate-100">
+                <label className="block text-xs font-bold text-slate-700 mb-2 font-simple">
+                  زیرِ علاج امراض اور مخصوص مسائل (Conditions Treated):
+                </label>
+                <div className="flex items-center gap-2 mb-3">
+                  <input
+                    type="text"
+                    value={newConditionInput}
+                    onChange={(e) => setNewConditionInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddCondition();
+                      }
+                    }}
+                    placeholder="مثال: معدے کا السر، جوڑوں کا درد، دائمی قبض..."
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCondition}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold flex items-center gap-1 font-simple"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>شامل کریں</span>
+                  </button>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {(formData.conditions || []).map((cond, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1.5 bg-blue-50 border border-blue-200 text-blue-900 px-3 py-1 rounded-xl text-xs font-medium"
+                    >
+                      <span>• {cond}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCondition(cond)}
+                        className="text-blue-700 hover:text-red-600 font-bold"
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Languages & Professional Memberships */}
+              <div className="pt-2 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2 font-simple">
+                    بولی جانے والی زبانیں (Languages Spoken):
+                  </label>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    {['اردو', 'پنجابی', 'انگریزی', 'پشتو', 'سندھی', 'سرائیکی'].map(lang => {
+                      const isChecked = (formData.languages || []).includes(lang);
+                      return (
+                        <button
+                          type="button"
+                          key={lang}
+                          onClick={() => {
+                            const cur = [...(formData.languages || [])];
+                            if (isChecked) {
+                              if (cur.length > 1) {
+                                setFormData({ ...formData, languages: cur.filter(l => l !== lang) });
+                              }
+                            } else {
+                              setFormData({ ...formData, languages: [...cur, lang] });
+                            }
+                          }}
+                          className={`px-3 py-1 rounded-xl border text-xs font-medium transition-colors ${
+                            isChecked
+                              ? 'bg-blue-600 text-white border-blue-600 font-bold'
+                              : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          {lang} {isChecked && '✓'}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-2 font-simple">
+                    پیشہ ورانہ تنظیموں کی رکنیت (Memberships):
+                  </label>
+                  <div className="flex items-center gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={newMembershipInput}
+                      onChange={(e) => setNewMembershipInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddMembership();
+                        }
+                      }}
+                      placeholder="مثال: قومی کونسل برائے طب، پاکستان طبی کانفرنس..."
+                      className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-800"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddMembership}
+                      className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold flex items-center gap-1"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {(formData.memberships || []).map((mem, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 bg-slate-100 border border-slate-200 text-slate-800 px-2.5 py-0.5 rounded-lg text-xs"
+                      >
+                        <span>{mem}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveMembership(mem)}
+                          className="text-slate-400 hover:text-red-600 font-bold"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               {/* About & Bio */}
-              <div>
+              <div className="pt-2 border-t border-slate-100">
                 <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple">
                   طبیب کا تفصیلی تعارف و فلسفہ علاج (About & Bio):
                 </label>
@@ -920,6 +1246,129 @@ export default function DoctorDashboard({
                   className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"
                 />
               </div>
+
+            </div>
+
+            {/* 4. Clinic, Degree & Certificate Gallery Images */}
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 font-h2 flex items-center gap-2">
+                    <ImageIcon className="w-5 h-5 text-emerald-600" />
+                    <span>مطب، کلینک اور اسناد کی تصاویر (اسناد، ڈگری، وزٹنگ کارڈ، پمفلٹ)</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    اپنی اصل تعلیمی اسناد، ڈگری، وزیٹنگ کارڈ، پمفلٹ یا مطب کی تصاویر لگائیں جو مریضوں کو پبلک پروفائل پر نظر آئیں گی۔
+                  </p>
+                </div>
+                <span className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-full font-bold font-sans self-start sm:self-auto">
+                  کل تصاویر: {(formData.gallery || []).length}
+                </span>
+              </div>
+
+              {/* Upload Action Area */}
+              <div className="bg-slate-50 border border-dashed border-slate-300 rounded-2xl p-4 sm:p-6 text-center space-y-4">
+                <input
+                  type="file"
+                  ref={galleryFileInputRef}
+                  onChange={handleGalleryFileUpload}
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                />
+                
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    disabled={isUploadingGallery}
+                    onClick={() => galleryFileInputRef.current?.click()}
+                    className="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-400 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 font-simple"
+                  >
+                    {isUploadingGallery ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>تصاویر اپلوڈ ہو رہی ہیں...</span>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className="w-4 h-4" />
+                        <span>موبائل یا کمپیوٹر سے تصاویر اپلوڈ کریں</span>
+                      </>
+                    )}
+                  </button>
+
+                  <span className="text-xs text-slate-400 font-simple">یا تصویر کا لنک درج کریں:</span>
+
+                  <div className="flex items-center gap-2 w-full sm:w-auto flex-1 max-w-md">
+                    <input
+                      type="url"
+                      value={newGalleryUrlInput}
+                      onChange={(e) => setNewGalleryUrlInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddGalleryUrl();
+                        }
+                      }}
+                      placeholder="تصویر کا URL درج کریں..."
+                      className="flex-1 bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-sans"
+                      dir="ltr"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddGalleryUrl}
+                      className="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold font-simple shrink-0"
+                    >
+                      شامل کریں
+                    </button>
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-400 font-simple">
+                  (ایک ساتھ متعدد تصاویر چن سکتے ہیں۔ JPG, PNG, WebP سپورٹڈ ہیں)
+                </p>
+              </div>
+
+              {/* Gallery Grid or Empty State */}
+              {(formData.gallery || []).length === 0 ? (
+                <div className="p-8 bg-slate-50/60 rounded-2xl border border-slate-200 text-center text-slate-500 text-xs space-y-2">
+                  <ImageIcon className="w-10 h-10 text-slate-300 mx-auto" />
+                  <p className="font-bold text-slate-600">ابھی تک کوئی اضافی تصویر شامل نہیں کی گئی۔</p>
+                  <p className="text-[11px] text-slate-400">
+                    مریضوں کا اعتماد بڑھانے کے لیے اپنے مطب، تعلیمی اسناد، ڈگری، وزیٹنگ کارڈ یا پمفلٹ کی تصاویر لگائیں۔
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {formData.gallery.map((imgUrl, idx) => (
+                    <div
+                      key={idx}
+                      className="relative group rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 aspect-video shadow-xs hover:shadow-md transition-all"
+                    >
+                      <img
+                        src={imgUrl}
+                        alt={`تصویر ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.target.parentElement.classList.add('opacity-60');
+                        }}
+                      />
+                      {/* Overlay delete button */}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveGalleryImage(idx)}
+                        className="absolute top-2 right-2 p-1.5 bg-red-600/90 hover:bg-red-600 text-white rounded-xl shadow-lg transition-all transform active:scale-90 flex items-center gap-1 text-[11px] font-bold"
+                        title="تصویر حذف کریں"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline font-simple text-[10px]">ڈیلیٹ</span>
+                      </button>
+                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-white text-[10px] font-sans truncate px-2">
+                        تصویر #{idx + 1}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
             </div>
 
@@ -1033,7 +1482,7 @@ export default function DoctorDashboard({
                     <img src={art.featuredImage} alt={art.title} className="w-24 h-24 rounded-xl object-cover" />
                     <div className="flex-1 space-y-1">
                       <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-sans font-bold">
-                        {art.categoryName}
+                        {Array.isArray(art.categories) && art.categories.length > 0 ? art.categories.join(' • ') : (art.categoryName || art.category || 'عام زمرہ')}
                       </span>
                       <h4 className="text-xs font-bold text-slate-900 line-clamp-2 leading-snug">{art.title}</h4>
                       <div className="flex items-center gap-3 text-[10px] text-slate-400 font-sans pt-1">

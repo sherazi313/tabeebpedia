@@ -159,6 +159,171 @@
   color: #065f46;
 }
 
+/* ========================================================= */
+/* DYNAMIC FONT SIZES FOR ARTICLE READER (A-, A, A+) */
+/* ========================================================= */
+.article-rendered-content.article-font-small,
+.article-rendered-content.article-font-small p,
+.article-rendered-content.article-font-small span,
+.article-rendered-content.article-font-small div,
+.article-rendered-content.article-font-small li,
+.article-rendered-content.article-font-small a,
+.article-rendered-content.article-font-small td,
+.article-rendered-content.article-font-small th,
+.article-rendered-content.article-font-small blockquote {
+  font-size: 13px !important;
+  line-height: 2.1 !important;
+}
+.article-rendered-content.article-font-small h1,
+.article-rendered-content.article-font-small h2 {
+  font-size: 1.35rem !important;
+}
+.article-rendered-content.article-font-small h3,
+.article-rendered-content.article-font-small h4,
+.article-rendered-content.article-font-small h5 {
+  font-size: 1.15rem !important;
+}
+
+.article-rendered-content.article-font-normal,
+.article-rendered-content.article-font-normal p,
+.article-rendered-content.article-font-normal span,
+.article-rendered-content.article-font-normal div,
+.article-rendered-content.article-font-normal li,
+.article-rendered-content.article-font-normal a,
+.article-rendered-content.article-font-normal td,
+.article-rendered-content.article-font-normal th,
+.article-rendered-content.article-font-normal blockquote {
+  font-size: 16px !important;
+  line-height: 2.3 !important;
+}
+.article-rendered-content.article-font-normal h1,
+.article-rendered-content.article-font-normal h2 {
+  font-size: 1.65rem !important;
+}
+.article-rendered-content.article-font-normal h3,
+.article-rendered-content.article-font-normal h4,
+.article-rendered-content.article-font-normal h5 {
+  font-size: 1.3rem !important;
+}
+
+.article-rendered-content.article-font-large,
+.article-rendered-content.article-font-large p,
+.article-rendered-content.article-font-large span,
+.article-rendered-content.article-font-large div,
+.article-rendered-content.article-font-large li,
+.article-rendered-content.article-font-large a,
+.article-rendered-content.article-font-large td,
+.article-rendered-content.article-font-large th,
+.article-rendered-content.article-font-large blockquote {
+  font-size: 21px !important;
+  line-height: 2.6 !important;
+}
+.article-rendered-content.article-font-large h1,
+.article-rendered-content.article-font-large h2 {
+  font-size: 2.1rem !important;
+}
+.article-rendered-content.article-font-large h3,
+.article-rendered-content.article-font-large h4,
+.article-rendered-content.article-font-large h5 {
+  font-size: 1.65rem !important;
+}
+
+
+/* ========================================================= */
+/* WORDPRESS IMPORTED & CMS TABLES STYLING */
+/* ========================================================= */
+.article-rendered-content table,
+.visual-editor-content table {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 1.75rem auto !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 1rem !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03) !important;
+  background-color: #ffffff !important;
+  direction: rtl !important;
+}
+
+.article-rendered-content table th,
+.visual-editor-content table th {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  font-family: 'Almarai', 'Cairo', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 0.95rem !important;
+  padding: 0.85rem 1rem !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+  border-left: 1px solid #e2e8f0 !important;
+  text-align: center !important;
+}
+
+.article-rendered-content table td,
+.visual-editor-content table td {
+  padding: 0.85rem 1rem !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-left: 1px solid #e2e8f0 !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  color: #1e293b !important;
+  font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif !important;
+  font-size: 1rem !important;
+  line-height: 2 !important;
+}
+
+.article-rendered-content table tr td:last-child,
+.visual-editor-content table tr td:last-child,
+.article-rendered-content table tr th:last-child,
+.visual-editor-content table tr th:last-child {
+  border-left: none !important;
+}
+
+.article-rendered-content table tbody tr:last-child td,
+.visual-editor-content table tbody tr:last-child td {
+  border-bottom: none !important;
+}
+
+/* First row heading styling when <tr> contains <h5> or <th> */
+.article-rendered-content table tr:first-child td,
+.visual-editor-content table tr:first-child td {
+  background: #f8fafc !important;
+  font-weight: bold !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+}
+
+.article-rendered-content table tr:first-child td h4,
+.article-rendered-content table tr:first-child td h5,
+.article-rendered-content table tr:first-child td h6,
+.visual-editor-content table tr:first-child td h4,
+.visual-editor-content table tr:first-child td h5,
+.visual-editor-content table tr:first-child td h6 {
+  margin: 0 !important;
+  color: #047857 !important;
+  font-family: 'Noto Nastaliq Urdu', serif !important;
+  font-weight: 800 !important;
+  font-size: 1.1rem !important;
+}
+
+/* Zebra striping for subsequent rows */
+.article-rendered-content table tbody tr:nth-child(even) td,
+.visual-editor-content table tbody tr:nth-child(even) td {
+  background-color: #f8fafc !important;
+}
+
+.article-rendered-content table tr:hover td,
+.visual-editor-content table tr:hover td {
+  background-color: #f1f5f9 !important;
+}
+
+.article-rendered-content table img,
+.visual-editor-content table img {
+  display: inline-block !important;
+  max-width: 100% !important;
+  height: auto !important;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -196,3 +361,31 @@
 .visual-editor-content *:not(h1):not(h2):not(h3):not(h4):not(h5):not(h6) {
   font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif;
 }
+
+.article-rendered-content figure {
+  margin: 2rem auto !important;
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.article-rendered-content img {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 1rem !important;
+  margin: 1.25rem auto !important;
+  display: block !important;
+  box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  background-color: #ffffff !important;
+}
+
+.article-rendered-content figure figcaption {
+  font-family: 'Noto Nastaliq Urdu', serif !important;
+  font-size: 0.95rem !important;
+  color: #64748b !important;
+  margin-top: 0.5rem !important;
+}
+

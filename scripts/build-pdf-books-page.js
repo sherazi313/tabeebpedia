@@ -1,0 +1,463 @@
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, '..');
+
+// Curated metadata and real covers for all 21 books
+const BOOKS_META = [
+  {
+    id: 1,
+    title: 'طب پاکستانی اردو',
+    author: 'حکیم سید عبدالوہاب شاہ شیرازی',
+    category: 'قانون مفرد اعضاء',
+    categoryEn: 'qanoon',
+    language: 'Urdu',
+    pages: 'مختصر و جامع',
+    description: 'کتاب طب پاکستانی (قانون مفرد اعضاء) کی مبادیات کو سمجھنے اور ابتدائی طلبہ کے لیے انتہائی آسان فہم، مصور اور بنیادی طبی کتاب۔',
+    image: '/images/books/tib-e-pakistani-urdu.jpg',
+    downloadUrl: 'https://drive.usercontent.google.com/u/0/uc?id=16loOy7s57F7SUvqhn7_4nqx42pUWIBmt&export=download',
+    embedUrl: 'https://drive.google.com/file/d/16loOy7s57F7SUvqhn7_4nqx42pUWIBmt/preview'
+  },
+  {
+    id: 2,
+    title: 'دوا کی شکل اور جڑی بوٹیوں کے اثرات',
+    author: 'حکیم سید عبدالوہاب شاہ شیرازی',
+    category: 'ادویات و فارماکوپیا',
+    categoryEn: 'herbs',
+    language: 'Urdu',
+    pages: 'تفصیلی تحقیق',
+    description: 'دوا کی طبعی شکل، رنگ، ساخت اور انسانی جسم پر جڑی بوٹیوں کے مزاجی و کیفیاتی اثرات میں تبدیلی پر لاجواب اور نایاب تحقیقی دستاویز۔',
+    image: '/images/books/dawa-shakal-jaribotian.jpg',
+    downloadUrl: 'https://drive.usercontent.google.com/u/0/uc?id=1gmWNOu1p08JdLdOcqPgLcsjdQhmHZiUo&export=download',
+    embedUrl: 'https://drive.google.com/file/d/1gmWNOu1p08JdLdOcqPgLcsjdQhmHZiUo/preview'
+  },
+  {
+    id: 3,
+    title: 'Tib e Pakistani English',
+    author: 'Hakim Syed Abdul Wahab Shah',
+    category: 'تراجم طب پاکستانی',
+    categoryEn: 'translations',
+    language: 'English',
+    pages: 'Standard Text',
+    description: 'Tibb-e-Pakistani (The Law of Simple Organs) is a fundamental, easy-to-understand, concise yet comprehensive introductory textbook dedicated to students of alternative medicine.',
+    image: '/images/books/tib-e-pakistani-english.jpg',
+    downloadUrl: 'https://archive.org/download/tib-e-pakistani-book-english/Tib%20e%20Pakistani%20Book%20English%20Qanun%20Mufrad%20Aaza%20Law%20of%20Simple%20Organs.pdf',
+    embedUrl: 'https://archive.org/embed/tib-e-pakistani-book-english'
+  },
+  {
+    id: 4,
+    title: 'तिब्ब-ए-पाकिस्तानी Tibb-e-Pakistani in Hindi',
+    author: 'हकीम सय्यद अब्दुल वहाब शाह',
+    category: 'تراجم طب پاکستانی',
+    categoryEn: 'translations',
+    language: 'Hindi',
+    pages: 'हिंदी संस्करण',
+    description: 'कानून मुफर्द आज़ा (तिब्ब-ए-पाकिस्तानी) के छात्रों के लिए एक बुनियादी, आसान, संक्षिप्त मगर व्यापक प्रारंभिक चिकित्सा पुस्तक।',
+    image: '/images/books/tib-e-pakistani-hindi.jpg',
+    downloadUrl: 'https://archive.org/download/tib-e-pakistani-book-hindi/Tib%20e%20Pakistani%20Book%20Hindi%20%E0%A4%A4%E0%A4%BF%E0%A4%AC%E0%A5%8D%E0%A4%AC-%E0%A4%8F-%E0%A4%AA%E0%A4%BE%E0%A4%95%E0%A4%BF%E0%A4%B8%E0%A5%8D%E0%A4%A4%E0%A4%BE%E0%A4%A8%E0%A5%80.pdf',
+    embedUrl: 'https://archive.org/embed/tib-e-pakistani-book-hindi'
+  },
+  {
+    id: 5,
+    title: 'الطب الباكستاني عربک',
+    author: 'الحكيم السيد عبد الوهاب شاه',
+    category: 'تراجم طب پاکستانی',
+    categoryEn: 'translations',
+    language: 'Arabic',
+    pages: 'النسخة العربية',
+    description: 'طب باكستان (قانون الأعضاء المفردة) هو كتاب طبي تمهيدي، صُمم خصيصاً لطلاب العلم؛ فهو يمتاز بكونه أساسياً، سهلاً، مختصراً، ومع ذلك فهو شامل في معانيه وقواعده الطبية.',
+    image: '/images/books/tib-e-pakistani-arabic.jpg',
+    downloadUrl: 'https://archive.org/download/tib-e-pakistani-arabic/%D8%B7%D8%A8%20%D9%BE%D8%A7%DA%A9%D8%B3%D8%AA%D8%A7%D9%86%DB%8C%20%D8%B9%D8%B1%D8%A8%DA%A9.pdf',
+    embedUrl: 'https://archive.org/embed/tib-e-pakistani-arabic'
+  },
+  {
+    id: 6,
+    title: 'طب پاکستانی فارسی',
+    author: 'حکیم سید عبدالوہاب شاہ شیرازی',
+    category: 'تراجم طب پاکستانی',
+    categoryEn: 'translations',
+    language: 'Persian',
+    pages: 'نسخه فارسی',
+    description: 'کتاب مقدماتی، ساده، مختصر و در عین حال جامع برای دانشجویان طب سنتی و علاقمندان به شناخت اصول علمی قانون مفرد اعضاء.',
+    image: '/images/books/tib-e-pakistani-persian.jpg',
+    downloadUrl: 'https://archive.org/download/tib-e-pakistani-book-persian/Tib%20e%20Pakistani%20Book%20%D8%B7%D8%A8%20%D9%BE%D8%A7%DA%A9%D8%B3%D8%AA%D8%A7%D9%86%DB%8C%20%D9%81%D8%A7%D8%B1%D8%B3%DB%8C.pdf',
+    embedUrl: 'https://archive.org/embed/tib-e-pakistani-book-persian'
+  },
+  {
+    id: 7,
+    title: '巴基斯坦医学 Tibb-e-Pakistani in Chinese',
+    author: 'Hakim Syed Abdul Wahab Shah',
+    category: 'تراجم طب پاکستانی',
+    categoryEn: 'translations',
+    language: 'Chinese',
+    pages: '中文版',
+    description: '巴基斯坦医学 为 巴基斯坦医学 (单一人体器官法) 学生编写的基础、简单、简明且全面的入门医学书籍。',
+    image: '/images/books/tib-e-pakistani-chinese.jpg',
+    downloadUrl: 'https://archive.org/download/tib-e-pakistani-book-1/%E5%B7%B4%E5%9F%BA%E6%96%AF%E5%9D%A6%E5%8C%BB%E5%AD%A6%20%20Tib%20e%20Pakistani%20Book%20%281%29.pdf',
+    embedUrl: 'https://archive.org/embed/tib-e-pakistani-book-1'
+  },
+  {
+    id: 8,
+    title: 'کلیات تحقیقات صابر ملتانی (حصہ اول)',
+    author: 'حکیم انقلاب دوست محمد صابر ملتانی',
+    category: 'قانون مفرد اعضاء',
+    categoryEn: 'qanoon',
+    language: 'Urdu',
+    pages: 'کلاسیک شاہکار',
+    description: 'بانی قانون مفرد اعضاء حکیم انقلاب صابر ملتانی کی بنیادی و اصولی تحقیقات کا پہلا حصہ۔ اس میں انسانی جسم کے افعال اور اعضاء رئیسہ کے باہمی تعلق پر مدلل بحث کی گئی ہے۔',
+    image: '/images/books/kulyat-sabir-multani-1.jpg',
+    downloadUrl: 'https://archive.org/download/kulyat-tahqeeqat-sabir-multani-part-1/%DA%A9%D9%84%DB%8C%D8%A7%D8%AA%20%D8%AA%D8%AD%D9%82%DB%8C%D9%82%D8%A7%D8%AA%20%D8%B5%D8%A7%D8%A8%D8%B1%20%D9%85%D9%84%D8%AA%D8%A7%D9%86%DB%8C%20%D8%AD%D8%B5%DB%81%20%D8%A7%D9%88%D9%84.pdf',
+    embedUrl: 'https://archive.org/embed/kulyat-tahqeeqat-sabir-multani-part-1'
+  },
+  {
+    id: 9,
+    title: 'کلیات تحقیقات صابر ملتانی (حصہ دوم)',
+    author: 'حکیم انقلاب دوست محمد صابر ملتانی',
+    category: 'قانون مفرد اعضاء',
+    categoryEn: 'qanoon',
+    language: 'Urdu',
+    pages: 'کلاسیک شاہکار',
+    description: 'حکیم صابر ملتانی کی کلیات کا دوسرا حصہ جس میں علاج بالمفردات، بیماریوں کے اسباب، تدابیرِ علاج اور مختلف امراض کی باقاعدہ تشخیص و تجاویز درج ہیں۔',
+    image: '/images/books/kulyat-sabir-multani-2.jpg',
+    downloadUrl: 'https://archive.org/download/kulyat-tahqeeqat-sabir-multani-part-2/%DA%A9%D9%84%DB%8C%D8%A7%D8%AA%20%D8%AA%D8%AD%D9%82%DB%8C%D9%82%D8%A7%D8%AA%20%D8%B5%D8%A7%D8%A8%D8%B1%20%D9%85%D9%84%D8%AA%D8%A7%D9%86%DB%8C%20%D8%AD%D8%B5%DB%81%20%D8%AF%D9%88%D9%85.pdf',
+    embedUrl: 'https://archive.org/embed/kulyat-tahqeeqat-sabir-multani-part-2'
+  },
+  {
+    id: 10,
+    title: 'چھ نبض کل امراض',
+    author: 'حکیم صابر ملتانی / اطباء کونسل',
+    category: 'تشخیص و لیبارٹری',
+    categoryEn: 'diagnosis',
+    language: 'Urdu',
+    pages: 'علم النبض',
+    description: 'علم النبض پر نایاب ترین دستاویز جس میں صرف چھ نبضوں کے ذریعے پورے جسم کے اعصابی، عضلاتی اور غدی امراض کی درست تشخیص کا طریقہ آسان انداز میں سمجھایا گیا ہے۔',
+    image: '/images/books/chheh-nabz-kul-amraz.jpg',
+    downloadUrl: 'https://archive.org/download/20210212_20210212_0729/%DA%86%DA%BE%20%D9%86%D8%A8%D8%B6%20%DA%A9%D9%84%20%D8%A7%D9%85%D8%B1%D8%A7%D8%B6%20%28%DA%A9%D8%AA%D8%A8%20%D8%AE%D8%A7%D9%86%DB%81%20%D8%B7%D8%A8%DB%8C%D8%A8%29.pdf',
+    embedUrl: 'https://archive.org/embed/20210212_20210212_0729'
+  },
+  {
+    id: 11,
+    title: 'دواؤں کو محفوظ رکھنے کے طریقے',
+    author: 'محققینِ طب و فارمیسی',
+    category: 'ادویات و فارماکوپیا',
+    categoryEn: 'herbs',
+    language: 'Urdu',
+    pages: 'فارمیسی گائیڈ',
+    description: 'جڑی بوٹیوں، کشتہ جات، شربت اور معجونات کو نمی، کیڑے مکوڑوں اور خراب ہونے سے بچانے کے جدید اور قدیم روایتی طریقوں پر جامع و عملی گائیڈ۔',
+    image: '/images/books/dawaon-ko-mehfooz-rakhna.jpg',
+    downloadUrl: 'https://archive.org/download/ways-to-store-medicines-safely/%D8%AF%D9%88%D8%A7%D8%A6%D9%88%DA%BA%20%DA%A9%D9%88%20%D9%85%D8%AD%D9%81%D9%88%D8%B8%20%D8%B1%DA%A9%DA%BE%D9%86%DB%92%20%DA%A9%DB%92%20%D8%B7%D8%B1%DB%8C%D9%82%DB%92.pdf',
+    embedUrl: 'https://archive.org/embed/ways-to-store-medicines-safely'
+  },
+  {
+    id: 12,
+    title: 'کیٹو ڈائٹ (Keto Diet Guide)',
+    author: 'ڈاکٹر خالد جمیل',
+    category: 'صحت و مطب',
+    categoryEn: 'health',
+    language: 'Urdu',
+    pages: 'ڈائٹ و میٹابولزم',
+    description: 'معروف معالج ڈاکٹر خالد جمیل کی لکھی ہوئی رہنما کتاب جس میں وزن میں کمی، شوگر کنٹرول اور میٹابولزم کی بہتری کے لیے کیٹو ڈائٹ کے سائنسی اصول آسان اردو میں درج ہیں۔',
+    image: '/images/books/keto-diet.jpg',
+    downloadUrl: 'https://archive.org/download/20250305_20250305_1457/%DA%88%D8%A7%DA%A9%D9%B9%D8%B1%20%D8%AE%D8%A7%D9%84%D8%AF%20%D8%AC%D9%85%DB%8C%D9%84%20%DA%A9%DB%8C%D9%B9%D9%88%20%DA%88%D8%A7%D8%A6%D9%B9.pdf',
+    embedUrl: 'https://archive.org/embed/20250305_20250305_1457'
+  },
+  {
+    id: 13,
+    title: 'جیبی فارماکوپیا (Pocket Pharmacopoeia)',
+    author: 'اطباء بورڈ پاکستان',
+    category: 'ادویات و فارماکوپیا',
+    categoryEn: 'herbs',
+    language: 'Urdu',
+    pages: 'پاکٹ ایڈیشن',
+    description: 'معالجین اور طلبہ کے لیے روزمرہ کلینیکل پریکٹس کے مجرب اور مستند دیسی نسخہ جات، اوزان اور ترکیبات کا فوری دستی رہنما مجموعہ۔',
+    image: '/images/books/jabi-pharmacopoeia.jpg',
+    downloadUrl: 'https://archive.org/download/jabiformacopia/jabi%2Bformacopia.pdf',
+    embedUrl: 'https://archive.org/embed/jabiformacopia'
+  },
+  {
+    id: 14,
+    title: 'لیبارٹری ٹیسٹ گائیڈ',
+    author: 'ڈاکٹر محمد مستنصر',
+    category: 'تشخیص و لیبارٹری',
+    categoryEn: 'diagnosis',
+    language: 'Urdu',
+    pages: 'میڈیکل گائیڈ',
+    description: 'خون، پیشاب اور کلینیکل ٹیسٹوں کے نتائج سمجھنے، نارمل ویلیوز اور بیماریوں کی لیبارٹری تشخیصی تفہیم پر مستند و مفید اردو میڈیکل کتاب۔',
+    image: '/images/books/lab-test-guide.jpg',
+    downloadUrl: 'https://archive.org/download/laboratory-test-guide-urdu-dr-muhammad-mustansir/%D9%84%DB%8C%D8%A8%D8%A7%D8%B1%D9%B9%D8%B1%DB%8C%20%D9%B9%DB%8C%D8%B3%D9%B9%20%DA%AF%D8%A7%D8%A6%DB%8C%DA%88.pdf',
+    embedUrl: 'https://archive.org/embed/laboratory-test-guide-urdu-dr-muhammad-mustansir'
+  },
+  {
+    id: 15,
+    title: 'لیبارٹری ٹیسٹس فار پیرامیڈیکس',
+    author: 'طبی ماہرین و محققین',
+    category: 'تشخیص و لیبارٹری',
+    categoryEn: 'diagnosis',
+    language: 'English/Urdu',
+    pages: 'پیرامیڈیکل سائنس',
+    description: 'ہسپتالوں اور کلینکس کے پیرامیڈیکل اسٹاف اور لیب ٹیکنیشنز کے لیے بنیادی ٹیسٹوں کے عملی طریقہ کار، سیمپلنگ اور حفاظتی تدابیر پر مشتمل جامع گائیڈ۔',
+    image: '/images/books/lab-tests-paramedics.jpg',
+    downloadUrl: 'https://archive.org/download/laboratory-tests-for-paramedics/LABORATORY%20TESTS%20FOR%20PARAMEDICS.pdf',
+    embedUrl: 'https://archive.org/embed/laboratory-tests-for-paramedics'
+  },
+  {
+    id: 16,
+    title: 'فارماکوپیا قانون مفرد اعضاء',
+    author: 'حکیم انقلاب دوست محمد صابر ملتانی',
+    category: 'قانون مفرد اعضاء',
+    categoryEn: 'qanoon',
+    language: 'Urdu',
+    pages: 'مرکبات و مفردات',
+    description: 'قانون مفرد اعضاء کے باقاعدہ فارمولیشن اصول، تریاق، ہاضم، ملین، مسہل اور مقویات کے اعصابی، عضلاتی اور غدی مرکبات کی مستند قرابادین۔',
+    image: '/images/books/pharmacopoeia-qanoon.jpg',
+    downloadUrl: 'https://archive.org/download/FarmacopiaQanoonMufradAzaHakimSabirMultani/Farmacopia%20Qanoon%20Mufrad%20aza%20Hakim%20Sabir%20Multani.pdf',
+    embedUrl: 'https://archive.org/embed/FarmacopiaQanoonMufradAzaHakimSabirMultani'
+  },
+  {
+    id: 17,
+    title: 'کلر تھراپی (Color Therapy)',
+    author: 'ماہرین قدرتی علاج',
+    category: 'صحت و مطب',
+    categoryEn: 'health',
+    language: 'Urdu',
+    pages: 'شعاعی و رنگ علاج',
+    description: 'رنگوں اور شعاعوں کے ذریعے امراض کے علاج، اعصابی نظام پر رنگوں کے اثرات اور ان کے سائنسی استعمال پر دلچسپ و معلوماتی کتاب۔',
+    image: '/images/books/color-therapy.jpg',
+    downloadUrl: 'https://archive.org/download/color-therapy/color_thrapy.pdf',
+    embedUrl: 'https://archive.org/embed/color-therapy'
+  },
+  {
+    id: 18,
+    title: 'تحقیقات انسانی بلڈ گروپ و غذا',
+    author: 'حکیم محمد عمر ملکپوری',
+    category: 'تشخیص و لیبارٹری',
+    categoryEn: 'diagnosis',
+    language: 'Urdu',
+    pages: 'بلڈ گروپ و طب',
+    description: 'انسانی بلڈ گروپس (A, B, AB, O) کا مزاج، طب یونانی، ہومیو پیتھی اور مناسب غذاؤں کے انتخاب پر ایک منفرد اور چشم کشا تحقیق۔',
+    image: '/images/books/blood-group-diet.jpg',
+    downloadUrl: 'https://archive.org/download/20230801_20230801_0039/%D8%A8%D9%84%DA%88_%DA%AF%D8%B1%D9%88%D9%BE_%DB%94%D8%BA%D8%B0%D8%A7_%D8%B7%D8%A8_%DB%81%DB%8C%D9%88%D9%85%DB%8C%D9%88%D8%AD%DA%A9%DB%8C%D9%85_%D9%85%D8%AD%D9%85%D8%AF_%D8%B9%D9%85%D8%B1_%D9%85%D9%84%DA%A9%D9%BE%D9%88%D8%B1%DB%8C_.pdf',
+    embedUrl: 'https://archive.org/embed/20230801_20230801_0039'
+  },
+  {
+    id: 19,
+    title: 'مبادیاتِ طب صابر ملتانی',
+    author: 'حکیم دوست محمد صابر ملتانی',
+    category: 'قانون مفرد اعضاء',
+    categoryEn: 'qanoon',
+    language: 'Urdu',
+    pages: 'بنیادی کورس',
+    description: 'طبیب طلبہ کے لیے قانون مفرد اعضاء کے تمام بنیادی قواعد، اصطلاحات، امراض کے درجات اور علاج کے ضوابط کا مکمل نصاب۔',
+    image: '/images/books/mubadiyat-e-tibb.jpg',
+    downloadUrl: 'https://archive.org/download/mubadiyat-e-tibb/%D9%85%D8%A8%D8%A7%D8%AF%DB%8C%D8%A7%D8%AA.%D8%B7%D8%A8.%D8%B5%D8%A7%D8%A8%D8%B1.%D9%85%D9%84%D8%AA%D8%A7%D9%86%DB%8C%20%28%DA%A9%D8%AA%D8%A8%20%D8%AE%D8%A7%D9%86%DB%81%20%D8%B7%D8%A8%DB%8C%D8%A8%29.pdf',
+    embedUrl: 'https://archive.org/embed/mubadiyat-e-tibb'
+  },
+  {
+    id: 20,
+    title: 'میرا مطب (کلینیکل تجربات)',
+    author: 'حکیم محمد احمد سلیمی (صدر نیشنل کونسل فار طب)',
+    category: 'صحت و مطب',
+    categoryEn: 'health',
+    language: 'Urdu',
+    pages: 'مجربات و تجربات',
+    description: 'پاکستان کی تاریخ کے عظیم طبیب حکیم محمد احمد سلیمی صاحب کے 50 سالہ کلینیکل مشاہدات، نایاب نسخہ جات اور نادر مطب ڈائری۔',
+    image: '/images/books/mera-matab.jpg',
+    downloadUrl: 'https://archive.org/download/mera-matab/%D9%85%DB%8C%D8%B1%D8%A7%20%D9%85%D8%B7%D8%A8%20%D8%AD%DA%A9%DB%8C%D9%85%20%D9%85%D8%AD%D9%85%D8%AF%20%D8%A7%D8%AD%D9%85%D8%AF%20%D8%B3%D9%84%DB%8C%D9%85%DB%8C%20%D8%B5%D8%A7%D8%AD%D8%A8%20%D8%B5%D8%AF%D8%B1%20%D9%86%DB%8C%D8%B4%D9%86%D9%84%20%DA%A9%D9%88%D9%86%D8%B3%D9%84%20%D9%81%D8%A7%D8%B1%20%D8%B7%D8%A8.pdf',
+    embedUrl: 'https://archive.org/embed/mera-matab'
+  },
+  {
+    id: 21,
+    title: 'MSDS Matab (یونانی مطب کے لازمی معیارات)',
+    author: 'پنجاب ہیلتھ کیئر کمیشن (PHC)',
+    category: 'صحت و مطب',
+    categoryEn: 'health',
+    language: 'Urdu/English',
+    pages: 'قانونی ریگولیشنز',
+    description: 'پنجاب ہیلتھ کیئر کمیشن کی جاری کردہ مستند ترین دستاویز جس میں یونانی کلینکس کے لیے 17 بنیادی معیارات اور 34 انڈیکیٹرز کی قانونی وضاحت ہے۔',
+    image: '/images/books/msds-matab.jpg',
+    downloadUrl: 'https://archive.org/download/msds-matab-ed-2-180221-rp.cdr/MSDS-Matab-Ed2-180221-RP.cdr.pdf',
+    embedUrl: 'https://archive.org/embed/msds-matab-ed-2-180221-rp.cdr'
+  }
+];
+
+// Save JSON data file
+const jsonPath = path.join(rootDir, 'public', 'data', 'pdf-books.json');
+fs.writeFileSync(jsonPath, JSON.stringify(BOOKS_META, null, 2), 'utf8');
+
+const distJsonPath = path.join(rootDir, 'dist', 'data', 'pdf-books.json');
+if (fs.existsSync(path.dirname(distJsonPath))) {
+  fs.writeFileSync(distJsonPath, JSON.stringify(BOOKS_META, null, 2), 'utf8');
+}
+
+console.log(`✅ Saved ${BOOKS_META.length} books to pdf-books.json`);
+
+// Construct bright, clean, high-contrast HTML body with authentic cover images
+function generatePageHtml(books) {
+  return `
+    <div class="space-y-8 text-right font-sans not-prose">
+      
+      <!-- Bright Hero Introduction Banner -->
+      <div class="p-6 sm:p-10 rounded-3xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-white border border-emerald-200/90 text-slate-800 shadow-xs relative overflow-hidden">
+        <div class="relative z-10 space-y-4">
+          <div class="inline-flex items-center gap-2 bg-emerald-600 text-white px-3.5 py-1 rounded-full text-xs font-bold shadow-xs">
+            <span>📚 طبیب پیڈیا کا ڈیجیٹل کتب خانہ</span>
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 leading-tight font-h1">
+            مفت طبی کتب ڈاؤن لوڈ کریں اور آن لائن پڑھیں
+          </h2>
+          <p class="text-sm sm:text-base text-slate-600 leading-relaxed max-w-4xl font-nastaliq">
+            طبیب پیڈیا کے اس خصوصی کتب خانے میں طبِ یونانی، قانونِ مفرد اعضاء، جدید کلینیکل تشخیص، لیبارٹری گائیڈز اور غذائی تحقیق کی <strong>مستند اور نایاب کتب</strong> اصلی سرورق کے ساتھ پی ڈی ایف فارمیٹ میں ڈاؤن لوڈ اور آن لائن مطالعہ کے لیے بلا معاوضہ پیش کی گئی ہیں۔
+          </p>
+          <div class="flex flex-wrap gap-2.5 pt-2 text-xs font-bold text-slate-700">
+            <span class="bg-white border border-emerald-200 px-3 py-1.5 rounded-xl shadow-xs text-emerald-800">📖 کل کتب: <strong>${books.length} کتب</strong></span>
+            <span class="bg-white border border-emerald-200 px-3 py-1.5 rounded-xl shadow-xs text-emerald-800">⚡ تیز رفتار ڈائریکٹ ڈاؤن لوڈ</span>
+            <span class="bg-white border border-indigo-200 px-3 py-1.5 rounded-xl shadow-xs text-indigo-800">🌐 6 مختلف بین الاقوامی زبانوں میں</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Books Grid (Bright White Cards with Real Book Cover Thumbnails) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-2 font-sans">
+        ${books.map((b, i) => `
+          <div class="bg-white rounded-3xl border border-slate-200/90 hover:border-emerald-500/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden group">
+            
+            <!-- Book Cover Image with 3D spine and realistic shadow -->
+            <div class="relative bg-gradient-to-b from-slate-100 via-slate-50 to-white p-5 pb-3 flex items-center justify-center border-b border-slate-100">
+              
+              <div class="absolute top-3 right-3 z-10">
+                <span class="bg-emerald-700/95 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-2xs">
+                  ${b.category}
+                </span>
+              </div>
+
+              <div class="absolute top-3 left-3 z-10">
+                <span class="bg-slate-900/80 text-white text-[10px] font-mono px-2 py-0.5 rounded-md shadow-2xs">
+                  ${b.language}
+                </span>
+              </div>
+
+              <div class="relative my-2 w-44 aspect-[3/4.2] rounded-xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300 bg-slate-200 border border-slate-200/80">
+                <img 
+                  src="${b.image}" 
+                  alt="${b.title}" 
+                  loading="lazy" 
+                  class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" 
+                />
+                <div class="absolute inset-0 bg-gradient-to-tr from-black/15 via-transparent to-white/20 pointer-events-none"></div>
+                <div class="absolute top-0 right-0 bottom-0 w-2.5 bg-gradient-to-r from-black/30 via-black/10 to-transparent pointer-events-none"></div>
+              </div>
+
+            </div>
+
+            <!-- Book Information -->
+            <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+              
+              <div class="space-y-1.5">
+                <h3 class="text-base font-extrabold text-slate-900 group-hover:text-emerald-700 transition-colors leading-snug line-clamp-2 font-h2">
+                  ${b.title}
+                </h3>
+                <p class="text-xs text-emerald-800 font-bold flex items-center gap-1.5">
+                  <span>👤</span>
+                  <span class="truncate">${b.author}</span>
+                </p>
+              </div>
+
+              <p class="text-xs text-slate-600 font-nastaliq leading-relaxed line-clamp-3">
+                ${b.description}
+              </p>
+
+              <div class="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100">
+                <span class="bg-slate-100 px-2 py-0.5 rounded-md text-slate-600 font-bold">
+                  ${b.pages}
+                </span>
+                <span class="text-emerald-700 font-bold">
+                  PDF ایڈیشن
+                </span>
+              </div>
+
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="p-4 pt-0 flex items-center gap-2">
+              <a 
+                href="${b.downloadUrl}" 
+                target="_blank" 
+                rel="noreferrer"
+                download
+                class="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-xs hover:shadow-md transition-all cursor-pointer"
+              >
+                <span>ڈاؤن لوڈ PDF</span>
+                <span>⬇️</span>
+              </a>
+
+              ${b.embedUrl ? `
+                <a 
+                  href="${b.embedUrl}" 
+                  target="_blank" 
+                  rel="noreferrer"
+                  class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-bold rounded-xl flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                  title="آن لائن مطالعہ کریں"
+                >
+                  <span>مطالعہ</span>
+                  <span class="text-xs">👁️</span>
+                </a>
+              ` : ''}
+            </div>
+
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Legal & Fair Use Note -->
+      <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 leading-relaxed">
+        <strong class="text-slate-800">نوٹ برائے قارئین و محققین:</strong> اس پورٹل پر دستیاب تمام کتابیں خالصتاً علمی، تحقیقی اور تدریسی مقاصد کے لیے تعلیمی فیئر یوز پالیسی (Fair Use) کے تحت شیئر کی گئی ہیں۔ اگر آپ کسی کتاب کے حق اشاعت کے مالک ہیں اور اسے ہٹوانا چاہتے ہیں تو براہ کرم ہم سے رابطہ فرمائیں۔
+      </div>
+
+    </div>
+  `;
+}
+
+// Update public/data/pages.json
+const pagesPath = path.join(rootDir, 'public', 'data', 'pages.json');
+let pagesList = [];
+if (fs.existsSync(pagesPath)) {
+  pagesList = JSON.parse(fs.readFileSync(pagesPath, 'utf8'));
+}
+
+const pageContent = generatePageHtml(BOOKS_META);
+
+const pdfBooksPage = {
+  id: 8339,
+  title: 'پی ڈی ایف طبی کتب (PDF Books)',
+  slug: 'pdf-books',
+  author: 'طبیب پیڈیا ریسرچ بورڈ',
+  date: '2026-09-27',
+  status: 'published',
+  parentId: null,
+  level: 0,
+  order: 3,
+  content: pageContent
+};
+
+// Remove if existing and add
+pagesList = pagesList.filter(p => p.slug !== 'pdf-books' && p.id !== 8339);
+
+// Insert as order 3 right after about-us (1), contact (2)
+pagesList.splice(2, 0, pdfBooksPage);
+
+// Re-index orders
+pagesList.forEach((p, idx) => {
+  p.order = idx + 1;
+});
+
+fs.writeFileSync(pagesPath, JSON.stringify(pagesList, null, 2), 'utf8');
+console.log(`✅ Saved pdf-books page into ${pagesPath}`);
+
+const distPagesPath = path.join(rootDir, 'dist', 'data', 'pages.json');
+if (fs.existsSync(distPagesPath)) {
+  fs.writeFileSync(distPagesPath, JSON.stringify(pagesList, null, 2), 'utf8');
+  console.log(`✅ Synced pdf-books page to ${distPagesPath}`);
+}

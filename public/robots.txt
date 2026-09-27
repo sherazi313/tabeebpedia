@@ -1,0 +1,50 @@
+# ==============================================================================
+# Robots.txt for Tabeeb Pedia (طبیب پیڈیا - جامع طبی و ہربل انسائیکلوپیڈیا)
+# Website: https://tabeebpedia.com
+# Conforms to Google Search Essentials & W3C Standards
+# ==============================================================================
+
+User-agent: Googlebot
+Allow: /
+Allow: /doctors
+Allow: /blog
+Allow: /farhang
+Allow: /herb-calculator
+Allow: /herbs
+Allow: /qanoon
+Allow: /images/
+Allow: /uploads/
+Allow: /wp-content/uploads/
+Allow: /data/
+Disallow: /api/
+Disallow: /admin
+Disallow: /doctor-dashboard
+
+User-agent: Googlebot-Image
+Allow: /images/
+Allow: /uploads/
+Allow: /wp-content/uploads/
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+Allow: /farhang
+Disallow: /api/
+Disallow: /admin
+Disallow: /doctor-dashboard
+
+User-agent: *
+Allow: /
+Allow: /doctors
+Allow: /blog
+Allow: /farhang
+Allow: /herb-calculator
+Allow: /images/
+Allow: /uploads/
+Allow: /wp-content/uploads/
+Disallow: /api/
+Disallow: /admin
+Disallow: /doctor-dashboard
+
+# XML Sitemap Location
+Sitemap: https://tabeebpedia.com/sitemap.xml

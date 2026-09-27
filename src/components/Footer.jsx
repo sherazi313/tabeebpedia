@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { CITIES, SPECIALTIES } from '../data/mockData';
 
-export default function Footer({ onNavigate, siteSettings }) {
+export default function Footer({ onNavigate, siteSettings, onSelectPage }) {
   const brandName = siteSettings?.siteName || 'طبیب پیڈیا';
   const aboutText = siteSettings?.footerAbout || 'پاکستان کا سب سے معتبر ڈیجیٹل ہربل پورٹل۔ ہمارا مقصد طب یونانی، طب نبوی اور قانون مفرد اعضاء کو جدید سائنسی معیار اور سہولت کے ساتھ ہر فرد تک پہنچانا ہے۔';
   const whatsapp = siteSettings?.whatsappNumber || '';
@@ -89,8 +89,24 @@ export default function Footer({ onNavigate, siteSettings }) {
               <li><button onClick={() => onNavigate('home')} className="hover:text-emerald-400 transition-colors">صفحۂ اول</button></li>
               <li><button onClick={() => onNavigate('doctors')} className="hover:text-emerald-400 transition-colors">اطباء و حکماء ڈائریکٹری</button></li>
               <li><button onClick={() => onNavigate('blog')} className="hover:text-emerald-400 transition-colors">طبی مضامین و ریسرچ</button></li>
-              <li><button onClick={() => onNavigate('herbs')} className="hover:text-emerald-400 transition-colors">جڑی بوٹیوں کی انسائیکلوپیڈیا</button></li>
-              <li><button onClick={() => onNavigate('qanoon')} className="hover:text-emerald-400 transition-colors">قانون مفرد اعضاء گائیڈ</button></li>
+              <li><button onClick={() => onNavigate('farhang')} className="hover:text-emerald-300 font-bold transition-colors">فرہنگِ اطباء (طبی اصطلاحات)</button></li>
+              <li><button onClick={() => onSelectPage ? onSelectPage('pdf-books') : onNavigate('pdf-books')} className="hover:text-emerald-300 font-bold transition-colors">پی ڈی ایف کتب (PDF Books)</button></li>
+              <li><button onClick={() => onNavigate('herb-calculator')} className="hover:text-amber-300 font-bold transition-colors">مزاج کیلکولیٹر (HEC)</button></li>
+              <li>
+                <a 
+                  href="https://www.himalayanpansar.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="text-amber-400 hover:text-amber-300 font-bold transition-colors inline-flex items-center gap-1"
+                >
+                  <span>آن لائن پنسار سٹور (Himalayan Pansar) ↗</span>
+                </a>
+              </li>
+              <li><button onClick={() => onSelectPage ? onSelectPage('about-us') : onNavigate('about-us')} className="hover:text-emerald-400 transition-colors">ہمارے بارے میں (About Us)</button></li>
+              <li><button onClick={() => onSelectPage ? onSelectPage('contact') : onNavigate('contact')} className="hover:text-emerald-400 transition-colors">رابطہ کریں (Contact Us)</button></li>
+              <li><button onClick={() => onSelectPage ? onSelectPage('privacy-policy') : onNavigate('privacy-policy')} className="hover:text-emerald-400 transition-colors">پرائیویسی پالیسی (Privacy Policy)</button></li>
+              <li><button onClick={() => onSelectPage ? onSelectPage('disclaimer') : onNavigate('disclaimer')} className="hover:text-emerald-400 transition-colors">میڈیکل ڈس کلیمر (Medical Disclaimer)</button></li>
+              <li><button onClick={() => onSelectPage ? onSelectPage('terms') : onNavigate('terms')} className="hover:text-emerald-400 transition-colors">شرائط و ضوابط (Terms of Service)</button></li>
             </ul>
           </div>
 
@@ -120,13 +136,30 @@ export default function Footer({ onNavigate, siteSettings }) {
         </div>
 
         {/* Disclaimer */}
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400 leading-relaxed text-center">
-          <strong className="text-slate-300">طبی انتباہ و ڈس کلیمر:</strong> طبیب پیڈیا ویب سائٹ پر فراہم کردہ تمام معلومات، مقالات اور نسخہ جات صرف علمی اور معلوماتی مقاصد کے لیے ہیں۔ یہ کسی مستند معالج یا ڈاکٹر کے باقاعدہ معائنے کا متبادل نہیں ہیں۔
+        <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400 leading-relaxed text-center space-y-1.5">
+          <div>
+            <strong className="text-slate-300">طبی انتباہ و ڈس کلیمر:</strong> طبیب پیڈیا ویب سائٹ پر فراہم کردہ تمام معلومات، مقالات اور نسخہ جات صرف علمی اور معلوماتی مقاصد کے لیے ہیں۔ یہ کسی مستند معالج یا ڈاکٹر کے باقاعدہ معائنے کا متبادل نہیں ہیں۔
+          </div>
+          <div>
+            <button 
+              onClick={() => onSelectPage ? onSelectPage('disclaimer') : onNavigate('disclaimer')} 
+              className="text-emerald-400 hover:text-emerald-300 underline font-bold cursor-pointer transition-colors"
+            >
+              مکمل قانونی و میڈیکل ڈس کلیمر پالیسی پڑھیں ←
+            </button>
+          </div>
         </div>
 
         {/* Bottom */}
         <div className="pt-6 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 font-sans">
           <p>© {new Date().getFullYear()} TabeebPedia.com — {siteSettings?.copyrightText || 'تمام جملہ حقوق محفوظ ہیں۔'}</p>
+          <div className="flex items-center gap-3 text-[11px] text-slate-400">
+            <button onClick={() => onSelectPage ? onSelectPage('privacy-policy') : onNavigate('privacy-policy')} className="hover:text-slate-200 transition-colors">پرائیویسی پالیسی</button>
+            <span>•</span>
+            <button onClick={() => onSelectPage ? onSelectPage('disclaimer') : onNavigate('disclaimer')} className="hover:text-slate-200 transition-colors">میڈیکل ڈس کلیمر</button>
+            <span>•</span>
+            <button onClick={() => onSelectPage ? onSelectPage('terms') : onNavigate('terms')} className="hover:text-slate-200 transition-colors">شرائط و ضوابط</button>
+          </div>
           <p className="flex items-center gap-1 text-slate-600">
             <span>محبت سے بنایا گیا</span>
             <Heart className="w-3 h-3 text-red-500 fill-red-500" />

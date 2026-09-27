@@ -1,0 +1,110 @@
+#hec-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+}
+
+#hec-container h2 {
+    text-align: center;
+    color: #333;
+}
+
+#hec-container p {
+    text-align: center;
+    color: #666;
+}
+
+#hec-form {
+    margin-bottom: 20px;
+}
+
+#hec-herb-names,
+#hec-herb-weight {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.button-container {
+    text-align: center;
+    margin-bottom: 15px; /* Added margin for spacing */
+}
+
+#hec-add-herb-btn,
+#hec-calculate-btn {
+    padding: 15px;
+    font-size: 16px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#hec-add-herb-btn {
+    background-color: #28a745; /* Green */
+}
+
+#hec-calculate-btn {
+    background-color: #007bff; /* Blue */
+}
+
+#hec-selected-herbs {
+    list-style-type: none;
+    padding: 0;
+}
+
+.hec-remove-herb-btn {
+    background-color: #dc3545; /* Red */
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#hec-results {
+    margin-top: 20px;
+}
+
+.result-title {
+    font-size: 18px; /* Larger font size for the results title */
+    font-weight: bold; /* Bold text for the title */
+    margin-bottom: 10px; /* Spacing below the title */
+}
+
+/* Table styling for results */
+#hec-results table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#hec-results th,
+#hec-results td {
+    padding: 10px;
+    text-align: center; /* Center alignment for table cells */
+}
+
+#hec-results th {
+    background-color: #007bff; /* Blue background for headers */
+    color: white; /* White text for headers */
+}
+
+#hec-results tr:nth-child(even) {
+    background-color: #e9ecef; /* Light grey for even rows */
+}
+
+#hec-results td {
+    font-weight: bold; /* Bold text for result cells */
+}
+
+/* Specific style for the result percentage */
+#hec-results .result-row:first-child {
+    font-size: 20px; /* Larger size for the first result row */
+    background-color: #d1ecf1; /* Light blue for header */
+}

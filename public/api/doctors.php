@@ -1,48 +1,38 @@
-﻿<?php
-require_once 'db.php';
+<?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+header("Content-Type: application/json; charset=UTF-8");
 
-$method = $_SERVER['REQUEST_METHOD'];
-
-// GET all doctors (or single doctor by id/slug)
-if ($method === 'GET') {
-    if (isset($_GET['id'])) {
-        $stmt = $pdo->prepare("SELECT * FROM doctors WHERE id = ?");
-        $stmt->execute([$_GET['id']]);
-        echo json_encode($stmt->fetch());
-    } else {
-        $stmt = $pdo->query("SELECT * FROM doctors ORDER BY created_at DESC");
-        echo json_encode($stmt->fetchAll());
-    }
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
 }
-// POST new doctor (Register)
-elseif ($method === 'POST') {
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-    // Simple validation
-    if(empty($data['whatsapp']) || empty($data['name'])) {
-        http_response_code(400);
-        echo json_encode(["error" => "Name and WhatsApp are required"]);
-        exit;
-    }
 
-    $stmt = $pdo->prepare("INSERT INTO doctors (name, title, clinic, city, whatsapp, email, password, fee, about, status, is_approved) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', 0)");
-    
-    try {
-        $stmt->execute([
-            $data['name'], 
-            $data['title'] ?? '', 
-            $data['clinic'] ?? '', 
-            $data['city'] ?? '', 
-            $data['whatsapp'], 
-            $data['email'] ?? '', 
-            $data['password'] ?? '',
-            $data['fee'] ?? 'Free',
-            $data['about'] ?? ''
-        ]);
-        echo json_encode(["success" => true, "id" => $pdo->lastInsertId(), "message" => "Registration successful. Waiting for admin approval."]);
-    } catch (PDOException $e) {
-        http_response_code(500);
-        echo json_encode(["error" => "Registration failed. WhatsApp or Email might already exist.", "details" => $e->getMessage()]);
+$dataFile = __DIR__ . '/../data/doctors.json';
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (file_exists($dataFile)) {
+        echo file_get_contents($dataFile);
+    } else {
+        echo json_encode([]);
     }
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $input = file_get_contents('php://input');
+    if ($input) {
+        $dataDir = dirname($dataFile);
+        if (!is_dir($dataDir)) {
+            mkdir($dataDir, 0777, true);
+        }
+        file_put_contents($dataFile, $input);
+        echo json_encode(['status' => 'success', 'message' => 'Doctors saved successfully']);
+    } else {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'No data received']);
+    }
+    exit;
 }
 ?>

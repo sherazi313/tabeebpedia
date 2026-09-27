@@ -13,7 +13,10 @@ import {
   Sparkles,
   Settings,
   Palette,
-  ChevronLeft
+  ChevronLeft,
+  Calculator,
+  ShoppingBag,
+  ExternalLink
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -27,7 +30,8 @@ export default function Navbar({
   loggedInDoctor,
   onOpenDoctorPortal,
   onOpenDoctorAuthModal,
-  onLogoutDoctor
+  onLogoutDoctor,
+  onSelectPage
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -35,8 +39,10 @@ export default function Navbar({
     { id: 'home', label: 'ہوم', icon: Sparkles },
     { id: 'doctors', label: 'اطباء و حکماء ڈائریکٹری', icon: Stethoscope },
     { id: 'blog', label: 'طبی مضامین و ریسرچ', icon: BookOpen },
-    
-    
+    { id: 'farhang', label: 'فرہنگِ اطباء', icon: BookOpen },
+    { id: 'pdf-books', label: 'پی ڈی ایف کتب', icon: BookOpen, isPage: true },
+    { id: 'herb-calculator', label: 'مزاج کیلکولیٹر (HEC)', icon: Calculator },
+    { id: 'store', label: 'ہمالین پنسار', icon: ShoppingBag, isExternal: true, url: 'https://www.himalayanpansar.com' }
   ];
 
   const isNavy = theme === 'navy';
@@ -73,6 +79,18 @@ export default function Navbar({
                 {isNavy ? 'سکیم: نیوی بلیو' : 'سکیم: ایمرلڈ گرین'}
               </button>
             </div>
+
+            {/* Online Store Direct Link */}
+            <a 
+              href="https://www.himalayanpansar.com" 
+              target="_blank" 
+              rel="noreferrer" 
+              className={`flex items-center gap-1.5 ${isNavy ? 'text-amber-300 hover:text-white bg-amber-500/10 border-amber-500/30' : 'text-amber-200 hover:text-white bg-amber-500/10 border-amber-500/30'} px-2.5 py-0.5 rounded-lg border transition-colors font-simple font-bold`}
+              title="ہماری آفیشل ای کامرس ویب سائٹ: ہمالین پنسار"
+            >
+              <ShoppingBag className="w-3 h-3 text-amber-300" />
+              <span>ہمالین پنسار</span>
+            </a>
 
             <a 
               href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}`} 
@@ -129,10 +147,31 @@ export default function Navbar({
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
+              if (item.isExternal) {
+                return (
+                  <a
+                    key={item.id}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                  >
+                    <Icon className="w-4 h-4 text-emerald-600" />
+                    <span>{item.label}</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                  </a>
+                );
+              }
               return (
                 <button
                   key={item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => {
+                    if (item.isPage && onSelectPage) {
+                      onSelectPage(item.id);
+                    } else {
+                      setActiveTab(item.id);
+                    }
+                  }}
                   className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${
                     isActive
                       ? isNavy 
@@ -143,11 +182,6 @@ export default function Navbar({
                 >
                   <Icon className={`w-4 h-4 ${isActive ? (isNavy ? 'text-blue-600' : 'text-emerald-600') : 'text-slate-400'}`} />
                   <span>{item.label}</span>
-                  {item.badge && (
-                    <span className="text-[10px] font-sans bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded-full font-bold">
-                      {item.badge}
-                    </span>
-                  )}
                   {isActive && (
                     <span className={`absolute bottom-0 left-3 right-3 h-0.5 ${isNavy ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full`} />
                   )}
@@ -174,9 +208,10 @@ export default function Navbar({
                 title="طبیب ڈیش بورڈ کھولیں"
               >
                 <img 
-                  src={loggedInDoctor.image || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80'} 
+                  src={loggedInDoctor.image || '/images/default_doctor.webp'} 
                   alt={loggedInDoctor.name || 'طبیب'} 
-                  className="w-7 h-7 rounded-full object-cover border border-emerald-400" 
+                  onError={(e) => { e.target.onerror = null; e.target.src = '/images/default_doctor.webp'; }}
+                  className="w-7 h-7 rounded-full object-cover border border-emerald-400 bg-white" 
                 />
                 <div className="text-right">
                   <span className="block text-white group-hover:text-blue-300 leading-tight truncate max-w-[120px]">{loggedInDoctor.name || 'طبیب'}</span>
@@ -220,11 +255,33 @@ export default function Navbar({
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
+              if (item.isExternal) {
+                return (
+                  <a
+                    key={item.id}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium text-slate-700 hover:bg-slate-50 transition-all"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-5 h-5 text-emerald-600" />
+                      <span>{item.label}</span>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-slate-400" />
+                  </a>
+                );
+              }
               return (
                 <button
                   key={item.id}
                   onClick={() => {
-                    setActiveTab(item.id);
+                    if (item.isPage && onSelectPage) {
+                      onSelectPage(item.id);
+                    } else {
+                      setActiveTab(item.id);
+                    }
                     setMobileMenuOpen(false);
                   }}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-all ${
@@ -239,11 +296,6 @@ export default function Navbar({
                     <Icon className={`w-5 h-5 ${isActive ? (isNavy ? 'text-blue-600' : 'text-emerald-600') : 'text-slate-400'}`} />
                     <span>{item.label}</span>
                   </div>
-                  {item.badge && (
-                    <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-sans">
-                      {item.badge}
-                    </span>
-                  )}
                 </button>
               );
             })}
@@ -267,9 +319,10 @@ export default function Navbar({
               >
                 <div className="flex items-center gap-2">
                   <img 
-                    src={loggedInDoctor.image || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80'} 
+                    src={loggedInDoctor.image || '/images/default_doctor.webp'} 
                     alt={loggedInDoctor.name || 'طبیب'} 
-                    className="w-8 h-8 rounded-full object-cover border border-emerald-400" 
+                    onError={(e) => { e.target.onerror = null; e.target.src = '/images/default_doctor.webp'; }}
+                    className="w-8 h-8 rounded-full object-cover border border-emerald-400 bg-white" 
                   />
                   <div className="text-right">
                     <span>{loggedInDoctor.name || 'طبیب'}</span>

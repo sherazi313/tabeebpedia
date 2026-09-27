@@ -75,6 +75,11 @@ export default function DoctorAuthModal({
     address: '',
     timing: 'روزانہ: شام 4:00 تا رات 9:00 (اتوار چھٹی)',
     fee: 500,
+    onlineFee: 800,
+    waitTime: '15 منٹ سے کم',
+    languages: ['اردو', 'پنجابی'],
+    memberships: ['قومی کونسل برائے طب (NCT)'],
+    conditions: ['معدے کی تیزابیت و السر', 'جوڑوں کا درد اور عرق النساء', 'دائمی قبض و آئی بی ایس'],
     experience: 5,
     specialties: ['امراض معدہ، گیس و تبخیر'],
     about: 'طب یونانی اور ہربل طریقہ علاج کے ذریعے مریضوں کی خدمت۔',
@@ -168,12 +173,43 @@ export default function DoctorAuthModal({
       setErrorMessage('براہ کرم اپنا پورا نام درج کریں');
       return;
     }
-    if (!signupForm.email.trim() || !signupForm.email.includes('@')) {
-      setErrorMessage('براہ کرم درست ای میل ایڈریس درج کریں');
+
+    // Urdu Language Restriction Checks
+    const containsUrdu = (text) => /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text || '');
+    const isPureEnglish = (text) => /[a-zA-Z]/.test(text || '') && !containsUrdu(text || '');
+
+    if (isPureEnglish(signupForm.name.trim())) {
+      setErrorMessage('براہ کرم اپنا نام صرف اردو رسم الخط میں درج فرمائیں (مثلاً: حکیم محمد احمد)');
       return;
     }
     if (!signupForm.clinicName.trim()) {
       setErrorMessage('براہ کرم مطب / کلینک کا نام درج کریں');
+      return;
+    }
+    if (isPureEnglish(signupForm.clinicName.trim())) {
+      setErrorMessage('براہ کرم مطب / کلینک کا نام اردو زبان میں درج فرمائیں (مثلاً: الشفاء دواخانہ)');
+      return;
+    }
+    if (signupForm.title && isPureEnglish(signupForm.title.trim())) {
+      setErrorMessage('براہ کرم عنوان / ٹائٹل اردو زبان میں درج فرمائیں (مثلاً: ماہر نباض، معالج طب یونانی)');
+      return;
+    }
+    if (signupForm.address && isPureEnglish(signupForm.address.trim())) {
+      setErrorMessage('براہ کرم مطب کا پتہ اردو زبان میں درج فرمائیں');
+      return;
+    }
+    if (signupForm.about && isPureEnglish(signupForm.about.trim())) {
+      setErrorMessage('براہ کرم تعارف اور تفصیلات اردو زبان میں درج فرمائیں');
+      return;
+    }
+    for (const spec of signupForm.specialties) {
+      if (isPureEnglish(spec.trim())) {
+        setErrorMessage(`براہ کرم مرض یا خصوصیت کا نام اردو میں درج فرمائیں: "${spec}"`);
+        return;
+      }
+    }
+    if (!signupForm.email.trim() || !signupForm.email.includes('@')) {
+      setErrorMessage('براہ کرم درست ای میل ایڈریس درج کریں');
       return;
     }
     if (!signupForm.password || signupForm.password.length < 6) {
@@ -191,6 +227,11 @@ export default function DoctorAuthModal({
     if (!finalCityName) {
       const cObj = (citiesList || CITIES).find(c => c.id === finalCityId);
       finalCityName = cObj ? cObj.name : finalCityId || 'لاہور';
+    }
+
+    if (finalCityName && isPureEnglish(finalCityName.trim())) {
+      setErrorMessage('براہ کرم شہر کا نام صرف اردو زبان میں درج فرمائیں (مثلاً: لاہور، راولپنڈی)');
+      return;
     }
 
     if (finalCityName && onAddCity) {
@@ -223,9 +264,14 @@ export default function DoctorAuthModal({
       address: signupForm.address.trim() || `${finalCityName}، پاکستان`,
       timing: signupForm.timing.trim() || 'روزانہ: شام 4:00 تا رات 9:00',
       fee: Number(signupForm.fee) || 500,
+      onlineFee: Number(signupForm.onlineFee) || 800,
+      waitTime: signupForm.waitTime || '15 منٹ سے کم',
+      languages: Array.isArray(signupForm.languages) ? signupForm.languages : ['اردو', 'پنجابی'],
+      memberships: Array.isArray(signupForm.memberships) ? signupForm.memberships : ['قومی کونسل برائے طب (NCT)'],
+      conditions: Array.isArray(signupForm.conditions) ? signupForm.conditions : ['معدے کی تیزابیت و السر', 'جوڑوں کا درد اور عرق النساء', 'دائمی قبض و آئی بی ایس'],
       phone: signupForm.phone.trim() || signupForm.whatsapp.trim() || '03001234567',
       whatsapp: signupForm.whatsapp.trim().replace(/[^0-9]/g, '') || signupForm.phone.trim().replace(/[^0-9]/g, '') || '923001234567',
-      image: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80',
+      image: '/images/default_doctor.webp',
       isVerified: false,
       emailVerified: false,
       isApproved: false, // ⚠️ Pending Admin Approval
@@ -282,6 +328,12 @@ export default function DoctorAuthModal({
     const trimmed = customSpecialtyInput.trim();
     if (!trimmed) return;
     setSpecialtyNotice('');
+
+    const containsUrdu = (text) => /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text || '');
+    if (/[a-zA-Z]/.test(trimmed) && !containsUrdu(trimmed)) {
+      setSpecialtyNotice('برائے مہربانی مرض یا شعبہ کا نام صرف اردو رسم الخط میں درج فرمائیں (مثلاً: جوڑوں کا درد، تبخیر معدہ)');
+      return;
+    }
 
     if (signupForm.specialties.length >= 3) {
       setSpecialtyNotice('زیادہ سے زیادہ 3 امراض منتخب ہو سکتے ہیں۔ نیا مرض شامل کرنے کے لیے پہلے کسی ایک کو ہٹائیں۔');
@@ -558,10 +610,26 @@ export default function DoctorAuthModal({
         {authMode === 'signup' && signupStep === 'form' && (
           <form onSubmit={handleDirectRegistration} className="p-6 sm:p-8 space-y-4 max-h-[70vh] overflow-y-auto">
             
+            {/* Urdu Language Guidelines Notice */}
+            <div className="bg-emerald-50 border border-emerald-300/80 rounded-2xl p-4 flex items-start gap-3 shadow-xs">
+              <div className="p-2 bg-emerald-100 text-emerald-800 rounded-xl shrink-0">
+                <Sparkles className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div className="text-xs space-y-1">
+                <h4 className="font-bold text-emerald-950 font-simple flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>لازمی ہدایت برائے رجسٹریشن (صرف اردو زبان):</span>
+                </h4>
+                <p className="text-emerald-800 font-simple leading-relaxed">
+                  طبیب پیڈیا قومی طبی انسائیکلوپیڈیا ہے۔ تمام معالجین سے گزارش ہے کہ <strong>اپنا نام، مطب/کلینک کا نام، پتہ، شہر، تعارف، ڈگری اور خدمات تمام تفصیلات لازمی طور پر اردو زبان میں درج فرمائیں</strong>۔
+                </p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
-                  پورا نام (مع القاب): *
+                  پورا نام (مع القاب - صرف اردو میں): *
                 </label>
                 <div className="relative">
                   <User className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
@@ -574,6 +642,11 @@ export default function DoctorAuthModal({
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl pr-9 pl-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-simple font-bold"
                   />
                 </div>
+                {signupForm.name && /[a-zA-Z]/.test(signupForm.name) && !/[\u0600-\u06FF]/.test(signupForm.name) && (
+                  <p className="text-[11px] text-amber-700 mt-1 font-simple flex items-center gap-1">
+                    ⚠️ برائے مہربانی اپنا نام صرف اردو رسم الخط میں لکھیں۔
+                  </p>
+                )}
               </div>
 
               <div>
@@ -706,7 +779,7 @@ export default function DoctorAuthModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
-                  مطب / کلینک کا نام: *
+                  مطب / کلینک کا نام (صرف اردو میں): *
                 </label>
                 <div className="relative">
                   <Building2 className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
@@ -719,6 +792,11 @@ export default function DoctorAuthModal({
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl pr-9 pl-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-simple"
                   />
                 </div>
+                {signupForm.clinicName && /[a-zA-Z]/.test(signupForm.clinicName) && !/[\u0600-\u06FF]/.test(signupForm.clinicName) && (
+                  <p className="text-[11px] text-amber-700 mt-1 font-simple flex items-center gap-1">
+                    ⚠️ برائے مہربانی مطب کا نام صرف اردو رسم الخط میں لکھیں۔
+                  </p>
+                )}
               </div>
 
               <div>
@@ -735,7 +813,7 @@ export default function DoctorAuthModal({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
                   طبی قابلیت / ڈگری:
@@ -765,7 +843,7 @@ export default function DoctorAuthModal({
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
-                  فیس (روپے):
+                  مطب وزٹ فیس (روپے):
                 </label>
                 <input
                   type="number"
@@ -775,6 +853,72 @@ export default function DoctorAuthModal({
                   onChange={(e) => setSignupForm({ ...signupForm, fee: Number(e.target.value) })}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
+                  آن لائن ویڈیو فیس:
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  step={100}
+                  value={signupForm.onlineFee}
+                  onChange={(e) => setSignupForm({ ...signupForm, onlineFee: Number(e.target.value) })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans"
+                />
+              </div>
+            </div>
+
+            {/* Wait Time & Languages */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
+                  اوسط انتظار کا وقت (Average Wait Time):
+                </label>
+                <select
+                  value={signupForm.waitTime}
+                  onChange={(e) => setSignupForm({ ...signupForm, waitTime: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans"
+                >
+                  <option value="15 منٹ سے کم">15 منٹ سے کم (Under 15 Min)</option>
+                  <option value="15 تا 30 منٹ">15 تا 30 منٹ</option>
+                  <option value="فوری معائنہ (بغیر انتظار)">فوری معائنہ (بغیر انتظار)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
+                  بولی جانے والی زبانیں (Languages Spoken):
+                </label>
+                <div className="flex flex-wrap gap-2 pt-1 text-xs">
+                  {['اردو', 'پنجابی', 'انگریزی', 'پشتو', 'سندھی', 'سرائیکی'].map((lang) => {
+                    const isChecked = signupForm.languages.includes(lang);
+                    return (
+                      <button
+                        type="button"
+                        key={lang}
+                        onClick={() => {
+                          const current = [...signupForm.languages];
+                          if (isChecked) {
+                            if (current.length > 1) {
+                              setSignupForm({ ...signupForm, languages: current.filter(l => l !== lang) });
+                            }
+                          } else {
+                            setSignupForm({ ...signupForm, languages: [...current, lang] });
+                          }
+                        }}
+                        className={`px-2.5 py-1 rounded-lg border text-xs font-simple transition-colors ${
+                          isChecked 
+                            ? 'bg-blue-600 text-white border-blue-600' 
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
+                        }`}
+                      >
+                        {lang} {isChecked && '✓'}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 

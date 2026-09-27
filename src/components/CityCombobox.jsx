@@ -94,6 +94,12 @@ export default function CityCombobox({
     const trimmed = typedName.trim();
     if (!trimmed) return;
 
+    // Block adding non-Urdu city
+    const containsUrdu = (text) => /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text || '');
+    if (/[a-zA-Z]/.test(trimmed) && !containsUrdu(trimmed)) {
+      return;
+    }
+
     // Check if it already matches an existing city
     const existing = safeCitiesList.find(c => {
       if (!c || c.id === 'all') return false;
@@ -104,7 +110,7 @@ export default function CityCombobox({
       if (onChange) onChange({ id: existing.id, name: existing.name });
       setQuery(existing.name);
     } else {
-      // Add as new city
+      // Add as new city (Urdu only)
       let newCityObj = null;
       if (onAddNewCity) {
         newCityObj = onAddNewCity(trimmed);
@@ -216,6 +222,13 @@ export default function CityCombobox({
         </div>
       </div>
 
+      {/* English typing live warning */}
+      {query && /[a-zA-Z]/.test(query) && !/[\u0600-\u06FF]/.test(query) && (
+        <p className="text-[11px] text-amber-700 mt-1 font-simple flex items-center gap-1">
+          ⚠️ برائے مہربانی شہر کا نام صرف اردو رسم الخط میں درج کریں (مثلاً: لاہور، کراچی)
+        </p>
+      )}
+
       {/* Dropdown Suggestions Menu */}
       {isOpen && (
         <div className="absolute z-50 right-0 left-0 mt-1.5 bg-white rounded-2xl shadow-xl border border-slate-200/90 overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-64 overflow-y-auto">
@@ -230,26 +243,32 @@ export default function CityCombobox({
 
           {/* New City Quick Add Option (if typed text isn't an exact match) */}
           {query.trim() && !exactMatch && (
-            <div className="p-1 border-b border-slate-100 bg-amber-50/60">
-              <button
-                type="button"
-                onClick={handleAddNew}
-                className="w-full text-right px-3 py-2 rounded-xl text-xs font-bold text-amber-900 bg-amber-100/70 hover:bg-amber-200/80 flex items-center justify-between transition-colors group"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-                    <Plus className="w-3.5 h-3.5" />
+            /[a-zA-Z]/.test(query.trim()) && !/[\u0600-\u06FF]/.test(query.trim()) ? (
+              <div className="p-2.5 border-b border-amber-200 bg-amber-50 text-[11px] text-amber-800 font-simple flex items-center gap-1.5">
+                <span>⚠️ انگریزی میں نیا شہر شامل نہیں کیا جا سکتا۔ براہ کرم اردو نام لکھیں۔</span>
+              </div>
+            ) : (
+              <div className="p-1 border-b border-slate-100 bg-amber-50/60">
+                <button
+                  type="button"
+                  onClick={handleAddNew}
+                  className="w-full text-right px-3 py-2 rounded-xl text-xs font-bold text-amber-900 bg-amber-100/70 hover:bg-amber-200/80 flex items-center justify-between transition-colors group"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-md bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <Plus className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <span>بطور نیا شہر شامل کریں:</span>
+                      <span className="mr-1 text-amber-700 underline underline-offset-2">"{query.trim()}"</span>
+                    </div>
                   </div>
-                  <div>
-                    <span>بطور نیا شہر شامل کریں:</span>
-                    <span className="mr-1 text-amber-700 underline underline-offset-2">"{query.trim()}"</span>
-                  </div>
-                </div>
-                <span className="text-[10px] bg-amber-500/20 text-amber-800 px-2 py-0.5 rounded-full font-sans">
-                  + نیا شہر
-                </span>
-              </button>
-            </div>
+                  <span className="text-[10px] bg-amber-500/20 text-amber-800 px-2 py-0.5 rounded-full font-sans">
+                    + نیا شہر
+                  </span>
+                </button>
+              </div>
+            )
           )}
 
           {/* List of Matched Cities */}
@@ -289,14 +308,20 @@ export default function CityCombobox({
               <div className="p-4 text-center text-xs text-slate-500 space-y-2">
                 <p>کوئی مماثل شہر نہیں ملا۔</p>
                 {query.trim() && (
-                  <button
-                    type="button"
-                    onClick={handleAddNew}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>"{query.trim()}" کو بطور نیا شہر شامل کریں</span>
-                  </button>
+                  /[a-zA-Z]/.test(query.trim()) && !/[\u0600-\u06FF]/.test(query.trim()) ? (
+                    <p className="text-[11px] text-amber-700 font-simple">
+                      ⚠️ انگریزی میں نیا شہر شامل نہیں کیا جا سکتا۔ براہ کرم اردو نام لکھیں۔
+                    </p>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleAddNew}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>"{query.trim()}" کو بطور نیا شہر شامل کریں</span>
+                    </button>
+                  )
                 )}
               </div>
             )}

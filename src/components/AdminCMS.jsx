@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { 
   PlusCircle, 
+  Hash, 
   Edit3, 
   Trash2, 
   UploadCloud, 
@@ -80,9 +81,105 @@ import {
   CornerUpRight,
   Copy,
   Clock,
-  Mail
+  Mail,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  GraduationCap,
+  Award,
+  Building2,
+  Plus,
+  Loader2,
+  Download,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import { ARTICLES, DOCTORS, CATEGORIES, SPECIALTIES } from '../data/mockData';
+import { fetchCategoriesApi, saveCategoriesApi, saveArticlesApi, saveSettingsApi, saveDoctorsApi, uploadImageApi, fetchLivePages, savePagesApi, fetchLiveGlossary, saveGlossaryApi } from '../api';
+import { BOOKS_DATA } from './PdfBooksLibrary';
+
+// Helper to generate clean, high-contrast HTML for PDF Books library page
+export const generatePdfBooksPageHtml = (books = []) => {
+  return `
+    <div class="space-y-8 text-right font-sans not-prose">
+      <div class="p-6 sm:p-10 rounded-3xl bg-gradient-to-br from-emerald-50 via-teal-50/60 to-white border border-emerald-200/90 text-slate-800 shadow-xs relative overflow-hidden">
+        <div class="relative z-10 space-y-4">
+          <div class="inline-flex items-center gap-2 bg-emerald-600 text-white px-3.5 py-1 rounded-full text-xs font-bold shadow-xs">
+            <span>📚 طبیب پیڈیا کا ڈیجیٹل کتب خانہ</span>
+          </div>
+          <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 leading-tight font-h1">
+            مفت طبی کتب ڈاؤن لوڈ کریں اور آن لائن پڑھیں
+          </h2>
+          <p class="text-sm sm:text-base text-slate-600 leading-relaxed max-w-4xl font-nastaliq">
+            طبیب پیڈیا کے اس خصوصی کتب خانے میں طبِ یونانی، قانونِ مفرد اعضاء، جدید کلینیکل تشخیص، لیبارٹری گائیڈز اور غذائی تحقیق کی <strong>مستند اور نایاب کتب</strong> اصلی سرورق کے ساتھ پی ڈی ایف فارمیٹ میں ڈاؤن لوڈ اور آن لائن مطالعہ کے لیے بلا معاوضہ پیش کی گئی ہیں۔
+          </p>
+          <div class="flex flex-wrap gap-2.5 pt-2 text-xs font-bold text-slate-700">
+            <span class="bg-white border border-emerald-200 px-3 py-1.5 rounded-xl shadow-xs text-emerald-800">📖 کل کتب: <strong>${books.length} کتب</strong></span>
+            <span class="bg-white border border-emerald-200 px-3 py-1.5 rounded-xl shadow-xs text-emerald-800">⚡ تیز رفتار ڈائریکٹ ڈاؤن لوڈ</span>
+            <span class="bg-white border border-indigo-200 px-3 py-1.5 rounded-xl shadow-xs text-indigo-800">🌐 6 مختلف بین الاقوامی زبانوں میں</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pt-2 font-sans">
+        ${books.map((b, i) => `
+          <div class="bg-white rounded-3xl border border-slate-200/90 hover:border-emerald-500/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden group">
+            <div class="relative bg-gradient-to-b from-slate-100 via-slate-50 to-white p-5 pb-3 flex items-center justify-center border-b border-slate-100">
+              <div class="absolute top-3 right-3 z-10">
+                <span class="bg-emerald-700/95 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-2xs">
+                  ${b.category}
+                </span>
+              </div>
+              <div class="absolute top-3 left-3 z-10">
+                <span class="bg-slate-900/80 text-white text-[10px] font-mono px-2 py-0.5 rounded-md shadow-2xs">
+                  ${b.language || 'Urdu'}
+                </span>
+              </div>
+              <div class="relative my-2 w-44 aspect-[3/4.2] rounded-xl overflow-hidden shadow-lg group-hover:shadow-2xl transition-all duration-300 bg-slate-200 border border-slate-200/80">
+                <img src="${b.image || '/images/books/tib-e-pakistani-urdu.jpg'}" alt="${b.title}" loading="lazy" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500" />
+                <div class="absolute inset-0 bg-gradient-to-tr from-black/15 via-transparent to-white/20 pointer-events-none"></div>
+                <div class="absolute top-0 right-0 bottom-0 w-2.5 bg-gradient-to-r from-black/30 via-black/10 to-transparent pointer-events-none"></div>
+              </div>
+            </div>
+            <div class="p-5 flex-1 flex flex-col justify-between space-y-3">
+              <div class="space-y-1.5">
+                <h3 class="text-base font-extrabold text-slate-900 group-hover:text-emerald-700 transition-colors leading-snug line-clamp-2 font-h2">
+                  ${b.title}
+                </h3>
+                <p class="text-xs text-emerald-800 font-bold flex items-center gap-1.5">
+                  <span>👤</span>
+                  <span class="truncate">${b.author}</span>
+                </p>
+              </div>
+              <p class="text-xs text-slate-600 font-nastaliq leading-relaxed line-clamp-3">
+                ${b.description || ''}
+              </p>
+              <div class="pt-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-100">
+                <span class="bg-slate-100 px-2 py-0.5 rounded-md text-slate-600 font-bold">
+                  ${b.pages || 'PDF'}
+                </span>
+                <span class="text-emerald-700 font-bold">PDF ایڈیشن</span>
+              </div>
+            </div>
+            <div class="p-4 pt-0 flex items-center gap-2">
+              <a href="${b.downloadUrl}" target="_blank" rel="noreferrer" download class="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-xs hover:shadow-md transition-all cursor-pointer">
+                <span>ڈاؤن لوڈ PDF</span>
+                <span>⬇️</span>
+              </a>
+              ${b.embedUrl ? `
+                <a href="${b.embedUrl}" target="_blank" rel="noreferrer" class="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-bold rounded-xl flex items-center justify-center gap-1 transition-colors cursor-pointer" title="آن لائن مطالعہ کریں">
+                  <span>مطالعہ</span>
+                  <span class="text-xs">👁️</span>
+                </a>
+              ` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+};
 
 // Slug Generator Helper (Supports Urdu and English clean URL friendly slugs)
 const generateSlugFromTitle = (title) => {
@@ -96,35 +193,563 @@ const generateSlugFromTitle = (title) => {
     .replace(/^-+|-+$/g, '');
 };
 
+export const isCategoryMatch = (cat, targetRef) => {
+  if (!cat || !targetRef) return false;
+  const refStr = String(targetRef).trim().toLowerCase();
+  return (
+    (cat.id !== undefined && cat.id !== null && String(cat.id).trim().toLowerCase() === refStr) ||
+    (cat.slug && String(cat.slug).trim().toLowerCase() === refStr) ||
+    (cat.name && String(cat.name).trim().toLowerCase() === refStr)
+  );
+};
+
+// Hierarchical category tree builder helper (WordPress Style)
+export const buildHierarchicalCategoryTree = (categories) => {
+  if (!Array.isArray(categories)) return [];
+
+  const findParent = (cat) => {
+    if (!cat.parentId) return null;
+    return categories.find(p => p !== cat && isCategoryMatch(p, cat.parentId));
+  };
+
+  const topParents = categories.filter(c => !c.parentId || !findParent(c));
+  const result = [];
+  const visited = new Set();
+
+  const traverse = (cat, depth) => {
+    const key = cat.id || cat.slug || cat.name;
+    if (visited.has(key)) return;
+    visited.add(key);
+    result.push({ ...cat, depth });
+
+    const kids = categories.filter(c => c !== cat && c.parentId && isCategoryMatch(cat, c.parentId));
+
+    kids.forEach(k => traverse(k, depth + 1));
+  };
+
+  topParents.forEach(p => traverse(p, 0));
+
+  categories.forEach(c => {
+    const key = c.id || c.slug || c.name;
+    if (!visited.has(key)) {
+      result.push({ ...c, depth: 0 });
+    }
+  });
+
+  return result;
+};
+
 export default function AdminCMS({ 
   onBackToWebsite, 
-  initialTab = 'articles', 
+  initialTab = 'dashboard', 
   siteSettings, 
   setSiteSettings, 
   onViewArticle,
   articlesList: propArticlesList,
   setArticlesList: propSetArticlesList,
   doctorsList: propDoctorsList,
-  setDoctorsList: propSetDoctorsList
+  setDoctorsList: propSetDoctorsList,
+  pagesList: propPagesList,
+  setPagesList: propSetPagesList,
+  glossaryList: propGlossaryList,
+  setGlossaryList: propSetGlossaryList
 }) {
-  const [adminTab, setAdminTab] = useState(initialTab); // 'articles', 'new-article', 'doctors', 'migration', 'settings'
+  const [adminTab, setAdminTab] = useState(initialTab);
+  const [settingsSubTab, setSettingsSubTab] = useState('general');
+  const [showColorPalette, setShowColorPalette] = useState(false);
+  const [showBgPalette, setShowBgPalette] = useState(false);
+  const [showPageColorPalette, setShowPageColorPalette] = useState(false);
+  const [showPageBgPalette, setShowPageBgPalette] = useState(false);
+
+  // Glossary Management State
+  const [glossaryList, setGlossaryList] = useState(() => {
+    if (propGlossaryList && Array.isArray(propGlossaryList) && propGlossaryList.length > 0) {
+      return propGlossaryList;
+    }
+    try {
+      const saved = localStorage.getItem('tabeeb_glossary_data_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch(e) {}
+    return [];
+  });
+
+  const [glossarySearch, setGlossarySearch] = useState('');
+  const [glossaryLetterFilter, setGlossaryLetterFilter] = useState('all');
+  const [editingGlossaryTerm, setEditingGlossaryTerm] = useState(null);
+  const [isGlossaryModalOpen, setIsGlossaryModalOpen] = useState(false);
+  const [glossaryForm, setGlossaryForm] = useState({
+    term: '',
+    slug: '',
+    shortDefinition: '',
+    content: ''
+  });
+
+  useEffect(() => {
+    if (propGlossaryList && Array.isArray(propGlossaryList) && propGlossaryList.length > 0) {
+      setGlossaryList(propGlossaryList);
+    }
+  }, [propGlossaryList]);
+
+  const updateAndSaveGlossary = (newList) => {
+    setGlossaryList(newList);
+    if (propSetGlossaryList) {
+      propSetGlossaryList(newList);
+    }
+    try {
+      localStorage.setItem('tabeeb_glossary_data_v1', JSON.stringify(newList));
+    } catch(e) {}
+    saveGlossaryApi(newList);
+  };
+
+  const RICH_COLORS = [
+    { name: 'سفید', hex: '#ffffff' },
+    { name: 'ہلکا سرمئی', hex: '#cbd5e1' },
+    { name: 'گہرا سرمئی', hex: '#64748b' },
+    { name: 'کالا', hex: '#0f172a' },
+    { name: 'زمردی سبز', hex: '#10b981' },
+    { name: 'گہرا سبز', hex: '#047857' },
+    { name: 'ہلکا نیلا', hex: '#38bdf8' },
+    { name: 'شاہی نیلا', hex: '#2563eb' },
+    { name: 'گہرا نیلا', hex: '#1e3a8a' },
+    { name: 'سرخ / لال', hex: '#ef4444' },
+    { name: 'گہرا سرخ', hex: '#b91c1c' },
+    { name: 'نارنجی', hex: '#f97316' },
+    { name: 'سنہری پیلا', hex: '#eab308' },
+    { name: 'امبری پیلا', hex: '#f59e0b' },
+    { name: 'جامنی', hex: '#a855f7' },
+    { name: 'گلابی', hex: '#ec4899' },
+    { name: 'ٹیل سبز', hex: '#14b8a6' },
+    { name: 'زیتونی', hex: '#84cc16' },
+  ];
+
+  const [categoriesList, setCategoriesList] = useState(() => {
+    const parentId = 'herbs-intro';
+    
+    // Complete Urdu Alphabet Categories (آ تا ی)
+    const allUrduAlphabetCats = [
+      { id: 'cat-a-madd', name: '( آ )', slug: 'alif-madda-wp', parentId },
+      { id: 'cat-alif', name: '( ا )', slug: 'alif-wp', parentId },
+      { id: 'cat-bay', name: '( ب )', slug: 'bay-wp', parentId },
+      { id: 'cat-pay', name: '( پ )', slug: 'pay-wp', parentId },
+      { id: 'cat-tay', name: '( ت )', slug: 'tay-wp', parentId },
+      { id: 'cat-ttay', name: '( ٹ )', slug: 'ttay-wp', parentId },
+      { id: 'cat-say', name: '( ث )', slug: 'say-wp', parentId },
+      { id: 'cat-jeem', name: '( ج )', slug: 'jeem-wp', parentId },
+      { id: 'cat-chay', name: '( چ )', slug: 'chay-wp', parentId },
+      { id: 'cat-hay', name: '( ح )', slug: 'hay-wp', parentId },
+      { id: 'cat-khay', name: '( خ )', slug: 'khay-wp', parentId },
+      { id: 'cat-daal', name: '( د )', slug: 'daal-wp', parentId },
+      { id: 'cat-ddaal', name: '( ڈ )', slug: 'ddaal-wp', parentId },
+      { id: 'cat-zaal', name: '( ذ )', slug: 'zaal-wp', parentId },
+      { id: 'cat-ray', name: '( ر )', slug: 'ray-wp', parentId },
+      { id: 'cat-rray', name: '( ڑ )', slug: 'rray-wp', parentId },
+      { id: 'cat-zay', name: '( ز )', slug: 'zay-wp', parentId },
+      { id: 'cat-zhay', name: '( ژ )', slug: 'zhay-wp', parentId },
+      { id: 'cat-seen', name: '( س )', slug: 'seen-wp', parentId },
+      { id: 'cat-sheen', name: '( ش )', slug: 'sheen-wp', parentId },
+      { id: 'cat-suad', name: '( ص )', slug: 'suad-wp', parentId },
+      { id: 'cat-zuad', name: '( ض )', slug: 'zuad-wp', parentId },
+      { id: 'cat-toe', name: '( ط )', slug: 'toe-wp', parentId },
+      { id: 'cat-zoe', name: '( ظ )', slug: 'zoe-wp', parentId },
+      { id: 'cat-ain', name: '( ع )', slug: 'ain-wp', parentId },
+      { id: 'cat-ghain', name: '( غ )', slug: 'ghain-wp', parentId },
+      { id: 'cat-fay', name: '( ف )', slug: 'fay-wp', parentId },
+      { id: 'cat-qaaf', name: '( ق )', slug: 'qaaf-wp', parentId },
+      { id: 'cat-kaaf', name: '( ک )', slug: 'kaaf-wp', parentId },
+      { id: 'cat-gaaf', name: '( گ )', slug: 'gaaf-wp', parentId },
+      { id: 'cat-laam', name: '( ل )', slug: 'laam-wp', parentId },
+      { id: 'cat-meem', name: '( م )', slug: 'meem-wp', parentId },
+      { id: 'cat-noon', name: '( ن )', slug: 'noon-wp', parentId },
+      { id: 'cat-wao', name: '( و )', slug: 'wao-wp', parentId },
+      { id: 'cat-gol-hay', name: '( ہ )', slug: 'gol-hay-wp', parentId },
+      { id: 'cat-do-chashmi-hay', name: '( ھ )', slug: 'do-chashmi-hay-wp', parentId },
+      { id: 'cat-hamza', name: '( ء )', slug: 'hamza-wp', parentId },
+      { id: 'cat-yay', name: '( ی )', slug: 'yay-wp', parentId }
+    ];
+
+    // Complete English Alphabet Categories (A to Z) under Herbs English Alphabetical Order
+    const allEnglishAlphabetCats = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(letter => ({
+      id: `cat-en-${letter.toLowerCase()}`,
+      name: letter,
+      slug: letter.toLowerCase(),
+      parentId: 'herbs-english-alphabetical-order'
+    }));
+
+    // Herbs classification
+    const herbClassifications = [
+      { id: 'ghazayein', name: 'غذائیں', slug: 'ghazayein', parentId: 'herbs-intro' },
+      { id: 'phal', name: 'پھل', slug: 'phal', parentId: 'herbs-intro' },
+      { id: 'zahreeli-bootiyan', name: 'زہریلی بوٹیاں', slug: 'zahreeli-bootiyan', parentId: 'herbs-intro' },
+      { id: 'animals', name: 'Animals', slug: 'animals', parentId: 'herbs-intro' },
+    ];
+
+    // Base Top-Level Categories (Exact WordPress Match)
+    const baseCats = [
+      { id: 'chemicals', name: 'کیمیکلز', slug: 'chemicals', parentId: null },
+      { id: 'mukhtalif-tariqay', name: 'مختلف طریقہ ہائے علاج', slug: 'mukhtalif-tariqay', parentId: null },
+      { id: 'mizaj', name: 'مزاج', slug: 'mizaj', parentId: null },
+      { id: 'mazameen', name: 'مضامین', slug: 'mazameen', parentId: null },
+      { id: 'herbs-intro', name: 'جڑی بوٹیوں کا تعارف', slug: 'herbs-intro', parentId: null },
+      { id: 'herbs-english-alphabetical-order', name: 'Herbs English Alphabetical Order', slug: 'herbs-english-alphabetical-order', parentId: null },
+      { id: 'qanoon-mufrad-aza', name: 'قانون مفرد اعضاء', slug: 'qanoon-mufrad-aza', parentId: null },
+      { id: 'tibb-unani', name: 'طب یونانی و نبوی', slug: 'tibb-unani', parentId: null },
+      { id: 'remedies', name: 'گھریلو علاج و مجربات', slug: 'remedies', parentId: null },
+      { id: 'diet-chart', name: 'غذائی چارٹ و پرہیز', slug: 'diet-chart', parentId: null },
+      { id: 'research', name: 'جدید طبی و سائنسی تحقیقات', slug: 'research', parentId: null },
+      { id: 'uncategorized', name: 'Uncategorized', slug: 'uncategorized', parentId: null },
+    ];
+
+    // Sub-Categories under مزاج (Exactly two sub-categories)
+    const mizajSubCats = [
+      { id: 'mizaj-tibb-pakistani', name: 'مزاج طب پاکستانی', slug: 'mizaj-tibb-pakistani', parentId: 'mizaj' },
+      { id: 'mizaj-tibb-unani', name: 'مزاج طب یونانی', slug: 'mizaj-tibb-unani', parentId: 'mizaj' },
+    ];
+
+    // Sub-categories under مزاج طب پاکستانی (Exactly these 6)
+    const mizajPakistaniCats = [
+      { id: 'asabi-azlati', name: 'اعصابی عضلاتی', slug: 'asabi-azlati', parentId: 'mizaj-tibb-pakistani' },
+      { id: 'azlati-asabi', name: 'عضلاتی اعصابی', slug: 'azlati-asabi', parentId: 'mizaj-tibb-pakistani' },
+      { id: 'azlati-ghudi', name: 'عضلاتی غدی', slug: 'azlati-ghudi', parentId: 'mizaj-tibb-pakistani' },
+      { id: 'ghudi-azlati', name: 'غدی عضلاتی', slug: 'ghudi-azlati', parentId: 'mizaj-tibb-pakistani' },
+      { id: 'ghudi-asabi', name: 'غدی اعصابی', slug: 'ghudi-asabi', parentId: 'mizaj-tibb-pakistani' },
+      { id: 'asabi-ghudi', name: 'اعصابی غدی', slug: 'asabi-ghudi', parentId: 'mizaj-tibb-pakistani' },
+    ];
+
+    // Sub-categories under مزاج طب یونانی (Exactly these 6)
+    const mizajUnaniCats = [
+      { id: 'tar-sard', name: 'تر سرد', slug: 'tar-sard', parentId: 'mizaj-tibb-unani' },
+      { id: 'khushk-sard', name: 'خشک سرد', slug: 'khushk-sard', parentId: 'mizaj-tibb-unani' },
+      { id: 'khushk-garm', name: 'خشک گرم', slug: 'khushk-garm', parentId: 'mizaj-tibb-unani' },
+      { id: 'garm-khushk', name: 'گرم خشک', slug: 'garm-khushk', parentId: 'mizaj-tibb-unani' },
+      { id: 'garm-tar', name: 'گرم تر', slug: 'garm-tar', parentId: 'mizaj-tibb-unani' },
+      { id: 'tar-garm', name: 'تر گرم', slug: 'tar-garm', parentId: 'mizaj-tibb-unani' },
+    ];
+
+    // Degrees of Mizaj (under qanoon-mufrad-aza)
+    const darajatCats = [
+      { id: 'mizaj-1', name: 'مزاج درجہ اول', slug: 'mizaj-1', parentId: 'qanoon-mufrad-aza' },
+      { id: 'mizaj-2', name: 'مزاج درجہ دوم', slug: 'mizaj-2', parentId: 'qanoon-mufrad-aza' },
+      { id: 'mizaj-3', name: 'مزاج درجہ سوم', slug: 'mizaj-3', parentId: 'qanoon-mufrad-aza' },
+      { id: 'mizaj-4', name: 'مزاج درجہ چہارم', slug: 'mizaj-4', parentId: 'qanoon-mufrad-aza' },
+    ];
+
+    // Tibb Unani Sub-categories
+    const tibbUnaniCats = [
+      { id: 'tibbi-maloomat', name: 'طبی معلومات', slug: 'tibbi-maloomat', parentId: 'tibb-unani' },
+      { id: 'nuskha-jaat', name: 'نسخہ جات', slug: 'nuskha-jaat', parentId: 'tibb-unani' },
+      { id: 'asool-e-ilaaj', name: 'اصول علاج', slug: 'asool-e-ilaaj', parentId: 'tibb-unani' },
+      { id: 'tibbi-istilahat', name: 'طبی اصطلاحات', slug: 'tibbi-istilahat', parentId: 'tibb-unani' },
+      { id: 'pdf-books', name: 'PDF Books', slug: 'pdf-books', parentId: 'tibb-unani' },
+    ];
+
+    const allSeeds = [
+      ...baseCats,
+      ...mizajSubCats,
+      ...mizajPakistaniCats,
+      ...mizajUnaniCats,
+      ...darajatCats,
+      ...allUrduAlphabetCats,
+      ...allEnglishAlphabetCats,
+      ...herbClassifications,
+      ...tibbUnaniCats
+    ];
+
+    try {
+      const saved = localStorage.getItem('tabeeb_categories');
+      if (saved !== null) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
+      }
+    } catch(e) {}
+
+    try { localStorage.setItem('tabeeb_categories', JSON.stringify(allSeeds)); } catch(e) {}
+    return allSeeds;
+  });
+  const [tagsList, setTagsList] = useState(() => { try { return JSON.parse(localStorage.getItem('tabeeb_tags')) || [{id:1, name:'عضلاتی غدی', slug:'azlati-ghudi'}]; } catch(e) { return [{id:1, name:'عضلاتی غدی', slug:'azlati-ghudi'}]; } });
+  const [categoryForm, setCategoryForm] = useState({ id: null, name: '', slug: '', parentId: '' });
+  const [categorySearchMeta, setCategorySearchMeta] = useState('');
+
+  const hierarchicalCategories = useMemo(() => {
+    return buildHierarchicalCategoryTree(categoriesList);
+  }, [categoriesList]);
+  // Media Library State
+  const [mediaList, setMediaList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tabeeb_media_library');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch(e) {}
+    const extracted = [];
+    const seenUrls = new Set();
+    ARTICLES.forEach(art => {
+      if (art.featuredImage && !seenUrls.has(art.featuredImage)) {
+        seenUrls.add(art.featuredImage);
+        extracted.push({
+          id: 'media-' + Math.random().toString(36).substr(2, 9),
+          url: art.featuredImage,
+          name: (art.slug || 'article-image') + '.jpg',
+          date: '2026/09/25',
+          attachedTo: art.title,
+          articleId: art.id
+        });
+      }
+    });
+    return extracted;
+  });
+  const [selectedMediaIds, setSelectedMediaIds] = useState([]);
+  const [mediaFilter, setMediaFilter] = useState('all'); // 'all', 'attached', 'unattached'
+  const [mediaSearch, setMediaSearch] = useState('');
+
+  // Pages State
+  const [internalPagesList, setInternalPagesList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tabeeb_pages');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch(e) {}
+    return [];
+  });
+  const pagesList = propPagesList || internalPagesList;
+  const setPagesList = propSetPagesList || setInternalPagesList;
+  const [pageForm, setPageForm] = useState(null); // null or { id, title, slug, content, status }
+
+  useEffect(() => {
+    const loadPagesFromDb = async () => {
+      try {
+        if (!pagesList || pagesList.length === 0) {
+          const data = await fetchLivePages();
+          if (Array.isArray(data) && data.length > 0) {
+            setPagesList(data);
+          }
+        }
+      } catch (e) {}
+    };
+    loadPagesFromDb();
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('tabeeb_media_library', JSON.stringify(mediaList));
+  }, [mediaList]);
+
+  useEffect(() => {
+    if (pagesList && pagesList.length > 0) {
+      try {
+        localStorage.setItem('tabeeb_pages', JSON.stringify(pagesList));
+      } catch (e) {}
+      savePagesApi(pagesList);
+    }
+  }, [pagesList]);
+
+  const handleMediaUpload = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        const newMedia = {
+          id: 'media-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+          url: uploadEvent.target.result,
+          name: file.name,
+          date: '2026/09/25',
+          attachedTo: null
+        };
+        setMediaList(prev => [newMedia, ...prev]);
+      };
+      reader.readAsDataURL(file);
+    });
+    showNotification('تصاویر کامیابی کے ساتھ میڈیا لائبریری میں شامل کر دی گئیں!');
+  };
+
+  const handleDeleteSingleMedia = (id) => {
+    if (window.confirm('کیا آپ واقعی یہ تصویر میڈیا لائبریری سے ڈیلیٹ کرنا چاہتے ہیں؟')) {
+      setMediaList(prev => prev.filter(m => m.id !== id));
+      setSelectedMediaIds(prev => prev.filter(item => item !== id));
+      showNotification('تصویر ڈیلیٹ کر دی گئی');
+    }
+  };
+
+  const handleBulkDeleteMedia = () => {
+    if (selectedMediaIds.length === 0) return;
+    if (window.confirm(`کیا آپ واقعی تمام منتخب شدہ ${selectedMediaIds.length} تصاویر ڈیلیٹ کرنا چاہتے ہیں؟`)) {
+      setMediaList(prev => prev.filter(m => !selectedMediaIds.includes(m.id)));
+      setSelectedMediaIds([]);
+      showNotification('منتخب تصاویر ڈیلیٹ کر دی گئیں');
+    }
+  };
+
+  const [tagForm, setTagForm] = useState({ id: null, name: '', slug: '' });
+
+  // Load categories from permanent database file on mount
+  useEffect(() => {
+    const loadCategoriesFromDb = async () => {
+      try {
+        const data = await fetchCategoriesApi();
+        if (Array.isArray(data) && data.length > 0) {
+          setCategoriesList(data);
+        }
+      } catch (e) {}
+    };
+    loadCategoriesFromDb();
+  }, []);
+
+  // Sync changes directly to permanent database file / API
+  useEffect(() => {
+    localStorage.setItem('tabeeb_categories', JSON.stringify(categoriesList));
+    saveCategoriesApi(categoriesList);
+  }, [categoriesList]);
+
+  useEffect(() => { localStorage.setItem('tabeeb_tags', JSON.stringify(tagsList)); }, [tagsList]);
+
   const [internalArticlesList, setInternalArticlesList] = useState(ARTICLES);
   const articlesList = propArticlesList || internalArticlesList;
   const setArticlesList = propSetArticlesList || setInternalArticlesList;
 
-  const [internalDoctorsList, setInternalDoctorsList] = useState(DOCTORS);
+  // Sync articles directly to permanent database file / API
+  useEffect(() => {
+    if (articlesList && articlesList.length > 0) {
+      saveArticlesApi(articlesList);
+    }
+  }, [articlesList]);
+
+  const [internalDoctorsList, setInternalDoctorsList] = useState([]);
   const doctorsList = propDoctorsList || internalDoctorsList;
   const setDoctorsList = propSetDoctorsList || setInternalDoctorsList;
+
+
+  // Sync settings directly to permanent database file / API
+  useEffect(() => {
+    if (siteSettings) {
+      localStorage.setItem('tabeeb_site_settings_v1', JSON.stringify(siteSettings));
+      saveSettingsApi(siteSettings);
+      setSettingsForm(prev => ({ ...prev, ...siteSettings }));
+    }
+  }, [siteSettings]);
 
   // Search & Filter in Articles table
   const [searchFilter, setSearchFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedArticleIds, setSelectedArticleIds] = useState([]);
+
+  // WordPress-style Pagination for Articles Table (Default 20, selectable 50, 100)
+  const [postsPerPage, setPostsPerPage] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tabeeb_admin_posts_per_page');
+      return saved ? parseInt(saved, 10) : 20;
+    } catch {
+      return 20;
+    }
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postSortOrder, setPostSortOrder] = useState('latest'); // 'latest' | 'oldest'
+
+  // Reset to page 1 when search, status filter, postsPerPage or sort order changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchFilter, statusFilter, postsPerPage, postSortOrder]);
 
   // Doctor Approvals & Management States
-  const [doctorTabFilter, setDoctorTabFilter] = useState('pending'); // 'pending', 'approved', 'all'
+  const [doctorTabFilter, setDoctorTabFilter] = useState('all'); // 'all', 'pending', 'approved'
   const [doctorSearchFilter, setDoctorSearchFilter] = useState('');
+  const [doctorVerifiedFilter, setDoctorVerifiedFilter] = useState('all'); // 'all', 'verified', 'unverified'
+  const [doctorFeaturedFilter, setDoctorFeaturedFilter] = useState('all'); // 'all', 'featured', 'standard'
+  const [doctorCityFilter, setDoctorCityFilter] = useState('all');
+  const [doctorSortOrder, setDoctorSortOrder] = useState('latest'); // 'latest' | 'oldest' | 'name' | 'exp'
+
+  // WordPress-style Pagination for Doctors Table (Default 20, selectable 50, 100, all)
+  const [doctorsPerPage, setDoctorsPerPage] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tabeeb_admin_doctors_per_page');
+      if (saved === 'all') return 'all';
+      return saved ? parseInt(saved, 10) : 20;
+    } catch {
+      return 20;
+    }
+  });
+  const [doctorCurrentPage, setDoctorCurrentPage] = useState(1);
+
+  // Reset to page 1 when doctor filters change
+  useEffect(() => {
+    setDoctorCurrentPage(1);
+  }, [
+    doctorTabFilter,
+    doctorSearchFilter,
+    doctorVerifiedFilter,
+    doctorFeaturedFilter,
+    doctorCityFilter,
+    doctorSortOrder,
+    doctorsPerPage
+  ]);
+
   const [editingDoctorId, setEditingDoctorId] = useState(null);
   const [doctorForm, setDoctorForm] = useState(null);
+  const [doctorEditTab, setDoctorEditTab] = useState('basic');
+  const [newSpecialtyInput, setNewSpecialtyInput] = useState('');
+  const [newServiceInput, setNewServiceInput] = useState('');
+  const [newConditionInput, setNewConditionInput] = useState('');
+  const [newGalleryInput, setNewGalleryInput] = useState('');
+  const adminDoctorGalleryFileRef = useRef(null);
+  const [isAdminUploadingGallery, setIsAdminUploadingGallery] = useState(false);
+
+  const handleAdminDoctorGalleryUpload = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    setIsAdminUploadingGallery(true);
+    try {
+      const uploadedUrls = [];
+      for (const file of files) {
+        const url = await uploadImageApi(file);
+        if (url) uploadedUrls.push(url);
+      }
+      if (uploadedUrls.length > 0) {
+        setDoctorForm(prev => ({
+          ...prev,
+          gallery: [...(prev.gallery || []), ...uploadedUrls]
+        }));
+        showNotification(`${uploadedUrls.length} تصویر/تصاویر کامیابی سے شامل ہو گئیں`);
+      }
+    } catch (err) {
+      console.error(err);
+      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا');
+    } finally {
+      setIsAdminUploadingGallery(false);
+      if (adminDoctorGalleryFileRef.current) adminDoctorGalleryFileRef.current.value = '';
+    }
+  };
+
+  const adminDoctorAvatarFileRef = useRef(null);
+  const [isAdminUploadingAvatar, setIsAdminUploadingAvatar] = useState(false);
+
+  const handleAdminDoctorAvatarUpload = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setIsAdminUploadingAvatar(true);
+    try {
+      const url = await uploadImageApi(file);
+      if (url) {
+        setDoctorForm(prev => ({ ...prev, image: url }));
+        showNotification('طبیب کی پروفائل تصویر کامیابی سے اپلوڈ ہو گئی!');
+      }
+    } catch (err) {
+      console.error(err);
+      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا');
+    } finally {
+      setIsAdminUploadingAvatar(false);
+      if (adminDoctorAvatarFileRef.current) adminDoctorAvatarFileRef.current.value = '';
+    }
+  };
+
+  const [newEduForm, setNewEduForm] = useState({ degree: '', institute: '', year: '' });
+  const [newExpForm, setNewExpForm] = useState({ companyName: '', jobTitle: '', duration: '', description: '' });
+  const [newAwardForm, setNewAwardForm] = useState({ title: '', year: '' });
   const [passwordRequests, setPasswordRequests] = useState([]);
   
   useEffect(() => {
@@ -140,6 +765,40 @@ export default function AdminCMS({
       localStorage.setItem('tabeeb_password_requests', JSON.stringify(updated));
       setPasswordRequests(updated);
     } catch(err) {}
+  };
+
+  // Quick Draft State (WordPress Style)
+  const [quickDraftTitle, setQuickDraftTitle] = useState('');
+  const [quickDraftContent, setQuickDraftContent] = useState('');
+
+  const handleSaveQuickDraft = (e) => {
+    e.preventDefault();
+    if (!quickDraftTitle.trim()) {
+      showNotification('براہ کرم ڈرافٹ کا عنوان درج کریں');
+      return;
+    }
+    const newDraft = {
+      id: Date.now(),
+      title: quickDraftTitle.trim(),
+      slug: generateSlugFromTitle(quickDraftTitle.trim()),
+      content: quickDraftContent ? `<p>${quickDraftContent.replace(/\n/g, '<br/>')}</p>` : '<p></p>',
+      excerpt: quickDraftContent ? quickDraftContent.slice(0, 150) : '',
+      author: 'syed abdul wahab shah',
+      categories: ['غیر زمرہ بند (Uncategorized)'],
+      category: 'غیر زمرہ بند (Uncategorized)',
+      tags: [],
+      featuredImage: siteSettings?.defaultArticleImage || '',
+      status: 'private',
+      date: new Date().toISOString().split('T')[0],
+      publishedAt: new Date().toISOString().split('T')[0],
+      readingTime: '2 منٹ'
+    };
+    const updated = [newDraft, ...articlesList];
+    setArticlesList(updated);
+    saveArticlesApi(updated);
+    setQuickDraftTitle('');
+    setQuickDraftContent('');
+    showNotification('ڈرافٹ کامیابی کے ساتھ محفوظ ہو گیا!');
   };
 
   // Editing state
@@ -230,7 +889,7 @@ export default function AdminCMS({
   const [tagInput, setTagInput] = useState('');
   const [showNewCatModal, setShowNewCatModal] = useState(false);
   const [newCatName, setNewCatName] = useState('');
-  const [availableCategories, setAvailableCategories] = useState(CATEGORIES.filter(c => c.id !== 'all'));
+  // availableCategories synced with categoriesList
 
   // Form Modal state
   const [formType, setFormType] = useState('consultation'); // 'consultation', 'order', 'question'
@@ -253,12 +912,64 @@ export default function AdminCMS({
   });
 
   // Site Settings Form State
+  
+  // Admin Username & Password Management State
+  const [credentialsForm, setCredentialsForm] = useState(() => ({
+    currentPassword: '',
+    username: (typeof window !== 'undefined' && localStorage.getItem('tabeeb_admin_custom_username')) || 'sherazi313',
+    newPassword: '',
+    confirmPassword: ''
+  }));
+  const [passwordStatusMsg, setPasswordStatusMsg] = useState({ type: '', text: '' });
+  const [showCurrentPass, setShowCurrentPass] = useState(false);
+  const [showNewPass, setShowNewPass] = useState(false);
+
+  const handleChangeAdminCredentials = (e) => {
+    e.preventDefault();
+    const currentStoredPassword = localStorage.getItem('tabeeb_admin_custom_password') || '5903911a';
+    
+    if (credentialsForm.currentPassword !== currentStoredPassword) {
+      setPasswordStatusMsg({ type: 'error', text: 'موجودہ پاس ورڈ درست نہیں ہے۔ تصدیق کے لیے درست پاس ورڈ درج کریں۔' });
+      return;
+    }
+
+    const trimmedUser = credentialsForm.username.trim();
+    if (!trimmedUser || trimmedUser.length < 3) {
+      setPasswordStatusMsg({ type: 'error', text: 'یوزر نیم کم از کم 3 حروف پر مشتمل ہونا چاہیے۔' });
+      return;
+    }
+
+    if (credentialsForm.newPassword) {
+      if (credentialsForm.newPassword.length < 6) {
+        setPasswordStatusMsg({ type: 'error', text: 'نیا پاس ورڈ کم از کم 6 حروف پر مشتمل ہونا چاہیے۔' });
+        return;
+      }
+      if (credentialsForm.newPassword !== credentialsForm.confirmPassword) {
+        setPasswordStatusMsg({ type: 'error', text: 'نیا پاس ورڈ اور تصدیقی پاس ورڈ ایک جیسے نہیں ہیں۔' });
+        return;
+      }
+    }
+
+    try {
+      localStorage.setItem('tabeeb_admin_custom_username', trimmedUser);
+      if (credentialsForm.newPassword) {
+        localStorage.setItem('tabeeb_admin_custom_password', credentialsForm.newPassword);
+      }
+      setPasswordStatusMsg({ type: 'success', text: 'ایڈمن یوزر نیم اور پاس ورڈ کامیابی کے ساتھ اپ ڈیٹ کر دیا گیا ہے!' });
+      setCredentialsForm(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }));
+      showNotification('ایڈمن لاگ ان کوائف کامیابی سے تبدیل ہو گئے!');
+    } catch (err) {
+      setPasswordStatusMsg({ type: 'error', text: 'کوائف محفوظ کرنے میں خرابی پیش آئی۔' });
+    }
+  };
+
   const [settingsForm, setSettingsForm] = useState(siteSettings || {
     siteName: 'طبیب پیڈیا',
     tagline: 'جامع ہربل و طبی انسائیکلوپیڈیا',
     logoUrl: '',
     helplinePhone: '0300-1234567',
     whatsappNumber: '923001234567',
+    headOffice: 'اسلام آباد، پاکستان',
     topbarNotice: 'طب یونانی، قانون مفرد اعضاء اور پاکستان کے مستند اطباء کی ڈائریکٹری',
     heroTitle: 'مستند اطباء اور حکماء سے مفت آن لائن رہنمائی و فوری رابطہ',
     heroSubtitle: 'طب یونانی، قانون مفرد اعضاء، ہربل علاج اور مستند سائنسی و طبی مضامین کا سب سے بڑا ڈیجیٹل خزانہ',
@@ -268,10 +979,338 @@ export default function AdminCMS({
     instagramUrl: 'https://instagram.com/tabeebpedia',
     youtubeUrl: 'https://youtube.com/tabeebpedia',
     metaTitle: 'طبیب پیڈیا - طب یونانی، قانون مفرد اعضاء اور اطباء ڈائریکٹری',
-    metaDescription: 'طبیب پیڈیا: پاکستان کی سب سے بڑی اور مستند طب یونانی، جڑی بوٹیاں اور اطباء و ڈاکٹرز ڈائریکٹری۔'
+    metaDescription: 'طبیب پیڈیا: پاکستان کی سب سے بڑی اور مستند طب یونانی، جڑی بوٹیاں اور اطباء و ڈاکٹرز ڈائریکٹری۔',
+    sidebarAdEnabled: true,
+    sidebarAdImage: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800',
+    sidebarAdTitle: 'طبی مشورہ اور رہنمائی',
+    sidebarAdSubtitle: 'مستند اور ماہر اطباء سے آن لائن رہنمائی اور نسخہ جات حاصل کریں۔',
+    sidebarAdLink: 'https://wa.me/923001234567',
+    sidebarAdButtonText: 'ابھی رابطہ کریں',
+    sidebarShowSearch: true,
+    sidebarShowCategories: true,
+    sidebarShowRecent: true,
+    sidebarShowConsultation: true,
+    sidebarShowCategoriesDropdown: true,
+    sidebarShowPagesDropdown: true,
+    pageSidebarShowPagesList: true,
+    pageSidebarShowRecentPosts: true,
+    pageSidebarShowDoctors: true,
+    pageSidebarShowCategories: true,
+    pageSidebarShowHelpline: true,
+    doctorBlockTitle: 'پاکستان کے معروف و مستند اطباء کرام',
+    doctorBlockSubtitle: 'آن لائن رہنمائی حاصل کریں یا واٹس ایپ پر براہ راست مشورہ طلب کریں',
+    doctorBlockColumns: '4',
+    doctorBlockRows: '2',
+    doctorBlockSort: 'latest',
+    featuredDoctorBlockEnabled: true,
+    featuredDoctorBlockTitle: 'نمایاں اطباء کرام (Featured Doctors)',
+    featuredDoctorBlockSubtitle: 'پاکستان بھر کے منتخب اور مستند اطباء و ماہرین طب یونانی',
+    featuredDoctorBlockColumns: '4',
+    featuredDoctorBlockRows: '1',
+    featuredDoctorBlockSort: 'latest'
   });
 
   const visualEditorRef = useRef(null);
+  const pageVisualEditorRef = useRef(null);
+  // Handle Featured Image Upload from Computer for Page
+  const handlePageFeaturedImageUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        setPageForm(prev => ({ ...prev, featuredImage: uploadEvent.target.result }));
+        showNotification('صفحے کی نمایاں تصویر کامیابی سے اپلوڈ ہو گئی!');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Execute Page Formatting Commands
+  const execPageCmd = (command, value = null) => {
+    if (pageEditorMode !== 'visual') return;
+    if (pageVisualEditorRef.current) {
+      pageVisualEditorRef.current.focus();
+    }
+    document.execCommand(command, false, value);
+    if (pageVisualEditorRef.current) {
+      setPageForm(prev => ({ ...prev, content: pageVisualEditorRef.current.innerHTML }));
+    }
+  };
+
+  // Handle Inline Image Upload into Page Content
+  const handlePageInlineImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        execPageCmd('insertHTML', `<img src="${uploadEvent.target.result}" alt="" style="max-width:100%; border-radius:1rem; margin:1rem auto; display:block;" />`);
+        showNotification('تصویر صفحے کے اندر کامیابی سے شامل ہو گئی!');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const [pageEditorMode, setPageEditorMode] = useState('visual'); // 'visual', 'code', 'preview'
+  const [pageEditorFont, setPageEditorFont] = useState('nastaliq');
+  const [pageEditorFontSize, setPageEditorFontSize] = useState('16px');
+  const [editingPageId, setEditingPageId] = useState(null);
+  const [isEditingPageSlug, setIsEditingPageSlug] = useState(false);
+  const [tempPageSlug, setTempPageSlug] = useState('');
+
+  // Dedicated PDF Books Management Studio State
+  const [pdfBooksList, setPdfBooksList] = useState(() => {
+    try {
+      const local = localStorage.getItem('tabeeb_pdf_books');
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch(e) {}
+    return BOOKS_DATA;
+  });
+
+  const [editingBookIndex, setEditingBookIndex] = useState(null);
+  const [showBookModal, setShowBookModal] = useState(false);
+  const [bookModalForm, setBookModalForm] = useState({
+    title: '',
+    author: 'حکیم سید عبدالوہاب شاہ شیرازی',
+    category: 'قانون مفرد اعضاء',
+    categoryEn: 'qanoon',
+    language: 'Urdu',
+    pages: 'مختصر و جامع',
+    description: '',
+    image: '/images/books/tib-e-pakistani-urdu.jpg',
+    downloadUrl: '',
+    embedUrl: ''
+  });
+  const [bookSearchQuery, setBookSearchQuery] = useState('');
+  const [bookCategoryFilter, setBookCategoryFilter] = useState('all');
+  const [pdfEditorSubTab, setPdfEditorSubTab] = useState('studio'); // 'studio', 'html'
+
+  // Load latest live books from /api/pdf-books or /data/pdf-books.json
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const res = await fetch('/api/pdf-books');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setPdfBooksList(data);
+            try { localStorage.setItem('tabeeb_pdf_books', JSON.stringify(data)); } catch(e) {}
+            return;
+          }
+        }
+      } catch(e) {}
+      try {
+        const res2 = await fetch('/data/pdf-books.json');
+        if (res2.ok) {
+          const data2 = await res2.json();
+          if (Array.isArray(data2) && data2.length > 0) {
+            setPdfBooksList(data2);
+            try { localStorage.setItem('tabeeb_pdf_books', JSON.stringify(data2)); } catch(e) {}
+          }
+        }
+      } catch(e) {}
+    };
+    fetchBooks();
+  }, []);
+
+  const handleSavePdfBooksList = async (newList) => {
+    setPdfBooksList(newList);
+    try {
+      localStorage.setItem('tabeeb_pdf_books', JSON.stringify(newList));
+    } catch(e) {}
+    try {
+      await fetch('/api/pdf-books', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newList)
+      });
+    } catch(e) {}
+
+    const generatedHtml = generatePdfBooksPageHtml(newList);
+    setPageForm(prev => ({
+      ...prev,
+      content: generatedHtml
+    }));
+
+    setPagesList(prev => prev.map(p => {
+      if (p.slug === 'pdf-books' || String(p.id) === '8339') {
+        return { ...p, content: generatedHtml };
+      }
+      return p;
+    }));
+  };
+
+  const handleOpenAddBook = () => {
+    setEditingBookIndex(null);
+    setBookModalForm({
+      title: '',
+      author: 'حکیم سید عبدالوہاب شاہ شیرازی',
+      category: 'قانون مفرد اعضاء',
+      categoryEn: 'qanoon',
+      language: 'Urdu',
+      pages: 'مختصر و جامع',
+      description: '',
+      image: '/images/books/tib-e-pakistani-urdu.jpg',
+      downloadUrl: '',
+      embedUrl: ''
+    });
+    setShowBookModal(true);
+  };
+
+  const handleOpenEditBook = (book, index) => {
+    setEditingBookIndex(index);
+    setBookModalForm({
+      ...book,
+      image: book.image || '/images/books/tib-e-pakistani-urdu.jpg'
+    });
+    setShowBookModal(true);
+  };
+
+  const handleSaveBookModal = () => {
+    if (!bookModalForm.title?.trim()) {
+      alert('براہ کرم کتاب کا عنوان درج فرمائیں۔');
+      return;
+    }
+    if (!bookModalForm.downloadUrl?.trim()) {
+      alert('براہ کرم پی ڈی ایف فائل کا ڈاؤن لوڈ لنک درج فرمائیں۔');
+      return;
+    }
+
+    let updated = [];
+    if (editingBookIndex !== null && editingBookIndex >= 0) {
+      updated = pdfBooksList.map((b, idx) => idx === editingBookIndex ? { ...b, ...bookModalForm } : b);
+      showNotification(`کتاب "${bookModalForm.title}" کامیابی کے ساتھ اپڈیٹ ہو گئی!`);
+    } else {
+      const newBook = {
+        id: Date.now(),
+        ...bookModalForm
+      };
+      updated = [newBook, ...pdfBooksList];
+      showNotification(`نئی کتاب "${bookModalForm.title}" کامیابی کے ساتھ شامل کر دی گئی!`);
+    }
+
+    handleSavePdfBooksList(updated);
+    setShowBookModal(false);
+    setEditingBookIndex(null);
+  };
+
+  const handleDeleteBook = (index) => {
+    const bookToDelete = pdfBooksList[index];
+    if (window.confirm(`کیا آپ واقعی کتاب "${bookToDelete?.title}" کو کتب خانے سے حذف کرنا چاہتے ہیں؟`)) {
+      const updated = pdfBooksList.filter((_, idx) => idx !== index);
+      handleSavePdfBooksList(updated);
+      showNotification(`کتاب "${bookToDelete?.title}" حذف کر دی گئی۔`);
+    }
+  };
+
+  const handleMoveBook = (index, direction) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= pdfBooksList.length) return;
+    const updated = [...pdfBooksList];
+    const temp = updated[index];
+    updated[index] = updated[targetIndex];
+    updated[targetIndex] = temp;
+    handleSavePdfBooksList(updated);
+  };
+
+  // Handle open new page
+  const handleOpenNewPage = () => {
+    setEditingPageId(null);
+    setIsEditingPageSlug(false);
+    setTempPageSlug('');
+    setPageEditorFont('nastaliq');
+    setPageEditorFontSize('16px');
+    setPageForm({
+      id: Date.now(),
+      title: '',
+      slug: '',
+      content: '<p>یہاں اپنے صفحے کا تفصیلی مواد تحریر کریں...</p>',
+      status: 'published',
+      author: 'حکیم سید عبدالوہاب شاہ',
+      date: '2026/09/25',
+      featuredImage: ''
+    });
+    setPageEditorMode('visual');
+    setAdminTab('new-page');
+  };
+
+  // Handle edit page
+  const handleEditPage = (page) => {
+    setEditingPageId(page.id);
+    setIsEditingPageSlug(false);
+    setPageEditorFont('nastaliq');
+    setPageEditorFontSize('16px');
+    const initialSlug = page.slug || page.title.toLowerCase().replace(/\s+/g, '-');
+    setTempPageSlug(initialSlug);
+
+    const isThisPdfPage = initialSlug === 'pdf-books' || String(page.id) === '8339' || (page.title && (page.title.includes('پی ڈی ایف') || page.title.includes('PDF Books')));
+
+    let contentToSet = page.content;
+    if (isThisPdfPage) {
+      contentToSet = generatePdfBooksPageHtml(pdfBooksList);
+      setPdfEditorSubTab('studio');
+    }
+
+    setPageForm({
+      ...page,
+      slug: initialSlug,
+      content: contentToSet
+    });
+    setPageEditorMode('visual');
+    setAdminTab('new-page');
+  };
+
+  // Sync page visual editor content on load
+  useEffect(() => {
+    if (adminTab === 'new-page' && pageEditorMode === 'visual' && pageVisualEditorRef.current) {
+      if (pageVisualEditorRef.current.innerHTML !== (pageForm?.content || '')) {
+        pageVisualEditorRef.current.innerHTML = pageForm?.content || '';
+      }
+    }
+  }, [adminTab, editingPageId, pageEditorMode]);
+
+  // Handle save page
+  const handleSavePage = () => {
+    if (!pageForm.title.trim()) {
+      alert('براہ کرم صفحے کا عنوان درج کریں');
+      return;
+    }
+
+    const isThisPdfPage = pageForm && (
+      pageForm.slug === 'pdf-books' || 
+      String(pageForm.id) === '8339' || 
+      (pageForm.title && (pageForm.title.includes('پی ڈی ایف') || pageForm.title.includes('PDF Books')))
+    );
+
+    let finalContent = '';
+    if (isThisPdfPage) {
+      finalContent = generatePdfBooksPageHtml(pdfBooksList);
+    } else {
+      finalContent = (pageEditorMode === 'visual' && pageVisualEditorRef.current) 
+        ? pageVisualEditorRef.current.innerHTML 
+        : (pageForm.content || '');
+    }
+
+    const finalSlug = (pageForm.slug || pageForm.title.toLowerCase().replace(/[^\w\u0600-\u06FF]+/g, '-')).replace(/\s+/g, '-');
+
+    const updatedPage = {
+      ...pageForm,
+      slug: finalSlug,
+      content: finalContent
+    };
+
+    if (pagesList.some(p => p.id === updatedPage.id)) {
+      setPagesList(prev => prev.map(p => p.id === updatedPage.id ? updatedPage : p));
+      showNotification('صفحہ کامیابی کے ساتھ اپڈیٹ ہو گیا!');
+    } else {
+      setPagesList(prev => [...prev, updatedPage]);
+      showNotification('نیا صفحہ کامیابی کے ساتھ شائع ہو گیا!');
+    }
+    setAdminTab('pages');
+  };
+
   const savedSelectionRef = useRef(null); // Saves exact caret/cursor position!
   const fileInputRef = useRef(null);
   const mediaFileInputRef = useRef(null);
@@ -322,38 +1361,65 @@ export default function AdminCMS({
   // =========================================================
   // PRECISE CARET / CURSOR PRESERVATION ENGINE
   // =========================================================
+    const getActiveEditorElement = () => {
+    if (adminTab === 'new-page') return pageVisualEditorRef.current;
+    return visualEditorRef.current;
+  };
+
   const saveCurrentSelection = () => {
-    if (editorMode !== 'visual' || !visualEditorRef.current) return;
+    const el = getActiveEditorElement();
+    if (!el) return;
     try {
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         if (
-          visualEditorRef.current.contains(range.commonAncestorContainer) || 
-          range.commonAncestorContainer === visualEditorRef.current
+          el.contains(range.commonAncestorContainer) || 
+          range.commonAncestorContainer === el
         ) {
           savedSelectionRef.current = range.cloneRange();
         }
       }
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
   };
 
   const restoreSelection = () => {
-    if (!visualEditorRef.current) return false;
-    visualEditorRef.current.focus();
+    const el = getActiveEditorElement();
+    if (!el) return false;
+    el.focus();
     if (savedSelectionRef.current) {
       try {
         const sel = window.getSelection();
         sel.removeAllRanges();
         sel.addRange(savedSelectionRef.current);
         return true;
-      } catch (err) {
-        // range may be detached
+      } catch (e) {
+        return false;
       }
     }
     return false;
+  };
+
+  const execUniversalCmd = (command, value = null) => {
+    restoreSelection();
+    document.execCommand(command, false, value);
+    const el = getActiveEditorElement();
+    if (el) {
+      if (adminTab === 'new-page') {
+        setPageForm(prev => ({ ...prev, content: el.innerHTML }));
+      } else {
+        setArticleForm(prev => ({ ...prev, content: el.innerHTML }));
+      }
+    }
+    saveCurrentSelection();
+  };
+
+  const applyTextColor = (color) => {
+    execUniversalCmd('foreColor', color);
+  };
+
+  const applyBgColor = (color) => {
+    execUniversalCmd('hiliteColor', color);
   };
 
   // Live calculation of words, characters, and reading time
@@ -478,10 +1544,14 @@ export default function AdminCMS({
     setEditorFontSize('14px');
     const initialSlug = art.slug || generateSlugFromTitle(art.title);
     setTempSlug(initialSlug);
+    const artCategories = Array.isArray(art.categories) && art.categories.length > 0 
+      ? art.categories 
+      : [art.categoryName || art.category || 'tibb-unani'].filter(Boolean);
     setArticleForm({
       title: art.title || '',
       slug: initialSlug,
-      category: art.category || 'tibb-unani',
+      category: art.category || artCategories[0] || 'tibb-unani',
+      categories: artCategories,
       status: art.status || 'published',
       excerpt: art.excerpt || '',
       content: art.content || '<p></p>',
@@ -497,21 +1567,38 @@ export default function AdminCMS({
 
   // Toggle Status (Public / Private)
   const handleToggleStatus = (id) => {
-    setArticlesList(articlesList.map(a => {
+    const updatedList = articlesList.map(a => {
       if (a.id === id) {
         const nextStatus = a.status === 'private' ? 'published' : 'private';
         return { ...a, status: nextStatus };
       }
       return a;
-    }));
+    });
+    setArticlesList(updatedList);
+    saveArticlesApi(updatedList);
     showNotification('مضمون کا پبلشنگ اسٹیٹس کامیابی سے تبدیل ہو گیا');
   };
 
   // Delete Article
   const handleDeleteArticle = (id) => {
     if (confirm('کیا آپ واقعی یہ مضمون مکمل ڈیلیٹ کرنا چاہتے ہیں؟')) {
-      setArticlesList(articlesList.filter(a => a.id !== id));
+      const updatedList = articlesList.filter(a => a.id !== id);
+      setArticlesList(updatedList);
+      saveArticlesApi(updatedList);
+      setSelectedArticleIds(prev => prev.filter(item => item !== id));
       showNotification('مضمون کامیابی سے ڈیلیٹ کر دیا گیا');
+    }
+  };
+
+  // Bulk Delete Articles
+  const handleBulkDeleteArticles = () => {
+    if (selectedArticleIds.length === 0) return;
+    if (confirm(`کیا آپ واقعی منتخب کردہ ${selectedArticleIds.length} مضامین کو مکمل ڈیلیٹ کرنا چاہتے ہیں؟`)) {
+      const updatedList = articlesList.filter(a => !selectedArticleIds.includes(a.id));
+      setArticlesList(updatedList);
+      saveArticlesApi(updatedList);
+      setSelectedArticleIds([]);
+      showNotification(`${selectedArticleIds.length} مضامین کامیابی سے ڈیلیٹ کر دیے گئے`);
     }
   };
 
@@ -534,8 +1621,12 @@ export default function AdminCMS({
       finalContent = visualEditorRef.current.innerHTML;
     }
 
-    const catObj = CATEGORIES.find(c => c.id === articleForm.category);
-    const categoryName = catObj ? catObj.name : 'طب یونانی';
+    const catObj = CATEGORIES.find(c => c.id === articleForm.category || c.slug === articleForm.category) ||
+      categoriesList.find(c => c.id === articleForm.category || c.slug === articleForm.category || c.name === articleForm.category);
+    const categoryName = catObj ? catObj.name : (articleForm.categoryName || articleForm.category || 'طب یونانی');
+    const finalCategories = Array.isArray(articleForm.categories) && articleForm.categories.length > 0 
+      ? articleForm.categories 
+      : [categoryName];
 
     let updatedList;
     if (editingArticleId) {
@@ -546,6 +1637,7 @@ export default function AdminCMS({
             ...articleForm,
             content: finalContent,
             categoryName,
+            categories: finalCategories,
             tags: typeof articleForm.tags === 'string' ? articleForm.tags.split(',').map(t => t.trim()).filter(Boolean) : articleForm.tags,
             readingTime: `${stats.readingTime} منٹ`,
             updatedAt: new Date().toISOString().split('T')[0]
@@ -562,10 +1654,11 @@ export default function AdminCMS({
         content: finalContent,
         slug: articleForm.slug || generateSlugFromTitle(articleForm.title),
         categoryName,
+        categories: finalCategories,
         readingTime: `${stats.readingTime} منٹ`,
         publishedAt: new Date().toISOString().split('T')[0],
         views: 1,
-        authorImage: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=150&q=80',
+        authorImage: '/images/author-photo.jpg',
         tags: typeof articleForm.tags === 'string' ? articleForm.tags.split(',').map(t => t.trim()).filter(Boolean) : articleForm.tags,
       };
       updatedList = [newArticle, ...articlesList];
@@ -573,11 +1666,7 @@ export default function AdminCMS({
       showNotification('نیا مضمون کامیابی کے ساتھ پبلش ہو گیا!');
     }
 
-    try {
-      localStorage.setItem('tabeeb_articles_data_v1', JSON.stringify(updatedList));
-    } catch (err) {}
-
-    setAdminTab('articles');
+      setAdminTab('articles');
   };
 
   // Tag helper functions
@@ -604,10 +1693,10 @@ export default function AdminCMS({
 
   const handleAddNewCategory = () => {
     if (!newCatName.trim()) return;
-    const newId = newCatName.trim().toLowerCase().replace(/[^\w\u0600-\u06FF]+/g, '-');
-    const newCat = { id: newId, name: newCatName.trim(), count: 0 };
-    setAvailableCategories(prev => [...prev, newCat]);
-    setArticleForm(prev => ({ ...prev, category: newId }));
+    const newSlug = newCatName.trim().toLowerCase().replace(/[^\w\u0600-\u06FF]+/g, '-');
+    const newCat = { id: newSlug, name: newCatName.trim(), slug: newSlug };
+    setCategoriesList(prev => [...prev, newCat]);
+    setArticleForm(prev => ({ ...prev, category: newSlug }));
     setNewCatName('');
     setShowNewCatModal(false);
     showNotification(`نئی کیٹیگری شامل ہو گئی: ${newCat.name}`);
@@ -647,6 +1736,17 @@ export default function AdminCMS({
   };
 
   // Save Website Settings
+  const handleSettingImageUpload = (e, field) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (uploadEvent) => {
+        setSettingsForm({ ...settingsForm, [field]: uploadEvent.target.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSaveSettings = (e) => {
     e.preventDefault();
     if (setSiteSettings) {
@@ -1222,16 +2322,60 @@ export default function AdminCMS({
   };
 
   // Filtered list of articles for table
-  const filteredArticles = articlesList.filter(art => {
-    const matchSearch = !searchFilter.trim() ||
-      art.title?.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      art.author?.toLowerCase().includes(searchFilter.toLowerCase());
-    
-    const artStatus = art.status || 'published';
-    const matchStatus = statusFilter === 'all' || artStatus === statusFilter;
+  const filteredArticles = useMemo(() => {
+    const list = articlesList.filter(art => {
+      const matchSearch = !searchFilter.trim() ||
+        art.title?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        art.author?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        art.category?.toLowerCase().includes(searchFilter.toLowerCase()) ||
+        (Array.isArray(art.categories) && art.categories.some(c => typeof c === 'string' && c.toLowerCase().includes(searchFilter.toLowerCase()))) ||
+        (Array.isArray(art.tags) && art.tags.some(t => typeof t === 'string' && t.toLowerCase().includes(searchFilter.toLowerCase()))) ||
+        (typeof art.tags === 'string' && art.tags.toLowerCase().includes(searchFilter.toLowerCase()));
+      
+      const artStatus = art.status || 'published';
+      const matchStatus = statusFilter === 'all' || artStatus === statusFilter;
 
-    return matchSearch && matchStatus;
-  });
+      return matchSearch && matchStatus;
+    });
+
+    return [...list].sort((a, b) => {
+      const timeA = new Date(a.publishedAt || a.date || 0).getTime();
+      const timeB = new Date(b.publishedAt || b.date || 0).getTime();
+      const idA = typeof a.id === 'number' ? a.id : parseInt(String(a.id).replace(/\D/g, '') || '0', 10);
+      const idB = typeof b.id === 'number' ? b.id : parseInt(String(b.id).replace(/\D/g, '') || '0', 10);
+
+      if (postSortOrder === 'oldest') {
+        if (!isNaN(timeA) && !isNaN(timeB) && timeA !== timeB) return timeA - timeB;
+        return idA - idB;
+      }
+      
+      // Default: 'latest' first
+      if (!isNaN(timeA) && !isNaN(timeB) && timeB !== timeA) return timeB - timeA;
+      return idB - idA;
+    });
+  }, [articlesList, searchFilter, statusFilter, postSortOrder]);
+
+  // WordPress-style Pagination Calculations
+  const totalFilteredPosts = filteredArticles.length;
+  const totalPages = Math.max(1, Math.ceil(totalFilteredPosts / postsPerPage));
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+  const startIndex = (safeCurrentPage - 1) * postsPerPage;
+  const endIndex = Math.min(startIndex + postsPerPage, totalFilteredPosts);
+  const paginatedArticles = filteredArticles.slice(startIndex, endIndex);
+
+  // Helper for generating page numbers (e.g. 1, 2, ..., 5, 6, 7, ..., 25)
+  const getPaginationPages = () => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (safeCurrentPage <= 4) {
+      return [1, 2, 3, 4, 5, '...', totalPages];
+    }
+    if (safeCurrentPage >= totalPages - 3) {
+      return [1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, '...', safeCurrentPage - 1, safeCurrentPage, safeCurrentPage + 1, '...', totalPages];
+  };
 
   return (
     <div className={`min-h-screen bg-slate-900 text-slate-100 flex flex-col font-urdu text-right select-text ${isFullscreen ? 'fixed inset-0 z-50 overflow-y-auto bg-slate-950' : ''}`} dir="rtl">
@@ -1295,60 +2439,70 @@ export default function AdminCMS({
         {/* Sidebar Navigation */}
         {!isFullscreen && adminTab !== 'new-article' && (
           <aside className="lg:col-span-3 bg-slate-950/80 border border-slate-800/80 rounded-3xl p-4 space-y-6 sticky top-6 backdrop-blur-md">
-            
-            {/* Action Button */}
-            <button
-              onClick={handleOpenNewArticle}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-3 rounded-2xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-900/30 transition-all font-simple"
-            >
-              <PlusCircle className="w-4 h-4" />
-              <span>نیا مضمون لکھیں</span>
-            </button>
 
-            {/* Navigation Links */}
-            <div className="space-y-1 text-xs font-bold font-simple">
-              {(() => {
-                const pendingDoctorsCount = doctorsList.filter(d => d && (d.isApproved === false || d.status === 'pending')).length;
-                const approvedDoctorsCount = doctorsList.filter(d => d && (d.isApproved !== false && d.status !== 'pending')).length;
-                
-                return [
-                  { id: 'articles', label: `مضامین مینیجر (${articlesList.length})`, icon: FileText, badge: null },
-                  { 
-                    id: 'doctors', 
-                    label: pendingDoctorsCount > 0 
-                      ? `اطباء و درخواستیں` 
-                      : `اطباء و کلینکس (${approvedDoctorsCount})`, 
-                    icon: UserCheck,
-                    badge: pendingDoctorsCount > 0 ? `${pendingDoctorsCount} نئی درخواستیں` : null
-                  },
-                  { id: 'settings', label: 'ویب سائٹ ترتیبات (لوگو، ہیڈر، فوٹر)', icon: Settings, badge: null },
-                  { id: 'migration', label: 'ورڈپریس مائیگریشن ٹول', icon: Database, badge: null },
-                ].map(item => {
-                  const Icon = item.icon;
-                  const isActive = adminTab === item.id || (item.id === 'articles' && adminTab === 'new-article');
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => setAdminTab(item.id)}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all ${
-                        isActive
-                          ? 'bg-blue-600/20 text-blue-300 border border-blue-500/30 font-bold'
-                          : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-blue-400' : 'text-slate-500'}`} />
-                        <span>{item.label}</span>
-                      </div>
-                      {item.badge && (
-                        <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full font-bold animate-pulse">
-                          {item.badge}
-                        </span>
-                      )}
-                    </button>
-                  );
-                });
-              })()}
+            {/* WordPress-style Navigation Links */}
+            <div className="space-y-6 text-xs font-bold font-simple">
+              <div>
+                <button 
+                  onClick={() => setAdminTab('dashboard')} 
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-bold ${
+                    adminTab === 'dashboard' 
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
+                      : 'text-slate-300 hover:text-white hover:bg-slate-900 border border-slate-800/80 bg-slate-900/40'
+                  }`}
+                >
+                  <Home className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm">ڈیش بورڈ (Dashboard)</span>
+                </button>
+              </div>
+
+              <div>
+                <div className="px-4 py-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider">Posts (مضامین)</div>
+                <div className="space-y-1">
+                  <button onClick={() => setAdminTab('articles')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'articles' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
+                    <FileText className="w-4 h-4" /> <span>All Posts (آل پوسٹس)</span>
+                  </button>
+                  <button onClick={handleOpenNewArticle} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'new-article' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
+                    <PlusCircle className="w-4 h-4" /> <span>Add New (نیا مضمون)</span>
+                  </button>
+                  <button onClick={() => setAdminTab('categories')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'categories' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
+                    <FolderOpen className="w-4 h-4" /> <span>Categories (کیٹیگریز)</span>
+                  </button>
+                  <button onClick={() => setAdminTab('tags')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'tags' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
+                    <Hash className="w-4 h-4" /> <span>Tags (ٹیگز)</span>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="px-4 py-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider">Media & Pages</div>
+                <div className="space-y-1">
+                  <button onClick={() => setAdminTab('media')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'media' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
+                    <ImageIcon className="w-4 h-4" /> <span>Media (میڈیا لائبریری)</span>
+                  </button>
+                  <button onClick={() => setAdminTab('pages')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'pages' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
+                    <BookOpen className="w-4 h-4" /> <span>Pages (صفحات)</span>
+                  </button>
+                  <button onClick={() => setAdminTab('glossary')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'glossary' ? 'bg-emerald-600/20 text-emerald-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
+                    <BookOpen className="w-4 h-4 text-emerald-400" /> <span>فرہنگِ اطباء (Glossary)</span>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <div className="px-4 py-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider">Directory & Tools</div>
+                <div className="space-y-1">
+                  <button onClick={() => setAdminTab('doctors')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'doctors' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
+                    <UserCheck className="w-4 h-4" /> <span>اطباء و کلینکس</span>
+                  </button>
+                  <button onClick={() => setAdminTab('settings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'settings' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
+                    <Settings className="w-4 h-4" /> <span>ویب سائٹ سیٹنگز</span>
+                  </button>
+                  <button onClick={() => setAdminTab('migration')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'migration' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
+                    <Database className="w-4 h-4" /> <span>مائیگریشن ٹول</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Quick Stats */}
@@ -2607,32 +3761,72 @@ export default function AdminCMS({
                       </div>
                     )}
 
-                    {/* Categories List */}
-                    <div className="space-y-1.5 max-h-40 overflow-y-auto p-0.5 font-simple text-xs">
-                      {availableCategories.map(cat => (
-                        <label
-                          key={cat.id}
-                          className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all border ${
-                            articleForm.category === cat.id
-                              ? 'bg-blue-600/20 border-blue-500/40 text-white font-bold'
-                              : 'bg-slate-900/60 border-slate-800/80 text-slate-300 hover:bg-slate-900'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="radio"
-                              name="articleCategory"
-                              checked={articleForm.category === cat.id}
-                              onChange={() => setArticleForm({...articleForm, category: cat.id})}
-                              className="accent-blue-500 w-3.5 h-3.5 cursor-pointer"
-                            />
-                            <span className="text-xs">{cat.name}</span>
-                          </div>
-                          {articleForm.category === cat.id && (
-                            <Check className="w-3.5 h-3.5 text-blue-400" />
-                          )}
-                        </label>
-                      ))}
+                    {/* Category Search Filter */}
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="زمرہ تلاش کریں..."
+                        value={categorySearchMeta}
+                        onChange={(e) => setCategorySearchMeta(e.target.value)}
+                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-simple"
+                      />
+                    </div>
+
+                    {/* Categories Hierarchical Tree List */}
+                    <div className="space-y-1 max-h-64 overflow-y-auto p-0.5 font-simple text-xs custom-scrollbar">
+                      {hierarchicalCategories
+                        .filter(cat => !categorySearchMeta || cat.name.toLowerCase().includes(categorySearchMeta.toLowerCase()))
+                        .map(cat => {
+                          const isChecked = (Array.isArray(articleForm.categories) && (articleForm.categories.includes(cat.name) || articleForm.categories.includes(cat.id) || articleForm.categories.includes(cat.slug))) ||
+                            articleForm.category === cat.id ||
+                            articleForm.category === cat.name ||
+                            articleForm.category === cat.slug;
+                          return (
+                            <label
+                              key={cat.id || cat.slug || cat.name}
+                              style={{ paddingRight: `${cat.depth * 18 + 8}px` }}
+                              className={`flex items-center justify-between py-1.5 px-2 rounded-lg cursor-pointer transition-all border ${
+                                isChecked
+                                  ? 'bg-blue-600/20 border-blue-500/40 text-white font-bold'
+                                  : cat.depth === 0
+                                    ? 'bg-slate-900/80 border-slate-800 text-slate-200 hover:bg-slate-800'
+                                    : 'bg-slate-900/40 border-slate-800/60 text-slate-300 hover:bg-slate-900 hover:text-white'
+                              }`}
+                            >
+                              <div className="flex items-center gap-1.5 min-w-0">
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={(e) => {
+                                    let currentCats = Array.isArray(articleForm.categories) ? [...articleForm.categories] : [articleForm.category].filter(Boolean);
+                                    if (e.target.checked) {
+                                      if (!currentCats.includes(cat.name)) currentCats.push(cat.name);
+                                    } else {
+                                      currentCats = currentCats.filter(c => c !== cat.name && c !== cat.id && c !== cat.slug);
+                                    }
+                                    setArticleForm({
+                                      ...articleForm,
+                                      category: currentCats[0] || cat.id,
+                                      categories: currentCats
+                                    });
+                                  }}
+                                  className="accent-blue-500 w-3.5 h-3.5 cursor-pointer rounded shrink-0"
+                                />
+                                {cat.depth > 0 && (
+                                  <span className="text-slate-500 select-none text-[11px] font-mono shrink-0">
+                                    {cat.depth === 1 ? '— ' : '—— '}
+                                  </span>
+                                )}
+                                <span className={`text-xs truncate ${cat.depth === 0 ? 'font-bold text-white' : ''}`}>
+                                  {cat.name}
+                                </span>
+                              </div>
+                              {isChecked && (
+                                <Check className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                              )}
+                            </label>
+                          );
+                        })}
                     </div>
                   </div>
 
@@ -2855,6 +4049,381 @@ export default function AdminCMS({
           )}
 
           {/* ========================================================= */}
+          {/* VIEW 0: WORDPRESS STYLE MAIN DASHBOARD */}
+          {/* ========================================================= */}
+          {adminTab === 'dashboard' && (
+            <div className="space-y-6">
+              
+              {/* Dashboard Welcome Header */}
+              <div className="bg-gradient-to-r from-blue-950/80 via-slate-900 to-indigo-950/80 border border-blue-900/40 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
+                        ورڈپریس طرز ایڈمن کنٹرول سینٹر
+                      </span>
+                      <span className="text-xs text-slate-400 font-sans">
+                        TabeebPedia CMS v2.5
+                      </span>
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-white font-simple mt-2">
+                      ڈیش بورڈ (Dashboard)
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-300 mt-1 font-sans">
+                      خوش آمدید، حکیم سید عبد الوہاب شاہ صاحب! یہاں آپ کی ویب سائٹ کی تمام اہم سرگرمیاں اور سمریز موجود ہیں۔
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={onBackToWebsite}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 transition-all font-simple"
+                    >
+                      <Globe className="w-4 h-4" />
+                      <span>ویب سائٹ وزٹ کریں (Visit Site)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleOpenNewArticle}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-750 text-slate-200 rounded-xl text-xs font-bold border border-slate-700 transition-all font-simple"
+                    >
+                      <PlusCircle className="w-4 h-4 text-emerald-400" />
+                      <span>نیا مضمون لکھیں</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAdminTab('new-page')}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-750 text-slate-200 rounded-xl text-xs font-bold border border-slate-700 transition-all font-simple"
+                    >
+                      <BookOpen className="w-4 h-4 text-blue-400" />
+                      <span>نیا صفحہ بنائیں</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* At a Glance (ایک نظر میں - WordPress Style Widgets) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* 1. Posts */}
+                <div 
+                  onClick={() => setAdminTab('articles')}
+                  className="bg-slate-950 border border-slate-800 hover:border-blue-500/50 p-5 rounded-2xl shadow-lg cursor-pointer transition-all hover:-translate-y-0.5 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-400 font-sans">شائع شدہ مضامین</span>
+                    <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                      <FileText className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-white font-mono">{articlesList.length}</span>
+                    <span className="text-xs text-emerald-400 font-bold font-sans">
+                      ({articlesList.filter(a => a.status !== 'private').length} لائیو)
+                    </span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-800/80">
+                    <span className="text-blue-400 group-hover:underline">تمام مضامین دیکھیں &larr;</span>
+                    <span className="text-amber-400 font-mono">{articlesList.filter(a => a.status === 'private').length} ڈرافٹ</span>
+                  </div>
+                </div>
+
+                {/* 2. Pages */}
+                <div 
+                  onClick={() => setAdminTab('pages')}
+                  className="bg-slate-950 border border-slate-800 hover:border-purple-500/50 p-5 rounded-2xl shadow-lg cursor-pointer transition-all hover:-translate-y-0.5 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-400 font-sans">ویب سائٹ صفحات</span>
+                    <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                      <BookOpen className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-white font-mono">{pagesList.length}</span>
+                    <span className="text-xs text-purple-300 font-bold font-sans">صفحات</span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-800/80">
+                    <span className="text-purple-400 group-hover:underline">صفحات کا انتظام &larr;</span>
+                    <span>جامع ہربل صفحات</span>
+                  </div>
+                </div>
+
+                {/* 3. Doctors */}
+                <div 
+                  onClick={() => setAdminTab('doctors')}
+                  className="bg-slate-950 border border-slate-800 hover:border-emerald-500/50 p-5 rounded-2xl shadow-lg cursor-pointer transition-all hover:-translate-y-0.5 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-400 font-sans">اطباء و ماہرین ڈائریکٹری</span>
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                      <UserCheck className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-white font-mono">{doctorsList.length}</span>
+                    <span className="text-xs text-emerald-400 font-bold font-sans">رجسٹرڈ اطباء</span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-800/80">
+                    <span className="text-emerald-400 group-hover:underline">اطباء لسٹ دیکھیں &larr;</span>
+                    <span className="text-amber-400 font-sans">
+                      {doctorsList.filter(d => d && (d.isApproved === false || d.status === 'pending')).length} زیرِ التواء
+                    </span>
+                  </div>
+                </div>
+
+                {/* 4. Categories */}
+                <div 
+                  onClick={() => setAdminTab('categories')}
+                  className="bg-slate-950 border border-slate-800 hover:border-amber-500/50 p-5 rounded-2xl shadow-lg cursor-pointer transition-all hover:-translate-y-0.5 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-400 font-sans">زمرہ جات و کیٹیگریز</span>
+                    <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                      <FolderOpen className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-baseline gap-2">
+                    <span className="text-3xl font-bold text-white font-mono">{categoriesList.length}</span>
+                    <span className="text-xs text-amber-300 font-bold font-sans">کیٹیگریز</span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-800/80">
+                    <span className="text-amber-400 group-hover:underline">کیٹیگریز دیکھیں &larr;</span>
+                    <span>الف بائی و موضوعاتی</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Main 2-Column WordPress Widgets Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                {/* Right Column: Quick Draft & Recent Activity */}
+                <div className="lg:col-span-7 space-y-6">
+                  
+                  {/* Quick Draft Widget */}
+                  <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                          <Edit3 className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-white font-simple">فوری مسودہ (Quick Draft)</h3>
+                          <p className="text-[11px] text-slate-400">کوئی نیا نسخہ یا خاکہ فوری طور پر بطور ڈرافٹ محفوظ کریں</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <form onSubmit={handleSaveQuickDraft} className="space-y-3">
+                      <div>
+                        <input
+                          type="text"
+                          value={quickDraftTitle}
+                          onChange={(e) => setQuickDraftTitle(e.target.value)}
+                          placeholder="مضمون یا نسخے کا عنوان..."
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-simple"
+                        />
+                      </div>
+                      <div>
+                        <textarea
+                          rows="3"
+                          value={quickDraftContent}
+                          onChange={(e) => setQuickDraftContent(e.target.value)}
+                          placeholder="مضمون کے چیدہ نکات یا مواد یہاں لکھیں..."
+                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-simple leading-relaxed"
+                        />
+                      </div>
+                      <div className="flex items-center justify-between pt-1">
+                        <span className="text-[11px] text-slate-500">
+                          ڈرافٹ محفوظ کرنے کے بعد آپ <span className="text-blue-400 font-bold">All Posts</span> سے کبھی بھی مکمل ایڈیٹنگ کر سکتے ہیں۔
+                        </span>
+                        <button
+                          type="submit"
+                          className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md font-simple shrink-0"
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                          <span>ڈرافٹ محفوظ کریں</span>
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* Recent Activity Widget */}
+                  <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                          <Clock className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-white font-simple">حالیہ شائع شدہ مضامین (Recent Activity)</h3>
+                          <p className="text-[11px] text-slate-400">تازہ ترین شامل کردہ طبی مضامین اور نسخہ جات</p>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setAdminTab('articles')}
+                        className="text-xs text-blue-400 hover:text-blue-300 font-bold hover:underline"
+                      >
+                        تمام مضامین دیکھیں ({articlesList.length}) &larr;
+                      </button>
+                    </div>
+
+                    <div className="divide-y divide-slate-800/80">
+                      {filteredArticles.slice(0, 5).map((art) => (
+                        <div key={art.id} className="py-3 flex items-center justify-between gap-3 group">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <img 
+                              src={art.featuredImage || siteSettings?.defaultArticleImage} 
+                              alt="" 
+                              className="w-11 h-11 rounded-xl object-cover border border-slate-800 shrink-0" 
+                            />
+                            <div className="min-w-0">
+                              <h4 
+                                onClick={() => handleEditArticle(art)}
+                                className="text-xs font-bold text-slate-200 group-hover:text-blue-400 truncate cursor-pointer font-h2"
+                              >
+                                {art.title}
+                              </h4>
+                              <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
+                                <span className="text-blue-400">{Array.isArray(art.categories) ? art.categories.slice(0, 2).join('، ') : art.category}</span>
+                                <span>•</span>
+                                <span className="font-mono">{art.publishedAt || art.date || '2024-09-24'}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleEditArticle(art)}
+                              className="p-1.5 rounded-lg bg-slate-900 hover:bg-blue-600/30 text-slate-400 hover:text-blue-300 border border-slate-800 transition-colors"
+                              title="ترمیم کریں"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                            </button>
+                            <a
+                              href={`/${art.slug || art.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-1.5 rounded-lg bg-slate-900 hover:bg-emerald-600/30 text-slate-400 hover:text-emerald-300 border border-slate-800 transition-colors"
+                              title="ویب سائٹ پر دیکھیں"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Left Column: Site Health & System Status */}
+                <div className="lg:col-span-5 space-y-6">
+                  
+                  {/* Site Health Status (WordPress Style) */}
+                  <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                          <CheckCircle2 className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-white font-simple">ویب سائٹ کی صحت (Site Health)</h3>
+                          <p className="text-[11px] text-slate-400">سسٹم اور ہوسٹنگ پرفارمنس کا جائزہ</p>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                        بہترین (Good)
+                      </span>
+                    </div>
+
+                    <div className="space-y-3 pt-1 text-xs">
+                      <div className="flex items-start gap-3 p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                        <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0"></div>
+                        <div>
+                          <h4 className="font-bold text-slate-200">مستقل ڈیٹا بیس سسٹم</h4>
+                          <p className="text-[11px] text-slate-400 mt-0.5">تمام 490 مضامین، صفحات اور سیٹنگز مستقل فائل ڈیٹا بیس میں محفوظ اور لائیو ہیں۔</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                        <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0"></div>
+                        <div>
+                          <h4 className="font-bold text-slate-200">ہوسٹنگر میڈیا لائبریری</h4>
+                          <p className="text-[11px] text-slate-400 mt-0.5">3,000+ تمام تصاویر ہوسٹنگر سرور کے ساتھ تیز رفتار کنکشن پر کام کر رہی ہیں۔</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-3 bg-slate-900/60 rounded-xl border border-slate-800">
+                        <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0"></div>
+                        <div>
+                          <h4 className="font-bold text-slate-200">ایڈمن سیکیورٹی پروٹیکشن</h4>
+                          <p className="text-[11px] text-slate-400 mt-0.5">ایڈمن ڈیش بورڈ پاس ورڈ تصدیق کے تحت محفوظ ہے۔</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Shortcuts & Management */}
+                  <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
+                    <h3 className="text-base font-bold text-white font-simple border-b border-slate-800 pb-3">
+                      فوری ٹولز اور ترتیبات (Quick Tools)
+                    </h3>
+
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setAdminTab('settings')}
+                        className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-blue-500/40 text-right transition-all group"
+                      >
+                        <Settings className="w-4 h-4 text-blue-400 mb-1.5 group-hover:scale-110 transition-transform" />
+                        <span className="block text-xs font-bold text-white">ویب سائٹ ترتیبات</span>
+                        <span className="text-[10px] text-slate-500">لوگو، ہوم پیج، اشتہارات</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setAdminTab('media')}
+                        className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-purple-500/40 text-right transition-all group"
+                      >
+                        <ImageIcon className="w-4 h-4 text-purple-400 mb-1.5 group-hover:scale-110 transition-transform" />
+                        <span className="block text-xs font-bold text-white">میڈیا لائبریری</span>
+                        <span className="text-[10px] text-slate-500">تصاویر اپلوڈ اور انتظام</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setAdminTab('doctors')}
+                        className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-emerald-500/40 text-right transition-all group"
+                      >
+                        <UserCheck className="w-4 h-4 text-emerald-400 mb-1.5 group-hover:scale-110 transition-transform" />
+                        <span className="block text-xs font-bold text-white">اطباء کا جائزہ</span>
+                        <span className="text-[10px] text-slate-500">نئی درخواستیں منظور کریں</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setAdminTab('migration')}
+                        className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-amber-500/40 text-right transition-all group"
+                      >
+                        <Database className="w-4 h-4 text-amber-400 mb-1.5 group-hover:scale-110 transition-transform" />
+                        <span className="block text-xs font-bold text-white">مائیگریشن ٹول</span>
+                        <span className="text-[10px] text-slate-500">ورڈپریس ڈیٹا بیک اپ</span>
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+          )}
+
+          {/* ========================================================= */}
           {/* VIEW 2: ARTICLES LIST & MANAGEMENT TABLE */}
           {/* ========================================================= */}
           {adminTab === 'articles' && (
@@ -2879,159 +4448,2441 @@ export default function AdminCMS({
                 </button>
               </div>
 
-              {/* Filters & Search Bar */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-900/80 p-3 rounded-2xl border border-slate-800">
-                <div className="relative w-full sm:w-80">
-                  <Search className="w-4 h-4 text-slate-500 absolute right-3.5 top-3" />
-                  <input
-                    type="text"
-                    value={searchFilter}
-                    onChange={(e) => setSearchFilter(e.target.value)}
-                    placeholder="مضمون کا عنوان یا مصنف تلاش کریں..."
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl pr-10 pl-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-simple"
-                  />
+              {/* Filters & WordPress-Style Pagination Bar (Top) */}
+              <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
+                <div className="flex flex-wrap items-center gap-3 flex-1">
+                  {/* Search Input */}
+                  <div className="relative flex-1 sm:flex-initial sm:w-72">
+                    <Search className="w-4 h-4 text-slate-500 absolute right-3.5 top-3" />
+                    <input
+                      type="text"
+                      value={searchFilter}
+                      onChange={(e) => setSearchFilter(e.target.value)}
+                      placeholder="مضمون کا عنوان یا مصنف تلاش کریں..."
+                      className="w-full bg-slate-950 border border-slate-700 rounded-xl pr-10 pl-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-simple"
+                    />
+                  </div>
+
+                  {/* Status Filter */}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-slate-400 font-sans">اسٹیٹس:</span>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                    >
+                      <option value="all">تمام مضامین</option>
+                      <option value="published">صرف پبلک (Live)</option>
+                      <option value="private">صرف پرائیویٹ (Draft)</option>
+                    </select>
+                  </div>
+
+                  {/* Sort Order Selector (Latest First / Oldest First) */}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-slate-400 font-sans">ترتیب:</span>
+                    <select
+                      value={postSortOrder}
+                      onChange={(e) => setPostSortOrder(e.target.value)}
+                      className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                    >
+                      <option value="latest">تازہ ترین پہلے (Latest First)</option>
+                      <option value="oldest">پرانے پہلے (Oldest First)</option>
+                    </select>
+                  </div>
+
+                  {/* Posts Per Page Selector (Default 20, 50, 100) */}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-slate-400 font-sans">فی صفحہ:</span>
+                    <select
+                      value={postsPerPage}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        setPostsPerPage(val);
+                        try {
+                          localStorage.setItem('tabeeb_admin_posts_per_page', String(val));
+                        } catch {}
+                      }}
+                      className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                    >
+                      <option value={20}>20 مضامین (ڈیفالٹ)</option>
+                      <option value={50}>50 مضامین</option>
+                      <option value={100}>100 مضامین</option>
+                    </select>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <span className="text-xs text-slate-400 font-sans">اسٹیٹس:</span>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
-                  >
-                    <option value="all">تمام مضامین</option>
-                    <option value="published">صرف پبلک (Live)</option>
-                    <option value="private">صرف پرائیویٹ (Private/Draft)</option>
-                  </select>
+                {/* Top Pagination Summary & Quick Nav Buttons (WordPress Style) */}
+                <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-slate-400 font-sans border-t lg:border-t-0 pt-2 lg:pt-0 border-slate-800">
+                  <span className="whitespace-nowrap">
+                    کل <strong className="text-white font-mono">{totalFilteredPosts}</strong> مضامین | صفحہ <strong className="text-blue-400 font-mono">{safeCurrentPage}</strong> از <strong className="text-slate-200 font-mono">{totalPages}</strong>
+                  </span>
+                  
+                  <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                    <button
+                      type="button"
+                      disabled={safeCurrentPage <= 1}
+                      onClick={() => setCurrentPage(1)}
+                      title="پہلا صفحہ"
+                      className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                    >
+                      <ChevronsRight className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={safeCurrentPage <= 1}
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      title="پچھلا صفحہ"
+                      className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={safeCurrentPage >= totalPages}
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      title="اگلا صفحہ"
+                      className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={safeCurrentPage >= totalPages}
+                      onClick={() => setCurrentPage(totalPages)}
+                      title="آخری صفحہ"
+                      className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                    >
+                      <ChevronsLeft className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
+              {/* Bulk Actions Banner */}
+              {selectedArticleIds.length > 0 && (
+                <div className="flex items-center justify-between bg-red-500/10 border border-red-500/30 px-4 py-2.5 rounded-xl shadow-lg">
+                  <span className="text-xs text-red-300 font-bold">
+                    {selectedArticleIds.length} مضامین منتخب ہیں
+                  </span>
+                  <button
+                    onClick={handleBulkDeleteArticles}
+                    className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 shadow"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>منتخب مضامین ڈیلیٹ کریں (Bulk Delete)</span>
+                  </button>
+                </div>
+              )}
+
               {/* Articles Table */}
-              <div className="border border-slate-800 rounded-2xl overflow-hidden divide-y divide-slate-800/80">
-                {filteredArticles.length === 0 ? (
-                  <div className="p-12 text-center text-slate-500">
-                    <FileText className="w-12 h-12 mx-auto mb-2 opacity-30" />
-                    <p className="font-bold font-simple">کوئی مضمون نہیں ملا</p>
+              <div className="border border-slate-800 rounded-xl overflow-x-auto bg-slate-900/30">
+                <table className="w-full text-right text-sm text-slate-300 font-sans">
+                  <thead className="text-xs text-slate-400 border-b border-slate-800 bg-slate-900/80">
+                    <tr>
+                      <th className="px-4 py-3 w-10 text-center">
+                        <input 
+                          type="checkbox" 
+                          checked={paginatedArticles.length > 0 && paginatedArticles.every(a => selectedArticleIds.includes(a.id))}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedArticleIds(prev => Array.from(new Set([...prev, ...paginatedArticles.map(a => a.id)])));
+                            } else {
+                              const pageIds = new Set(paginatedArticles.map(a => a.id));
+                              setSelectedArticleIds(prev => prev.filter(id => !pageIds.has(id)));
+                            }
+                          }}
+                          className="rounded border-slate-700 bg-slate-800 cursor-pointer" 
+                          title="اس صفحے کے تمام مضامین منتخب کریں"
+                        />
+                      </th>
+                      <th className="px-4 py-3 font-bold text-slate-200">Title</th>
+                      <th className="px-4 py-3 font-bold text-slate-200">Author</th>
+                      <th className="px-4 py-3 font-bold text-slate-200">Categories</th>
+                      <th className="px-4 py-3 font-bold text-slate-200">Tags</th>
+                      <th 
+                        className="px-4 py-3 font-bold text-slate-200 cursor-pointer hover:text-blue-400 select-none transition-colors"
+                        onClick={() => setPostSortOrder(prev => prev === 'latest' ? 'oldest' : 'latest')}
+                        title="تاریخ کے حساب سے ترتیب بدلیں (کلک کریں)"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <span>Date</span>
+                          <span className="text-[10px] text-blue-400 font-mono">
+                            {postSortOrder === 'latest' ? '▼ (Latest)' : '▲ (Oldest)'}
+                          </span>
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/80">
+                    {paginatedArticles.length === 0 ? (
+                      <tr><td colSpan="6" className="p-8 text-center text-slate-500">کوئی مضمون نہیں ملا</td></tr>
+                    ) : (
+                      paginatedArticles.map(art => (
+                        <tr key={art.id} className="hover:bg-slate-800/40 transition-colors group">
+                          <td className="px-4 py-4 text-center">
+                            <input 
+                              type="checkbox" 
+                              checked={selectedArticleIds.includes(art.id)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedArticleIds(prev => [...prev, art.id]);
+                                } else {
+                                  setSelectedArticleIds(prev => prev.filter(id => id !== art.id));
+                                }
+                              }}
+                              className="rounded border-slate-700 bg-slate-800 cursor-pointer" 
+                            />
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-3">
+                              <img src={art.featuredImage || siteSettings?.defaultArticleImage} alt="" className="w-10 h-10 rounded object-cover border border-slate-700 shrink-0" />
+                              <div>
+                                <span onClick={() => handleEditArticle(art)} className="font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer font-h2 text-base">
+                                  {art.title} {art.status === 'private' ? '— Draft' : ''}
+                                </span>
+                                <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+                                  <span onClick={() => handleEditArticle(art)} className="text-blue-500 hover:text-blue-400 cursor-pointer hover:underline">Edit</span>
+                                  <span onClick={() => handleDeleteArticle(art.id)} className="text-red-500 hover:text-red-400 cursor-pointer hover:underline">Trash</span>
+                                  <a href={`/${art.slug || art.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:text-emerald-400 hover:underline">View</a>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-xs font-bold text-slate-300">
+                            {art.author || 'syed abdul wahab shah'}
+                          </td>
+                          <td className="px-4 py-4 text-xs text-blue-400">
+                            {Array.isArray(art.categories) && art.categories.length > 0
+                              ? art.categories.join('، ')
+                              : (art.categoryName || art.category || 'عام زمرہ')}
+                          </td>
+                          <td className="px-4 py-4 text-xs text-slate-400">
+                            {Array.isArray(art.tags) && art.tags.length > 0
+                              ? art.tags.join('، ')
+                              : (art.tags || '—')}
+                          </td>
+                          <td className="px-4 py-4 text-xs text-slate-400">
+                            <span className={art.status === 'published' ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
+                              {art.status === 'published' ? 'Published' : 'Draft'}
+                            </span><br />
+                            <span className="font-mono text-[11px] text-slate-500">
+                              {art.publishedAt || art.date || '2024/09/24'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Bottom Comprehensive Pagination Bar (WordPress Style) */}
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-800 text-xs text-slate-400 font-sans">
+                  {/* Range counter */}
+                  <div>
+                    مضامین <strong className="text-white font-mono">{startIndex + 1}</strong> تا <strong className="text-white font-mono">{endIndex}</strong> دکھائے جا رہے ہیں (کل <strong className="text-blue-400 font-mono">{totalFilteredPosts}</strong> میں سے)
                   </div>
-                ) : (
-                  filteredArticles.map(art => {
-                    const isPrivate = art.status === 'private';
+
+                  {/* Numbered Pagination & Arrows */}
+                  <div className="flex flex-wrap items-center justify-center gap-1.5">
+                    {/* Previous Button */}
+                    <button
+                      type="button"
+                      disabled={safeCurrentPage <= 1}
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 text-slate-200 transition-colors"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5" />
+                      <span>پچھلا</span>
+                    </button>
+
+                    {/* Page Numbers */}
+                    {getPaginationPages().map((pNum, idx) => {
+                      if (pNum === '...') {
+                        return <span key={`ellipsis-${idx}`} className="px-2 text-slate-500 font-mono">…</span>;
+                      }
+                      const isCurrent = pNum === safeCurrentPage;
+                      return (
+                        <button
+                          key={pNum}
+                          type="button"
+                          onClick={() => setCurrentPage(pNum)}
+                          className={`min-w-8 h-8 px-2.5 rounded-xl text-xs font-bold font-mono transition-all ${
+                            isCurrent
+                              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                              : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+                          }`}
+                        >
+                          {pNum}
+                        </button>
+                      );
+                    })}
+
+                    {/* Next Button */}
+                    <button
+                      type="button"
+                      disabled={safeCurrentPage >= totalPages}
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 text-slate-200 transition-colors"
+                    >
+                      <span>اگلا</span>
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Jump directly to Page Number */}
+                  <div className="flex items-center gap-2">
+                    <span>صفحہ نمبر:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max={totalPages}
+                      defaultValue={safeCurrentPage}
+                      key={safeCurrentPage}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const val = parseInt(e.target.value, 10);
+                          if (!isNaN(val) && val >= 1 && val <= totalPages) {
+                            setCurrentPage(val);
+                          }
+                        }
+                      }}
+                      className="w-14 bg-slate-900 border border-slate-700 text-white rounded-lg px-2 py-1 text-center font-mono text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+                      title="نمبر لکھ کر Enter دبائیں"
+                    />
+                    <span>از {totalPages}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* VIEW: CATEGORIES */}
+          {adminTab === 'categories' && (() => {
+            const flattenedHierarchicalList = hierarchicalCategories;
+
+            const getCategoryPostCount = (cat) => {
+              const childCats = categoriesList.filter(c => c !== cat && c.parentId && isCategoryMatch(cat, c.parentId));
+              const directCount = articlesList.filter(art => {
+                if (isCategoryMatch(cat, art.category) || isCategoryMatch(cat, art.categoryName)) return true;
+                if (Array.isArray(art.categories)) {
+                  return art.categories.some(c => isCategoryMatch(cat, c));
+                }
+                return false;
+              }).length;
+
+              if (childCats.length > 0) {
+                const totalCount = articlesList.filter(art => {
+                  if (isCategoryMatch(cat, art.category) || isCategoryMatch(cat, art.categoryName)) return true;
+                  if (Array.isArray(art.categories) && art.categories.some(c => isCategoryMatch(cat, c))) return true;
+                  return childCats.some(ch => {
+                    if (isCategoryMatch(ch, art.category) || isCategoryMatch(ch, art.categoryName)) return true;
+                    if (Array.isArray(art.categories) && art.categories.some(c => isCategoryMatch(ch, c))) return true;
+                    return false;
+                  });
+                }).length;
+                return { direct: directCount, total: totalCount, hasChildren: true };
+              }
+
+              return { direct: directCount, total: directCount, hasChildren: false };
+            };
+
+            return (
+              <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+                <div className="border-b border-slate-800 pb-4">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white font-simple flex items-center gap-3">
+                    <FolderOpen className="w-6 h-6 text-blue-400" />
+                    <span>زمرہ جات / کیٹیگریز (Categories Hierarchy)</span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    ورڈپریس طرز پر بنیادی کیٹیگریز اور ان کے تحت ذیلی کیٹیگریز (Sub-categories) کا مکمل نظام
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                  
+                  {/* Left Form: Add / Edit Category */}
+                  <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4 sticky top-6 shadow-lg">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                      <h3 className="text-base font-bold text-slate-200 font-simple">
+                        {categoryForm.id ? 'کیٹیگری میں ترمیم کریں (Edit)' : 'نیا زمرہ بنائیں (Add New)'}
+                      </h3>
+                      {categoryForm.id && (
+                        <button
+                          type="button"
+                          onClick={() => setCategoryForm({ id: null, name: '', slug: '', parentId: '' })}
+                          className="text-xs text-slate-400 hover:text-white"
+                        >
+                          کینسل
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Name */}
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple">
+                          نام (Category Name) *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={categoryForm.name}
+                          onChange={e => {
+                            const name = e.target.value;
+                            setCategoryForm(prev => ({
+                              ...prev,
+                              name,
+                              slug: prev.id ? prev.slug : name.trim().toLowerCase().replace(/[^\w\u0600-\u06FF]+/g, '-')
+                            }));
+                          }}
+                          placeholder="مثلاً: پھل و سبزیاں یا الف..."
+                          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-xs font-bold focus:border-blue-500 outline-none"
+                        />
+                      </div>
+
+                      {/* Slug */}
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple">
+                          سلگ (Slug URL)
+                        </label>
+                        <input
+                          type="text"
+                          value={categoryForm.slug}
+                          onChange={e => setCategoryForm({ ...categoryForm, slug: e.target.value })}
+                          placeholder="alif یا fruits"
+                          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-blue-400 text-xs font-mono focus:border-blue-500 outline-none text-left dir-ltr"
+                        />
+                      </div>
+
+                      {/* Parent Category Dropdown (WordPress Hierarchical) */}
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple">
+                          والدین زمرہ (Parent Category)
+                        </label>
+                        <select
+                          value={categoryForm.parentId || ''}
+                          onChange={e => setCategoryForm({ ...categoryForm, parentId: e.target.value })}
+                          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-200 text-xs focus:border-blue-500 outline-none font-bold"
+                        >
+                          <option value="">— کوئی نہیں (None - بنیادی کیٹیگری) —</option>
+                          {hierarchicalCategories
+                            .filter(c => c.id !== categoryForm.id && c.slug !== categoryForm.slug)
+                            .map(c => (
+                              <option key={c.id || c.slug} value={c.id || c.slug}>
+                                {c.depth > 0 ? (c.depth === 1 ? '— ' : '—— ') : ''}{c.name}
+                              </option>
+                            ))}
+                        </select>
+                        <p className="text-[10px] text-slate-500 mt-1">
+                          اگر اسے کسی دوسری کیٹیگری کے تحت لانا ہو تو اوپر اس کا والدین زمرہ منتخب کریں۔
+                        </p>
+                      </div>
+
+                      {/* Submit & Cancel Buttons */}
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!categoryForm.name.trim()) {
+                              alert('براہ کرم کیٹیگری کا نام درج کریں');
+                              return;
+                            }
+                            const cleanSlug = (categoryForm.slug || categoryForm.name.trim().toLowerCase().replace(/[^\w\u0600-\u06FF]+/g, '-')).replace(/\s+/g, '-');
+                            
+                            if (categoryForm.id) {
+                              setCategoriesList(prev => prev.map(c => (c.id === categoryForm.id || c.slug === categoryForm.id) ? { ...categoryForm, slug: cleanSlug } : c));
+                              showNotification('کیٹیگری میں ترمیم محفوظ ہو گئی!');
+                            } else {
+                              const newCat = {
+                                id: cleanSlug,
+                                name: categoryForm.name.trim(),
+                                slug: cleanSlug,
+                                parentId: categoryForm.parentId || null
+                              };
+                              setCategoriesList(prev => [...prev, newCat]);
+                              showNotification('نئی کیٹیگری کامیابی سے شامل ہو گئی!');
+                            }
+                            setCategoryForm({ id: null, name: '', slug: '', parentId: '' });
+                          }}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-colors flex-1 shadow-md font-simple"
+                        >
+                          {categoryForm.id ? 'تبدیلیاں محفوظ کریں (Update)' : 'نیا زمرہ شامل کریں (Add)'}
+                        </button>
+
+                        {categoryForm.id && (
+                          <button
+                            type="button"
+                            onClick={() => setCategoryForm({ id: null, name: '', slug: '', parentId: '' })}
+                            className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-2.5 rounded-xl text-xs"
+                          >
+                            کینسل
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: WordPress Style Hierarchical Table */}
+                  <div className="lg:col-span-2 border border-slate-800 rounded-2xl overflow-hidden bg-slate-900/40 shadow-xl">
+                    <table className="w-full text-right text-sm text-slate-300">
+                      <thead className="bg-slate-900/90 border-b border-slate-800 text-xs text-slate-400">
+                        <tr>
+                          <th className="p-3.5 font-bold text-slate-200">Name (نام زمرہ)</th>
+                          <th className="p-3.5 font-bold text-slate-200">Parent (والدین)</th>
+                          <th className="p-3.5 font-bold text-slate-200">Slug (سلگ)</th>
+                          <th className="p-3.5 w-28 text-center font-bold text-slate-200">مضامین (Count)</th>
+                          <th className="p-3.5 w-24 text-center font-bold text-slate-200">ایکشنز</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/80 font-sans">
+                        {flattenedHierarchicalList.map(cat => {
+                          const parentCat = cat.parentId ? categoriesList.find(p => p !== cat && isCategoryMatch(p, cat.parentId)) : null;
+                          return (
+                            <tr key={cat.id || cat.slug} className="hover:bg-slate-800/50 transition-colors group">
+                              <td className="p-3.5">
+                                <div className="flex items-center gap-1.5" style={{ paddingRight: `${cat.depth * 1.5}rem` }}>
+                                  {cat.depth > 0 && (
+                                    <span className="text-slate-500 font-bold select-none font-mono">
+                                      {cat.depth === 1 ? '— ' : '—— '}
+                                    </span>
+                                  )}
+                                  <span
+                                    onClick={() => setCategoryForm({ ...cat, parentId: cat.parentId || '' })}
+                                    className={`cursor-pointer hover:underline font-h2 text-sm ${
+                                      cat.depth === 0 ? 'text-white font-bold' : 'text-blue-300'
+                                    }`}
+                                  >
+                                    {cat.name}
+                                  </span>
+                                </div>
+                              </td>
+
+                              <td className="p-3.5 text-xs text-slate-400 font-simple">
+                                {parentCat ? (
+                                  <span className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg">
+                                    {parentCat.name}
+                                  </span>
+                                ) : (
+                                  <span className="text-slate-600">—</span>
+                                )}
+                              </td>
+
+                              <td className="p-3.5 text-xs font-mono text-slate-400">
+                                /{cat.slug}
+                              </td>
+
+                              <td className="p-3.5 text-center">
+                                {(() => {
+                                  const stats = getCategoryPostCount(cat);
+                                  if (stats.hasChildren) {
+                                    return (
+                                      <span
+                                        onClick={() => {
+                                          setSearchFilter(cat.name);
+                                          setAdminTab('articles');
+                                        }}
+                                        title={`اس زمرے اور ذیلی زمرہ جات میں کل ${stats.total} مضامین ہیں`}
+                                        className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white transition-colors cursor-pointer"
+                                      >
+                                        {stats.total}
+                                      </span>
+                                    );
+                                  }
+                                  if (stats.direct > 0) {
+                                    return (
+                                      <span
+                                        onClick={() => {
+                                          setSearchFilter(cat.name);
+                                          setAdminTab('articles');
+                                        }}
+                                        title={`اس زمرہ کے ${stats.direct} مضامین دیکھنے کے لیے کلک کریں`}
+                                        className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30 hover:bg-blue-500 hover:text-white transition-colors cursor-pointer"
+                                      >
+                                        {stats.direct}
+                                      </span>
+                                    );
+                                  }
+                                  return (
+                                    <span
+                                      title="یہ زمرہ فی الوقت خالی ہے"
+                                      className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-mono text-slate-500 bg-slate-800/60 border border-slate-800/80 select-none"
+                                    >
+                                      0 (خالی)
+                                    </span>
+                                  );
+                                })()}
+                              </td>
+
+                              <td className="p-3.5 text-center">
+                                <div className="flex items-center justify-center gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => setCategoryForm({ ...cat, parentId: cat.parentId || '' })}
+                                    className="text-blue-400 hover:text-blue-300 p-1 hover:bg-slate-800 rounded transition-colors"
+                                    title="ترمیم کریں (Edit)"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (window.confirm(`کیا آپ واقعی کیٹیگری "${cat.name}" ڈیلیٹ کرنا چاہتے ہیں؟`)) {
+                                        setCategoriesList(prev => prev.filter(c => c.id !== cat.id && c.slug !== cat.slug));
+                                        showNotification('کیٹیگری ڈیلیٹ کر دی گئی');
+                                      }
+                                    }}
+                                    className="text-red-400 hover:text-red-300 p-1 hover:bg-slate-800 rounded transition-colors"
+                                    title="حذف کریں (Delete)"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                </div>
+              </div>
+            );
+          })()}
+
+
+          {/* VIEW: TAGS */}
+          {adminTab === 'tags' && (
+            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-8 shadow-xl">
+              <h2 className="text-xl sm:text-2xl font-bold text-white font-simple">Tags (ٹیگز)</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl h-fit">
+                  <h3 className="text-lg font-bold text-slate-200 mb-4">{tagForm.id ? 'Edit Tag' : 'Add New Tag'}</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Name (نام)</label>
+                      <input type="text" value={tagForm.name} onChange={e => {
+                         const name = e.target.value;
+                         setTagForm(prev => ({ ...prev, name, slug: prev.id ? prev.slug : name.trim().toLowerCase().replace(/\s+/g, '-') }));
+                      }} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white outline-none focus:border-blue-500 font-bold" />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Slug (سلگ)</label>
+                      <input type="text" value={tagForm.slug} onChange={e => setTagForm({...tagForm, slug: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white outline-none focus:border-blue-500 font-sans" />
+                    </div>
+                    <div className="flex gap-2">
+                        <button onClick={() => {
+                            if (!tagForm.name) return;
+                            if (tagForm.id) {
+                                setTagsList(prev => prev.map(c => c.id === tagForm.id ? tagForm : c));
+                            } else {
+                                setTagsList(prev => [...prev, { ...tagForm, id: Date.now() }]);
+                            }
+                            setTagForm({ id: null, name: '', slug: '' });
+                        }} className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors flex-1 shadow-md">
+                          {tagForm.id ? 'Update Tag' : 'Add New Tag'}
+                        </button>
+                        {tagForm.id && (
+                            <button onClick={() => setTagForm({ id: null, name: '', slug: '' })} className="bg-slate-700 hover:bg-slate-600 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors">
+                                Cancel
+                            </button>
+                        )}
+                    </div>
+                  </div>
+                </div>
+                <div className="lg:col-span-2 border border-slate-800 rounded-2xl overflow-hidden bg-slate-900/30 self-start">
+                  <table className="w-full text-right text-sm text-slate-300">
+                    <thead className="bg-slate-900/80 border-b border-slate-800"><tr><th className="p-4 font-bold text-slate-200">Name</th><th className="p-4 font-bold text-slate-200">Slug</th><th className="p-4 w-24 text-center font-bold text-slate-200">Actions</th></tr></thead>
+                    <tbody className="divide-y divide-slate-800/80">
+                      {tagsList.map(tag => (
+                          <tr key={tag.id} className="hover:bg-slate-800/40 transition-colors">
+                              <td className="p-4 text-blue-400 font-bold font-h2">{tag.name}</td>
+                              <td className="p-4 text-slate-400 font-sans">{tag.slug}</td>
+                              <td className="p-4 text-center">
+                                <div className="flex items-center justify-center gap-3">
+                                  <button onClick={() => setTagForm(tag)} className="text-blue-500 hover:text-blue-400 transition-colors" title="Edit"><Edit3 className="w-4 h-4" /></button>
+                                  <button onClick={() => {
+                                      if(window.confirm('کیا آپ واقعی یہ ٹیگ ڈیلیٹ کرنا چاہتے ہیں؟')) {
+                                          setTagsList(prev => prev.filter(c => c.id !== tag.id));
+                                      }
+                                  }} className="text-red-500 hover:text-red-400 transition-colors" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                                </div>
+                              </td>
+                          </tr>
+                      ))}
+                      {tagsList.length === 0 && <tr><td colSpan="3" className="p-8 text-center text-slate-500">کوئی ٹیگ موجود نہیں</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+
+          {/* ========================================================= */}
+      
+
+          
+          {/* ========================================================= */}
+          {/* VIEW: MEDIA LIBRARY */}
+          {/* ========================================================= */}
+          {adminTab === 'media' && (
+            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white font-simple flex items-center gap-3">
+                    <ImageIcon className="w-6 h-6 text-blue-400" />
+                    <span>میڈیا لائبریری (Media Library)</span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    ویب سائٹ کی تمام تصاویر، منسلک مضامین اور اپلوڈز کا مکمل کنٹرول
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <label className="relative cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md font-simple flex items-center gap-2">
+                    <UploadCloud className="w-4 h-4" />
+                    <span>نئی تصویر اپلوڈ کریں</span>
+                    <input type="file" multiple accept="image/*" onChange={handleMediaUpload} className="hidden" />
+                  </label>
+
+                  {selectedMediaIds.length > 0 && (
+                    <button
+                      onClick={handleBulkDeleteMedia}
+                      className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md font-simple flex items-center gap-2 animate-pulse"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>منتخب ڈیلیٹ کریں ({selectedMediaIds.length})</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Media Controls Bar */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400 font-bold">فلٹر:</span>
+                  <div className="flex gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-bold">
+                    <button
+                      onClick={() => setMediaFilter('all')}
+                      className={`px-3 py-1.5 rounded-lg transition-colors ${mediaFilter === 'all' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                    >
+                      تمام میڈیا ({mediaList.length})
+                    </button>
+                    <button
+                      onClick={() => setMediaFilter('attached')}
+                      className={`px-3 py-1.5 rounded-lg transition-colors ${mediaFilter === 'attached' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                    >
+                      منسلک / زیر استعمال ({mediaList.filter(m => m.attachedTo).length})
+                    </button>
+                    <button
+                      onClick={() => setMediaFilter('unattached')}
+                      className={`px-3 py-1.5 rounded-lg transition-colors ${mediaFilter === 'unattached' ? 'bg-amber-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                    >
+                      صرف اپلوڈ / غیر منسلک ({mediaList.filter(m => !m.attachedTo).length})
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 w-full sm:w-64">
+                  <div className="relative w-full">
+                    <Search className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-3" />
+                    <input
+                      type="text"
+                      value={mediaSearch}
+                      onChange={e => setMediaSearch(e.target.value)}
+                      placeholder="تصویر یا فائل تلاش کریں..."
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl pr-9 pl-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-sans"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Media Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {mediaList
+                  .filter(item => {
+                    if (mediaFilter === 'attached') return !!item.attachedTo;
+                    if (mediaFilter === 'unattached') return !item.attachedTo;
+                    return true;
+                  })
+                  .filter(item => !mediaSearch || item.name.toLowerCase().includes(mediaSearch.toLowerCase()) || (item.attachedTo && item.attachedTo.toLowerCase().includes(mediaSearch.toLowerCase())))
+                  .map(media => {
+                    const isSelected = selectedMediaIds.includes(media.id);
                     return (
                       <div
-                        key={art.id}
-                        className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-900/50 transition-colors"
+                        key={media.id}
+                        className={`group relative bg-slate-900 border rounded-2xl overflow-hidden transition-all flex flex-col ${
+                          isSelected ? 'border-blue-500 ring-2 ring-blue-500/50' : 'border-slate-800 hover:border-slate-700'
+                        }`}
                       >
-                        <div className="flex items-start sm:items-center gap-4">
-                          <img
-                            src={art.featuredImage}
-                            alt={art.title}
-                            className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border border-slate-800 shrink-0"
+                        {/* Checkbox */}
+                        <div className="absolute top-2 right-2 z-10">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedMediaIds(prev => [...prev, media.id]);
+                              } else {
+                                setSelectedMediaIds(prev => prev.filter(id => id !== media.id));
+                              }
+                            }}
+                            className="w-4 h-4 rounded border-slate-700 bg-slate-950/80 text-blue-600 focus:ring-0 cursor-pointer"
                           />
-                          <div className="space-y-1 text-right">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <a 
-                                href={`/${art.slug || art.id}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => {
-                                  // If clicked normally without modifier keys, open in editor
-                                  if (!e.ctrlKey && !e.metaKey && !e.shiftKey && e.button === 0) {
-                                    e.preventDefault();
-                                    handleEditArticle(art);
-                                  }
-                                }}
-                                className="text-sm sm:text-base font-bold text-white hover:text-blue-400 font-simple transition-colors inline-block cursor-pointer"
-                                title="کلک پر ایڈٹ کریں، یا رائٹ کلک کر کے نئی ونڈو / ٹیب میں کھولیں"
-                              >
-                                {art.title}
-                              </a>
-                              {isPrivate ? (
-                                <span className="inline-flex items-center gap-1 bg-amber-950 text-amber-300 border border-amber-800 text-[10px] px-2 py-0.5 rounded-full font-sans font-bold">
-                                  <Lock className="w-3 h-3" />
-                                  پرائیویٹ / ڈرافٹ
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1 bg-emerald-950 text-emerald-300 border border-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-sans font-bold">
-                                  <Globe className="w-3 h-3" />
-                                  پبلک (لائیو)
-                                </span>
-                              )}
-                            </div>
+                        </div>
 
-                            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 font-sans">
-                              <span>کیٹیگری: <strong>{art.categoryName || art.category}</strong></span>
-                              <span>•</span>
-                              <span>مصنف: {art.author}</span>
-                              <span>•</span>
-                              <span>تاریخ: {art.publishedAt}</span>
-                            </div>
+                        {/* Image Preview */}
+                        <div className="aspect-square bg-slate-950 overflow-hidden relative">
+                          <img
+                            src={media.url}
+                            alt={media.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-2">
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteSingleMedia(media.id)}
+                              className="p-1.5 bg-red-600/90 hover:bg-red-600 text-white rounded-lg transition-colors"
+                              title="ڈیلیٹ کریں"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                            <a
+                              href={media.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-1.5 bg-slate-800/90 hover:bg-slate-700 text-white rounded-lg transition-colors text-[10px] font-bold"
+                            >
+                              دیکھیں
+                            </a>
                           </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="flex items-center justify-end gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800 font-simple">
-                          {/* View Live Article in New Tab Button */}
-                          <a
-                            href={`/${art.slug || art.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 bg-emerald-950/60 text-emerald-300 hover:bg-emerald-900 border border-emerald-800 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
-                            title="مضمون کو نئی ونڈو / ٹیب میں لائیو کھولیں (Open in New Tab)"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                            <span className="hidden md:inline">دیکھیں (View)</span>
-                          </a>
+                        {/* Details */}
+                        <div className="p-2.5 flex-1 flex flex-col justify-between space-y-1.5 text-right">
+                          <p className="text-[11px] font-bold text-slate-200 truncate font-sans" title={media.name}>
+                            {media.name}
+                          </p>
+                          <div>
+                            {media.attachedTo ? (
+                              <span className="inline-block text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md font-bold truncate max-w-full" title={`منسلک: ${media.attachedTo}`}>
+                                🟢 منسلک: {media.attachedTo}
+                              </span>
+                            ) : (
+                              <span className="inline-block text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md font-bold">
+                                ⚪ غیر منسلک (صرف اپلوڈ)
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
 
-                          {/* Toggle Public / Private Button */}
+              {mediaList.length === 0 && (
+                <div className="p-12 text-center text-slate-500 space-y-3">
+                  <ImageIcon className="w-12 h-12 mx-auto opacity-30" />
+                  <p className="font-bold text-sm font-simple">میڈیا لائبریری خالی ہے</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          
+          {/* ========================================================= */}
+          {/* VIEW: WORDPRESS STYLE FULL PAGE WYSIWYG EDITOR */}
+          {/* ========================================================= */}
+          {adminTab === 'new-page' && pageForm && (
+            <div className="space-y-4">
+              
+              {/* WordPress Top Action Bar */}
+              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-lg">
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setAdminTab('pages')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold transition-all border border-slate-700 font-simple"
+                  >
+                    <ArrowRight className="w-3.5 h-3.5 text-blue-400" />
+                    <span>تمام صفحات (All Pages)</span>
+                  </button>
+                  <span className="text-slate-700 hidden sm:inline">|</span>
+                  <div className="hidden sm:block">
+                    <h2 className="text-xs sm:text-sm font-bold text-white font-simple">
+                      {editingPageId ? 'صفحے میں ترمیم کریں (Page Editor)' : 'نیا صفحہ تحریر کریں (New Page Editor)'}
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (pageEditorMode === 'visual' && pageVisualEditorRef.current) {
+                        setPageForm({ ...pageForm, content: pageVisualEditorRef.current.innerHTML });
+                      }
+                      setPageEditorMode(pageEditorMode === 'preview' ? 'visual' : 'preview');
+                    }}
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all border font-simple ${
+                      pageEditorMode === 'preview' ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-900 text-slate-300 hover:text-white border-slate-700'
+                    }`}
+                  >
+                    <Eye className="w-4 h-4" />
+                    <span>{pageEditorMode === 'preview' ? 'ویژول موڈ' : 'پیش نظارہ (Preview)'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPageForm(prev => ({ ...prev, status: 'draft' }));
+                      handleSavePage();
+                    }}
+                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors font-simple border border-slate-700"
+                  >
+                    ڈرافٹ محفوظ کریں
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleSavePage}
+                    className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-900/30 transition-all font-simple"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>{editingPageId ? 'صفحہ اپڈیٹ کریں (Update)' : 'صفحہ پبلش کریں (Publish)'}</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* WordPress 2-Column Main Form Grid */}
+              <div className="flex flex-col lg:flex-row gap-4 items-start w-full">
+                
+                {/* 1. MAIN CONTENT AREA */}
+                <div className="flex-1 min-w-0 w-full space-y-4">
+                  
+                  {/* Title & Permalink */}
+                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 shadow-lg space-y-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-400 block mb-1 font-simple">
+                        صفحے کا عنوان (Page Title) *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={pageForm.title}
+                        onChange={(e) => {
+                          const newTitle = e.target.value;
+                          setPageForm(prev => ({
+                            ...prev,
+                            title: newTitle,
+                            slug: prev.slug || newTitle.trim().toLowerCase().replace(/[^\w\u0600-\u06FF]+/g, '-')
+                          }));
+                        }}
+                        placeholder="یہاں صفحے کا عنوان درج کریں (مثلاً: ہمارے بارے میں / رابطہ کریں)..."
+                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-base sm:text-lg font-bold focus:outline-none focus:border-blue-500 font-h2"
+                      />
+                    </div>
+
+                    {/* Permalink Display */}
+                    <div className="flex items-center gap-2 text-xs bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800 text-slate-400">
+                      <span className="font-bold text-slate-300">مستقل لنک (Permalink):</span>
+                      <span className="text-slate-500 font-mono">http://localhost:3000/</span>
+                      {isEditingPageSlug ? (
+                        <div className="flex items-center gap-1.5 flex-1">
+                          <input
+                            type="text"
+                            value={tempPageSlug}
+                            onChange={(e) => setTempPageSlug(e.target.value)}
+                            className="bg-slate-950 border border-blue-500 rounded px-2 py-0.5 text-xs text-blue-300 font-mono outline-none"
+                          />
                           <button
                             type="button"
-                            onClick={() => handleToggleStatus(art.id)}
-                            className={`p-2 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 ${
-                              isPrivate
-                                ? 'bg-amber-900/40 text-amber-300 hover:bg-amber-900/60 border border-amber-700'
-                                : 'bg-emerald-900/40 text-emerald-300 hover:bg-emerald-900/60 border border-emerald-700'
-                            }`}
-                            title={isPrivate ? 'پبلک کریں' : 'پرائیویٹ بنائیں'}
+                            onClick={() => {
+                              setPageForm(prev => ({ ...prev, slug: tempPageSlug.trim().replace(/\s+/g, '-') }));
+                              setIsEditingPageSlug(false);
+                            }}
+                            className="px-2 py-0.5 bg-blue-600 text-white rounded text-[10px] font-bold"
                           >
-                            {isPrivate ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
-                            <span className="hidden md:inline">{isPrivate ? 'پرائیویٹ ہے' : 'پبلک ہے'}</span>
+                            اوکے
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingPageSlug(false)}
+                            className="px-2 py-0.5 bg-slate-800 text-slate-400 rounded text-[10px]"
+                          >
+                            منسوخ
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-blue-400 font-bold">
+                            {pageForm.slug || 'page-slug'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTempPageSlug(pageForm.slug || '');
+                              setIsEditingPageSlug(true);
+                            }}
+                            className="text-blue-400 hover:text-blue-300 underline text-[11px]"
+                          >
+                            تبدیل کریں
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ========================================================= */}
+                  {/* Dedicated Digital Books Management Studio (PDF Books) */}
+                  {/* ========================================================= */}
+                  {(pageForm && (pageForm.slug === 'pdf-books' || String(pageForm.id) === '8339' || (pageForm.title && (pageForm.title.includes('پی ڈی ایف') || pageForm.title.includes('PDF Books'))))) ? (
+                    <div className="space-y-4">
+                      {/* Studio Top Control Card */}
+                      <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+                        <div className="flex items-center gap-3.5">
+                          <div className="p-3 bg-emerald-600/20 text-emerald-400 rounded-2xl border border-emerald-500/30 shrink-0">
+                            <BookOpen className="w-7 h-7" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="text-base sm:text-lg font-bold text-white font-simple">
+                                پی ڈی ایف کتب لائبریری سٹوڈیو (Digital Books Studio)
+                              </h3>
+                              <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs px-2.5 py-0.5 rounded-full font-bold">
+                                {pdfBooksList.length} کتب
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-400 font-sans mt-0.5">
+                              یہاں سے آپ لائبریری کی تمام کتب میں بغیر کسی کوڈنگ کے آسانی سے اضافہ، ترمیم یا حذف کر سکتے ہیں۔
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2.5">
+                          <button
+                            type="button"
+                            onClick={handleOpenAddBook}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-900/40 transition-all font-simple cursor-pointer"
+                          >
+                            <PlusCircle className="w-4 h-4" />
+                            <span>+ نئی کتاب شامل کریں</span>
                           </button>
 
-                          {/* Edit Button */}
+                          <div className="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-simple">
+                            <button
+                              type="button"
+                              onClick={() => setPdfEditorSubTab('studio')}
+                              className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                                pdfEditorSubTab === 'studio' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                              }`}
+                            >
+                              کتب مینیجر
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setPdfEditorSubTab('html')}
+                              className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+                                pdfEditorSubTab === 'html' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                              }`}
+                            >
+                              خام HTML کوڈ
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Sub-Tab 1: Books Manager Studio */}
+                      {pdfEditorSubTab === 'studio' && (
+                        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-4 shadow-xl">
+                          {/* Search & Category Filter Toolbar */}
+                          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+                            <div className="relative w-full sm:w-80">
+                              <input
+                                type="text"
+                                value={bookSearchQuery}
+                                onChange={(e) => setBookSearchQuery(e.target.value)}
+                                placeholder="کتاب کا نام، مصنف یا موضوع تلاش کریں..."
+                                className="w-full bg-slate-900 border border-slate-700 rounded-xl pr-10 pl-4 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 font-simple"
+                              />
+                              <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-3" />
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1">
+                              {[
+                                { id: 'all', name: 'تمام کتب' },
+                                { id: 'qanoon', name: 'قانون مفرد اعضاء' },
+                                { id: 'translations', name: 'تراجم' },
+                                { id: 'diagnosis', name: 'تشخیص و لیب' },
+                                { id: 'herbs', name: 'ادویات و فارماکوپیا' },
+                                { id: 'health', name: 'صحت و مطب' }
+                              ].map((cat) => {
+                                const isActive = bookCategoryFilter === cat.id;
+                                const count = cat.id === 'all' 
+                                  ? pdfBooksList.length 
+                                  : pdfBooksList.filter(b => b.categoryEn === cat.id || b.category === cat.name).length;
+                                return (
+                                  <button
+                                    key={cat.id}
+                                    type="button"
+                                    onClick={() => setBookCategoryFilter(cat.id)}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all font-simple cursor-pointer ${
+                                      isActive 
+                                        ? 'bg-emerald-600 text-white shadow-xs' 
+                                        : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                                    }`}
+                                  >
+                                    <span>{cat.name}</span>
+                                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isActive ? 'bg-white/20' : 'bg-slate-800'}`}>{count}</span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* Filtered Books List */}
+                          {(() => {
+                            const filtered = pdfBooksList.filter(b => {
+                              const matchCat = bookCategoryFilter === 'all' || b.categoryEn === bookCategoryFilter || b.category === bookCategoryFilter;
+                              if (!matchCat) return false;
+                              if (!bookSearchQuery.trim()) return true;
+                              const q = bookSearchQuery.toLowerCase().trim();
+                              return (b.title || '').toLowerCase().includes(q) || 
+                                     (b.author || '').toLowerCase().includes(q) ||
+                                     (b.category || '').toLowerCase().includes(q);
+                            });
+
+                            if (filtered.length === 0) {
+                              return (
+                                <div className="p-8 text-center space-y-3">
+                                  <BookOpen className="w-12 h-12 text-slate-600 mx-auto" />
+                                  <p className="text-sm font-bold text-slate-300 font-simple">کوئی کتاب نہیں ملی</p>
+                                  <button
+                                    type="button"
+                                    onClick={() => { setBookSearchQuery(''); setBookCategoryFilter('all'); }}
+                                    className="text-xs text-blue-400 hover:underline"
+                                  >
+                                    فلٹرز ختم کریں
+                                  </button>
+                                </div>
+                              );
+                            }
+
+                            return (
+                              <div className="space-y-2.5">
+                                {filtered.map((book) => {
+                                  const originalIndex = pdfBooksList.findIndex(b => (b.id && book.id && b.id === book.id) || b.title === book.title);
+                                  return (
+                                    <div
+                                      key={book.id || book.title}
+                                      className="bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all"
+                                    >
+                                      {/* Book Thumbnail + Info */}
+                                      <div className="flex items-center gap-3.5 min-w-0 flex-1">
+                                        {/* Reorder Buttons */}
+                                        <div className="flex flex-col gap-1 text-slate-500 shrink-0">
+                                          <button
+                                            type="button"
+                                            disabled={originalIndex === 0}
+                                            onClick={() => handleMoveBook(originalIndex, -1)}
+                                            className="p-1 hover:text-white hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"
+                                            title="اوپر کریں"
+                                          >
+                                            <ArrowUp className="w-3.5 h-3.5" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            disabled={originalIndex === pdfBooksList.length - 1}
+                                            onClick={() => handleMoveBook(originalIndex, 1)}
+                                            className="p-1 hover:text-white hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"
+                                            title="نیچے کریں"
+                                          >
+                                            <ArrowDown className="w-3.5 h-3.5" />
+                                          </button>
+                                        </div>
+
+                                        {/* Thumbnail Cover */}
+                                        <div className="w-12 h-16 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden shrink-0 shadow-sm relative">
+                                          <img
+                                            src={book.image || '/images/books/tib-e-pakistani-urdu.jpg'}
+                                            alt={book.title}
+                                            className="w-full h-full object-cover object-top"
+                                            onError={(e) => { e.target.onerror = null; e.target.src = '/images/books/tib-e-pakistani-urdu.jpg'; }}
+                                          />
+                                        </div>
+
+                                        {/* Text Details */}
+                                        <div className="min-w-0 space-y-1 text-right">
+                                          <div className="flex flex-wrap items-center gap-2">
+                                            <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded font-bold font-simple">
+                                              {book.category}
+                                            </span>
+                                            <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">
+                                              {book.language || 'Urdu'}
+                                            </span>
+                                            <span className="text-[10px] text-slate-500 font-mono">
+                                              #{originalIndex + 1}
+                                            </span>
+                                          </div>
+
+                                          <h4 className="text-sm sm:text-base font-bold text-white group-hover:text-emerald-400 transition-colors truncate font-h2">
+                                            {book.title}
+                                          </h4>
+
+                                          <p className="text-xs text-slate-400 truncate">
+                                            مصنف: <strong className="text-slate-300">{book.author}</strong> • {book.pages || 'PDF'}
+                                          </p>
+                                        </div>
+                                      </div>
+
+                                      {/* Actions */}
+                                      <div className="flex items-center gap-2 self-end sm:self-center shrink-0">
+                                        {book.downloadUrl && (
+                                          <a
+                                            href={book.downloadUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs transition-colors"
+                                            title="ڈاؤن لوڈ لنک ٹیسٹ کریں"
+                                          >
+                                            <Download className="w-4 h-4 text-emerald-400" />
+                                          </a>
+                                        )}
+
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenEditBook(book, originalIndex)}
+                                          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 rounded-xl text-xs font-bold transition-all font-simple cursor-pointer"
+                                        >
+                                          <Edit3 className="w-3.5 h-3.5" />
+                                          <span>ترمیم</span>
+                                        </button>
+
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteBook(originalIndex)}
+                                          className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 rounded-xl text-xs font-bold transition-all font-simple cursor-pointer"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                          <span>حذف</span>
+                                        </button>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
+
+                      {/* Sub-Tab 2: Raw HTML Mode */}
+                      {pdfEditorSubTab === 'html' && (
+                        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-3">
+                          <div className="flex items-center justify-between text-xs text-slate-400">
+                            <span>خام HTML کوڈ ایڈیٹر</span>
+                            <button
+                              type="button"
+                              onClick={() => setPdfEditorSubTab('studio')}
+                              className="text-emerald-400 hover:underline font-bold"
+                            >
+                              ← کتب سٹوڈیو پر واپس جائیں
+                            </button>
+                          </div>
+                          <textarea
+                            rows="18"
+                            value={pageForm.content}
+                            onChange={(e) => setPageForm({ ...pageForm, content: e.target.value })}
+                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 text-emerald-400 font-mono text-xs leading-relaxed focus:outline-none focus:border-emerald-500 text-left dir-ltr"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* Visual / Code / Preview Container */
+                    <div className="bg-slate-950 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+                    
+                    {/* TinyMCE-Style Rich Formatting Toolbar */}
+                    {pageEditorMode === 'visual' && (
+                      <div className="bg-slate-900/95 border-b border-slate-800 p-2.5 flex flex-wrap items-center gap-1.5 text-slate-300 sticky top-0 z-20 backdrop-blur-sm">
+                        
+                        {/* Font Family */}
+                        <select
+                          value={pageEditorFont}
+                          onChange={(e) => {
+                            setPageEditorFont(e.target.value);
+                            if (pageVisualEditorRef.current) {
+                              pageVisualEditorRef.current.className = `w-full max-w-4xl bg-white text-slate-900 shadow-2xl rounded-2xl p-8 sm:p-12 min-h-[550px] outline-none leading-loose text-right article-rendered-content border border-slate-200 ${
+                                e.target.value === 'nastaliq' ? 'font-nastaliq text-xl' : e.target.value === 'simple' ? 'font-simple text-lg' : 'font-sans text-base'
+                              }`;
+                            }
+                          }}
+                          className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer font-bold"
+                        >
+                          <option value="nastaliq">خطِ نستعلیق (Urdu Nastaliq)</option>
+                          <option value="simple">سادہ اردو (Simple Urdu)</option>
+                          <option value="sans">English / Sans</option>
+                        </select>
+
+                        {/* Headings */}
+                        <select
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val) execUniversalCmd('formatBlock', val);
+                          }}
+                          defaultValue=""
+                          className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer"
+                        >
+                          <option value="">ہیڈنگ اسٹائل...</option>
+                          <option value="h1">ہیڈنگ 1 (H1 - مرکزی)</option>
+                          <option value="h2">ہیڈنگ 2 (H2 - بڑی سرخی)</option>
+                          <option value="h3">ہیڈنگ 3 (H3 - ذیلی سرخی)</option>
+                          <option value="p">پیراگراف (عام متن)</option>
+                          <option value="blockquote">اقتباس (Quote)</option>
+                        </select>
+
+                        <div className="h-4 w-[1px] bg-slate-700 mx-1"></div>
+
+                        {/* Text Color Dropdown Palette with Selection Preservation */}
+                        <div className="relative">
                           <button
                             type="button"
-                            onClick={() => handleEditArticle(art)}
-                            className="p-2 bg-blue-900/40 text-blue-300 hover:bg-blue-900/70 border border-blue-700 rounded-xl text-xs font-bold transition-colors flex items-center gap-1"
-                            title="ترمیم کریں (Edit)"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              saveCurrentSelection();
+                              setShowPageColorPalette(!showPageColorPalette);
+                              setShowPageBgPalette(false);
+                            }}
+                            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-2 py-1.5 rounded-lg border border-slate-700 text-xs font-bold text-white transition-colors"
+                            title="ٹیکسٹ کا رنگ تبدیل کریں"
                           >
-                            <Edit3 className="w-4 h-4" />
-                            <span className="hidden md:inline">ایڈٹ کریں</span>
+                            <Palette className="w-3.5 h-3.5 text-amber-400" />
+                            <span>رنگ</span>
                           </button>
 
-                          {/* Delete Button */}
+                          {showPageColorPalette && (
+                            <div 
+                              onMouseDown={(e) => e.preventDefault()}
+                              className="absolute top-full right-0 mt-2 bg-slate-900 border border-slate-700 rounded-2xl p-3 shadow-2xl z-50 w-64 space-y-2.5 text-right animate-in fade-in-50"
+                            >
+                              <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 border-b border-slate-800 pb-1.5">
+                                <span>ٹیکسٹ رنگ منتخب کریں</span>
+                                <input
+                                  type="color"
+                                  defaultValue="#0f172a"
+                                  onChange={(e) => {
+                                    applyTextColor(e.target.value);
+                                  }}
+                                  className="w-5 h-5 bg-transparent border-0 cursor-pointer rounded"
+                                  title="کسٹم رنگ چنیں"
+                                />
+                              </div>
+                              <div className="grid grid-cols-6 gap-1.5">
+                                {RICH_COLORS.map(c => (
+                                  <button
+                                    key={c.hex}
+                                    type="button"
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      applyTextColor(c.hex);
+                                      setShowPageColorPalette(false);
+                                    }}
+                                    className="w-7 h-7 rounded-lg border border-slate-700/80 hover:scale-110 hover:border-white transition-all flex items-center justify-center shadow-sm"
+                                    style={{ backgroundColor: c.hex }}
+                                    title={c.name}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Background Highlighter Dropdown */}
+                        <div className="relative">
                           <button
                             type="button"
-                            onClick={() => handleDeleteArticle(art.id)}
-                            className="p-2 bg-red-950 text-red-400 hover:bg-red-900/60 border border-red-800 rounded-xl transition-colors"
-                            title="ڈیلیٹ کریں"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              saveCurrentSelection();
+                              setShowPageBgPalette(!showPageBgPalette);
+                              setShowPageColorPalette(false);
+                            }}
+                            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-2 py-1.5 rounded-lg border border-slate-700 text-xs font-bold text-white transition-colors"
+                            title="بیک گراؤنڈ ہائی لائٹر"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Highlighter className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>ہائی لائٹ</span>
+                          </button>
+
+                          {showPageBgPalette && (
+                            <div 
+                              onMouseDown={(e) => e.preventDefault()}
+                              className="absolute top-full right-0 mt-2 bg-slate-900 border border-slate-700 rounded-2xl p-3 shadow-2xl z-50 w-64 space-y-2.5 text-right animate-in fade-in-50"
+                            >
+                              <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 border-b border-slate-800 pb-1.5">
+                                <span>ہائی لائٹر رنگ منتخب کریں</span>
+                                <input
+                                  type="color"
+                                  defaultValue="#047857"
+                                  onChange={(e) => {
+                                    applyBgColor(e.target.value);
+                                  }}
+                                  className="w-5 h-5 bg-transparent border-0 cursor-pointer rounded"
+                                  title="کسٹم ہائی لائٹر"
+                                />
+                              </div>
+                              <div className="grid grid-cols-6 gap-1.5">
+                                {RICH_COLORS.map(c => (
+                                  <button
+                                    key={c.hex}
+                                    type="button"
+                                    onMouseDown={(e) => {
+                                      e.preventDefault();
+                                      applyBgColor(c.hex);
+                                      setShowPageBgPalette(false);
+                                    }}
+                                    className="w-7 h-7 rounded-lg border border-slate-700/80 hover:scale-110 hover:border-white transition-all flex items-center justify-center shadow-sm"
+                                    style={{ backgroundColor: c.hex }}
+                                    title={c.name}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Instant Quick Color Swatches on Toolbar */}
+                        <div className="flex items-center gap-1 bg-slate-800/90 px-2 py-1 rounded-lg border border-slate-700">
+                          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyTextColor('#ffffff'); }} className="w-4 h-4 rounded-full bg-white border border-slate-400 hover:scale-125 transition-transform" title="سفید رنگ"></button>
+                          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyTextColor('#10b981'); }} className="w-4 h-4 rounded-full bg-emerald-500 hover:scale-125 transition-transform" title="زمردی سبز"></button>
+                          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyTextColor('#38bdf8'); }} className="w-4 h-4 rounded-full bg-sky-400 hover:scale-125 transition-transform" title="آسمانی نیلا"></button>
+                          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyTextColor('#ef4444'); }} className="w-4 h-4 rounded-full bg-red-500 hover:scale-125 transition-transform" title="سرخ رنگ"></button>
+                          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyTextColor('#f59e0b'); }} className="w-4 h-4 rounded-full bg-amber-500 hover:scale-125 transition-transform" title="سنہری رنگ"></button>
+                        </div>
+
+                        <div className="h-4 w-[1px] bg-slate-700 mx-1"></div>
+
+                        {/* Basic Formatting with onMouseDown preventDefault */}
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('bold'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="بولڈ (Ctrl+B)">
+                          <Bold className="w-4 h-4" />
+                        </button>
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('italic'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="اٹالک (Ctrl+I)">
+                          <Italic className="w-4 h-4" />
+                        </button>
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('underline'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="انڈر لائن (Ctrl+U)">
+                          <Underline className="w-4 h-4" />
+                        </button>
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('strikeThrough'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="سٹرائیک">
+                          <Strikethrough className="w-4 h-4" />
+                        </button>
+
+                        <div className="h-4 w-[1px] bg-slate-700 mx-1"></div>
+
+                        {/* Alignments with onMouseDown preventDefault */}
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('justifyRight'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="دائیں سیدھ">
+                          <AlignRight className="w-4 h-4" />
+                        </button>
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('justifyCenter'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="درمیان">
+                          <AlignCenter className="w-4 h-4" />
+                        </button>
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('justifyLeft'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="بائیں سیدھ">
+                          <AlignLeft className="w-4 h-4" />
+                        </button>
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('justifyFull'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="مکمل سیدھ (Justify)">
+                          <AlignJustify className="w-4 h-4" />
+                        </button>
+
+                        <div className="h-4 w-[1px] bg-slate-700 mx-1"></div>
+
+                        {/* Lists */}
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('insertUnorderedList'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="بلٹ لسٹ">
+                          <List className="w-4 h-4" />
+                        </button>
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('insertOrderedList'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="نمبر والی لسٹ">
+                          <ListOrdered className="w-4 h-4" />
+                        </button>
+
+                        <div className="h-4 w-[1px] bg-slate-700 mx-1"></div>
+
+                        {/* Link & Computer Image Upload */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const url = prompt('لنک درج کریں (URL):', 'https://');
+                            if (url) execUniversalCmd('createLink', url);
+                          }}
+                          className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white"
+                          title="لنک شامل کریں"
+                        >
+                          <LinkIcon className="w-4 h-4" />
+                        </button>
+
+                        {/* Upload Image directly into text from Computer */}
+                        <label className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-emerald-400 cursor-pointer flex items-center gap-1 border border-slate-700" title="کمپیوٹر سے تصویر شامل کریں">
+                          <ImageIcon className="w-4 h-4" />
+                          <span className="text-[10px] font-bold">+ تصویر</span>
+                          <input type="file" accept="image/*" onChange={handlePageInlineImageUpload} className="hidden" />
+                        </label>
+
+                        <button
+                          type="button"
+                          onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('insertHorizontalRule'); }}
+                          className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white"
+                          title="لائن لگائیں (Divider)"
+                        >
+                          <Minus className="w-4 h-4" />
+                        </button>
+
+                        {/* Mode Buttons on right */}
+                        <div className="mr-auto flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                          <button
+                            type="button"
+                            onClick={() => setPageEditorMode('visual')}
+                            className={`px-2.5 py-1 rounded text-[11px] font-bold ${pageEditorMode === 'visual' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                          >
+                            Visual (ویژول)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (pageVisualEditorRef.current) {
+                                setPageForm({ ...pageForm, content: pageVisualEditorRef.current.innerHTML });
+                              }
+                              setPageEditorMode('code');
+                            }}
+                            className={`px-2.5 py-1 rounded text-[11px] font-bold ${pageEditorMode === 'code' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                          >
+                            Code (کوڈ)
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Editor Editable Body - International Standard Clean White Paper */}
+                    {pageEditorMode === 'visual' && (
+                      <div className="bg-slate-950 p-4 sm:p-8 flex justify-center border-t border-slate-800/80">
+                        <div
+                          ref={pageVisualEditorRef}
+                          contentEditable
+                          onInput={() => {
+                            if (pageVisualEditorRef.current) {
+                              setPageForm(prev => ({ ...prev, content: pageVisualEditorRef.current.innerHTML }));
+                            }
+                            saveCurrentSelection();
+                          }}
+                          onMouseUp={saveCurrentSelection}
+                          onKeyUp={saveCurrentSelection}
+                          onSelect={saveCurrentSelection}
+                          className={`w-full max-w-4xl bg-white text-slate-900 shadow-2xl rounded-2xl p-8 sm:p-12 min-h-[550px] outline-none leading-loose text-right article-rendered-content border border-slate-200 transition-all focus:ring-4 focus:ring-blue-500/20 ${
+                            pageEditorFont === 'nastaliq' ? 'font-nastaliq text-xl' : pageEditorFont === 'simple' ? 'font-simple text-lg' : 'font-sans text-base'
+                          }`}
+                          style={{ minHeight: '550px', color: '#0f172a', backgroundColor: '#ffffff' }}
+                        />
+                      </div>
+                    )}
+
+                    {/* HTML Code Editor Mode */}
+                    {pageEditorMode === 'code' && (
+                      <div className="p-4 bg-slate-950">
+                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-xs text-slate-400">
+                          <span>HTML سورس کوڈ ایڈیٹر</span>
+                          <button
+                            type="button"
+                            onClick={() => setPageEditorMode('visual')}
+                            className="text-blue-400 hover:underline font-bold"
+                          >
+                            ویژول موڈ پر واپس جائیں
+                          </button>
+                        </div>
+                        <textarea
+                          rows="16"
+                          value={pageForm.content}
+                          onChange={(e) => setPageForm({ ...pageForm, content: e.target.value })}
+                          className="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 text-emerald-400 font-mono text-xs leading-relaxed focus:outline-none focus:border-blue-500 text-left dir-ltr"
+                        />
+                      </div>
+                    )}
+
+                    {/* Preview Mode */}
+                    {pageEditorMode === 'preview' && (
+                      <div className="p-8 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-[400px]">
+                        <h1 className="text-3xl font-bold font-h1 border-b pb-4 mb-6">{pageForm.title || 'صفحے کا عنوان'}</h1>
+                        <div 
+                          className="article-rendered-content text-base leading-relaxed font-nastaliq"
+                          dangerouslySetInnerHTML={{ __html: pageForm.content }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                  {/* Add / Edit Book Modal */}
+                  {showBookModal && (
+                    <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in-50">
+                      <div className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-right font-sans">
+                        
+                        {/* Modal Header */}
+                        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/80">
+                          <div className="flex items-center gap-2.5">
+                            <div className="p-2 bg-emerald-600/20 text-emerald-400 rounded-xl">
+                              <BookOpen className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <h3 className="text-base font-bold text-white font-simple">
+                                {editingBookIndex !== null ? 'کتاب کی تفصیلات میں ترمیم (Edit Book)' : 'نئی کتاب شامل کریں (Add New Book)'}
+                              </h3>
+                              <p className="text-[11px] text-slate-400">
+                                عنوان، سرورق، مصنف، پی ڈی ایف اور دیگر تفصیلات درج فرمائیں
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => { setShowBookModal(false); setEditingBookIndex(null); }}
+                            className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+
+                        {/* Modal Body Form */}
+                        <div className="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
+                          
+                          {/* Book Title */}
+                          <div>
+                            <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                              کتاب کا عنوان (Book Title) *
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={bookModalForm.title}
+                              onChange={(e) => setBookModalForm({ ...bookModalForm, title: e.target.value })}
+                              placeholder="مثلاً: کلیات تحقیقات صابر ملتانی"
+                              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:border-emerald-500 outline-none font-h2"
+                            />
+                          </div>
+
+                          {/* Author & Category in 2 columns */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                                مصنف / محقق کا نام *
+                              </label>
+                              <input
+                                type="text"
+                                required
+                                value={bookModalForm.author}
+                                onChange={(e) => setBookModalForm({ ...bookModalForm, author: e.target.value })}
+                                placeholder="مثلاً: حکیم دوست محمد صابر ملتانی"
+                                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs focus:border-emerald-500 outline-none"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                                شعبہ / کیٹگری *
+                              </label>
+                              <select
+                                value={bookModalForm.category}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  let en = 'qanoon';
+                                  if (val.includes('تراجم')) en = 'translations';
+                                  else if (val.includes('تشخیص')) en = 'diagnosis';
+                                  else if (val.includes('ادویات')) en = 'herbs';
+                                  else if (val.includes('صحت')) en = 'health';
+                                  setBookModalForm({ ...bookModalForm, category: val, categoryEn: en });
+                                }}
+                                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs focus:border-emerald-500 outline-none font-simple"
+                              >
+                                <option value="قانون مفرد اعضاء">قانون مفرد اعضاء</option>
+                                <option value="تراجم طب پاکستانی">تراجم طب پاکستانی</option>
+                                <option value="تشخیص و لیبارٹری">تشخیص و لیبارٹری</option>
+                                <option value="ادویات و فارماکوپیا">ادویات و فارماکوپیا</option>
+                                <option value="صحت و مطب">صحت و مطب</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          {/* Language & Edition Tag in 2 columns */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                                کتاب کی زبان
+                              </label>
+                              <select
+                                value={bookModalForm.language}
+                                onChange={(e) => setBookModalForm({ ...bookModalForm, language: e.target.value })}
+                                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs focus:border-emerald-500 outline-none"
+                              >
+                                <option value="Urdu">اردو (Urdu)</option>
+                                <option value="English">انگریزی (English)</option>
+                                <option value="Arabic">عربی (Arabic)</option>
+                                <option value="Persian">فارسی (Persian)</option>
+                                <option value="Hindi">ہندی (Hindi)</option>
+                                <option value="Chinese">چینی (Chinese)</option>
+                                <option value="Urdu/English">اردو و انگریزی (Mixed)</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                                نوعیت / صفحات کا ٹیگ
+                              </label>
+                              <input
+                                type="text"
+                                value={bookModalForm.pages}
+                                onChange={(e) => setBookModalForm({ ...bookModalForm, pages: e.target.value })}
+                                placeholder="مثلاً: مختصر و جامع، کلاسیک شاہکار، علم النبض"
+                                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs focus:border-emerald-500 outline-none"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Cover Image Upload & URL with Preview */}
+                          <div className="space-y-2 bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                            <label className="block text-xs font-bold text-slate-300 font-simple">
+                              کتاب کا سرورق / کور تصویر (Book Cover)
+                            </label>
+                            <div className="flex flex-col sm:flex-row items-center gap-3">
+                              <div className="w-16 h-22 rounded-xl bg-slate-900 border border-slate-700 overflow-hidden shrink-0 shadow-md">
+                                <img
+                                  src={bookModalForm.image || '/images/books/tib-e-pakistani-urdu.jpg'}
+                                  alt="Book Cover Preview"
+                                  className="w-full h-full object-cover object-top"
+                                  onError={(e) => { e.target.onerror = null; e.target.src = '/images/books/tib-e-pakistani-urdu.jpg'; }}
+                                />
+                              </div>
+                              
+                              <div className="space-y-2 flex-1 w-full">
+                                <input
+                                  type="text"
+                                  value={bookModalForm.image}
+                                  onChange={(e) => setBookModalForm({ ...bookModalForm, image: e.target.value })}
+                                  placeholder="تصویر کا لوکل پاتھ یا انٹرنیٹ URL (مثلاً: /images/books/mybook.jpg)"
+                                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none text-left dir-ltr font-mono"
+                                />
+
+                                <div className="flex items-center gap-2">
+                                  <label className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 rounded-xl text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 font-simple">
+                                    <UploadCloud className="w-3.5 h-3.5 text-blue-400" />
+                                    <span>کمپیوٹر سے کور تصویر منتخب کریں</span>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={async (e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          const url = await uploadImageApi(file);
+                                          if (url) {
+                                            setBookModalForm(prev => ({ ...prev, image: url }));
+                                            showNotification('کور تصویر کامیابی سے اپلوڈ ہو گئی!');
+                                          }
+                                        }
+                                      }}
+                                      className="hidden"
+                                    />
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Download URL & Embed Reader URL */}
+                          <div className="space-y-3">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                                پی ڈی ایف کا ڈاؤن لوڈ لنک (Download PDF URL) *
+                              </label>
+                              <input
+                                type="url"
+                                required
+                                value={bookModalForm.downloadUrl}
+                                onChange={(e) => setBookModalForm({ ...bookModalForm, downloadUrl: e.target.value })}
+                                placeholder="https://archive.org/download/... یا گوگل ڈرائیو ڈاؤن لوڈ لنک"
+                                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-emerald-400 text-xs focus:border-emerald-500 outline-none text-left dir-ltr font-mono"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                                آن لائن ریڈر لنک (Online Reader Embed URL - اختیاری)
+                              </label>
+                              <input
+                                type="url"
+                                value={bookModalForm.embedUrl}
+                                onChange={(e) => setBookModalForm({ ...bookModalForm, embedUrl: e.target.value })}
+                                placeholder="https://archive.org/embed/... یا گوگل ڈرائیو پریویو لنک"
+                                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-blue-400 text-xs focus:border-emerald-500 outline-none text-left dir-ltr font-mono"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Description */}
+                          <div>
+                            <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                              کتاب کا مختصر تعارف / تفصیل (Description)
+                            </label>
+                            <textarea
+                              rows="3"
+                              value={bookModalForm.description}
+                              onChange={(e) => setBookModalForm({ ...bookModalForm, description: e.target.value })}
+                              placeholder="کتاب کے اہم موضوعات، ابواب یا خصوصیات کا تعارف..."
+                              className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-xs focus:border-emerald-500 outline-none leading-relaxed font-nastaliq"
+                            />
+                          </div>
+
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="p-4 sm:p-5 border-t border-slate-800 bg-slate-950 flex items-center justify-between gap-3">
+                          <button
+                            type="button"
+                            onClick={() => { setShowBookModal(false); setEditingBookIndex(null); }}
+                            className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all font-simple cursor-pointer"
+                          >
+                            منسوخ کریں
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleSaveBookModal}
+                            className="px-7 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-900/30 transition-all font-simple flex items-center gap-2 cursor-pointer"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>کتاب محفوظ کریں</span>
                           </button>
                         </div>
 
                       </div>
-                    );
-                  })
-                )}
+                    </div>
+                  )}
+
+                </div>
+
+                {/* 2. SIDEBAR OPTIONS */}
+                <div className="w-full lg:w-72 space-y-4">
+                  
+                  {/* Status & Publish */}
+                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-lg">
+                    <h3 className="text-xs font-bold text-slate-300 font-simple border-b border-slate-800 pb-2">
+                      پبلشنگ اسٹیٹس (Publish Status)
+                    </h3>
+                    
+                    <div>
+                      <label className="block text-[11px] text-slate-400 mb-1">اسٹیٹس</label>
+                      <select
+                        value={pageForm.status}
+                        onChange={(e) => setPageForm({ ...pageForm, status: e.target.value })}
+                        className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-2 outline-none font-bold"
+                      >
+                        <option value="published">پبلک (شائع شدہ / Live)</option>
+                        <option value="draft">ڈرافٹ (غیر شائع)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] text-slate-400 mb-1">مصنف (Author)</label>
+                      <input
+                        type="text"
+                        value={pageForm.author || ''}
+                        onChange={(e) => setPageForm({ ...pageForm, author: e.target.value })}
+                        className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-2 outline-none"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleSavePage}
+                      className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-all shadow-md mt-2 flex items-center justify-center gap-2"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>{editingPageId ? 'تبدیلیاں محفوظ کریں' : 'صفحہ پبلش کریں'}</span>
+                    </button>
+                  </div>
+
+                  {/* Featured Image */}
+                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-lg">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                      <h3 className="text-xs font-bold text-slate-300 font-simple">
+                        نمایاں تصویر (Featured Image)
+                      </h3>
+                      {pageForm.featuredImage && (
+                        <button
+                          type="button"
+                          onClick={() => setPageForm({ ...pageForm, featuredImage: '' })}
+                          className="text-[10px] text-red-400 hover:text-red-300 font-bold"
+                        >
+                          تصویر ہٹائیں
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Upload from Computer Button */}
+                    <label className="w-full py-2.5 px-3 bg-slate-900 hover:bg-slate-800 border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-xl cursor-pointer text-center flex flex-col items-center justify-center gap-1 transition-all">
+                      <UploadCloud className="w-5 h-5 text-blue-400" />
+                      <span className="text-xs font-bold text-slate-200 font-simple">کمپیوٹر سے تصویر اپلوڈ کریں</span>
+                      <span className="text-[10px] text-slate-500">JPG, PNG, WebP فارمیٹس</span>
+                      <input type="file" accept="image/*" onChange={handlePageFeaturedImageUpload} className="hidden" />
+                    </label>
+
+                    {/* Or URL input */}
+                    <div>
+                      <span className="text-[10px] text-slate-500 block mb-1">یا انٹرنیٹ سے تصویر کا لنک (URL):</span>
+                      <input
+                        type="text"
+                        value={pageForm.featuredImage || ''}
+                        onChange={(e) => setPageForm({ ...pageForm, featuredImage: e.target.value })}
+                        placeholder="https://example.com/image.jpg"
+                        className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-2 outline-none text-left dir-ltr"
+                      />
+                    </div>
+
+                    {pageForm.featuredImage && (
+                      <div className="relative rounded-xl overflow-hidden border border-slate-800">
+                        <img src={pageForm.featuredImage} alt="Featured Preview" className="w-full h-36 object-cover" />
+                      </div>
+                    )}
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+          )}
+
+
+          {/* VIEW: PAGES MANAGEMENT (WORDPRESS STYLE) */}
+          {/* ========================================================= */}
+          {adminTab === 'pages' && (
+            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+              
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white font-simple flex items-center gap-3">
+                    <BookOpen className="w-6 h-6 text-blue-400" />
+                    <span>صفحات (Pages)</span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1 font-sans">
+                    ویب سائٹ کے تمام جامد صفحات (پرائیویسی، ہمارے بارے میں، رابطہ وغیرہ) کی ترامیم اور کنٹرول
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleOpenNewPage}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md font-simple"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>نیا صفحہ بنائیں (Add New Page)</span>
+                </button>
+              </div>
+
+              {/* Pages WordPress Style Table */}
+              <div className="border border-slate-800 rounded-2xl overflow-hidden bg-slate-900/30">
+                <table className="w-full text-right text-sm text-slate-300 font-sans">
+                  <thead className="text-xs text-slate-400 border-b border-slate-800 bg-slate-900/80">
+                    <tr>
+                      <th className="px-4 py-3.5 w-10 text-center"><input type="checkbox" className="rounded border-slate-700 bg-slate-800" /></th>
+                      <th className="px-4 py-3.5 font-bold text-slate-200">Title</th>
+                      <th className="px-4 py-3.5 font-bold text-slate-200">Author</th>
+                      <th className="px-4 py-3.5 font-bold text-slate-200">Slug</th>
+                      <th className="px-4 py-3.5 font-bold text-slate-200">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/80">
+                    {pagesList.map(page => (
+                      <tr key={page.id} className="hover:bg-slate-800/40 transition-colors group">
+                        <td className="px-4 py-4 text-center">
+                          <input type="checkbox" className="rounded border-slate-700 bg-slate-800" />
+                        </td>
+                        <td className="px-4 py-4">
+                          <span onClick={() => handleEditPage(page)} className="font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer font-h2 text-base">
+                            {page.level === 2 ? '— — ' : page.level === 1 ? '— ' : ''}{page.title}
+                          </span>
+                          <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+                            <span onClick={() => handleEditPage(page)} className="text-blue-500 hover:text-blue-400 cursor-pointer hover:underline">Edit</span>
+                            <span onClick={() => {
+                              if (window.confirm('کیا آپ واقعی یہ صفحہ ڈیلیٹ کرنا چاہتے ہیں؟')) {
+                                setPagesList(prev => prev.filter(p => p.id !== page.id));
+                                showNotification('صفحہ ڈیلیٹ کر دیا گیا');
+                              }
+                            }} className="text-red-500 hover:text-red-400 cursor-pointer hover:underline">Trash</span>
+                            <a href={`/${page.slug}`} target="_blank" rel="noreferrer" className="text-emerald-500 hover:text-emerald-400 hover:underline">View</a>
+                          </div>
+                        </td>
+                        <td className="px-4 py-4 text-xs font-bold text-slate-300">
+                          {page.author || 'syed abdul wahab shah'}
+                        </td>
+                        <td className="px-4 py-4 text-xs font-mono text-slate-400">
+                          /{page.slug}
+                        </td>
+                        <td className="px-4 py-4 text-xs text-slate-400">
+                          Published<br />
+                          {page.date}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
 
             </div>
           )}
 
           {/* ========================================================= */}
-          {/* VIEW 3: DOCTORS APPROVAL & CLINICS MANAGEMENT */}
+          {/* VIEW: GLOSSARY / فرہنگِ اطباء MANAGEMENT */}
           {/* ========================================================= */}
-          {adminTab === 'doctors' && (() => {
+          {adminTab === 'glossary' && (() => {
+            const URDU_LETTERS = [
+              'سب', 'آ', 'ا', 'ب', 'پ', 'ت', 'ٹ', 'ث', 'ج', 'چ', 'ح', 'خ', 
+              'د', 'ڈ', 'ذ', 'ر', 'ڑ', 'ز', 'ژ', 'س', 'ش', 'ص', 'ض', 'ط', 
+              'ظ', 'ع', 'غ', 'ف', 'ق', 'ک', 'گ', 'ل', 'م', 'ن', 'و', 'ہ', 'ی'
+            ];
+
+            const filteredGlossary = glossaryList.filter(item => {
+              if (!item) return false;
+              const matchesSearch = !glossarySearch.trim() || 
+                (item.term && item.term.toLowerCase().includes(glossarySearch.toLowerCase())) ||
+                (item.shortDefinition && item.shortDefinition.toLowerCase().includes(glossarySearch.toLowerCase())) ||
+                (item.slug && item.slug.toLowerCase().includes(glossarySearch.toLowerCase()));
+              
+              if (!matchesSearch) return false;
+
+              if (glossaryLetterFilter && glossaryLetterFilter !== 'all' && glossaryLetterFilter !== 'سب') {
+                const firstChar = (item.term || '').trim().charAt(0);
+                if (glossaryLetterFilter === 'ا' && (firstChar === 'ا' || firstChar === 'آ' || firstChar === 'إ' || firstChar === 'أ')) return true;
+                if (glossaryLetterFilter === 'ی' && (firstChar === 'ی' || firstChar === 'ے' || firstChar === 'ي')) return true;
+                if (glossaryLetterFilter === 'ک' && (firstChar === 'ک' || firstChar === 'ك')) return true;
+                if (glossaryLetterFilter === 'ہ' && (firstChar === 'ہ' || firstChar === 'ھ' || firstChar === 'ة')) return true;
+                return firstChar === glossaryLetterFilter;
+              }
+
+              return true;
+            });
+
+            const handleOpenAddGlossary = () => {
+              setEditingGlossaryTerm(null);
+              setGlossaryForm({
+                term: '',
+                slug: '',
+                shortDefinition: '',
+                content: ''
+              });
+              setIsGlossaryModalOpen(true);
+            };
+
+            const handleOpenEditGlossary = (item) => {
+              setEditingGlossaryTerm(item);
+              let plainDef = item.shortDefinition || '';
+              if (!plainDef && item.content) {
+                plainDef = item.content.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+              }
+
+              // Convert raw HTML into clean readable text for the editor
+              let cleanContentText = (item.content || '')
+                .replace(/<h[1-6][^>]*>(.*?)<\/h[1-6]>/gi, '$1\n\n')
+                .replace(/<\/p>/gi, '\n\n')
+                .replace(/<br\s*[\/]?>/gi, '\n')
+                .replace(/<[^>]+>/g, '')
+                .replace(/&nbsp;/g, ' ')
+                .replace(/&amp;/g, '&')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'")
+                .replace(/\n\s*\n\s*\n/g, '\n\n')
+                .trim();
+
+              if (!cleanContentText) {
+                cleanContentText = plainDef;
+              }
+
+              let decodedSlug = item.slug || '';
+              try {
+                decodedSlug = decodeURIComponent(decodedSlug);
+              } catch(e) {}
+
+              setGlossaryForm({
+                term: item.term || '',
+                slug: decodedSlug,
+                shortDefinition: plainDef.replace(/<[^>]+>/g, '').trim(),
+                content: cleanContentText
+              });
+              setIsGlossaryModalOpen(true);
+            };
+
+            const handleDeleteGlossary = (itemToDelete) => {
+              if (window.confirm(`کیا آپ واقعی اصطلاح "${itemToDelete.term}" کو فرہنگِ اطباء سے ڈیلیٹ کرنا چاہتے ہیں؟`)) {
+                const updated = glossaryList.filter(g => g.id !== itemToDelete.id && g.slug !== itemToDelete.slug && g.term !== itemToDelete.term);
+                updateAndSaveGlossary(updated);
+                showNotification(`اصطلاح "${itemToDelete.term}" حذف کر دی گئی ہے۔`);
+              }
+            };
+
+            const handleSaveGlossaryForm = (e) => {
+              e.preventDefault();
+              if (!glossaryForm.term.trim()) {
+                alert('براہ کرم اصطلاح کا نام درج فرمائیں۔');
+                return;
+              }
+
+              const cleanTerm = glossaryForm.term.trim();
+              let cleanSlug = glossaryForm.slug.trim() || generateSlugFromTitle(cleanTerm) || cleanTerm;
+              try {
+                cleanSlug = decodeURIComponent(cleanSlug);
+              } catch(e) {}
+
+              const cleanShort = glossaryForm.shortDefinition.replace(/<[^>]+>/g, '').trim() || cleanTerm;
+              
+              // Format clean content into structured clean HTML paragraphs without raw tags or styles
+              const rawContentInput = glossaryForm.content.trim();
+              let cleanContentHtml = '';
+              if (rawContentInput.includes('<p>') || rawContentInput.includes('<h3>')) {
+                cleanContentHtml = rawContentInput;
+              } else {
+                // Format plain paragraphs
+                cleanContentHtml = rawContentInput
+                  .split(/\n\s*\n/)
+                  .map(p => p.trim())
+                  .filter(Boolean)
+                  .map(p => `<p>${p.replace(/\n/g, '<br />')}</p>`)
+                  .join('\n');
+              }
+
+              if (!cleanContentHtml) {
+                cleanContentHtml = `<p>${cleanShort}</p>`;
+              }
+
+              if (editingGlossaryTerm) {
+                const updated = glossaryList.map(item => {
+                  if (item.id === editingGlossaryTerm.id || item.slug === editingGlossaryTerm.slug || item.term === editingGlossaryTerm.term) {
+                    return {
+                      ...item,
+                      term: cleanTerm,
+                      slug: cleanSlug,
+                      shortDefinition: cleanShort,
+                      content: cleanContentHtml,
+                      date: item.date || new Date().toISOString().split('T')[0]
+                    };
+                  }
+                  return item;
+                });
+                updateAndSaveGlossary(updated);
+                showNotification(`اصطلاح "${cleanTerm}" میں کامیابی سے ترمیم کر لی گئی۔`);
+              } else {
+                const newItem = {
+                  id: Date.now(),
+                  term: cleanTerm,
+                  slug: cleanSlug,
+                  shortDefinition: cleanShort,
+                  content: cleanContentHtml,
+                  date: new Date().toISOString().split('T')[0]
+                };
+                const updated = [newItem, ...glossaryList];
+                updateAndSaveGlossary(updated);
+                showNotification(`نئی اصطلاح "${cleanTerm}" فرہنگِ اطباء میں شامل ہو گئی۔`);
+              }
+
+              setIsGlossaryModalOpen(false);
+            };
+
+            return (
+              <div className="space-y-6">
+                
+                {/* Header & Actions */}
+                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">📖</span>
+                      <h2 className="text-xl font-bold text-white font-simple">فرہنگِ اطباء (Medical Glossary Studio)</h2>
+                    </div>
+                    <p className="text-xs text-slate-400 font-nastaliq">
+                      طبی مضامین میں ان تمام اصطلاحات پر خودکار ڈاٹڈ لائن اور ٹول ٹپ ظاہر ہوگی، اور کلک کرنے پر اس کا مکمل صفحہ کھلے گا۔
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2.5">
+                    <a
+                      href="/farhang"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>لائیو فرہنگ دیکھیں</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={handleOpenAddGlossary}
+                      className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 font-simple cursor-pointer"
+                    >
+                      <PlusCircle className="w-4 h-4" />
+                      <span>+ نئی اصطلاح شامل کریں</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick Statistics Bar */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-right">
+                  <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+                    <span className="text-[11px] text-slate-400 block font-simple">کل اصطلاحات:</span>
+                    <strong className="text-2xl font-bold text-white font-sans">{glossaryList.length}</strong>
+                  </div>
+                  <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+                    <span className="text-[11px] text-slate-400 block font-simple">فلٹر شدہ اصطلاحات:</span>
+                    <strong className="text-2xl font-bold text-emerald-400 font-sans">{filteredGlossary.length}</strong>
+                  </div>
+                  <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+                    <span className="text-[11px] text-slate-400 block font-simple">خودکار ٹول ٹپس:</span>
+                    <strong className="text-2xl font-bold text-blue-400 font-sans">فعال (Active)</strong>
+                  </div>
+                  <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
+                    <span className="text-[11px] text-slate-400 block font-simple">گوگل رینکنگ / SEO:</span>
+                    <strong className="text-2xl font-bold text-amber-400 font-sans">Indexable</strong>
+                  </div>
+                </div>
+
+                {/* Filter & Search Bar */}
+                <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
+                    <div className="relative flex-1 w-full">
+                      <input
+                        type="text"
+                        value={glossarySearch}
+                        onChange={(e) => setGlossarySearch(e.target.value)}
+                        placeholder="اصطلاح، تعریف یا سلگ تلاش کریں (مثلاً: مفرح، استرخا، ریاح)..."
+                        className="w-full bg-slate-950 border border-slate-700 rounded-xl pr-10 pl-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                      />
+                      <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-3 pointer-events-none" />
+                    </div>
+                    {glossarySearch && (
+                      <button
+                        type="button"
+                        onClick={() => setGlossarySearch('')}
+                        className="text-xs text-slate-400 hover:text-white px-3 py-2 bg-slate-800 rounded-xl transition-colors"
+                      >
+                        سرچ ختم کریں
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Urdu Alphabet Filter Pills */}
+                  <div className="flex flex-wrap items-center gap-1 pt-1 justify-start">
+                    {URDU_LETTERS.map(letter => {
+                      const isActive = (letter === 'سب' && (glossaryLetterFilter === 'all' || glossaryLetterFilter === 'سب')) || glossaryLetterFilter === letter;
+                      return (
+                        <button
+                          key={letter}
+                          type="button"
+                          onClick={() => setGlossaryLetterFilter(letter === 'سب' ? 'all' : letter)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                            isActive 
+                              ? 'bg-emerald-600 text-white shadow-xs' 
+                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
+                          }`}
+                        >
+                          {letter}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Glossary Table */}
+                <div className="border border-slate-800 rounded-2xl overflow-hidden bg-slate-900/30">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-right text-sm text-slate-300 font-sans">
+                      <thead className="text-xs text-slate-400 border-b border-slate-800 bg-slate-900/80">
+                        <tr>
+                          <th className="px-4 py-3.5 w-12 text-center">#</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-200">اصطلاح (Term)</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-200">مختصر تعریف (Tooltip Preview)</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-200">URL سلگ</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-200 w-36 text-center">ایکشنز</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/80">
+                        {filteredGlossary.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-simple">
+                              کوئی اصطلاح نہیں ملی۔ تلاش کا لفظ تبدیل کریں یا نئی اصطلاح شامل کریں۔
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredGlossary.map((item, index) => (
+                            <tr key={item.id || item.slug || index} className="hover:bg-slate-800/40 transition-colors group">
+                              <td className="px-4 py-3.5 text-center text-xs text-slate-500 font-mono">
+                                {index + 1}
+                              </td>
+                              <td className="px-4 py-3.5">
+                                <span 
+                                  onClick={() => handleOpenEditGlossary(item)}
+                                  className="font-bold text-emerald-400 hover:text-emerald-300 hover:underline cursor-pointer font-h2 text-base block"
+                                >
+                                  {item.term}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3.5 max-w-md">
+                                <p className="text-xs text-slate-400 line-clamp-2 font-nastaliq leading-relaxed">
+                                  {item.shortDefinition || item.content?.replace(/<[^>]+>/g, ' ') || '—'}
+                                </p>
+                              </td>
+                              <td className="px-4 py-3.5 text-xs font-mono text-slate-400">
+                                /farhang/{item.slug || encodeURIComponent(item.term)}
+                              </td>
+                              <td className="px-4 py-3.5 text-center">
+                                <div className="flex items-center justify-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleOpenEditGlossary(item)}
+                                    className="p-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white rounded-lg transition-all"
+                                    title="ترمیم کریں"
+                                  >
+                                    <Edit3 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteGlossary(item)}
+                                    className="p-1.5 bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white rounded-lg transition-all"
+                                    title="ڈیلیٹ کریں"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <a
+                                    href={`/farhang/${item.slug || encodeURIComponent(item.term)}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="p-1.5 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white rounded-lg transition-all"
+                                    title="ویب سائٹ پر دیکھیں"
+                                  >
+                                    <Eye className="w-3.5 h-3.5" />
+                                  </a>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Add/Edit Modal */}
+                {isGlossaryModalOpen && (
+                  <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 w-full max-w-2xl text-right space-y-5 shadow-2xl animate-in fade-in zoom-in duration-200">
+                      
+                      <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <button
+                          type="button"
+                          onClick={() => setIsGlossaryModalOpen(false)}
+                          className="p-1.5 text-slate-400 hover:text-white bg-slate-800 rounded-full"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                        <h3 className="text-lg font-bold text-white font-simple flex items-center gap-2">
+                          <span>{editingGlossaryTerm ? 'اصطلاح میں ترمیم کریں' : 'نئی طبی اصطلاح شامل کریں'}</span>
+                          <span>📖</span>
+                        </h3>
+                      </div>
+
+                      <form onSubmit={handleSaveGlossaryForm} className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                            اصطلاح کا نام (مثلاً: مفرح، استرخا، ریاح، مسکن):
+                          </label>
+                          <input
+                            type="text"
+                            value={glossaryForm.term}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setGlossaryForm(prev => ({
+                                ...prev,
+                                term: val,
+                                slug: prev.slug ? prev.slug : generateSlugFromTitle(val)
+                              }));
+                            }}
+                            placeholder="طبی اصطلاح درج کریں..."
+                            required
+                            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                            URL سلگ (Clean Slug for SEO):
+                          </label>
+                          <input
+                            type="text"
+                            value={glossaryForm.slug}
+                            onChange={(e) => setGlossaryForm({ ...glossaryForm, slug: e.target.value })}
+                            placeholder="مثلاً: salabat یا صلابت"
+                            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-sans focus:outline-none focus:border-emerald-500"
+                            dir="auto"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                            مختصر تعریف (Tooltip Preview - جو ماؤس لے جانے پر پاپ اپ کارڈ میں نظر آئے گی):
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={glossaryForm.shortDefinition}
+                            onChange={(e) => setGlossaryForm({ ...glossaryForm, shortDefinition: e.target.value })}
+                            placeholder="سادہ 2-3 سطری خلاصہ..."
+                            className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white text-xs font-nastaliq leading-relaxed focus:outline-none focus:border-emerald-500"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                            مکمل تفصیلی تشریح و طبی افعال (Full Page Explanation):
+                          </label>
+                          <textarea
+                            rows={7}
+                            value={glossaryForm.content}
+                            onChange={(e) => setGlossaryForm({ ...glossaryForm, content: e.target.value })}
+                            placeholder="اصطلاح کی مکمل سائنسی و یونانی طبی تفصیل سادہ اردو پیراگراف میں درج کریں۔ (کوڈنگ یا HTML ٹیگز لکھنے کی ضرورت نہیں ہے)"
+                            className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white text-xs font-nastaliq leading-relaxed focus:outline-none focus:border-emerald-500"
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                          <button
+                            type="button"
+                            onClick={() => setIsGlossaryModalOpen(false)}
+                            className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors font-simple"
+                          >
+                            منسوخ کریں
+                          </button>
+                          <button
+                            type="submit"
+                            className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md font-simple flex items-center gap-1.5"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>محفوظ کریں</span>
+                          </button>
+                        </div>
+                      </form>
+
+                    </div>
+                  </div>
+                )}
+
+              </div>
+            );
+          })()}
+
+          {
+          adminTab === 'doctors' && (() => {
             const pendingDoctors = doctorsList.filter(d => d && (d.isApproved === false || d.status === 'pending'));
             const approvedDoctors = doctorsList.filter(d => d && (d.isApproved !== false && d.status !== 'pending'));
 
@@ -3054,23 +6905,60 @@ export default function AdminCMS({
             
             const handleEditDoctor = (docItem) => {
               setEditingDoctorId(docItem.id);
-              setDoctorForm({ ...docItem });
+              setDoctorForm({
+                ...docItem,
+                name: docItem.name || '',
+                title: docItem.title || '',
+                qualifications: docItem.qualifications || '',
+                registrationNumber: docItem.registrationNumber || '',
+                treatmentType: docItem.treatmentType || 'طب یونانی و قانون مفرد اعضاء',
+                clinicName: docItem.clinicName || '',
+                cityName: docItem.cityName || '',
+                address: docItem.address || '',
+                timing: docItem.timing || 'پیر تا ہفتہ: صبح 10:00 تا شام 7:00',
+                fee: docItem.fee || 500,
+                onlineFee: docItem.onlineFee || (docItem.fee ? docItem.fee + 300 : 800),
+                waitTime: docItem.waitTime || '15 منٹ سے کم',
+                experience: docItem.experience || 12,
+                rating: docItem.rating || 4.9,
+                reviewsCount: docItem.reviewsCount || 120,
+                phone: docItem.phone || '',
+                whatsapp: docItem.whatsapp || '',
+                email: docItem.email || '',
+                password: docItem.password || 'password123',
+                image: docItem.image || '',
+                about: docItem.about || '',
+                isVerified: !!docItem.isVerified,
+                isFeatured: !!docItem.isFeatured,
+                languages: Array.isArray(docItem.languages) ? [...docItem.languages] : ['اردو', 'پنجابی'],
+                memberships: Array.isArray(docItem.memberships) ? [...docItem.memberships] : ['قومی کونسل برائے طب (NCT)'],
+                conditions: Array.isArray(docItem.conditions) ? [...docItem.conditions] : ['معدے کی تیزابیت و السر', 'جوڑوں کا درد اور عرق النساء', 'دائمی قبض و آئی بی ایس'],
+                specialties: Array.isArray(docItem.specialties) ? [...docItem.specialties] : [],
+                services: Array.isArray(docItem.services) ? [...docItem.services] : [],
+                education: Array.isArray(docItem.education) ? JSON.parse(JSON.stringify(docItem.education)) : [],
+                experiences: Array.isArray(docItem.experiences) ? JSON.parse(JSON.stringify(docItem.experiences)) : [],
+                awards: Array.isArray(docItem.awards) ? JSON.parse(JSON.stringify(docItem.awards)) : [],
+                gallery: Array.isArray(docItem.gallery) ? [...docItem.gallery] : []
+              });
+              setDoctorEditTab('basic');
+              setNewSpecialtyInput('');
+              setNewServiceInput('');
+              setNewGalleryInput('');
+              setNewEduForm({ degree: '', institute: '', year: '' });
+              setNewExpForm({ companyName: '', jobTitle: '', duration: '', description: '' });
+              setNewAwardForm({ title: '', year: '' });
             };
 
             const handleSaveDoctor = async () => {
-              if (!editingDoctorId) return;
+              if (!editingDoctorId || !doctorForm) return;
               try {
-                // Here we update internal state
-                setDoctorsList(prev => prev.map(d => d.id === editingDoctorId ? { ...d, ...doctorForm } : d));
+                const updatedDocs = doctorsList.map(d => d.id === editingDoctorId ? { ...d, ...doctorForm } : d);
+                setDoctorsList(updatedDocs);
+                await saveDoctorsApi(updatedDocs);
                 try {
-                  const savedDocs = JSON.parse(localStorage.getItem('tabeeb_doctors_data_v1') || '[]');
-                  const updatedDocs = savedDocs.map(d => d.id === editingDoctorId ? { ...d, ...doctorForm } : d);
                   localStorage.setItem('tabeeb_doctors_data_v1', JSON.stringify(updatedDocs));
                 } catch(e) {}
-                
-                // If there's a Firebase backend, it should be updated here (assuming doc() and updateDoc() are available or similar to handleApproveDoctor)
-                // We leave it to the same mock/state strategy as the rest.
-                showNotification('طبیب کی تفصیلات اپڈیٹ ہو گئیں۔');
+                showNotification(`طبیب "${doctorForm.name || ''}" کی تمام تفصیلات کامیابی سے اپڈیٹ اور محفوظ ہو گئیں!`);
                 setEditingDoctorId(null);
                 setDoctorForm(null);
               } catch (error) {
@@ -3079,47 +6967,84 @@ export default function AdminCMS({
               }
             };
 
-
-            const handleRejectDoctor = (doctorId) => {
-              const docToReject = doctorsList.find(d => d.id === doctorId);
-              if (window.confirm(`کیا آپ واقعی ${docToReject?.name || 'اس طبیب'} کی رجسٹریشن درخواست مسترد اور حذف کرنا چاہتے ہیں؟`)) {
-                setDoctorsList(prev => prev.filter(d => d.id !== doctorId));
-                showNotification(`طبیب ${docToReject?.name || ''} کی درخواست مسترد کر دی گئی۔`);
+            const handleDeleteDoctor = async (doctorId) => {
+              const docToDelete = doctorsList.find(d => d.id === doctorId);
+              if (!docToDelete) return;
+              if (window.confirm(`کیا آپ واقعی طبیب "${docToDelete.name || ''}" کو مکمل طور پر حذف (Delete) کرنا چاہتے ہیں؟ یہ عمل واپس نہیں ہو سکے گا۔`)) {
+                try {
+                  const updatedDocs = doctorsList.filter(d => d.id !== doctorId);
+                  setDoctorsList(updatedDocs);
+                  await saveDoctorsApi(updatedDocs);
+                  try {
+                    localStorage.setItem('tabeeb_doctors_data_v1', JSON.stringify(updatedDocs));
+                  } catch(e) {}
+                  showNotification(`طبیب "${docToDelete.name || ''}" کو کامیابی سے ڈیلیٹ کر دیا گیا۔`);
+                  if (editingDoctorId === doctorId) {
+                    setEditingDoctorId(null);
+                    setDoctorForm(null);
+                  }
+                } catch (error) {
+                  console.error('Error deleting doctor:', error);
+                  showNotification('ڈیلیٹ کرنے میں خرابی پیش آئی: ' + error.message, 'error');
+                }
               }
             };
 
-            const handleToggleDoctorVerified = (doctorId) => {
-              setDoctorsList(prev => prev.map(d => {
+            const handleRejectDoctor = (doctorId) => {
+              handleDeleteDoctor(doctorId);
+            };
+
+            const handleToggleDoctorVerified = async (doctorId) => {
+              const updated = doctorsList.map(d => {
                 if (d.id === doctorId) {
                   return { ...d, isVerified: !d.isVerified };
                 }
                 return d;
-              }));
-              showNotification('ویریفیکیشن اسٹیٹس تبدیل کر دیا گیا');
+              });
+              setDoctorsList(updated);
+              await saveDoctorsApi(updated);
+              try {
+                localStorage.setItem('tabeeb_doctors_data_v1', JSON.stringify(updated));
+              } catch(e) {}
+              showNotification('ویریفیکیشن اسٹیٹس تبدیل اور محفوظ کر دیا گیا');
             };
 
-            const handleToggleDoctorFeatured = (doctorId) => {
-              setDoctorsList(prev => prev.map(d => {
+            const handleToggleDoctorFeatured = async (doctorId) => {
+              const updated = doctorsList.map(d => {
                 if (d.id === doctorId) {
                   return { ...d, isFeatured: !d.isFeatured };
                 }
                 return d;
-              }));
-              showNotification('ہوم پیج نمایاں اسٹیٹس تبدیل کر دیا گیا');
+              });
+              setDoctorsList(updated);
+              await saveDoctorsApi(updated);
+              try {
+                localStorage.setItem('tabeeb_doctors_data_v1', JSON.stringify(updated));
+              } catch(e) {}
+              showNotification('ہوم پیج نمایاں اسٹیٹس تبدیل اور محفوظ کر دیا گیا');
             };
 
-            const handleUnpublishDoctor = (doctorId) => {
+            const handleUnpublishDoctor = async (doctorId) => {
               const doc = doctorsList.find(d => d.id === doctorId);
               if (window.confirm(`کیا آپ ${doc?.name || 'اس طبیب'} کو غیر پبلش (زیرِ التواء) کرنا چاہتے ہیں؟`)) {
-                setDoctorsList(prev => prev.map(d => {
+                const updated = doctorsList.map(d => {
                   if (d.id === doctorId) {
                     return { ...d, isApproved: false, status: 'pending' };
                   }
                   return d;
-                }));
+                });
+                setDoctorsList(updated);
+                await saveDoctorsApi(updated);
+                try {
+                  localStorage.setItem('tabeeb_doctors_data_v1', JSON.stringify(updated));
+                } catch(e) {}
                 showNotification('طبیب کو پبلک ڈائریکٹری سے ہٹا دیا گیا');
               }
             };
+
+            const availableDoctorCities = Array.from(new Set(
+              doctorsList.map(d => (d?.cityName && typeof d.cityName === 'string' ? d.cityName.trim() : (d?.city && typeof d.city === 'string' ? d.city.trim() : ''))).filter(Boolean)
+            )).sort((a, b) => a.localeCompare(b, 'ur'));
 
             let currentList = doctorTabFilter === 'pending'
               ? pendingDoctors
@@ -3127,17 +7052,82 @@ export default function AdminCMS({
                 ? approvedDoctors
                 : doctorsList;
 
+            // Verified filter
+            if (doctorVerifiedFilter === 'verified') {
+              currentList = currentList.filter(d => d.isVerified === true || d.isVerified === '1' || d.isVerified === 'yes');
+            } else if (doctorVerifiedFilter === 'unverified') {
+              currentList = currentList.filter(d => !d.isVerified || d.isVerified === false || d.isVerified === '0' || d.isVerified === 'no');
+            }
+
+            // Featured filter
+            if (doctorFeaturedFilter === 'featured') {
+              currentList = currentList.filter(d => d.isFeatured === true || d.isFeatured === '1');
+            } else if (doctorFeaturedFilter === 'standard') {
+              currentList = currentList.filter(d => !d.isFeatured || d.isFeatured === false);
+            }
+
+            // City filter
+            if (doctorCityFilter !== 'all') {
+              currentList = currentList.filter(d => 
+                (d.cityName && d.cityName.trim() === doctorCityFilter) ||
+                (d.city && d.city.trim() === doctorCityFilter)
+              );
+            }
+
+            // Search filter
             if (doctorSearchFilter.trim()) {
               const q = doctorSearchFilter.trim().toLowerCase();
               currentList = currentList.filter(d => 
                 (d.name && d.name.toLowerCase().includes(q)) ||
                 (d.clinicName && d.clinicName.toLowerCase().includes(q)) ||
                 (d.cityName && d.cityName.toLowerCase().includes(q)) ||
+                (d.address && d.address.toLowerCase().includes(q)) ||
+                (d.qualifications && d.qualifications.toLowerCase().includes(q)) ||
+                (d.councilRegNo && d.councilRegNo.toLowerCase().includes(q)) ||
                 (d.email && d.email.toLowerCase().includes(q)) ||
                 (d.whatsapp && d.whatsapp.includes(q)) ||
                 (d.phone && d.phone.includes(q))
               );
             }
+
+            // Sort order
+            currentList = [...currentList].sort((a, b) => {
+              if (doctorSortOrder === 'name') {
+                return (a.name || '').localeCompare(b.name || '', 'ur');
+              }
+              if (doctorSortOrder === 'exp') {
+                return (Number(b.experience) || 0) - (Number(a.experience) || 0);
+              }
+              const idA = Number(a.id) || 0;
+              const idB = Number(b.id) || 0;
+              if (doctorSortOrder === 'oldest') {
+                return idA - idB;
+              }
+              // Default latest first
+              return idB - idA;
+            });
+
+            // WordPress-style Pagination Calculations
+            const totalFilteredDoctors = currentList.length;
+            const effectiveDoctorsPerPage = doctorsPerPage === 'all' ? Math.max(1, totalFilteredDoctors) : Number(doctorsPerPage);
+            const totalDoctorPages = Math.max(1, Math.ceil(totalFilteredDoctors / effectiveDoctorsPerPage));
+            const safeDoctorCurrentPage = Math.min(Math.max(1, doctorCurrentPage), totalDoctorPages);
+            const doctorStartIndex = doctorsPerPage === 'all' ? 0 : (safeDoctorCurrentPage - 1) * effectiveDoctorsPerPage;
+            const doctorEndIndex = doctorsPerPage === 'all' ? totalFilteredDoctors : Math.min(doctorStartIndex + effectiveDoctorsPerPage, totalFilteredDoctors);
+            const paginatedDoctors = currentList.slice(doctorStartIndex, doctorEndIndex);
+
+            const getDoctorPaginationPages = () => {
+              if (totalDoctorPages <= 7) {
+                return Array.from({ length: totalDoctorPages }, (_, i) => i + 1);
+              }
+              if (safeDoctorCurrentPage <= 4) {
+                return [1, 2, 3, 4, 5, '...', totalDoctorPages];
+              }
+              if (safeDoctorCurrentPage >= totalDoctorPages - 3) {
+                return [1, '...', totalDoctorPages - 4, totalDoctorPages - 3, totalDoctorPages - 2, totalDoctorPages - 1, totalDoctorPages];
+              }
+              return [1, '...', safeDoctorCurrentPage - 1, safeDoctorCurrentPage, safeDoctorCurrentPage + 1, '...', totalDoctorPages];
+            };
 
             return (
               <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
@@ -3252,11 +7242,22 @@ export default function AdminCMS({
                   </div>
                 </div>
 
-                {/* Sub-Tabs & Filters */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                  
-                  {/* Filter Pills */}
-                  <div className="flex items-center gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 font-simple text-xs">
+                {/* Sub-Tabs Row */}
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 font-simple text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setDoctorTabFilter('all')}
+                      className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 ${
+                        doctorTabFilter === 'all'
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <UserCheck className="w-4 h-4" />
+                      <span>تمام اطباء ({doctorsList.length})</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => setDoctorTabFilter('pending')}
@@ -3270,7 +7271,7 @@ export default function AdminCMS({
                       <span>نئی درخواستیں برائے منظوری</span>
                       {pendingDoctors.length > 0 && (
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-sans font-extrabold ${
-                          doctorTabFilter === 'pending' ? 'bg-slate-950 text-amber-400' : 'bg-amber-500/20 text-amber-300'
+                          doctorTabFilter === 'pending' ? 'bg-slate-950 text-amber-400' : 'bg-amber-500/20 text-amber-300 animate-pulse'
                         }`}>
                           {pendingDoctors.length} نئی
                         </span>
@@ -3289,37 +7290,187 @@ export default function AdminCMS({
                       <CheckCircle2 className="w-4 h-4" />
                       <span>منظور شدہ اطباء ({approvedDoctors.length})</span>
                     </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setDoctorTabFilter('all')}
-                      className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 ${
-                        doctorTabFilter === 'all'
-                          ? 'bg-blue-600 text-white shadow-md'
-                          : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      <span>تمام ({doctorsList.length})</span>
-                    </button>
                   </div>
 
-                  {/* Search input */}
-                  <div className="relative min-w-[220px]">
-                    <Search className="w-4 h-4 text-slate-500 absolute right-3 top-3" />
-                    <input
-                      type="text"
-                      value={doctorSearchFilter}
-                      onChange={(e) => setDoctorSearchFilter(e.target.value)}
-                      placeholder="ڈاکٹر، کلینک، شہر، فون سے تلاش کریں..."
-                      className="w-full bg-slate-900 border border-slate-800 rounded-xl pr-9 pl-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-simple"
-                    />
+                  {/* Active Filters Clear Button if filtered */}
+                  {(doctorSearchFilter || doctorVerifiedFilter !== 'all' || doctorFeaturedFilter !== 'all' || doctorCityFilter !== 'all' || doctorSortOrder !== 'latest') && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDoctorSearchFilter('');
+                        setDoctorVerifiedFilter('all');
+                        setDoctorFeaturedFilter('all');
+                        setDoctorCityFilter('all');
+                        setDoctorSortOrder('latest');
+                      }}
+                      className="text-xs text-amber-400 hover:text-amber-300 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-simple"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      <span>تمام فلٹرز ختم کریں</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* WordPress-style Doctors Filter & Pagination Toolbar */}
+                <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                  <div className="flex flex-wrap items-center gap-3">
+                    
+                    {/* Search Input */}
+                    <div className="relative min-w-[210px] flex-1 sm:flex-none">
+                      <Search className="w-4 h-4 text-slate-500 absolute right-3 top-2.5" />
+                      <input
+                        type="text"
+                        placeholder="ڈاکٹر، مطب، شہر، فون، رجسٹریشن..."
+                        value={doctorSearchFilter}
+                        onChange={(e) => setDoctorSearchFilter(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-700 rounded-xl pr-9 pl-8 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-sans"
+                      />
+                      {doctorSearchFilter && (
+                        <button
+                          type="button"
+                          onClick={() => setDoctorSearchFilter('')}
+                          className="absolute left-2.5 top-2.5 text-slate-500 hover:text-white"
+                          title="تلاش ختم کریں"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Verification Filter Dropdown */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-slate-400 font-sans">تصدیق:</span>
+                      <select
+                        value={doctorVerifiedFilter}
+                        onChange={(e) => setDoctorVerifiedFilter(e.target.value)}
+                        className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                      >
+                        <option value="all">تمام (تصدیق شدہ و غیر تصدیق شدہ)</option>
+                        <option value="verified">صرف تصدیق شدہ (Verified ✓)</option>
+                        <option value="unverified">صرف غیر تصدیق شدہ (Unverified ✗)</option>
+                      </select>
+                    </div>
+
+                    {/* Featured Filter Dropdown */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-slate-400 font-sans">نمایاں:</span>
+                      <select
+                        value={doctorFeaturedFilter}
+                        onChange={(e) => setDoctorFeaturedFilter(e.target.value)}
+                        className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                      >
+                        <option value="all">تمام اطباء</option>
+                        <option value="featured">صرف ہوم پیج پر نمایاں (Featured ★)</option>
+                        <option value="standard">عام اطباء (غیر نمایاں)</option>
+                      </select>
+                    </div>
+
+                    {/* City Filter Dropdown */}
+                    {availableDoctorCities.length > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-slate-400 font-sans">شہر:</span>
+                        <select
+                          value={doctorCityFilter}
+                          onChange={(e) => setDoctorCityFilter(e.target.value)}
+                          className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold max-w-[150px]"
+                        >
+                          <option value="all">تمام شہر ({availableDoctorCities.length})</option>
+                          {availableDoctorCities.map(city => (
+                            <option key={city} value={city}>{city}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Sort Order Selector */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-slate-400 font-sans">ترتیب:</span>
+                      <select
+                        value={doctorSortOrder}
+                        onChange={(e) => setDoctorSortOrder(e.target.value)}
+                        className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                      >
+                        <option value="latest">تازہ ترین پہلے (Latest First)</option>
+                        <option value="oldest">پرانے پہلے (Oldest First)</option>
+                        <option value="name">نام کے لحاظ سے (الف تا ے)</option>
+                        <option value="exp">تجربہ کے لحاظ سے (زیادہ تجربہ کار)</option>
+                      </select>
+                    </div>
+
+                    {/* Doctors Per Page Selector (Default 20, 50, 100, all) */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-slate-400 font-sans">فی صفحہ:</span>
+                      <select
+                        value={doctorsPerPage}
+                        onChange={(e) => {
+                          const val = e.target.value === 'all' ? 'all' : parseInt(e.target.value, 10);
+                          setDoctorsPerPage(val);
+                          try {
+                            localStorage.setItem('tabeeb_admin_doctors_per_page', String(val));
+                          } catch {}
+                        }}
+                        className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                      >
+                        <option value={20}>20 اطباء (ڈیفالٹ)</option>
+                        <option value={50}>50 اطباء</option>
+                        <option value={100}>100 اطباء</option>
+                        <option value="all">تمام اطباء (ایک ہی صفحے پر)</option>
+                      </select>
+                    </div>
+
+                  </div>
+
+                  {/* Top Pagination Summary & Quick Nav Buttons (WordPress Style) */}
+                  <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-slate-400 font-sans border-t lg:border-t-0 pt-2 lg:pt-0 border-slate-800">
+                    <span className="whitespace-nowrap">
+                      کل <strong className="text-white font-mono">{totalFilteredDoctors}</strong> اطباء | صفحہ <strong className="text-blue-400 font-mono">{safeDoctorCurrentPage}</strong> از <strong className="text-slate-200 font-mono">{totalDoctorPages}</strong>
+                    </span>
+                    
+                    <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                      <button
+                        type="button"
+                        disabled={safeDoctorCurrentPage <= 1}
+                        onClick={() => setDoctorCurrentPage(1)}
+                        title="پہلا صفحہ"
+                        className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                      >
+                        <ChevronsRight className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={safeDoctorCurrentPage <= 1}
+                        onClick={() => setDoctorCurrentPage(p => Math.max(1, p - 1))}
+                        title="پچھلا صفحہ"
+                        className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                      >
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={safeDoctorCurrentPage >= totalDoctorPages}
+                        onClick={() => setDoctorCurrentPage(p => Math.min(totalDoctorPages, p + 1))}
+                        title="اگلا صفحہ"
+                        className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={safeDoctorCurrentPage >= totalDoctorPages}
+                        onClick={() => setDoctorCurrentPage(totalDoctorPages)}
+                        title="آخری صفحہ"
+                        className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                      >
+                        <ChevronsLeft className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
 
                 </div>
 
                 {/* Content List */}
                 <div className="space-y-4">
-                  {currentList.length === 0 ? (
+                  {paginatedDoctors.length === 0 ? (
                     <div className="text-center py-12 bg-slate-900/50 rounded-3xl border border-slate-800 space-y-3">
                       <div className="w-12 h-12 rounded-2xl bg-slate-800 text-slate-500 mx-auto flex items-center justify-center">
                         <UserCheck className="w-6 h-6" />
@@ -3332,11 +7483,27 @@ export default function AdminCMS({
                       <p className="text-xs text-slate-500 font-simple">
                         {doctorTabFilter === 'pending'
                           ? 'جب بھی کوئی طبیب ای میل تصدیق کے ساتھ نیا فارم بھرے گا، وہ یہاں منظوری کے لیے ظاہر ہوگا۔'
-                          : 'براہ کرم سرچ فلٹر تبدیل کر کے دوبارہ کوشش کریں۔'}
+                          : 'براہ کرم تلاش یا فلٹرز تبدیل کر کے دوبارہ کوشش کریں۔'}
                       </p>
+                      {(doctorSearchFilter || doctorVerifiedFilter !== 'all' || doctorFeaturedFilter !== 'all' || doctorCityFilter !== 'all' || doctorSortOrder !== 'latest') && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDoctorSearchFilter('');
+                            setDoctorVerifiedFilter('all');
+                            setDoctorFeaturedFilter('all');
+                            setDoctorCityFilter('all');
+                            setDoctorSortOrder('latest');
+                          }}
+                          className="mt-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2 rounded-xl font-simple transition-colors inline-flex items-center gap-1.5"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          <span>تمام فلٹرز ختم کریں</span>
+                        </button>
+                      )}
                     </div>
                   ) : (
-                    currentList.map(doc => {
+                    paginatedDoctors.map((doc, docIdx) => {
                       const isPending = doc.isApproved === false || doc.status === 'pending';
 
                       return (
@@ -3353,13 +7520,18 @@ export default function AdminCMS({
                             
                             <div className="flex items-start gap-4">
                               <img
-                                src={doc.image || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=400&q=80'}
+                                src={doc.image || '/images/default_doctor.webp'}
                                 alt={doc.name}
-                                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-slate-700 shrink-0 bg-slate-800"
+                                onError={(e) => { e.target.onerror = null; e.target.src = '/images/default_doctor.webp'; }}
+                                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-slate-700 shrink-0 bg-white"
                               />
 
                               <div className="space-y-1">
                                 <div className="flex flex-wrap items-center gap-2">
+                                  <span className="text-[11px] font-mono font-bold text-slate-400 bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800">
+                                    #{doctorStartIndex + docIdx + 1}
+                                  </span>
+
                                   <h3 className="text-lg font-bold text-white font-simple">
                                     {doc.name}
                                   </h3>
@@ -3376,6 +7548,17 @@ export default function AdminCMS({
                                     </span>
                                   )}
 
+                                  {doc.isVerified ? (
+                                    <span className="bg-emerald-950/60 text-emerald-300 border border-emerald-800/80 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans flex items-center gap-1">
+                                      <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                                      <span>تصدیق شدہ معالج ✓</span>
+                                    </span>
+                                  ) : (
+                                    <span className="bg-amber-950/60 text-amber-300 border border-amber-800/80 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans">
+                                      غیر تصدیق شدہ
+                                    </span>
+                                  )}
+
                                   {doc.emailVerified && (
                                     <span className="bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans">
                                       ای میل تصدیق شدہ ✓
@@ -3383,8 +7566,9 @@ export default function AdminCMS({
                                   )}
 
                                   {doc.isFeatured && (
-                                    <span className="bg-purple-500/20 text-purple-300 border border-purple-400/30 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans">
-                                      ہوم پیج پر نمایاں ★
+                                    <span className="bg-purple-500/20 text-purple-300 border border-purple-400/30 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans flex items-center gap-1">
+                                      <Sparkles className="w-3 h-3 text-purple-400" />
+                                      <span>ہوم پیج پر نمایاں ★</span>
                                     </span>
                                   )}
                                 </div>
@@ -3566,135 +7750,1181 @@ export default function AdminCMS({
                   )}
                 </div>
 
+                {/* Bottom Comprehensive Pagination Bar for Doctors (WordPress Style) */}
+                {totalDoctorPages > 1 && (
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-800 text-xs text-slate-400 font-sans">
+                    {/* Range counter */}
+                    <div>
+                      اطباء <strong className="text-white font-mono">{doctorStartIndex + 1}</strong> تا <strong className="text-white font-mono">{doctorEndIndex}</strong> دکھائے جا رہے ہیں (کل <strong className="text-blue-400 font-mono">{totalFilteredDoctors}</strong> میں سے)
+                    </div>
+
+                    {/* Numbered Pagination & Arrows */}
+                    <div className="flex flex-wrap items-center justify-center gap-1.5">
+                      {/* Previous Button */}
+                      <button
+                        type="button"
+                        disabled={safeDoctorCurrentPage <= 1}
+                        onClick={() => setDoctorCurrentPage(p => Math.max(1, p - 1))}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 text-slate-200 transition-colors"
+                      >
+                        <ChevronRight className="w-3.5 h-3.5" />
+                        <span>پچھلا</span>
+                      </button>
+
+                      {/* Page Numbers */}
+                      {getDoctorPaginationPages().map((pNum, idx) => {
+                        if (pNum === '...') {
+                          return <span key={`doc-ellipsis-${idx}`} className="px-2 text-slate-500 font-mono">…</span>;
+                        }
+                        const isCurrent = pNum === safeDoctorCurrentPage;
+                        return (
+                          <button
+                            key={pNum}
+                            type="button"
+                            onClick={() => setDoctorCurrentPage(pNum)}
+                            className={`min-w-8 h-8 px-2.5 rounded-xl text-xs font-bold font-mono transition-all ${
+                              isCurrent
+                                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                                : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+                            }`}
+                          >
+                            {pNum}
+                          </button>
+                        );
+                      })}
+
+                      {/* Next Button */}
+                      <button
+                        type="button"
+                        disabled={safeDoctorCurrentPage >= totalDoctorPages}
+                        onClick={() => setDoctorCurrentPage(p => Math.min(totalDoctorPages, p + 1))}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 text-slate-200 transition-colors"
+                      >
+                        <span>اگلا</span>
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Jump directly to Page Number */}
+                    <div className="flex items-center gap-2">
+                      <span>صفحہ نمبر:</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max={totalDoctorPages}
+                        defaultValue={safeDoctorCurrentPage}
+                        key={safeDoctorCurrentPage}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            const val = parseInt(e.target.value, 10);
+                            if (!isNaN(val) && val >= 1 && val <= totalDoctorPages) {
+                              setDoctorCurrentPage(val);
+                            }
+                          }
+                        }}
+                        className="w-14 bg-slate-900 border border-slate-700 text-white rounded-lg px-2 py-1 text-center font-mono text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+                        title="نمبر لکھ کر Enter دبائیں"
+                      />
+                      <span>از {totalDoctorPages}</span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Edit Doctor Modal */}
                 {editingDoctorId && doctorForm && (
-                  <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
-                      <div className="p-4 border-b border-slate-800 flex items-center justify-between">
-                        <h3 className="text-lg font-bold text-white font-simple">طبیب کی تفصیلات تبدیل کریں</h3>
-                        <button onClick={() => { setEditingDoctorId(null); setDoctorForm(null); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors">
+                  <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+                    <div className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+                      
+                      {/* Modal Header */}
+                      <div className="p-4 sm:p-5 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between gap-4 shrink-0">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <img 
+                            src={doctorForm.image || "/images/default_doctor.webp"} 
+                            alt={doctorForm.name} 
+                            onError={(e) => { e.target.onerror = null; e.target.src = "/images/default_doctor.webp"; }}
+                            className="w-12 h-12 rounded-xl object-cover border border-slate-700 shrink-0 bg-white"
+                          />
+                          <div className="min-w-0 text-right">
+                            <h3 className="text-base sm:text-lg font-bold text-white font-simple truncate">
+                              طبیب کا پروفائل ایڈٹ کریں: {doctorForm.name}
+                            </h3>
+                            <div className="flex items-center justify-end gap-2 text-xs text-slate-400 font-sans mt-0.5">
+                              {doctorForm.registrationNumber && (
+                                <span className="text-emerald-400 font-mono font-bold" dir="ltr">{doctorForm.registrationNumber}</span>
+                              )}
+                              <span>• آئی ڈی: #{doctorForm.id}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button 
+                          onClick={() => { setEditingDoctorId(null); setDoctorForm(null); }} 
+                          className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-colors shrink-0"
+                        >
                           <X className="w-5 h-5" />
                         </button>
                       </div>
-                      
-                      <div className="p-4 overflow-y-auto space-y-4 font-simple text-sm">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-slate-400 mb-1 text-xs">نام</label>
-                            <input 
-                              type="text" 
-                              value={doctorForm.name || ''} 
-                              onChange={(e) => setDoctorForm({...doctorForm, name: e.target.value})}
-                              className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-blue-500 outline-none"
+
+                      {/* Navigation Sub-Tabs */}
+                      <div className="sticky top-0 z-20 flex items-center gap-1.5 overflow-x-auto p-2.5 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 text-xs font-simple no-scrollbar shrink-0 shadow-md">
+                        {[
+                          { id: 'basic', label: 'بنیادی معلومات', icon: UserCheck },
+                          { id: 'clinic', label: 'مطب، اوقات و رابطہ', icon: Building2 },
+                          { id: 'about', label: 'تعارف و طریقہ علاج', icon: FileText },
+                          { id: 'specialties', label: `تخصص و خدمات (${(doctorForm.specialties || []).length + (doctorForm.services || []).length})`, icon: Sparkles },
+                          { id: 'education', label: `اسناد و تعلیم (${(doctorForm.education || []).length})`, icon: GraduationCap },
+                          { id: 'experiences', label: `طبی تجربات (${(doctorForm.experiences || []).length})`, icon: Award },
+                          { id: 'awards', label: `اعزازات (${(doctorForm.awards || []).length})`, icon: Award },
+                          { id: 'gallery', label: `فوٹو گیلری (${(doctorForm.gallery || []).length})`, icon: ImageIcon }
+                        ].map(tab => {
+                          const Icon = tab.icon;
+                          const isActive = doctorEditTab === tab.id;
+                          return (
+                            <button
+                              key={tab.id}
+                              type="button"
+                              onClick={() => {
+                                setDoctorEditTab(tab.id);
+                                const el = document.getElementById(`admin-doc-${tab.id}`);
+                                if (el) {
+                                  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }
+                              }}
+                              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl whitespace-nowrap transition-all font-bold ${
+                                isActive 
+                                  ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-400/30' 
+                                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                              }`}
+                            >
+                              <Icon className="w-3.5 h-3.5" />
+                              <span>{tab.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Modal Scrollable Body */}
+                      <div 
+                        onScroll={(e) => {
+                          const container = e.currentTarget;
+                          const containerTop = container.getBoundingClientRect().top;
+                          const sectionIds = ['basic', 'clinic', 'about', 'specialties', 'education', 'experiences', 'awards', 'gallery'];
+                          for (let i = sectionIds.length - 1; i >= 0; i--) {
+                            const el = document.getElementById(`admin-doc-${sectionIds[i]}`);
+                            if (el) {
+                              const rect = el.getBoundingClientRect();
+                              if (rect.top - containerTop <= 130) {
+                                setDoctorEditTab(sectionIds[i]);
+                                break;
+                              }
+                            }
+                          }
+                        }}
+                        className="p-4 sm:p-6 overflow-y-auto space-y-6 font-simple text-sm flex-1 text-right scroll-smooth"
+                      >
+                        
+                        {/* SECTION 1: BASIC INFO */}
+                        <div id="admin-doc-basic" className="scroll-mt-3 space-y-4 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-emerald-400">
+                            <div className="flex items-center gap-2">
+                              <UserCheck className="w-5 h-5 text-emerald-400" />
+                              <h4 className="font-bold text-base text-white">بنیادی معلومات و شخصی کوائف</h4>
+                            </div>
+                            <span className="text-[11px] text-slate-400">نام، ٹائٹل، رجسٹریشن، فیس و رابطہ</span>
+                          </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">پورا نام (Full Name)</label>
+                                <input 
+                                  type="text" 
+                                  value={doctorForm.name || ''} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, name: e.target.value})}
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">ٹائٹل / ذیلی عنوان (Sub Heading)</label>
+                                <input 
+                                  type="text" 
+                                  value={doctorForm.title || ''} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, title: e.target.value})}
+                                  placeholder="طبیب حاذق، ماہر نباض..."
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">قومی کونسل برائے طب رجسٹریشن نمبر (Council Reg No)</label>
+                                <input 
+                                  type="text" 
+                                  value={doctorForm.registrationNumber || ''} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, registrationNumber: e.target.value})}
+                                  placeholder="مثلاً: 16455-FTJ"
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-emerald-400 font-mono focus:border-emerald-500 outline-none"
+                                  dir="ltr"
+                                />
+                              </div>
+
+                              {/* Doctor Profile Picture Card */}
+                              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
+                                <label className="block text-slate-300 text-xs font-bold">
+                                  طبیب کی پروفائل تصویر (Profile Picture):
+                                </label>
+
+                                <div className="flex flex-col sm:flex-row items-center gap-4">
+                                  <div className="relative shrink-0">
+                                    <img 
+                                      src={doctorForm.image || '/images/default_doctor.webp'} 
+                                      alt={doctorForm.name} 
+                                      className="w-20 h-20 rounded-2xl object-cover border-2 border-emerald-500/80 shadow-md bg-white"
+                                      onError={(e) => { e.target.onerror = null; e.target.src = '/images/default_doctor.webp'; }}
+                                    />
+                                  </div>
+
+                                  <div className="flex-1 space-y-2 text-center sm:text-right w-full">
+                                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                                      <input 
+                                        type="file" 
+                                        ref={adminDoctorAvatarFileRef}
+                                        onChange={handleAdminDoctorAvatarUpload}
+                                        accept="image/*"
+                                        className="hidden" 
+                                      />
+                                      <button
+                                        type="button"
+                                        disabled={isAdminUploadingAvatar}
+                                        onClick={() => adminDoctorAvatarFileRef.current?.click()}
+                                        className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                                      >
+                                        {isAdminUploadingAvatar ? (
+                                          <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            <span>اپلوڈ ہو رہی ہے...</span>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <UploadCloud className="w-4 h-4" />
+                                            <span>موبائل / کمپیوٹر سے تصویر چنیں</span>
+                                          </>
+                                        )}
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setDoctorForm({ ...doctorForm, image: '/images/default_doctor.webp' });
+                                          showNotification('ڈیفالٹ (غیر تصدیق شدہ) تصویر سیٹ کر دی گئی');
+                                        }}
+                                        className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-400/30 rounded-xl text-xs font-bold transition-all"
+                                        title="غیر تصدیق شدہ بیج لگائیں"
+                                      >
+                                        ڈیفالٹ بیج لگائیں (Unverified)
+                                      </button>
+                                    </div>
+
+                                    {/* Direct URL input option */}
+                                    <div className="flex items-center gap-2 pt-1">
+                                      <span className="text-[11px] text-slate-400 font-simple shrink-0">یا URL:</span>
+                                      <input 
+                                        type="text" 
+                                        value={doctorForm.image || ''} 
+                                        onChange={(e) => setDoctorForm({...doctorForm, image: e.target.value})}
+                                        placeholder="تصویر کا آن لائن URL درج کریں..."
+                                        className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-white focus:border-blue-500 outline-none text-xs font-mono"
+                                        dir="ltr"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">طریقہ علاج (Treatment System)</label>
+                                <select
+                                  value={doctorForm.treatmentType || 'طب یونانی و قانون مفرد اعضاء'}
+                                  onChange={(e) => setDoctorForm({...doctorForm, treatmentType: e.target.value})}
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none cursor-pointer"
+                                >
+                                  <option value="طب یونانی و قانون مفرد اعضاء">طب یونانی و قانون مفرد اعضاء</option>
+                                  <option value="طب یونانی">طب یونانی (Unani Medicine)</option>
+                                  <option value="طب پاکستانی (قانون مفرد اعضاء)">طب پاکستانی (قانون مفرد اعضاء)</option>
+                                  <option value="طب نبوی">طب نبوی</option>
+                                  <option value="حجامہ">حجامہ و کپنگ تھیراپی</option>
+                                  <option value="ہومیو پیتھی">ہومیو پیتھی</option>
+                                  <option value="دیگر قدرتی علاج">دیگر قدرتی علاج</option>
+                                </select>
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">طبی تجربہ سال (Experience in Years)</label>
+                                <input 
+                                  type="number" 
+                                  value={doctorForm.experience || ''} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, experience: Number(e.target.value)})}
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-sans"
+                                  dir="ltr"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">ریٹنگ (Rating out of 5)</label>
+                                <input 
+                                  type="number" 
+                                  step="0.1"
+                                  min="1"
+                                  max="5"
+                                  value={doctorForm.rating || 4.9} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, rating: parseFloat(e.target.value)})}
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-sans"
+                                  dir="ltr"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">ریویوز کی تعداد (Reviews Count)</label>
+                                <input 
+                                  type="number" 
+                                  value={doctorForm.reviewsCount || 120} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, reviewsCount: parseInt(e.target.value, 10)})}
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-sans"
+                                  dir="ltr"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Badges / Checkboxes */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                              <label className="flex items-center gap-3 p-3 bg-slate-950 border border-slate-800 rounded-2xl cursor-pointer hover:border-emerald-500/50 transition-colors">
+                                <input 
+                                  type="checkbox" 
+                                  checked={!!doctorForm.isVerified}
+                                  onChange={(e) => setDoctorForm({...doctorForm, isVerified: e.target.checked})}
+                                  className="w-4 h-4 rounded text-emerald-600 focus:ring-0 bg-slate-900 border-slate-700"
+                                />
+                                <div>
+                                  <span className="font-bold text-white text-xs block">مصدقہ طبیب بیج (Verified Badge)</span>
+                                  <span className="text-[11px] text-slate-400 block">پروفائل پر سبز رنگ کا مصدقہ بیج دکھائی دے گا۔</span>
+                                </div>
+                              </label>
+
+                              <label className="flex items-center gap-3 p-3 bg-slate-950 border border-slate-800 rounded-2xl cursor-pointer hover:border-amber-500/50 transition-colors">
+                                <input 
+                                  type="checkbox" 
+                                  checked={!!doctorForm.isFeatured}
+                                  onChange={(e) => setDoctorForm({...doctorForm, isFeatured: e.target.checked})}
+                                  className="w-4 h-4 rounded text-amber-500 focus:ring-0 bg-slate-900 border-slate-700"
+                                />
+                                <div>
+                                  <span className="font-bold text-white text-xs block">نمایاں طبیب (Featured Status)</span>
+                                  <span className="text-[11px] text-slate-400 block">ڈائریکٹری میں سرفہرست سنہری بیج کے ساتھ نظر آئے گا۔</span>
+                                </div>
+                              </label>
+                            </div>
+                          </div>
+
+                        {/* SECTION 2: CLINIC, ADDRESS & CONTACT */}
+                        <div id="admin-doc-clinic" className="scroll-mt-3 space-y-4 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-blue-400">
+                            <div className="flex items-center gap-2">
+                              <Building2 className="w-5 h-5 text-blue-400" />
+                              <h4 className="font-bold text-base text-white">مطب / کلینک، اوقات و لوکیشن</h4>
+                            </div>
+                            <span className="text-[11px] text-slate-400">شہر، پتہ، روزانہ کے اوقات، نقشہ لنک</span>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">مطب / کلینک کا نام (Clinic Name)</label>
+                                <input 
+                                  type="text" 
+                                  value={doctorForm.clinicName || ''} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, clinicName: e.target.value})}
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">شہر (City)</label>
+                                <input 
+                                  type="text" 
+                                  value={doctorForm.cityName || ''} 
+                                  onChange={(e) => {
+                                    const c = e.target.value;
+                                    const slug = c.toLowerCase().replace(/[\s\-_]+/g, '-');
+                                    setDoctorForm({...doctorForm, cityName: c, city: slug});
+                                  }}
+                                  placeholder="لاہور، اسلام آباد، کراچی، ایبٹ آباد..."
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                />
+                              </div>
+
+                              <div className="sm:col-span-2">
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">تفصیلی پتہ (Detailed Street Address)</label>
+                                <input 
+                                  type="text" 
+                                  value={doctorForm.address || ''} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, address: e.target.value})}
+                                  placeholder="پلازہ، مین روڈ، نزد سنگ میل..."
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">اوقات کار (Clinic Timings)</label>
+                                <input 
+                                  type="text" 
+                                  value={doctorForm.timing || ''} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, timing: e.target.value})}
+                                  placeholder="پیر تا ہفتہ: صبح 10:00 تا شام 7:00"
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">مشاورت فیس (Consultation Fee Rs)</label>
+                                <input 
+                                  type="number" 
+                                  value={doctorForm.fee || ''} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, fee: Number(e.target.value)})}
+                                  placeholder="500"
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-sans"
+                                  dir="ltr"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">آن لائن ویڈیو مشاورت فیس (Online Fee Rs)</label>
+                                <input 
+                                  type="number" 
+                                  value={doctorForm.onlineFee || ''} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, onlineFee: Number(e.target.value)})}
+                                  placeholder="800"
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-sans"
+                                  dir="ltr"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">اوسط انتظار کا وقت (Average Wait Time)</label>
+                                <input 
+                                  type="text" 
+                                  value={doctorForm.waitTime || ''} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, waitTime: e.target.value})}
+                                  placeholder="15 منٹ سے کم"
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">واٹس ایپ نمبر (WhatsApp)</label>
+                                <input 
+                                  type="text" 
+                                  value={doctorForm.whatsapp || ''} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, whatsapp: e.target.value})}
+                                  placeholder="923001234567"
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-mono"
+                                  dir="ltr"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">فون / موبائل نمبر (Phone)</label>
+                                <input 
+                                  type="text" 
+                                  value={doctorForm.phone || ''} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, phone: e.target.value})}
+                                  placeholder="0300-1234567"
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-mono"
+                                  dir="ltr"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-slate-300 mb-1 text-xs font-bold">ای میل (Email)</label>
+                                <input 
+                                  type="email" 
+                                  value={doctorForm.email || ''} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, email: e.target.value})}
+                                  placeholder="hakeem@example.com"
+                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-mono"
+                                  dir="ltr"
+                                />
+                              </div>
+
+                              <div className="bg-blue-950/40 p-3 rounded-2xl border border-blue-600/50">
+                                <label className="block text-blue-300 mb-1 text-xs font-bold flex items-center gap-1.5">
+                                  <Lock className="w-3.5 h-3.5 text-blue-400" />
+                                  <span>لاگ ان پاسورڈ (Login Password):</span>
+                                </label>
+                                <input 
+                                  type="text" 
+                                  value={doctorForm.password || 'password123'} 
+                                  onChange={(e) => setDoctorForm({...doctorForm, password: e.target.value})}
+                                  className="w-full bg-slate-900 border border-blue-500 rounded-xl p-2 text-emerald-400 font-bold focus:border-blue-400 outline-none text-xs tracking-wider font-mono"
+                                  dir="ltr"
+                                />
+                                <span className="text-[10px] text-slate-400 mt-1 block">طبیب اس پاسورڈ سے اپنے ڈیش بورڈ پر لاگ ان ہو سکتا ہے۔</span>
+                              </div>
+                            </div>
+                          </div>
+
+                        {/* SECTION 3: ABOUT / BIO */}
+                        <div id="admin-doc-about" className="scroll-mt-3 space-y-3 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-indigo-400">
+                            <div className="flex items-center gap-2">
+                              <FileText className="w-5 h-5 text-indigo-400" />
+                              <h4 className="font-bold text-base text-white">معالج کا تفصیلی تعارف اور طریقہ علاج</h4>
+                            </div>
+                            <span className="text-[11px] text-slate-400">پیراگراف یا لسٹ کی صورت میں لکھیں</span>
+                          </div>
+                            <div className="flex items-center justify-between">
+                              <label className="block text-slate-300 text-xs font-bold">
+                                معالج کا تفصیلی تعارف اور طریقہ علاج (Doctor Bio):
+                              </label>
+                              <span className="text-[11px] text-slate-400">پیراگراف یا لسٹ کی صورت میں لکھیں</span>
+                            </div>
+                            <textarea 
+                              value={doctorForm.about || ''} 
+                              onChange={(e) => setDoctorForm({...doctorForm, about: e.target.value})}
+                              placeholder="معالج کے تعارف، طریقہ علاج اور تجربات کے بارے میں تفصیلی معلومات..."
+                              rows={9}
+                              className="w-full bg-slate-950 border border-slate-700 rounded-2xl p-4 text-white focus:border-blue-500 outline-none leading-relaxed text-sm"
                             />
                           </div>
-                          <div>
-                            <label className="block text-slate-400 mb-1 text-xs">ٹائٹل / عہدہ</label>
-                            <input 
-                              type="text" 
-                              value={doctorForm.title || ''} 
-                              onChange={(e) => setDoctorForm({...doctorForm, title: e.target.value})}
-                              className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-blue-500 outline-none"
-                            />
+
+                        {/* SECTION 4: SPECIALTIES & SERVICES */}
+                        <div id="admin-doc-specialties" className="scroll-mt-3 space-y-6 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-amber-400">
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="w-5 h-5 text-amber-400" />
+                              <h4 className="font-bold text-base text-white">تخصص، امراض و فراہم کردہ خدمات</h4>
+                            </div>
+                            <span className="text-[11px] text-slate-400">
+                              تخصص: {(doctorForm.specialties || []).length} | خدمات: {(doctorForm.services || []).length}
+                            </span>
                           </div>
-                          <div>
-                            <label className="block text-slate-400 mb-1 text-xs">مطب کا نام</label>
-                            <input 
-                              type="text" 
-                              value={doctorForm.clinicName || ''} 
-                              onChange={(e) => setDoctorForm({...doctorForm, clinicName: e.target.value})}
-                              className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-blue-500 outline-none"
-                            />
+                          
+                          {/* Specialties */}
+                          <div className="space-y-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+                              <label className="block text-slate-200 font-bold text-xs">
+                                تخصص / امراض (Specialties)
+                              </label>
+                              
+                              <div className="flex flex-wrap gap-2">
+                                {(doctorForm.specialties || []).map((spec, idx) => (
+                                  <span 
+                                    key={idx} 
+                                    className="inline-flex items-center gap-1.5 bg-slate-800 text-slate-200 text-xs px-3 py-1.5 rounded-xl border border-slate-700"
+                                  >
+                                    <span>{spec}</span>
+                                    <button 
+                                      type="button" 
+                                      onClick={() => {
+                                        const updated = doctorForm.specialties.filter((_, i) => i !== idx);
+                                        setDoctorForm({...doctorForm, specialties: updated});
+                                      }}
+                                      className="text-slate-400 hover:text-red-400"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </span>
+                                ))}
+                              </div>
+
+                              <div className="flex gap-2 pt-2">
+                                <input 
+                                  type="text" 
+                                  value={newSpecialtyInput}
+                                  onChange={(e) => setNewSpecialtyInput(e.target.value)}
+                                  placeholder="نیا شعبہ یا بیماری لکھیں (مثلاً: امراض معدہ، جوڑوں کا درد)..."
+                                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-blue-500 font-simple"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      const trimmed = newSpecialtyInput.trim();
+                                      if (trimmed) {
+                                        const containsUrdu = (text) => /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text || '');
+                                        if (/[a-zA-Z]/.test(trimmed) && !containsUrdu(trimmed)) {
+                                          showNotification('برائے مہربانی مرض یا شعبہ کا نام صرف اردو زبان میں لکھیں', 'error');
+                                          return;
+                                        }
+                                        setDoctorForm({...doctorForm, specialties: [...(doctorForm.specialties || []), trimmed]});
+                                        setNewSpecialtyInput('');
+                                      }
+                                    }
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const trimmed = newSpecialtyInput.trim();
+                                    if (trimmed) {
+                                      const containsUrdu = (text) => /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text || '');
+                                      if (/[a-zA-Z]/.test(trimmed) && !containsUrdu(trimmed)) {
+                                        showNotification('برائے مہربانی مرض یا شعبہ کا نام صرف اردو زبان میں لکھیں', 'error');
+                                        return;
+                                      }
+                                      setDoctorForm({...doctorForm, specialties: [...(doctorForm.specialties || []), trimmed]});
+                                      setNewSpecialtyInput('');
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 font-simple"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                  <span>شامل کریں</span>
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Services */}
+                            <div className="space-y-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+                              <label className="block text-slate-200 font-bold text-xs">
+                                خصوصی طبی خدمات (Offered Services)
+                              </label>
+
+                              <div className="space-y-2">
+                                {(doctorForm.services || []).map((srv, idx) => (
+                                  <div 
+                                    key={idx} 
+                                    className="flex items-center justify-between bg-slate-900 border border-slate-800 p-2.5 rounded-xl text-xs text-slate-300"
+                                  >
+                                    <span>{srv}</span>
+                                    <button 
+                                      type="button" 
+                                      onClick={() => {
+                                        const updated = doctorForm.services.filter((_, i) => i !== idx);
+                                        setDoctorForm({...doctorForm, services: updated});
+                                      }}
+                                      className="text-slate-400 hover:text-red-400 p-1"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+
+                              <div className="flex gap-2 pt-2">
+                                <input 
+                                  type="text" 
+                                  value={newServiceInput}
+                                  onChange={(e) => setNewServiceInput(e.target.value)}
+                                  placeholder="نئی طبی خدمت درج کریں (مثلاً: نبض سے مکمل تشخیص)..."
+                                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-blue-500"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      if (newServiceInput.trim()) {
+                                        setDoctorForm({...doctorForm, services: [...(doctorForm.services || []), newServiceInput.trim()]});
+                                        setNewServiceInput('');
+                                      }
+                                    }
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (newServiceInput.trim()) {
+                                      setDoctorForm({...doctorForm, services: [...(doctorForm.services || []), newServiceInput.trim()]});
+                                      setNewServiceInput('');
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                  <span>شامل کریں</span>
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Conditions Treated (Oladoc Style) */}
+                            <div className="space-y-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+                              <label className="block text-slate-200 font-bold text-xs">
+                                زیرِ علاج امراض اور علامات (Conditions Treated)
+                              </label>
+
+                              <div className="flex flex-wrap gap-2">
+                                {(doctorForm.conditions || []).map((cond, idx) => (
+                                  <span 
+                                    key={idx} 
+                                    className="inline-flex items-center gap-1.5 bg-blue-950 text-blue-200 text-xs px-3 py-1.5 rounded-xl border border-blue-800"
+                                  >
+                                    <span>• {cond}</span>
+                                    <button 
+                                      type="button" 
+                                      onClick={() => {
+                                        const updated = doctorForm.conditions.filter((_, i) => i !== idx);
+                                        setDoctorForm({...doctorForm, conditions: updated});
+                                      }}
+                                      className="text-blue-400 hover:text-red-400"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </span>
+                                ))}
+                              </div>
+
+                              <div className="flex gap-2 pt-2">
+                                <input 
+                                  type="text" 
+                                  value={newConditionInput}
+                                  onChange={(e) => setNewConditionInput(e.target.value)}
+                                  placeholder="نیا مرض لکھیں (مثلاً: معدے کا السر، دائمی قبض، جوڑوں کا درد)..."
+                                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-blue-500 font-simple"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      const trimmed = newConditionInput.trim();
+                                      if (trimmed) {
+                                        setDoctorForm({...doctorForm, conditions: [...(doctorForm.conditions || []), trimmed]});
+                                        setNewConditionInput('');
+                                      }
+                                    }
+                                  }}
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const trimmed = newConditionInput.trim();
+                                    if (trimmed) {
+                                      setDoctorForm({...doctorForm, conditions: [...(doctorForm.conditions || []), trimmed]});
+                                      setNewConditionInput('');
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 font-simple"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                  <span>شامل کریں</span>
+                                </button>
+                              </div>
+                            </div>
+
                           </div>
-                          <div>
-                            <label className="block text-slate-400 mb-1 text-xs">شہر / پتہ</label>
-                            <input 
-                              type="text" 
-                              value={doctorForm.cityName || doctorForm.address || ''} 
-                              onChange={(e) => setDoctorForm({...doctorForm, cityName: e.target.value, address: e.target.value})}
-                              className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-blue-500 outline-none"
-                            />
+
+                        {/* SECTION 5: EDUCATION & QUALIFICATIONS */}
+                        <div id="admin-doc-education" className="scroll-mt-3 space-y-4 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-purple-400">
+                            <div className="flex items-center gap-2">
+                              <GraduationCap className="w-5 h-5 text-purple-400" />
+                              <h4 className="font-bold text-base text-white">طبی اسناد، ڈگریاں و تعلیم</h4>
+                            </div>
+                            <span className="text-[11px] text-slate-400">کل اسناد: {(doctorForm.education || []).length}</span>
                           </div>
-                          <div>
-                            <label className="block text-slate-400 mb-1 text-xs">وٹس اپ نمبر</label>
-                            <input 
-                              type="text" 
-                              value={doctorForm.whatsapp || ''} 
-                              onChange={(e) => setDoctorForm({...doctorForm, whatsapp: e.target.value})}
-                              className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-blue-500 outline-none"
-                              dir="ltr"
-                            />
+                          <div className="space-y-2">
+                              <label className="block text-slate-300 text-xs font-bold">موجودہ طبی اسناد (Degrees & Education):</label>
+                              {(doctorForm.education || []).length === 0 ? (
+                                <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center text-slate-500 text-xs">
+                                  کوئی سند شامل نہیں ہے۔ نیچے فارم کے ذریعے نئی سند شامل کریں۔
+                                </div>
+                              ) : (
+                                <div className="space-y-2">
+                                  {doctorForm.education.map((edu, idx) => (
+                                    <div key={idx} className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between gap-3 text-xs">
+                                      <div>
+                                        <span className="font-bold text-white block">{edu.degree}</span>
+                                        <span className="text-slate-400 text-[11px] block">{edu.institute} {edu.year ? `(${edu.year})` : ''}</span>
+                                      </div>
+                                      <button 
+                                        type="button" 
+                                        onClick={() => {
+                                          const updated = doctorForm.education.filter((_, i) => i !== idx);
+                                          setDoctorForm({...doctorForm, education: updated});
+                                        }}
+                                        className="text-slate-400 hover:text-red-400 p-1.5"
+                                        title="حذف کریں"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Add Education Form */}
+                            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                              <span className="text-xs font-bold text-slate-200 block">نئی سند یا ڈگری شامل کریں:</span>
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <input 
+                                  type="text" 
+                                  value={newEduForm.degree}
+                                  onChange={(e) => setNewEduForm({...newEduForm, degree: e.target.value})}
+                                  placeholder="ڈگری کا نام (مثلاً: فاضل الطب)"
+                                  className="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none"
+                                />
+                                <input 
+                                  type="text" 
+                                  value={newEduForm.institute}
+                                  onChange={(e) => setNewEduForm({...newEduForm, institute: e.target.value})}
+                                  placeholder="ادارہ (مثلاً: طبیہ کالج لاہور)"
+                                  className="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none"
+                                />
+                                <div className="flex gap-2">
+                                  <input 
+                                    type="text" 
+                                    value={newEduForm.year}
+                                    onChange={(e) => setNewEduForm({...newEduForm, year: e.target.value})}
+                                    placeholder="سال (مثلاً: 2015)"
+                                    className="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none font-sans"
+                                    dir="ltr"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (newEduForm.degree.trim()) {
+                                        setDoctorForm({
+                                          ...doctorForm, 
+                                          education: [...(doctorForm.education || []), { ...newEduForm }]
+                                        });
+                                        setNewEduForm({ degree: '', institute: '', year: '' });
+                                      }
+                                    }}
+                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0"
+                                  >
+                                    شامل کریں
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+
                           </div>
-                          <div>
-                            <label className="block text-slate-400 mb-1 text-xs">ای میل</label>
-                            <input 
-                              type="text" 
-                              value={doctorForm.email || ''} 
-                              onChange={(e) => setDoctorForm({...doctorForm, email: e.target.value})}
-                              className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-blue-500 outline-none"
-                              dir="ltr"
-                            />
+
+                        {/* SECTION 6: EXPERIENCES */}
+                        <div id="admin-doc-experiences" className="scroll-mt-3 space-y-4 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-teal-400">
+                            <div className="flex items-center gap-2">
+                              <Award className="w-5 h-5 text-teal-400" />
+                              <h4 className="font-bold text-base text-white">طبی و کلینیکل تجربات</h4>
+                            </div>
+                            <span className="text-[11px] text-slate-400">کل تجربات: {(doctorForm.experiences || []).length}</span>
                           </div>
-                          <div className="bg-blue-950/40 p-2.5 rounded-xl border border-blue-600/60">
-                            <label className="block text-blue-300 mb-1 text-xs font-bold font-simple flex items-center gap-1.5">
-                              <Lock className="w-3.5 h-3.5 text-blue-400" />
-                              <span>لاگ ان پاسورڈ (Login Password):</span>
-                            </label>
-                            <input 
-                              type="text" 
-                              value={doctorForm.password || 'password123'} 
-                              onChange={(e) => setDoctorForm({...doctorForm, password: e.target.value})}
-                              placeholder="طبیب کا پاسورڈ..."
-                              className="w-full bg-slate-900 border border-blue-500 rounded-lg p-2 text-emerald-400 font-bold focus:border-blue-400 outline-none text-xs tracking-wider"
-                              dir="ltr"
-                            />
-                            <span className="text-[10px] text-slate-400 mt-1 block font-simple">ایڈمن یہاں سے پاسورڈ دیکھ اور تبدیل کر سکتا ہے۔</span>
+                          <div className="space-y-2">
+                              <label className="block text-slate-300 text-xs font-bold">طبی تجربات و خدمات (Clinical Experiences):</label>
+                              {(doctorForm.experiences || []).length === 0 ? (
+                                <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center text-slate-500 text-xs">
+                                  کوئی تجربہ شامل نہیں ہے۔ نیچے سے نیا تجربہ شامل کریں۔
+                                </div>
+                              ) : (
+                                <div className="space-y-2">
+                                  {doctorForm.experiences.map((exp, idx) => (
+                                    <div key={idx} className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-start justify-between gap-3 text-xs">
+                                      <div className="space-y-0.5">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-bold text-white">{exp.companyName || exp.jobTitle}</span>
+                                          {exp.duration && <span className="text-slate-400 font-sans text-[11px]">({exp.duration})</span>}
+                                        </div>
+                                        {exp.jobTitle && <span className="text-blue-400 text-[11px] block">{exp.jobTitle}</span>}
+                                        {exp.description && <p className="text-slate-400 text-[11px] mt-1">{exp.description}</p>}
+                                      </div>
+                                      <button 
+                                        type="button" 
+                                        onClick={() => {
+                                          const updated = doctorForm.experiences.filter((_, i) => i !== idx);
+                                          setDoctorForm({...doctorForm, experiences: updated});
+                                        }}
+                                        className="text-slate-400 hover:text-red-400 p-1.5 shrink-0"
+                                        title="حذف کریں"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Add Experience Form */}
+                            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                              <span className="text-xs font-bold text-slate-200 block">نیا تجربہ شامل کریں:</span>
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <input 
+                                  type="text" 
+                                  value={newExpForm.companyName}
+                                  onChange={(e) => setNewExpForm({...newExpForm, companyName: e.target.value})}
+                                  placeholder="ادارہ یا مطب کا نام"
+                                  className="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none"
+                                />
+                                <input 
+                                  type="text" 
+                                  value={newExpForm.jobTitle}
+                                  onChange={(e) => setNewExpForm({...newExpForm, jobTitle: e.target.value})}
+                                  placeholder="عہدہ (مثلاً: سینئر طبیب)"
+                                  className="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none"
+                                />
+                                <input 
+                                  type="text" 
+                                  value={newExpForm.duration}
+                                  onChange={(e) => setNewExpForm({...newExpForm, duration: e.target.value})}
+                                  placeholder="مدت (مثلاً: 2018 - 2024)"
+                                  className="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none font-sans"
+                                  dir="ltr"
+                                />
+                              </div>
+                              <div className="flex gap-2">
+                                <input 
+                                  type="text" 
+                                  value={newExpForm.description}
+                                  onChange={(e) => setNewExpForm({...newExpForm, description: e.target.value})}
+                                  placeholder="مختصر تفصیل..."
+                                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (newExpForm.companyName.trim() || newExpForm.jobTitle.trim()) {
+                                      setDoctorForm({
+                                        ...doctorForm, 
+                                        experiences: [...(doctorForm.experiences || []), { ...newExpForm }]
+                                      });
+                                      setNewExpForm({ companyName: '', jobTitle: '', duration: '', description: '' });
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0"
+                                >
+                                  شامل کریں
+                                </button>
+                              </div>
+                            </div>
+
                           </div>
-                          <div>
-                            <label className="block text-slate-400 mb-1 text-xs">فیس (Rs)</label>
-                            <input 
-                              type="text" 
-                              value={doctorForm.fee || ''} 
-                              onChange={(e) => setDoctorForm({...doctorForm, fee: e.target.value})}
-                              className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-blue-500 outline-none"
-                            />
+
+                        {/* SECTION 7: AWARDS */}
+                        <div id="admin-doc-awards" className="scroll-mt-3 space-y-4 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-yellow-400">
+                            <div className="flex items-center gap-2">
+                              <Award className="w-5 h-5 text-yellow-400" />
+                              <h4 className="font-bold text-base text-white">اعزازات و شیلڈز (Awards & Distinctions)</h4>
+                            </div>
+                            <span className="text-[11px] text-slate-400">کل اعزازات: {(doctorForm.awards || []).length}</span>
                           </div>
-                          <div>
-                            <label className="block text-slate-400 mb-1 text-xs">تجربہ</label>
-                            <input 
-                              type="text" 
-                              value={doctorForm.experience || ''} 
-                              onChange={(e) => setDoctorForm({...doctorForm, experience: e.target.value})}
-                              className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-blue-500 outline-none"
-                            />
+                          <div className="space-y-2">
+                              <label className="block text-slate-300 text-xs font-bold">اعزازات و شیلڈز (Awards & Distinctions):</label>
+                              {(doctorForm.awards || []).length === 0 ? (
+                                <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center text-slate-500 text-xs">
+                                  کوئی اعزاز درج نہیں ہے۔
+                                </div>
+                              ) : (
+                                <div className="space-y-2">
+                                  {doctorForm.awards.map((aw, idx) => (
+                                    <div key={idx} className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between gap-3 text-xs">
+                                      <div>
+                                        <span className="font-bold text-amber-300 block">{aw.title}</span>
+                                        {aw.year && <span className="text-slate-400 font-sans text-[11px] block">{aw.year}</span>}
+                                      </div>
+                                      <button 
+                                        type="button" 
+                                        onClick={() => {
+                                          const updated = doctorForm.awards.filter((_, i) => i !== idx);
+                                          setDoctorForm({...doctorForm, awards: updated});
+                                        }}
+                                        className="text-slate-400 hover:text-red-400 p-1.5"
+                                        title="حذف کریں"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Add Award Form */}
+                            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3">
+                              <span className="text-xs font-bold text-slate-200 block">نیا اعزاز شامل کریں:</span>
+                              <div className="flex gap-2">
+                                <input 
+                                  type="text" 
+                                  value={newAwardForm.title}
+                                  onChange={(e) => setNewAwardForm({...newAwardForm, title: e.target.value})}
+                                  placeholder="اعزاز کا عنوان (مثلاً: گولڈ میڈل برائے نبض شناسی)"
+                                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none"
+                                />
+                                <input 
+                                  type="text" 
+                                  value={newAwardForm.year}
+                                  onChange={(e) => setNewAwardForm({...newAwardForm, year: e.target.value})}
+                                  placeholder="سال (2020)"
+                                  className="w-28 bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none font-sans"
+                                  dir="ltr"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (newAwardForm.title.trim()) {
+                                      setDoctorForm({
+                                        ...doctorForm, 
+                                        awards: [...(doctorForm.awards || []), { ...newAwardForm }]
+                                      });
+                                      setNewAwardForm({ title: '', year: '' });
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0"
+                                >
+                                  شامل کریں
+                                </button>
+                              </div>
+                            </div>
+
                           </div>
-                        </div>
-                        <div>
-                          <label className="block text-slate-400 mb-1 text-xs">تعارف</label>
-                          <textarea 
-                            value={doctorForm.about || ''} 
-                            onChange={(e) => setDoctorForm({...doctorForm, about: e.target.value})}
-                            className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white focus:border-blue-500 outline-none h-24"
-                          ></textarea>
-                        </div>
+
+                        {/* SECTION 8: PHOTO GALLERY */}
+                        <div id="admin-doc-gallery" className="scroll-mt-3 space-y-4 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-rose-400">
+                            <div className="flex items-center gap-2">
+                              <ImageIcon className="w-5 h-5 text-rose-400" />
+                              <h4 className="font-bold text-base text-white">مطب و اسناد کی فوٹو گیلری</h4>
+                            </div>
+                            <span className="text-[11px] text-slate-400">کل تصاویر: {(doctorForm.gallery || []).length}</span>
+                          </div>
+                          
+                          <div className="flex items-center justify-between">
+                              <label className="block text-slate-300 text-xs font-bold">
+                                مطب اور اسناد کی تصاویر (Gallery Images):
+                              </label>
+                              <span className="text-xs text-slate-400 font-sans">
+                                کل تصاویر: {(doctorForm.gallery || []).length}
+                              </span>
+                            </div>
+
+                            {/* Gallery Grid with Delete Option */}
+                            {(doctorForm.gallery || []).length === 0 ? (
+                              <div className="p-8 bg-slate-950 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs space-y-1">
+                                <ImageIcon className="w-8 h-8 text-slate-600 mx-auto" />
+                                <p>فی الوقت کوئی تصویر شامل نہیں ہے۔</p>
+                              </div>
+                            ) : (
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                {doctorForm.gallery.map((imgUrl, idx) => (
+                                  <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-700 aspect-video bg-slate-950">
+                                    <img 
+                                      src={imgUrl} 
+                                      alt={`Gallery ${idx + 1}`} 
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                      onError={(e) => { e.target.parentElement.style.opacity = '0.5'; }}
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const updated = doctorForm.gallery.filter((_, i) => i !== idx);
+                                        setDoctorForm({...doctorForm, gallery: updated});
+                                      }}
+                                      className="absolute top-1.5 right-1.5 p-1 bg-red-600/90 hover:bg-red-600 text-white rounded-lg shadow-md transition-all opacity-90 group-hover:opacity-100"
+                                      title="تصویر حذف کریں"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Add Gallery Image Form */}
+                            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-4">
+                              <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                                <span className="text-xs font-bold text-slate-200">
+                                  نئی تصاویر شامل کریں (کمپیوٹر/موبائل سے فائل اپلوڈ کریں یا URL درج کریں):
+                                </span>
+                                <input
+                                  type="file"
+                                  ref={adminDoctorGalleryFileRef}
+                                  onChange={handleAdminDoctorGalleryUpload}
+                                  accept="image/*"
+                                  multiple
+                                  className="hidden"
+                                />
+                                <button
+                                  type="button"
+                                  disabled={isAdminUploadingGallery}
+                                  onClick={() => adminDoctorGalleryFileRef.current?.click()}
+                                  className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-xs"
+                                >
+                                  {isAdminUploadingGallery ? (
+                                    <>
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                      <span>اپلوڈ جاری ہے...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <UploadCloud className="w-4 h-4" />
+                                      <span>کمپیوٹر / موبائل سے تصاویر چنیں</span>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+
+                              <div className="flex gap-2">
+                                <input 
+                                  type="text" 
+                                  value={newGalleryInput}
+                                  onChange={(e) => setNewGalleryInput(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      if (newGalleryInput.trim()) {
+                                        setDoctorForm({
+                                          ...doctorForm, 
+                                          gallery: [...(doctorForm.gallery || []), newGalleryInput.trim()]
+                                        });
+                                        setNewGalleryInput('');
+                                      }
+                                    }
+                                  }}
+                                  placeholder="یا تصویر کا آن لائن لنک (URL) یہاں چسپاں کریں..."
+                                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none font-mono"
+                                  dir="ltr"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (newGalleryInput.trim()) {
+                                      setDoctorForm({
+                                        ...doctorForm, 
+                                        gallery: [...(doctorForm.gallery || []), newGalleryInput.trim()]
+                                      });
+                                      setNewGalleryInput('');
+                                    }
+                                  }}
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1"
+                                >
+                                  <Plus className="w-3.5 h-3.5" />
+                                  <span>لنک شامل کریں</span>
+                                </button>
+                              </div>
+                            </div>
+
+                          </div>
+
                       </div>
                       
-                      <div className="p-4 border-t border-slate-800 flex justify-end gap-2">
+                      {/* Modal Footer */}
+                      <div className="p-4 border-t border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-3 shrink-0">
                         <button 
-                          onClick={() => { setEditingDoctorId(null); setDoctorForm(null); }}
-                          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-bold transition-all text-xs"
+                          type="button"
+                          onClick={() => handleDeleteDoctor(doctorForm.id)}
+                          className="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl font-bold transition-all text-xs flex items-center gap-1.5"
                         >
-                          کینسل
+                          <Trash2 className="w-4 h-4" />
+                          <span>طبیب کو مکمل ڈیلیٹ کریں</span>
                         </button>
-                        <button 
-                          onClick={handleSaveDoctor}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold transition-all text-xs flex items-center gap-1"
-                        >
-                          <Save className="w-4 h-4" />
-                          محفوظ کریں
-                        </button>
+
+                        <div className="flex items-center gap-2">
+                          <button 
+                            type="button"
+                            onClick={() => { setEditingDoctorId(null); setDoctorForm(null); }}
+                            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold transition-all text-xs"
+                          >
+                            کینسل
+                          </button>
+                          <button 
+                            type="button"
+                            onClick={handleSaveDoctor}
+                            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-900/20"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>تبدیلیاں محفوظ کریں</span>
+                          </button>
+                        </div>
                       </div>
+
                     </div>
                   </div>
                 )}
@@ -3707,217 +8937,903 @@ export default function AdminCMS({
           {/* VIEW 4: COMPREHENSIVE WEBSITE SETTINGS (LOGO, HEADER, FOOTER) */}
           {/* ========================================================= */}
           {adminTab === 'settings' && (
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-8 shadow-xl">
+            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
               
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              {/* Header & Global Save */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white font-simple">
-                    ویب سائٹ ترتیبات (لوگو، ہیڈر، ہوم پیج و فوٹر)
+                  <h2 className="text-xl sm:text-2xl font-bold text-white font-simple flex items-center gap-2.5">
+                    <Settings className="w-6 h-6 text-blue-400" />
+                    <span>ویب سائٹ ترتیبات (Website Settings)</span>
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    ویب سائٹ کے لوگو، ہیڈر فون نمبر، سوشل میڈیا اور فوٹر مواد کو کنٹرول کریں
+                  <p className="text-xs text-slate-400 mt-1">
+                    ورڈپریس طرز پر اپنی ویب سائٹ کی تمام ترتیبات، ہوم پیج، سائیڈ بار اشتہار اور سیکیورٹی کو منظم کریں
                   </p>
                 </div>
 
                 <button
                   type="button"
                   onClick={handleSaveSettings}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md transition-all font-simple"
+                  className="flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 transition-all font-simple shrink-0"
                 >
                   <Save className="w-4 h-4" />
                   <span>تمام ترتیبات محفوظ کریں</span>
                 </button>
               </div>
 
-              <form onSubmit={handleSaveSettings} className="space-y-8">
+              {/* WordPress-Style Sub-Tabs Navigation */}
+              <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-4">
+                {[
+                  { id: 'general', label: 'عمومی سیٹنگز', icon: Globe },
+                  { id: 'homepage', label: 'ہوم پیج بلاکس', icon: Home },
+                  { id: 'sidebar', label: 'سائیڈ بار و اشتہارات', icon: Layout },
+                  { id: 'media', label: 'ڈیفالٹ میڈیا', icon: ImageIcon },
+                  { id: 'security', label: 'سیکیورٹی و پاس ورڈ', icon: Lock },
+                  { id: 'footer', label: 'فوٹر و سوشل لنکس', icon: Share2 },
+                ].map((tab) => {
+                  const TabIcon = tab.icon;
+                  const isActive = settingsSubTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setSettingsSubTab(tab.id)}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                        isActive
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                          : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-850 border border-slate-800'
+                      }`}
+                    >
+                      <TabIcon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <form onSubmit={handleSaveSettings} className="space-y-6">
                 
-                {/* 1. Logo & Branding Settings */}
-                <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-4">
-                  <h3 className="text-sm font-bold text-blue-300 font-simple flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4 text-blue-400" />
-                    <span>لوگو اور برانڈنگ ترتیبات</span>
-                  </h3>
+                {/* 1. GENERAL SETTINGS */}
+                {settingsSubTab === 'general' && (
+                  <div className="space-y-6 animate-in fade-in-50">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                      <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                        <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
+                          <Globe className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-white font-simple">ویب سائٹ کی بنیادی معلومات</h3>
+                          <p className="text-xs text-slate-400">سائٹ کا عنوان، ٹیگ لائن اور ہیلپ لائن رابطہ نمبرز</p>
+                        </div>
+                      </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-bold text-slate-300 block mb-1">ویب سائٹ کا نام (Site Name)</label>
-                      <input
-                        type="text"
-                        value={settingsForm.siteName}
-                        onChange={(e) => setSettingsForm({...settingsForm, siteName: e.target.value})}
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-simple font-bold"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-bold text-slate-300 block mb-1">ٹیگ لائن (Tagline)</label>
-                      <input
-                        type="text"
-                        value={settingsForm.tagline}
-                        onChange={(e) => setSettingsForm({...settingsForm, tagline: e.target.value})}
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Logo Upload */}
-                  <div>
-                    <label className="text-xs font-bold text-slate-300 block mb-1">کسٹم لوگو امیج (Upload Logo Image)</label>
-                    <input
-                      type="file"
-                      ref={logoFileInputRef}
-                      onChange={handleLogoUpload}
-                      accept="image/*"
-                      className="hidden"
-                    />
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => logoFileInputRef.current?.click()}
-                        className="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs text-slate-200 font-bold rounded-xl transition-colors font-simple flex items-center gap-2"
-                      >
-                        <UploadCloud className="w-4 h-4 text-blue-400" />
-                        <span>کمپیوٹر سے لوگو منتخب کریں</span>
-                      </button>
-                      <input
-                        type="url"
-                        value={settingsForm.logoUrl}
-                        onChange={(e) => setSettingsForm({...settingsForm, logoUrl: e.target.value})}
-                        placeholder="یا آن لائن لوگو URL درج کریں..."
-                        className="flex-1 bg-slate-950 border border-slate-700 rounded-xl p-2 text-xs text-white font-sans"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. Header & Helpline Settings */}
-                <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-4">
-                  <h3 className="text-sm font-bold text-emerald-400 font-simple flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-emerald-400" />
-                    <span>ہیڈر، ہیلپ لائن اور ٹاپ بار میسج</span>
-                  </h3>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-bold text-slate-300 block mb-1">کال ہیلپ لائن نمبر</label>
-                      <input
-                        type="text"
-                        value={settingsForm.helplinePhone}
-                        onChange={(e) => setSettingsForm({...settingsForm, helplinePhone: e.target.value})}
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white font-sans"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-bold text-slate-300 block mb-1">واٹس ایپ نمبر (مریضوں سے رابطے کے لیے)</label>
-                      <input
-                        type="text"
-                        value={settingsForm.whatsappNumber}
-                        onChange={(e) => setSettingsForm({...settingsForm, whatsappNumber: e.target.value})}
-                        placeholder="923001234567"
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white font-sans"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-slate-300 block mb-1">ٹاپ بار اعلان / نوٹس ٹیکسٹ</label>
-                    <input
-                      type="text"
-                      value={settingsForm.topbarNotice}
-                      onChange={(e) => setSettingsForm({...settingsForm, topbarNotice: e.target.value})}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
-                    />
-                  </div>
-                </div>
-
-                {/* 3. Homepage Hero Banner Content */}
-                <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-4">
-                  <h3 className="text-sm font-bold text-amber-300 font-simple flex items-center gap-2">
-                    <Home className="w-4 h-4 text-amber-400" />
-                    <span>ہوم پیج ہیرو بینر ٹیکسٹ</span>
-                  </h3>
-
-                  <div>
-                    <label className="text-xs font-bold text-slate-300 block mb-1">مرکزی ہیرو ہیڈنگ (Hero Title)</label>
-                    <input
-                      type="text"
-                      value={settingsForm.heroTitle}
-                      onChange={(e) => setSettingsForm({...settingsForm, heroTitle: e.target.value})}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white font-simple font-bold"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-bold text-slate-300 block mb-1">ہیرو سب ٹائٹل (Hero Subtitle)</label>
-                    <textarea
-                      rows={2}
-                      value={settingsForm.heroSubtitle}
-                      onChange={(e) => setSettingsForm({...settingsForm, heroSubtitle: e.target.value})}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
-                    />
-                  </div>
-                </div>
-
-                {/* 4. Footer & Social Media Settings */}
-                <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-4">
-                  <h3 className="text-sm font-bold text-indigo-400 font-simple flex items-center gap-2">
-                    <Share2 className="w-4 h-4 text-indigo-400" />
-                    <span>فوٹر مواد اور سوشل لنکس</span>
-                  </h3>
-
-                  <div>
-                    <label className="text-xs font-bold text-slate-300 block mb-1">فوٹر تعارفی پیراگراف (About Text)</label>
-                    <textarea
-                      rows={2}
-                      value={settingsForm.footerAbout}
-                      onChange={(e) => setSettingsForm({...settingsForm, footerAbout: e.target.value})}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label className="text-xs font-bold text-slate-300 block mb-1">فیس بک پیج URL</label>
-                      <input
-                        type="url"
-                        value={settingsForm.facebookUrl}
-                        onChange={(e) => setSettingsForm({...settingsForm, facebookUrl: e.target.value})}
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2 text-xs text-white font-sans"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-300 block mb-1">انسٹاگرام URL</label>
-                      <input
-                        type="url"
-                        value={settingsForm.instagramUrl}
-                        onChange={(e) => setSettingsForm({...settingsForm, instagramUrl: e.target.value})}
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2 text-xs text-white font-sans"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-300 block mb-1">یوٹیوب چینل URL</label>
-                      <input
-                        type="url"
-                        value={settingsForm.youtubeUrl}
-                        onChange={(e) => setSettingsForm({...settingsForm, youtubeUrl: e.target.value})}
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2 text-xs text-white font-sans"
-                      />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">ویب سائٹ کا نام (Site Name)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.siteName || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, siteName: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">ٹیگ لائن (Tagline)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.tagline || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, tagline: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-400 mb-1">ٹاپ بار نوٹس / اعلان (Topbar Announcement)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.topbarNotice || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, topbarNotice: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                          />
+                        </div>
+                        <div className="md:col-span-2 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                          <label className="block text-xs font-bold text-slate-400 mb-2">ویب سائٹ کا لوگو (Logo)</label>
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="flex-1">
+                              <input 
+                                type="text" 
+                                value={settingsForm.logoUrl || ''} 
+                                onChange={e => setSettingsForm({...settingsForm, logoUrl: e.target.value})} 
+                                className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                                placeholder="تصویر کا لنک (URL) یہاں ڈالیں" 
+                              />
+                            </div>
+                            <div className="relative overflow-hidden shrink-0">
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={(e) => handleSettingImageUpload(e, 'logoUrl')} 
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                              />
+                              <button type="button" className="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                                <UploadCloud className="w-4 h-4" /> کمپیوٹر سے اپلوڈ کریں
+                              </button>
+                            </div>
+                          </div>
+                          {settingsForm.logoUrl && (
+                            <div className="mt-3 inline-block bg-white p-2 rounded-xl shadow-sm border border-slate-700">
+                              <img src={settingsForm.logoUrl} alt="Logo Preview" className="h-10 object-contain" />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">ہیلپ لائن فون</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.helplinePhone || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, helplinePhone: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">واٹس ایپ نمبر (بغیر + کے، جیسے 923001234567)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.whatsappNumber || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, whatsappNumber: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">مرکزی دفتر کا پتہ (Head Office Location)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.headOffice || ''} 
+                            placeholder="اسلام آباد، پاکستان"
+                            onChange={e => setSettingsForm({...settingsForm, headOffice: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-right font-simple" 
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
-                {/* Save Button */}
-                <div className="pt-4 flex justify-end font-simple">
+                {/* 2. HOMEPAGE SETTINGS */}
+                {settingsSubTab === 'homepage' && (
+                  <div className="space-y-6 animate-in fade-in-50">
+                    {/* Hero Section */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                      <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                          <Home className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-white font-simple">ہوم پیج: مرکزی ہیرو بینر (Hero Section)</h3>
+                          <p className="text-xs text-slate-400">مین پیج کا نمایاں ٹائٹل اور سب ٹائٹل</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3 pt-2">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">ہیرو کا مرکزی عنوان (Hero Title)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.heroTitle || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, heroTitle: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">ہیرو کا ذیلی عنوان / تفصیل (Hero Subtitle)</label>
+                          <textarea 
+                            rows="2"
+                            value={settingsForm.heroSubtitle || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, heroSubtitle: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none leading-relaxed" 
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Featured Doctors Block */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                          <h3 className="text-base font-bold text-slate-100 font-h2">
+                            نمایاں اطباء کا بلاک (Featured Doctors Grid)
+                          </h3>
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-amber-400">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.featuredDoctorBlockEnabled !== false} 
+                            onChange={e => setSettingsForm({...settingsForm, featuredDoctorBlockEnabled: e.target.checked})}
+                            className="w-4 h-4 rounded text-amber-500 focus:ring-0 bg-slate-800 border-slate-700"
+                          />
+                          <span>ہوم پیج پر شو کریں</span>
+                        </label>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-400 mb-1">بلاک کا ٹائٹل (Title)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.featuredDoctorBlockTitle || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, featuredDoctorBlockTitle: e.target.value})} 
+                            placeholder="نمایاں اطباء کرام (Featured Doctors)"
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" 
+                          />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-400 mb-1">بلاک کی سب ٹائٹل / تفصیل (Subtitle)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.featuredDoctorBlockSubtitle || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, featuredDoctorBlockSubtitle: e.target.value})} 
+                            placeholder="پاکستان بھر کے منتخب اور مستند اطباء و ماہرین طب یونانی"
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" 
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">کالمز کی تعداد (Columns: 1 سے 4)</label>
+                          <select 
+                            value={settingsForm.featuredDoctorBlockColumns || '4'} 
+                            onChange={e => setSettingsForm({...settingsForm, featuredDoctorBlockColumns: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+                          >
+                            <option value="1">1 کالم</option>
+                            <option value="2">2 کالم</option>
+                            <option value="3">3 کالم</option>
+                            <option value="4">4 کالم</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">لائنوں کی تعداد (Rows: 1 سے 10)</label>
+                          <input 
+                            type="number" 
+                            min="1" 
+                            max="10" 
+                            value={settingsForm.featuredDoctorBlockRows || '1'} 
+                            onChange={e => setSettingsForm({...settingsForm, featuredDoctorBlockRows: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" 
+                          />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-400 mb-1">ترتیب (Sort Order)</label>
+                          <select 
+                            value={settingsForm.featuredDoctorBlockSort || 'latest'} 
+                            onChange={e => setSettingsForm({...settingsForm, featuredDoctorBlockSort: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+                          >
+                            <option value="latest">تازہ ترین نمایاں اطباء پہلے (Latest First)</option>
+                            <option value="oldest">پرانے نمایاں اطباء پہلے (Oldest First)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Doctors Block */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                      <h3 className="text-base font-bold text-slate-100 font-h2 border-b border-slate-800 pb-3">عمومی اطباء کا بلاک (All / Latest Doctors Grid)</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-400 mb-1">بلاک کا ٹائٹل</label>
+                          <input type="text" value={settingsForm.doctorBlockTitle || ''} onChange={e => setSettingsForm({...settingsForm, doctorBlockTitle: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-400 mb-1">بلاک کی سب ٹائٹل / تفصیل</label>
+                          <input type="text" value={settingsForm.doctorBlockSubtitle || ''} onChange={e => setSettingsForm({...settingsForm, doctorBlockSubtitle: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">کالمز کی تعداد (1 سے 4)</label>
+                          <select value={settingsForm.doctorBlockColumns || '4'} onChange={e => setSettingsForm({...settingsForm, doctorBlockColumns: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="1">1 کالم</option>
+                            <option value="2">2 کالم</option>
+                            <option value="3">3 کالم</option>
+                            <option value="4">4 کالم</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">لائنوں کی تعداد</label>
+                          <input type="number" min="1" max="10" value={settingsForm.doctorBlockRows || '2'} onChange={e => setSettingsForm({...settingsForm, doctorBlockRows: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-400 mb-1">ترتیب (کون پہلے نظر آئے؟)</label>
+                          <select value={settingsForm.doctorBlockSort || 'latest'} onChange={e => setSettingsForm({...settingsForm, doctorBlockSort: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="latest">نئے شامل ہونے والے اطباء پہلے (Latest First)</option>
+                            <option value="oldest">پرانے اطباء پہلے (Oldest First)</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Articles Block */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                      <h3 className="text-base font-bold text-slate-100 font-h2 border-b border-slate-800 pb-3">طبی مضامین کا بلاک (Articles Grid)</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-400 mb-1">بلاک کا ٹائٹل</label>
+                          <input type="text" value={settingsForm.articleBlockTitle || ''} onChange={e => setSettingsForm({...settingsForm, articleBlockTitle: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">کالمز کی تعداد (1 سے 4)</label>
+                          <select value={settingsForm.articleBlockColumns || '4'} onChange={e => setSettingsForm({...settingsForm, articleBlockColumns: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="1">1 کالم</option>
+                            <option value="2">2 کالم</option>
+                            <option value="3">3 کالم</option>
+                            <option value="4">4 کالم</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">لائنوں کی تعداد</label>
+                          <input type="number" min="1" max="10" value={settingsForm.articleBlockRows || '3'} onChange={e => setSettingsForm({...settingsForm, articleBlockRows: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-400 mb-1">ترتیب (کون پہلے نظر آئے؟)</label>
+                          <select value={settingsForm.articleBlockSort || 'latest'} onChange={e => setSettingsForm({...settingsForm, articleBlockSort: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="latest">تازہ ترین مضامین پہلے (Latest)</option>
+                            <option value="oldest">پرانے مضامین پہلے</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. SIDEBAR & ADS SETTINGS */}
+                {settingsSubTab === 'sidebar' && (
+                  <div className="space-y-6 animate-in fade-in-50">
+                    {/* Widget Toggles */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                      <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                        <div className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
+                          <Layout className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-white font-simple">مضمون ریڈنگ پیج سائیڈ بار وجیٹس</h3>
+                          <p className="text-xs text-slate-400">کنٹرول کریں کہ مضمون پڑھتے وقت سائیڈ بار پر کون سے سیکشنز نظر آئیں</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.sidebarShowSearch !== false}
+                            onChange={e => setSettingsForm({...settingsForm, sidebarShowSearch: e.target.checked})}
+                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-white block">مضامین سرچ باکس دکھائیں</span>
+                            <span className="text-[11px] text-slate-400">سائیڈ بار میں سرچ کی سہولت</span>
+                          </div>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.sidebarShowCategories !== false}
+                            onChange={e => setSettingsForm({...settingsForm, sidebarShowCategories: e.target.checked})}
+                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-white block">مقبول کیٹگریز کی لسٹ دکھائیں</span>
+                            <span className="text-[11px] text-slate-400">کیٹگری کے مضامین کی تعداد معہ کلک ایبل فلٹر</span>
+                          </div>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.sidebarShowRecent !== false}
+                            onChange={e => setSettingsForm({...settingsForm, sidebarShowRecent: e.target.checked})}
+                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-white block">تازہ ترین مضامین لسٹ دکھائیں</span>
+                            <span className="text-[11px] text-slate-400">حالیہ شائع شدہ طبی مضامین</span>
+                          </div>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.sidebarShowConsultation !== false}
+                            onChange={e => setSettingsForm({...settingsForm, sidebarShowConsultation: e.target.checked})}
+                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-white block">آن لائن رہنمائی و مشورہ کارڈ دکھائیں</span>
+                            <span className="text-[11px] text-slate-400">اطباء سے فوری آن لائن رابطے کا کارڈ</span>
+                          </div>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.sidebarShowCategoriesDropdown !== false}
+                            onChange={e => setSettingsForm({...settingsForm, sidebarShowCategoriesDropdown: e.target.checked})}
+                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-white block">تمام کیٹگریز کا ڈراپ ڈاؤن دکھائیں</span>
+                            <span className="text-[11px] text-slate-400">سائیڈ بار میں سلیکٹ ڈراپ ڈاؤن لسٹ</span>
+                          </div>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.sidebarShowPagesDropdown !== false}
+                            onChange={e => setSettingsForm({...settingsForm, sidebarShowPagesDropdown: e.target.checked})}
+                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-white block">صفحات کا ڈراپ ڈاؤن دکھائیں</span>
+                            <span className="text-[11px] text-slate-400">سائیڈ بار میں اہم صفحات پر فوری چھلانگ</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Pages Sidebar Controls */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                      <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
+                          <BookOpen className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-white font-simple">ویب سائٹ صفحات (Pages) سائیڈ بار وجیٹس</h3>
+                          <p className="text-xs text-slate-400">کنٹرول کریں کہ صفحات (ہمارے بارے میں، رابطہ، پرائیویسی وغیرہ) پر سائیڈ بار میں کون سے ویجیٹس نظر آئیں</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.pageSidebarShowPagesList !== false}
+                            onChange={e => setSettingsForm({...settingsForm, pageSidebarShowPagesList: e.target.checked})}
+                            className="w-4 h-4 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500" 
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-white block">فہرستِ صفحات (Pages Directory)</span>
+                            <span className="text-[11px] text-slate-400">تمام سرکاری و کارپوریٹ صفحات کی لسٹ</span>
+                          </div>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.pageSidebarShowRecentPosts !== false}
+                            onChange={e => setSettingsForm({...settingsForm, pageSidebarShowRecentPosts: e.target.checked})}
+                            className="w-4 h-4 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500" 
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-white block">حالیہ شائع شدہ مضامین (Recent Posts)</span>
+                            <span className="text-[11px] text-slate-400">تازہ ترین مضامین کے تصویری کارڈز</span>
+                          </div>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.pageSidebarShowDoctors !== false}
+                            onChange={e => setSettingsForm({...settingsForm, pageSidebarShowDoctors: e.target.checked})}
+                            className="w-4 h-4 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500" 
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-white block">مستند اطباء و نبض شناس (Doctors)</span>
+                            <span className="text-[11px] text-slate-400">معالجین کے کارڈز اور فوری رابطہ بٹن</span>
+                          </div>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.pageSidebarShowCategories !== false}
+                            onChange={e => setSettingsForm({...settingsForm, pageSidebarShowCategories: e.target.checked})}
+                            className="w-4 h-4 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500" 
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-white block">اہم کیٹگریز و شعبہ جات (Categories)</span>
+                            <span className="text-[11px] text-slate-400">کیٹگریز ڈراپ ڈاؤن اور پِلز (Pills) لسٹ</span>
+                          </div>
+                        </label>
+
+                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.pageSidebarShowHelpline !== false}
+                            onChange={e => setSettingsForm({...settingsForm, pageSidebarShowHelpline: e.target.checked})}
+                            className="w-4 h-4 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500" 
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-white block">ہیلپ لائن و واٹس ایپ سپورٹ باکس</span>
+                            <span className="text-[11px] text-slate-400">سرکاری اوقات، فون اور ایک کلک واٹس ایپ</span>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Custom Image Banner Ad */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
+                            <Sparkles className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <h3 className="text-base font-bold text-white font-simple">کسٹم اشتہار / سپانسرڈ بینر (Custom Sidebar Banner)</h3>
+                            <p className="text-xs text-slate-400">سائیڈ بار پر اپنی مرضی کی تصویر، اشتہار یا بینر لگائیں</p>
+                          </div>
+                        </div>
+
+                        <label className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 cursor-pointer self-start sm:self-auto">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.sidebarAdEnabled !== false}
+                            onChange={e => setSettingsForm({...settingsForm, sidebarAdEnabled: e.target.checked})}
+                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                          />
+                          <span className="text-xs font-bold text-slate-200">اشتہار فعال کریں (Active)</span>
+                        </label>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-400 mb-1">اشتہار کا عنوان (Ad Title)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.sidebarAdTitle || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, sidebarAdTitle: e.target.value})} 
+                            placeholder="مثلاً: طبی مشورہ اور رہنمائی"
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                          />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-400 mb-1">اشتہار کی تفصیل / ذیلی عنوان (Ad Subtitle)</label>
+                          <textarea 
+                            rows="2"
+                            value={settingsForm.sidebarAdSubtitle || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, sidebarAdSubtitle: e.target.value})} 
+                            placeholder="مثلاً: مستند اور ماہر اطباء سے آن لائن رہنمائی حاصل کریں۔"
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none leading-relaxed" 
+                          />
+                        </div>
+
+                        <div className="md:col-span-2 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                          <label className="block text-xs font-bold text-slate-300 mb-2">اشتہار کی تصویر (Banner Image)</label>
+                          <div className="flex flex-col sm:flex-row gap-3">
+                            <div className="flex-1">
+                              <input 
+                                type="text" 
+                                value={settingsForm.sidebarAdImage || ''} 
+                                onChange={e => setSettingsForm({...settingsForm, sidebarAdImage: e.target.value})} 
+                                className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                                placeholder="تصویر کا URL لنک ڈالیں یا کمپیوٹر سے اپلوڈ کریں" 
+                              />
+                            </div>
+                            <div className="relative overflow-hidden shrink-0">
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                onChange={(e) => handleSettingImageUpload(e, 'sidebarAdImage')} 
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                              />
+                              <button type="button" className="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                                <UploadCloud className="w-4 h-4" /> کمپیوٹر سے تصویر منتخب کریں
+                              </button>
+                            </div>
+                          </div>
+
+                          {settingsForm.sidebarAdImage && (
+                            <div className="mt-4 flex flex-col sm:flex-row items-center gap-4 bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
+                              <img 
+                                src={settingsForm.sidebarAdImage} 
+                                alt="Sidebar Ad Preview" 
+                                className="w-full sm:w-48 h-28 object-cover rounded-xl border border-slate-700" 
+                              />
+                              <div className="text-right">
+                                <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">لائیو پری ویو</span>
+                                <h4 className="font-bold text-white text-sm mt-1">{settingsForm.sidebarAdTitle || 'عنوان'}</h4>
+                                <p className="text-xs text-slate-400 line-clamp-2 mt-0.5">{settingsForm.sidebarAdSubtitle || 'تفصیل'}</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">اشتہار پر کلک کرنے کا ہدف لنک (URL / WhatsApp Link)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.sidebarAdLink || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, sidebarAdLink: e.target.value})} 
+                            placeholder="https://wa.me/923001234567 یا ویب سائٹ لنک"
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">بٹن کا متن (Button Text)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.sidebarAdButtonText || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, sidebarAdButtonText: e.target.value})} 
+                            placeholder="مثلاً: ابھی رابطہ کریں / تفصیلات دیکھیں"
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. MEDIA SETTINGS */}
+                {settingsSubTab === 'media' && (
+                  <div className="space-y-6 animate-in fade-in-50">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                      <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                        <div className="w-8 h-8 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center font-bold">
+                          <ImageIcon className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-white font-simple">بائی ڈیفالٹ تصاویر کی سیٹنگز</h3>
+                          <p className="text-xs text-slate-400">اگر کسی مضمون یا طبیب کے ساتھ تصویر نہ لگی ہو، تو یہ ڈیفالٹ تصاویر شو ہوں گی۔</p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                        <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                          <label className="block text-xs font-bold text-slate-300 mb-2">طبی مضامین کی ڈیفالٹ تصویر</label>
+                          <div className="flex flex-col gap-3">
+                            <input type="text" value={settingsForm.defaultArticleImage || ''} onChange={e => setSettingsForm({...settingsForm, defaultArticleImage: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" placeholder="تصویر کا لنک (URL)" />
+                            <div className="relative overflow-hidden shrink-0">
+                              <input type="file" accept="image/*" onChange={(e) => handleSettingImageUpload(e, 'defaultArticleImage')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                              <button type="button" className="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                                <UploadCloud className="w-4 h-4" /> اپلوڈ کریں
+                              </button>
+                            </div>
+                          </div>
+                          {settingsForm.defaultArticleImage && <img src={settingsForm.defaultArticleImage} className="w-full h-32 mt-3 object-cover rounded-lg border border-slate-700" alt="Preview" />}
+                        </div>
+
+                        <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                          <label className="block text-xs font-bold text-slate-300 mb-2">اطباء کی ڈیفالٹ پروفائل تصویر</label>
+                          <div className="flex flex-col gap-3">
+                            <input type="text" value={settingsForm.defaultDoctorImage || ''} onChange={e => setSettingsForm({...settingsForm, defaultDoctorImage: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" placeholder="تصویر کا لنک (URL)" />
+                            <div className="relative overflow-hidden shrink-0">
+                              <input type="file" accept="image/*" onChange={(e) => handleSettingImageUpload(e, 'defaultDoctorImage')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                              <button type="button" className="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                                <UploadCloud className="w-4 h-4" /> اپلوڈ کریں
+                              </button>
+                            </div>
+                          </div>
+                          {settingsForm.defaultDoctorImage && <img src={settingsForm.defaultDoctorImage} className="w-24 h-24 mt-3 object-cover rounded-full border-2 border-slate-700 mx-auto" alt="Preview" />}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. SECURITY & ADMIN PASSWORD */}
+                {settingsSubTab === 'security' && (
+                  <div className="space-y-6 animate-in fade-in-50">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6">
+                      <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-red-600 flex items-center justify-center text-white shadow-lg shadow-red-900/20">
+                            <Lock className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-bold text-white font-h2">ایڈمن لاگ ان پاس ورڈ تبدیل کریں</h3>
+                            <p className="text-xs text-slate-400">اپنے ایڈمن پینل کی حفاظت کے لیے ایک مضبوط اور محفوظ پاس ورڈ رکھیں</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {passwordStatusMsg.text && (
+                        <div className={`p-4 rounded-2xl border text-xs font-bold leading-relaxed animate-in fade-in-50 ${
+                          passwordStatusMsg.type === 'success'
+                            ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300'
+                            : 'bg-red-950/60 border-red-500/50 text-red-300'
+                        }`}>
+                          {passwordStatusMsg.text}
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1.5">موجودہ پاس ورڈ (Current Password) *</label>
+                          <div className="relative">
+                            <input
+                              type={showCurrentPass ? 'text' : 'password'}
+                              value={credentialsForm.currentPassword}
+                              onChange={e => setCredentialsForm({ ...credentialsForm, currentPassword: e.target.value })}
+                              placeholder="موجودہ پاس ورڈ درج کریں..."
+                              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-sans focus:border-blue-500 outline-none text-left dir-ltr pr-10 font-mono"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowCurrentPass(!showCurrentPass)}
+                              className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200"
+                            >
+                              {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1.5">ایڈمن یوزر نیم (Admin Username) *</label>
+                          <input
+                            type="text"
+                            value={credentialsForm.username}
+                            onChange={e => setCredentialsForm({ ...credentialsForm, username: e.target.value })}
+                            placeholder="یوزر نیم درج کریں..."
+                            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-sans focus:border-blue-500 outline-none text-left dir-ltr font-mono"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1.5">نیا پاس ورڈ (New Password)</label>
+                          <div className="relative">
+                            <input
+                              type={showNewPass ? 'text' : 'password'}
+                              value={credentialsForm.newPassword}
+                              onChange={e => setCredentialsForm({ ...credentialsForm, newPassword: e.target.value })}
+                              placeholder="نیا پاس ورڈ (کم از کم 6 حروف)..."
+                              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-sans focus:border-blue-500 outline-none text-left dir-ltr pr-10 font-mono"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowNewPass(!showNewPass)}
+                              className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200"
+                            >
+                              {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1.5">نئے پاس ورڈ کی تصدیق (Confirm)</label>
+                          <input
+                            type={showNewPass ? 'text' : 'password'}
+                            value={credentialsForm.confirmPassword}
+                            onChange={e => setCredentialsForm({ ...credentialsForm, confirmPassword: e.target.value })}
+                            placeholder="نیا پاس ورڈ دوبارہ درج کریں..."
+                            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-sans focus:border-blue-500 outline-none text-left dir-ltr font-mono"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-2 lg:col-span-4 flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+                          <p className="text-[11px] text-slate-500 font-sans">
+                            ڈیفالٹ یوزر نیم: <code className="text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">sherazi313</code> اور پاس ورڈ: <code className="text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">5903911a</code> ہے۔
+                          </p>
+                          
+                          <button
+                            type="button" 
+                            onClick={handleChangeAdminCredentials}
+                            className="w-full sm:w-auto bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 font-simple shrink-0 cursor-pointer"
+                          >
+                            <ShieldCheck className="w-4 h-4" />
+                            <span>کوائف محفوظ کریں (Save Admin Credentials)</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. FOOTER & SOCIAL SETTINGS */}
+                {settingsSubTab === 'footer' && (
+                  <div className="space-y-6 animate-in fade-in-50">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+                      <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
+                        <div className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">
+                          <Share2 className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-white font-simple">فوٹر کی سیٹنگز و سوشل لنکس</h3>
+                          <p className="text-xs text-slate-400">ویب سائٹ کا تعارف، کاپی رائٹ اور تمام سوشل میڈیا اکاؤنٹس</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-400 mb-1">ویب سائٹ کا تعارف (About Text)</label>
+                          <textarea 
+                            rows="3" 
+                            value={settingsForm.footerAboutText || settingsForm.footerAbout || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, footerAboutText: e.target.value, footerAbout: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none leading-relaxed"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">پتہ (Address)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.footerAddress || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, footerAddress: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-400 mb-1">ای میل (Email)</label>
+                          <input 
+                            type="email" 
+                            value={settingsForm.footerEmail || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, footerEmail: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-400 mb-1">کاپی رائٹ ٹیکسٹ (Copyright)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.footerCopyright || settingsForm.copyrightText || ''} 
+                            onChange={e => setSettingsForm({...settingsForm, footerCopyright: e.target.value, copyrightText: e.target.value})} 
+                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                          />
+                        </div>
+
+                        {/* Social Links */}
+                        <div className="md:col-span-2 border-t border-slate-800 pt-3">
+                          <h4 className="text-xs font-bold text-slate-300 mb-3">سوشل میڈیا لنکس (Social Profiles)</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-400 mb-1">فیس بک (Facebook URL)</label>
+                              <input 
+                                type="text" 
+                                value={settingsForm.facebookUrl || ''} 
+                                onChange={e => setSettingsForm({...settingsForm, facebookUrl: e.target.value})} 
+                                className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-400 mb-1">انسٹاگرام (Instagram URL)</label>
+                              <input 
+                                type="text" 
+                                value={settingsForm.instagramUrl || ''} 
+                                onChange={e => setSettingsForm({...settingsForm, instagramUrl: e.target.value})} 
+                                className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[11px] font-bold text-slate-400 mb-1">یوٹیوب (YouTube URL)</label>
+                              <input 
+                                type="text" 
+                                value={settingsForm.youtubeUrl || ''} 
+                                onChange={e => setSettingsForm({...settingsForm, youtubeUrl: e.target.value})} 
+                                className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bottom Save Button Bar */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-800">
+                  <p className="text-xs text-slate-400">
+                    تبدیلیاں کرنے کے بعد <span className="text-blue-400 font-bold">محفوظ کریں</span> کے بٹن پر لازمی کلک کریں۔
+                  </p>
                   <button
                     type="submit"
-                    className="flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl text-xs sm:text-sm font-bold shadow-lg shadow-blue-900/30 transition-all"
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-lg shadow-blue-600/30 font-h2 flex items-center justify-center gap-2"
                   >
-                    <Save className="w-4 h-4" />
-                    <span>تمام ترتیبات محفوظ کریں</span>
+                    <Save className="w-5 h-5" />
+                    <span>تبدیلیاں محفوظ کریں (Save Settings)</span>
                   </button>
                 </div>
-
               </form>
 
             </div>
@@ -3964,7 +9880,6 @@ export default function AdminCMS({
 
       </div>
 
-      {/* ========================================================= */}
       {/* MODAL 1: ADD MEDIA (COMPUTER UPLOAD, URL, STOCK LIBRARY) */}
       {/* ========================================================= */}
       {showMediaModal && (

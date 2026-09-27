@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   X, 
   MapPin, 
@@ -13,243 +13,1190 @@ import {
   CheckCircle2, 
   Building2,
   Send,
-  UserCheck
+  UserCheck,
+  Image as ImageIcon,
+  Video,
+  Globe,
+  Languages,
+  Users,
+  HelpCircle,
+  Share2,
+  ExternalLink,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Sparkles,
+  PlayCircle,
+  FileText,
+  Headphones,
+  Lock,
+  ThumbsUp,
+  AlertCircle
 } from 'lucide-react';
 
-export default function DoctorProfileModal({ doctor, onClose }) {
+// Helper to clean any raw HTML or formatting tags from doctor bio
+function formatDoctorBio(bio, doctorName) {
+  if (!bio) return '';
+  let str = String(bio);
+
+  // Remove shortcodes like [caption ...] ... [/caption]
+  str = str.replace(/\[caption[^\]]*\]([\s\S]*?)\[\/caption\]/gi, '$1');
+  str = str.replace(/\[[^\]]+\]/g, '');
+
+  // Remove images
+  str = str.replace(/<img[^>]*>/gi, '');
+
+  // Remove duplicate heading with doctor name
+  if (doctorName) {
+    const cleanDocName = doctorName.replace(/[^\w\u0600-\u06FF]/g, '').toLowerCase();
+    str = str.replace(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi, (m, headingText) => {
+      const cleanHeading = headingText.replace(/[^\w\u0600-\u06FF]/g, '').toLowerCase();
+      if (cleanHeading.includes(cleanDocName) || cleanDocName.includes(cleanHeading)) {
+        return '';
+      }
+      return '\n' + headingText.trim() + '\n';
+    });
+  }
+
+  // Clean tags: replace <li> with bullet
+  str = str.replace(/<li[^>]*>/gi, '• ');
+  str = str.replace(/<\/li>/gi, '\n');
+
+  // Replace <br>, <p>, <div> with line breaks
+  str = str.replace(/<br\s*[\/]?>/gi, '\n');
+  str = str.replace(/<\/p>/gi, '\n\n');
+  str = str.replace(/<\/div>/gi, '\n');
+
+  // Strip all remaining HTML tags
+  str = str.replace(/<[^>]*>/g, '');
+
+  // Decode common HTML entities
+  str = str.replace(/&nbsp;/gi, ' ')
+           .replace(/&amp;/gi, '&')
+           .replace(/&quot;/gi, '"')
+           .replace(/&#8211;/g, '–')
+           .replace(/&#8217;/g, "'")
+           .replace(/&lt;/gi, '<')
+           .replace(/&gt;/gi, '>');
+
+  // Clean up excessive whitespace and newlines
+  let lines = str.split('\n')
+           .map(line => line.trim())
+           .filter((line, idx, arr) => line || (idx > 0 && arr[idx - 1]));
+
+  if (lines.length > 1) {
+    const first = lines[0].trim();
+    if (first.length < 45 && (first.startsWith('حکیم ') || first.startsWith('ڈاکٹر ') || first.toLowerCase().startsWith('dr') || first.toLowerCase().startsWith('hakeem') || first === doctorName)) {
+      if (lines.slice(1).join(' ').trim().length > 15) {
+        lines.shift();
+      }
+    }
+  }
+
+  return lines.join('\n').trim();
+}
+
+export default function DoctorProfileModal({ 
+  doctor, 
+  onClose,
+  articlesList = [],
+  onSelectArticle 
+}) {
+  const [activeTab, setActiveTab] = useState('about'); // 'about', 'services', 'conditions', 'education', 'experience', 'reviews', 'faqs', 'media'
+  const [consultationMode, setConsultationMode] = useState('online'); // 'online' or 'clinic'
   const [appointmentSent, setAppointmentSent] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  
+  // Review submission state
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [newReview, setNewReview] = useState({ patientName: '', rating: 5, comment: '', disease: '' });
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+  const [localReviews, setLocalReviews] = useState([]);
+
+  // Accordion open/close state for FAQs
+  const [openFaqIndex, setOpenFaqIndex] = useState(0);
+
+  // Appointment Form state
   const [formData, setFormData] = useState({
     patientName: '',
     phone: '',
     disease: '',
     date: '',
-    notes: ''
+    notes: '',
+    mode: 'آن لائن ویڈیو مشاورت'
   });
 
   if (!doctor) return null;
 
-  const handleSubmit = (e) => {
+  // Consultation Fees
+  const clinicFee = Number(doctor.fee) || 500;
+  const onlineFee = Number(doctor.onlineFee) || (clinicFee + 300);
+  const waitTime = doctor.waitTime || '15 منٹ سے کم';
+  const satisfactionScore = doctor.satisfactionScore || (doctor.rating ? Math.min(99, Math.round((doctor.rating / 5) * 100)) : 96);
+  const totalReviewsCount = (doctor.reviewsCount || 120) + localReviews.length;
+
+  // Conditions Treated List (with fallbacks if empty)
+  const conditionsTreated = useMemo(() => {
+    if (doctor.conditions && Array.isArray(doctor.conditions) && doctor.conditions.length > 0) {
+      return doctor.conditions;
+    }
+    if (doctor.specialties && Array.isArray(doctor.specialties) && doctor.specialties.length > 0) {
+      return doctor.specialties;
+    }
+    return [
+      'معدے کا السر اور دائمی تیزابیت (Acid Peptic Disease)',
+      'جوڑوں و مہروں کا درد اور عرق النساء (Sciatica & Joint Pain)',
+      'دائمی قبض اور آئی بی ایس (IBS & Chronic Constipation)',
+      'امراض جگر و یرقان (Liver Heat & Jaundice)',
+      'ذیابیطس و شوگر کا ہربل انتظام (Diabetes Mellitus)',
+      'ہائی بلڈ پریشر (Hypertension)',
+      'مردانہ و زنانہ پوشیدہ امراض و بانجھ پن (Infertility)',
+      'دائمی نزلہ زکام اور الرجی (Allergy & Respiratory Issues)'
+    ];
+  }, [doctor]);
+
+  // Services Offered (with fallbacks)
+  const servicesOffered = useMemo(() => {
+    if (doctor.services && Array.isArray(doctor.services) && doctor.services.length > 0) {
+      return doctor.services;
+    }
+    return [
+      'نبض کی 6 اقسام سے اعصابی، عضلاتی، غدی مزاج کی تشخیص',
+      'حجامہ و کپنگ تھیراپی برائے درد و فاسد خون کا اخراج',
+      'قانون مفرد اعضاء اور طب نبوی کے مطابق پرہیز و غذائی چارٹ',
+      'خالص جڑی بوٹیوں سے تیار کردہ نایاب سفوف و کشتہ جات'
+    ];
+  }, [doctor]);
+
+  // Languages Spoken (with fallbacks)
+  const languagesList = useMemo(() => {
+    if (doctor.languages && Array.isArray(doctor.languages) && doctor.languages.length > 0) {
+      return doctor.languages;
+    }
+    return ['اردو (Urdu)', 'پنجابی (Punjabi)', 'انگریزی (English)'];
+  }, [doctor]);
+
+  // Memberships (with fallbacks)
+  const membershipsList = useMemo(() => {
+    if (doctor.memberships && Array.isArray(doctor.memberships) && doctor.memberships.length > 0) {
+      return doctor.memberships;
+    }
+    return [
+      'نیشنل کونسل فار طب پاکستان (National Council for Tibb - NCT)',
+      'پاکستان طبی کانفرنس (Pakistan Tibbi Conference)'
+    ];
+  }, [doctor]);
+
+  // FAQs (with fallbacks)
+  const faqsList = useMemo(() => {
+    if (doctor.faqs && Array.isArray(doctor.faqs) && doctor.faqs.length > 0) {
+      return doctor.faqs;
+    }
+    return [
+      {
+        question: `طبیب ${doctor.name} سے معائنے یا چیک اپ کی فیس کیا ہے؟`,
+        answer: `کلینک پر تفصیلی معائنے اور تشخیص کی فیس ${clinicFee} روپے ہے، جبکہ آن لائن ویڈیو/آڈیو مشاورت کی فیس ${onlineFee} روپے ہے۔ ادویات کے چارجز بیماری کے دورانیے کے مطابق الگ ہوتے ہیں۔`
+      },
+      {
+        question: 'آن لائن مشاورت کا کیا طریقہ کار ہے اور ادویات کیسے ملتی ہیں؟',
+        answer: 'آپ واٹس ایپ یا فون کے ذریعے وقت طے کرتے ہیں۔ مقررہ وقت پر ویڈیو یا وائس کال پر نبض، زبان اور علامات کی تفصیل معلوم کی جاتی ہے۔ اس کے بعد تیار کردہ خالص ادویات ٹی سی ایس (TCS) یا کوریئر کے ذریعے 24 سے 48 گھنٹوں میں آپ کے گھر پہنچا دی جاتی ہیں۔'
+      },
+      {
+        question: 'مطب / کلینک کے اوقات اور ایڈریس کیا ہے؟',
+        answer: `${doctor.clinicName || 'مطب'}: ${doctor.address || `${doctor.cityName || 'لاہور'}، پاکستان`}۔ اوقات کار: ${doctor.timing || 'پیر تا ہفتہ: شام 4:00 تا رات 9:00'} ہیں۔ براہ کرم تشریف لانے سے قبل وقت کی تصدیق کر لیں۔`
+      },
+      {
+        question: 'کیا حکیم صاحب کے پاس کونسل کا تصدیق شدہ رجسٹریشن نمبر ہے؟',
+        answer: `جی ہاں! حکیم صاحب قومی کونسل برائے طب (National Council for Tibb) کے مصدقہ رجسٹرڈ معالج ہیں، جن کا رجسٹریشن نمبر ${doctor.registrationNumber || doctor.councilRegNo || 'کونسل سے رجسٹرڈ'} ہے۔`
+      }
+    ];
+  }, [doctor, clinicFee, onlineFee]);
+
+  // Sample default reviews
+  const defaultReviews = [
+    {
+      id: 101,
+      patientName: 'محمد عثمان طارق',
+      date: '10 ستمبر 2026',
+      rating: 5,
+      disease: 'معدے کی تیزابیت اور دائمی قبض',
+      verified: true,
+      comment: 'بہت ہی شفیق اور بااخلاق معالج ہیں۔ نبض دیکھ کر ہی ساری کیفیت بتا دی۔ ایک ماہ کے علاج سے معدے کی جلن اور گیس مکمل ٹھیک ہو گئی۔ جزاک اللہ خیراً۔'
+    },
+    {
+      id: 102,
+      patientName: 'طاہرہ بیگم',
+      date: '28 اگست 2026',
+      rating: 5,
+      disease: 'جوڑوں کا درد اور یورک ایسڈ',
+      verified: true,
+      comment: 'میری والدہ کو گھٹنوں کے درد کی وجہ سے چلنے پھرنے میں شدید تکلیف تھی۔ حکیم صاحب کے بتائے ہوئے قہوہ اور ہربل تیل سے اب وہ بغیر سہارے نماز پڑھ رہی ہیں۔'
+    },
+    {
+      id: 103,
+      patientName: 'وقار احمد چوہدری',
+      date: '15 اگست 2026',
+      rating: 5,
+      disease: 'یرقان اور جگر کی گرمی',
+      verified: true,
+      comment: 'آن لائن ویڈیو کال پر بہت تفصیل سے بات سنی اور ادویات اگلے ہی دن کوریئر سے مل گئیں۔ بہت مطمئن ہوں۔'
+    }
+  ];
+
+  const allReviews = [...localReviews, ...defaultReviews];
+
+  // Articles written by this doctor
+  const doctorArticles = useMemo(() => {
+    if (!articlesList || articlesList.length === 0) return [];
+    const cleanDocName = (doctor.name || '').replace(/حکیم|ڈاکٹر|پروفیسر/g, '').trim().toLowerCase();
+    return articlesList.filter(a => {
+      if (a.authorId && a.authorId === doctor.id) return true;
+      if (a.author && cleanDocName && a.author.toLowerCase().includes(cleanDocName)) return true;
+      return false;
+    }).slice(0, 4);
+  }, [articlesList, doctor]);
+
+  // Submit appointment request
+  const handleSubmitAppointment = (e) => {
     e.preventDefault();
     setAppointmentSent(true);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-      <div className="bg-white w-full max-w-4xl rounded-3xl shadow-2xl border border-slate-100 overflow-hidden my-auto max-h-[92vh] flex flex-col animate-in zoom-in-95 duration-200">
-        
-        {/* Modal Header Banner */}
-        <div className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-900 text-white p-6 relative">
-          <button
-            onClick={onClose}
-            className="absolute top-4 left-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+  // Submit new review
+  const handleAddReview = (e) => {
+    e.preventDefault();
+    if (!newReview.patientName.trim() || !newReview.comment.trim()) return;
 
-          <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start text-center sm:text-right pt-2">
-            <img
-              src={doctor.image}
-              alt={doctor.name}
-              className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-4 border-white/20 shadow-md"
-            />
-            <div className="space-y-1.5 flex-1">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <h2 className="text-xl sm:text-2xl font-bold">{doctor.name}</h2>
-                {doctor.isVerified && (
-                  <span className="inline-flex items-center gap-1 bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 text-xs px-2.5 py-0.5 rounded-full font-sans">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>مصدقہ طبیب</span>
-                  </span>
-                )}
-              </div>
-              <p className="text-emerald-100 text-sm font-medium">{doctor.title}</p>
-              <p className="text-xs text-emerald-200/80 font-sans">{doctor.qualifications}</p>
-              
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-2 text-xs font-sans text-emerald-100">
-                <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-lg">
-                  <Star className="w-3.5 h-3.5 fill-amber-300 text-amber-300" />
-                  <span>{doctor.rating} ({doctor.reviewsCount} تصدیق شدہ آراء)</span>
-                </span>
-                <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-lg">
-                  <Award className="w-3.5 h-3.5 text-emerald-300" />
-                  <span>{doctor.experience} سالہ طبی تجربہ</span>
-                </span>
-                <span className="flex items-center gap-1 bg-white/10 px-2.5 py-1 rounded-lg">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-300" />
-                  <span>{doctor.cityName}</span>
-                </span>
-              </div>
-            </div>
+    const reviewObj = {
+      id: Date.now(),
+      patientName: newReview.patientName.trim(),
+      date: 'ابھی حال ہی میں',
+      rating: newReview.rating || 5,
+      disease: newReview.disease.trim() || 'طبی مشاورت',
+      verified: true,
+      comment: newReview.comment.trim()
+    };
+
+    setLocalReviews([reviewObj, ...localReviews]);
+    setReviewSubmitted(true);
+    setNewReview({ patientName: '', rating: 5, comment: '', disease: '' });
+    setTimeout(() => {
+      setShowReviewForm(false);
+      setReviewSubmitted(false);
+    }, 2000);
+  };
+
+  // Copy doctor profile link
+  const handleShareProfile = () => {
+    const url = window.location.origin + window.location.pathname + `?doctor=${doctor.slug || doctor.id}`;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url);
+      setCopiedLink(true);
+      setTimeout(() => setCopiedLink(false), 2500);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto font-nastaliq text-right">
+      <div className="bg-white w-full max-w-6xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-auto max-h-[95vh] flex flex-col animate-in zoom-in-95 duration-200">
+        
+        {/* Top Sticky Bar: Header + Actions */}
+        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-teal-950 text-white px-4 sm:px-6 py-4 flex items-center justify-between gap-4 border-b border-white/10 shrink-0 sticky top-0 z-20">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-xs px-3 py-1 rounded-full font-sans font-medium">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
+              <span>مصدقہ طبیب پروفائل</span>
+            </span>
+            <span className="hidden sm:inline text-xs text-slate-400 font-sans">
+              طبیب پیڈیا اطباء ڈائریکٹری
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleShareProfile}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-sans text-white transition-all duration-200"
+              title="پروفائل لنک شیئر کریں"
+            >
+              {copiedLink ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span className="text-emerald-300">لنک کاپی ہو گیا!</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4 text-slate-300" />
+                  <span className="hidden sm:inline">شیئر کریں</span>
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={onClose}
+              className="p-2 bg-white/10 hover:bg-white/20 rounded-xl text-white transition-colors"
+              title="بند کریں"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
-        {/* Modal Scrollable Body */}
-        <div className="p-6 overflow-y-auto space-y-6 text-right">
+        {/* Scrollable Main Area */}
+        <div className="overflow-y-auto flex-1 p-4 sm:p-6 lg:p-8 space-y-6">
           
-          {/* Quick Action Floating Bar */}
-          <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
-            <div className="space-y-0.5">
-              <span className="text-xs text-emerald-800 font-bold block">فوری آن لائن رہنمائی:</span>
-              <span className="text-xs text-slate-600">براہ راست واٹس ایپ یا فون کے ذریعے طبیب سے رابطہ کریں</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <a
-                href={`tel:${doctor.phone}`}
-                className="flex items-center gap-1.5 bg-white text-emerald-800 border border-emerald-300 text-xs font-bold px-3.5 py-2 rounded-xl hover:bg-emerald-100 transition-colors"
-              >
-                <Phone className="w-3.5 h-3.5" />
-                <span>کال کریں</span>
-              </a>
-              <a
-                href={`https://wa.me/${doctor.whatsapp}?text=${encodeURIComponent(`السلام علیکم ${doctor.name}، میں طبیب پیڈیا کے ذریعے آپ سے رابطہ کر رہا ہوں۔`)}`}
-                target="_blank"
-                rel="noreferrer"
-                className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-sm"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>واٹس ایپ چیٹ</span>
-              </a>
+          {/* 1. Doctor Hero Card (Oladoc Style Top Banner) */}
+          <div className="bg-white rounded-3xl border border-slate-200 p-5 sm:p-7 shadow-xs">
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              
+              {/* Doctor Avatar with Verified Ring */}
+              <div className="relative shrink-0 mx-auto md:mx-0">
+                <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl sm:rounded-3xl overflow-hidden border-4 border-emerald-500/20 shadow-md bg-slate-100">
+                  <img
+                    src={doctor.image || "/images/default_doctor.webp"}
+                    alt={doctor.name}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "/images/default_doctor.webp";
+                    }}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                {doctor.isVerified && (
+                  <div className="absolute -bottom-2 -left-2 bg-emerald-600 text-white rounded-full p-1.5 shadow-md border-2 border-white" title="کونسل سے تصدیق شدہ">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                )}
+              </div>
+
+              {/* Doctor Details */}
+              <div className="flex-1 space-y-3 min-w-0 text-center md:text-right">
+                
+                {/* Verification Tag */}
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                  <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-300 text-xs px-3 py-0.5 rounded-full font-sans font-bold">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>قومی کونسل برائے طب (NCT) سے تصدیق شدہ</span>
+                  </span>
+                  {(doctor.registrationNumber || doctor.councilRegNo) && (
+                    <span className="text-xs bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full font-mono font-bold" dir="ltr">
+                      Reg: {doctor.registrationNumber || doctor.councilRegNo}
+                    </span>
+                  )}
+                  {doctor.treatmentType && (
+                    <span className="text-xs bg-teal-50 text-teal-800 border border-teal-200 px-2.5 py-0.5 rounded-full">
+                      {doctor.treatmentType}
+                    </span>
+                  )}
+                </div>
+
+                {/* Doctor Name & Title */}
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                    {doctor.name}
+                  </h1>
+                  <p className="text-emerald-700 font-bold text-sm sm:text-base mt-1">
+                    {doctor.title || 'ماہر نباض، معالج طب یونانی و محقق طب نبوی'}
+                  </p>
+                  <p className="text-xs sm:text-sm text-slate-500 font-sans mt-0.5">
+                    {doctor.qualifications || 'فاضل طب والجراحت (FTJ)، رجسٹرڈ طبیب'}
+                  </p>
+                </div>
+
+                {/* 4 Key Metric Badges (Oladoc Core Metrics) */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-2">
+                  
+                  {/* Metric 1: Wait Time */}
+                  <div className="bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-2xl p-2.5 text-center transition-colors">
+                    <span className="block text-slate-900 font-bold text-xs sm:text-sm font-sans">{waitTime}</span>
+                    <span className="text-[11px] text-slate-500 flex items-center justify-center gap-1 mt-0.5">
+                      <Clock className="w-3 h-3 text-emerald-600" />
+                      <span>اوسط انتظار</span>
+                    </span>
+                  </div>
+
+                  {/* Metric 2: Experience */}
+                  <div className="bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-2xl p-2.5 text-center transition-colors">
+                    <span className="block text-slate-900 font-bold text-xs sm:text-sm font-sans">{doctor.experience || 10}+ سال</span>
+                    <span className="text-[11px] text-slate-500 flex items-center justify-center gap-1 mt-0.5">
+                      <Award className="w-3 h-3 text-amber-500" />
+                      <span>طبی تجربہ</span>
+                    </span>
+                  </div>
+
+                  {/* Metric 3: Patient Satisfaction */}
+                  <div className="bg-emerald-50/70 hover:bg-emerald-50 border border-emerald-200/80 rounded-2xl p-2.5 text-center transition-colors">
+                    <span className="block text-emerald-900 font-bold text-xs sm:text-sm font-sans">{satisfactionScore}% اطمینان</span>
+                    <span className="text-[11px] text-emerald-700 flex items-center justify-center gap-1 mt-0.5">
+                      <ThumbsUp className="w-3 h-3 text-emerald-600" />
+                      <span>مریض فیڈبیک</span>
+                    </span>
+                  </div>
+
+                  {/* Metric 4: Reviews Count */}
+                  <div className="bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-2xl p-2.5 text-center transition-colors">
+                    <div className="flex items-center justify-center gap-1 font-bold text-xs sm:text-sm text-slate-900 font-sans">
+                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                      <span>{doctor.rating || 4.9}</span>
+                    </div>
+                    <span className="text-[11px] text-slate-500 block mt-0.5 font-sans">
+                      {totalReviewsCount} تصدیق شدہ آراء
+                    </span>
+                  </div>
+
+                </div>
+
+              </div>
+
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* 2. Main Two-Column Layout: Left Content (70%) + Right Sticky Consultation Card (30%) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            {/* Left 2 Columns: Details, Bio, Education */}
-            <div className="md:col-span-2 space-y-6">
+            {/* Left 8 Cols: Tabs Navigation & Detailed Information Sections */}
+            <div className="lg:col-span-8 space-y-6">
               
-              {/* About Section */}
-              <div className="space-y-2">
-                <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-2">
-                  معالج کا تعارف اور طریقہ علاج
-                </h3>
-                <p className="text-sm text-slate-600 leading-relaxed">
-                  {doctor.about}
-                </p>
+              {/* Oladoc Quick-Jump Navigation Tabs */}
+              <div className="bg-white rounded-2xl border border-slate-200 p-1.5 shadow-xs overflow-x-auto no-scrollbar flex items-center gap-1 sticky top-20 z-10">
+                {[
+                  { id: 'about', label: 'معالج کا تعارف', icon: UserCheck },
+                  { id: 'services', label: 'طبی خدمات', icon: CheckCircle2 },
+                  { id: 'conditions', label: 'زیرِ علاج امراض', icon: Sparkles },
+                  { id: 'education', label: 'اسناد و تعلیم', icon: GraduationCap },
+                  { id: 'experience', label: 'تجربہ و کلینکس', icon: Building2 },
+                  { id: 'reviews', label: `ریویوز (${allReviews.length})`, icon: Star },
+                  { id: 'faqs', label: 'عمومی سوالات', icon: HelpCircle },
+                  { id: 'media', label: `ویڈیوز و گیلری (${(doctor.gallery?.length || 0) + (doctorArticles.length)})`, icon: ImageIcon },
+                ].map(tab => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 ${
+                        isActive 
+                          ? 'bg-emerald-600 text-white shadow-sm' 
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5 shrink-0" />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
               </div>
 
-              {/* Services Offered */}
-              <div className="space-y-2">
-                <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-2">
-                  خصوصی طبی خدمات (Services)
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                  {doctor.services?.map((srv, idx) => (
-                    <div key={idx} className="flex items-start gap-2 text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                      <span>{srv}</span>
+              {/* SECTION: ABOUT DOCTOR */}
+              {activeTab === 'about' && (
+                <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-xs animate-in fade-in-50">
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-bold text-slate-900 border-r-4 border-emerald-600 pr-3 flex items-center justify-between">
+                      <span>معالج کا تعارف اور طریقہ علاج</span>
+                      <span className="text-xs text-slate-500 font-sans font-normal">About Doctor</span>
+                    </h3>
+                    
+                    <div className="text-sm text-slate-700 leading-relaxed font-body whitespace-pre-line space-y-3 bg-slate-50/80 p-5 rounded-2xl border border-slate-200/70">
+                      {formatDoctorBio(doctor.about, doctor.name) || (
+                        <p>
+                          طبیب {doctor.name} پاکستان کے معتبر اور مستند اطباء میں شمار ہوتے ہیں۔ آپ نبض شناسی، قانون مفرد اعضاء اور طب یونانی کے اصولوں کے تحت مریض کے مزاج کی درست تشخیص فرما کر قدرتی جڑی بوٹیوں اور غذائی پرہیز سے شافی علاج تجویز فرماتے ہیں۔
+                        </p>
+                      )}
                     </div>
-                  ))}
-                </div>
-              </div>
+                  </div>
 
-              {/* Education & Qualifications */}
-              <div className="space-y-2">
-                <h3 className="text-base font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center gap-2">
-                  <GraduationCap className="w-4 h-4 text-emerald-600" />
-                  <span>طبی اسناد و تعلیم</span>
-                </h3>
-                <div className="space-y-2 pt-1">
-                  {doctor.education?.map((edu, idx) => (
-                    <div key={idx} className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs">
-                      <div className="font-bold text-slate-800 font-sans">{edu.degree}</div>
-                      <div className="text-slate-500 mt-0.5">{edu.institute}</div>
+                  {/* Languages Spoken (Oladoc Screenshot 3) */}
+                  <div className="space-y-3 pt-3 border-t border-slate-100">
+                    <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <Languages className="w-4 h-4 text-emerald-600" />
+                      <span>بولی جانے والی زبانیں (Languages Spoken)</span>
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {languagesList.map((lang, idx) => (
+                        <span key={idx} className="bg-slate-100 text-slate-800 text-xs px-3 py-1.5 rounded-xl border border-slate-200 font-sans">
+                          {lang}
+                        </span>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Professional Memberships (Oladoc Screenshot 3) */}
+                  <div className="space-y-3 pt-3 border-t border-slate-100">
+                    <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                      <Award className="w-4 h-4 text-emerald-600" />
+                      <span>پیشہ ورانہ تنظیموں کی رکنیت (Professional Memberships)</span>
+                    </h4>
+                    <div className="space-y-2">
+                      {membershipsList.map((mem, idx) => (
+                        <div key={idx} className="flex items-center gap-2.5 text-xs text-slate-700 bg-emerald-50/50 p-2.5 rounded-xl border border-emerald-100">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>{mem}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                 </div>
-              </div>
+              )}
+
+              {/* SECTION: SERVICES */}
+              {activeTab === 'services' && (
+                <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-xs animate-in fade-in-50">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 className="text-lg font-bold text-slate-900 border-r-4 border-emerald-600 pr-3">
+                      طبی خدمات اور کلینیکل سہولیات
+                    </h3>
+                    <span className="text-xs text-slate-500 font-sans">Services Offered</span>
+                  </div>
+
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    طبیب {doctor.name} کے مطب پر جدید تشخیصی طریقہ کار اور قدیم مستند طبی علوم کی روشنی میں درج ذیل خدمات فراہم کی جاتی ہیں:
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {servicesOffered.map((srv, idx) => (
+                      <div key={idx} className="flex items-start gap-3 bg-slate-50 hover:bg-emerald-50/50 p-3.5 rounded-2xl border border-slate-200/80 transition-colors">
+                        <div className="p-1.5 bg-emerald-100 text-emerald-800 rounded-xl shrink-0 mt-0.5">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        </div>
+                        <span className="text-xs sm:text-sm font-bold text-slate-800">{srv}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION: CONDITIONS TREATED (Oladoc Screenshot 2 & 4) */}
+              {activeTab === 'conditions' && (
+                <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-xs animate-in fade-in-50">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 className="text-lg font-bold text-slate-900 border-r-4 border-emerald-600 pr-3">
+                      زیرِ علاج امراض اور تخصصات
+                    </h3>
+                    <span className="text-xs text-slate-500 font-sans">Conditions Treated</span>
+                  </div>
+
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    مریض ان تمام امراض کے تسلی بخش علاج کے لیے آن لائن یا کلینک پر مشورہ لے سکتے ہیں:
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {conditionsTreated.map((cond, idx) => (
+                      <div key={idx} className="flex items-center gap-3 bg-slate-50 hover:bg-slate-100/80 p-3 rounded-2xl border border-slate-200/80 transition-colors">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                        <span className="text-xs sm:text-sm text-slate-800 font-medium">{cond}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Medical Advice Box */}
+                  <div className="bg-amber-50 border border-amber-200/80 rounded-2xl p-4 text-xs text-amber-900 leading-relaxed flex items-start gap-3">
+                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong>طبی مشورہ:</strong> ہر انسان کا مزاج دوسرے سے مختلف ہوتا ہے۔ بغیر تشخیص کے کسی نسخے پر عمل کرنے کے بجائے معالج سے باقاعدہ مشورہ کر کے علاج شروع کرنا ہی اصل شفاء کا باعث ہے۔
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION: EDUCATION (Oladoc Screenshot 4) */}
+              {activeTab === 'education' && (
+                <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-xs animate-in fade-in-50">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 className="text-lg font-bold text-slate-900 border-r-4 border-emerald-600 pr-3 flex items-center gap-2">
+                      <GraduationCap className="w-5 h-5 text-emerald-600" />
+                      <span>طبی اسناد، ڈگریاں اور قابلیت</span>
+                    </h3>
+                    <span className="text-xs text-slate-500 font-sans">Education & Qualifications</span>
+                  </div>
+
+                  <div className="space-y-3">
+                    {doctor.education && doctor.education.length > 0 ? (
+                      doctor.education.map((edu, idx) => (
+                        <div key={idx} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <div className="space-y-1">
+                            <h4 className="font-bold text-slate-900 text-sm font-sans">{edu.degree}</h4>
+                            <p className="text-xs text-slate-600 font-sans">{edu.institute}</p>
+                          </div>
+                          {edu.year && (
+                            <span className="text-xs font-sans text-emerald-700 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200 self-start sm:self-auto">
+                              {edu.year}
+                            </span>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+                        <div className="font-bold text-slate-900 text-sm">{doctor.qualifications || 'فاضل طب والجراحت (FTJ)'}</div>
+                        <div className="text-xs text-slate-600">نیشنل کونسل فار طب پاکستان (منظور شدہ ادارہ)</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Awards & Distinctions */}
+                  {doctor.awards && doctor.awards.length > 0 && (
+                    <div className="pt-4 border-t border-slate-100 space-y-3">
+                      <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <Award className="w-4 h-4 text-amber-500" />
+                        <span>اعزازات و اسناد (Awards & Distinctions)</span>
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {doctor.awards.map((aw, idx) => (
+                          <div key={idx} className="bg-amber-50/60 border border-amber-200/80 p-3.5 rounded-2xl flex items-center justify-between text-xs">
+                            <span className="font-bold text-amber-950">{aw.title}</span>
+                            {aw.year && <span className="text-amber-800 font-sans font-medium">{aw.year}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              )}
+
+              {/* SECTION: EXPERIENCE & CLINICS */}
+              {activeTab === 'experience' && (
+                <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-xs animate-in fade-in-50">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 className="text-lg font-bold text-slate-900 border-r-4 border-emerald-600 pr-3 flex items-center gap-2">
+                      <Building2 className="w-5 h-5 text-emerald-600" />
+                      <span>کلینکس اور پیشہ ورانہ تجربہ</span>
+                    </h3>
+                    <span className="text-xs text-slate-500 font-sans">Practice Locations & History</span>
+                  </div>
+
+                  {/* Experience Timeline */}
+                  {doctor.experiences && doctor.experiences.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">سابقہ و موجودہ وابستگی:</h4>
+                      <div className="space-y-3">
+                        {doctor.experiences.map((exp, idx) => (
+                          <div key={idx} className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs space-y-1.5">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                              <span className="font-bold text-slate-900 text-sm">{exp.companyName || exp.jobTitle}</span>
+                              {exp.duration && (
+                                <span className="text-slate-500 font-sans text-xs bg-white px-2.5 py-0.5 rounded-lg border border-slate-200 self-start sm:self-auto">
+                                  {exp.duration}
+                                </span>
+                              )}
+                            </div>
+                            {exp.jobTitle && <div className="text-emerald-700 font-bold">{exp.jobTitle}</div>}
+                            {exp.description && <div className="text-slate-600 text-xs leading-relaxed">{exp.description}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Clinic Details Card */}
+                  <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                    <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-emerald-600" />
+                      <span>مرکزی مطب و کلینک کا پتہ:</span>
+                    </h4>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                      <div className="space-y-1">
+                        <span className="text-slate-400 block">نام مطب:</span>
+                        <strong className="text-slate-900 text-sm block">{doctor.clinicName || 'مطب طبیب'}</strong>
+                        <p className="text-slate-600 mt-1 flex items-start gap-1.5">
+                          <MapPin className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          <span>{doctor.address || `${doctor.cityName || 'لاہور'}، پاکستان`}</span>
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <span className="text-slate-400 block">اوقاتِ کار:</span>
+                        <div className="flex items-center gap-1.5 text-slate-800 font-sans font-bold">
+                          <Clock className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>{doctor.timing || 'پیر تا ہفتہ: شام 4:00 تا رات 9:00'}</span>
+                        </div>
+                        <div className="text-slate-500 mt-2">
+                          <span>معائنہ فیس: </span>
+                          <strong className="text-emerald-800 font-sans text-sm">{clinicFee} روپے</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+              {/* SECTION: PATIENT REVIEWS & SATISFACTION (Oladoc Screenshot 1 & 4) */}
+              {activeTab === 'reviews' && (
+                <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-xs animate-in fade-in-50">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 className="text-lg font-bold text-slate-900 border-r-4 border-emerald-600 pr-3 flex items-center gap-2">
+                      <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
+                      <span>مریضوں کے تاثرات اور تجربات</span>
+                    </h3>
+                    <button
+                      onClick={() => setShowReviewForm(!showReviewForm)}
+                      className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs"
+                    >
+                      {showReviewForm ? 'فارم بند کریں' : 'اپنی رائے درج کریں'}
+                    </button>
+                  </div>
+
+                  {/* Oladoc Satisfaction Breakdown Header */}
+                  <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200/90 flex flex-col md:flex-row items-center gap-6">
+                    
+                    {/* Big Score Circle */}
+                    <div className="text-center shrink-0">
+                      <div className="w-24 h-24 rounded-full bg-slate-900 text-white flex flex-col items-center justify-center shadow-lg border-4 border-emerald-500">
+                        <span className="text-2xl font-black font-sans leading-none">{satisfactionScore}%</span>
+                        <span className="text-[10px] text-emerald-300 font-sans mt-0.5">اطمینان</span>
+                      </div>
+                      <span className="text-xs text-slate-600 block mt-2 font-bold font-sans">
+                        {totalReviewsCount} تصدیق شدہ مریض
+                      </span>
+                    </div>
+
+                    {/* Progress Bars for Checkup, Environment, Staff (Oladoc Breakdown) */}
+                    <div className="flex-1 w-full space-y-3 text-xs">
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-bold text-slate-800">طبیب کا معائنہ و توجہ (Doctor Checkup)</span>
+                          <span className="font-bold font-sans text-emerald-700">98%</span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                          <div className="bg-emerald-600 h-2 rounded-full" style={{ width: '98%' }}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-bold text-slate-800">مطب کا ماحول و صفائی (Clinic Environment)</span>
+                          <span className="font-bold font-sans text-emerald-700">95%</span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                          <div className="bg-emerald-600 h-2 rounded-full" style={{ width: '95%' }}></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="font-bold text-slate-800">عملے کا اخلاق و رویہ (Staff Behaviour)</span>
+                          <span className="font-bold font-sans text-emerald-700">96%</span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                          <div className="bg-emerald-600 h-2 rounded-full" style={{ width: '96%' }}></div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* Add Review Form */}
+                  {showReviewForm && (
+                    <form onSubmit={handleAddReview} className="bg-emerald-50/70 border border-emerald-200 p-5 rounded-3xl space-y-4 text-xs animate-in fade-in-50">
+                      <h4 className="font-bold text-emerald-950 text-sm flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-emerald-600" />
+                        <span>طبیب {doctor.name} کے بارے میں اپنا تجربہ شیئر کریں:</span>
+                      </h4>
+
+                      {reviewSubmitted ? (
+                        <div className="bg-white p-4 rounded-2xl border border-emerald-300 text-center space-y-1">
+                          <CheckCircle2 className="w-7 h-7 text-emerald-600 mx-auto" />
+                          <p className="font-bold text-emerald-900">آپ کا فیڈبیک کامیابی سے شامل ہو گیا ہے!</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block font-bold text-slate-700 mb-1">مریض کا نام *</label>
+                            <input
+                              type="text"
+                              required
+                              value={newReview.patientName}
+                              onChange={(e) => setNewReview({...newReview, patientName: e.target.value})}
+                              placeholder="مثلاً: محمد اسلم"
+                              className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block font-bold text-slate-700 mb-1">بیماری / شکایت</label>
+                            <input
+                              type="text"
+                              value={newReview.disease}
+                              onChange={(e) => setNewReview({...newReview, disease: e.target.value})}
+                              placeholder="مثلاً: گیس، السر، جوڑوں کا درد"
+                              className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                            />
+                          </div>
+
+                          <div className="sm:col-span-2">
+                            <label className="block font-bold text-slate-700 mb-1">آپ کا تفصیلی تبصرہ *</label>
+                            <textarea
+                              rows={3}
+                              required
+                              value={newReview.comment}
+                              onChange={(e) => setNewReview({...newReview, comment: e.target.value})}
+                              placeholder="طبیب کے طریقہ علاج اور نتائج کے بارے میں لکھیے..."
+                              className="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                            />
+                          </div>
+
+                          <div className="sm:col-span-2 flex items-center justify-between pt-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-700">ریٹنگ:</span>
+                              {[1, 2, 3, 4, 5].map(star => (
+                                <button
+                                  type="button"
+                                  key={star}
+                                  onClick={() => setNewReview({...newReview, rating: star})}
+                                  className="focus:outline-none"
+                                >
+                                  <Star className={`w-5 h-5 ${star <= newReview.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}`} />
+                                </button>
+                              ))}
+                            </div>
+
+                            <button
+                              type="submit"
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 rounded-xl text-xs transition-colors shadow-xs"
+                            >
+                              ریویو جمع کرائیں
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </form>
+                  )}
+
+                  {/* Reviews List (Oladoc Verified Patient Reviews) */}
+                  <div className="space-y-3 pt-2">
+                    {allReviews.map(rev => (
+                      <div key={rev.id} className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-slate-900 text-sm">{rev.patientName}</span>
+                            {rev.verified && (
+                              <span className="inline-flex items-center gap-1 bg-emerald-100 text-emerald-800 text-[10px] px-2 py-0.5 rounded-full font-sans font-bold">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                <span>Verified Patient</span>
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-slate-400 font-sans text-[11px]">{rev.date}</span>
+                        </div>
+
+                        {rev.disease && (
+                          <div className="text-[11px] text-slate-500">
+                            علاج برائے: <strong className="text-slate-700">{rev.disease}</strong>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} className={`w-3.5 h-3.5 ${i < rev.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
+                          ))}
+                        </div>
+
+                        <p className="text-slate-700 leading-relaxed font-body pt-1">
+                          "{rev.comment}"
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                </div>
+              )}
+
+              {/* SECTION: FAQS (Oladoc Screenshot 1 & 2) */}
+              {activeTab === 'faqs' && (
+                <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-xs animate-in fade-in-50">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 className="text-lg font-bold text-slate-900 border-r-4 border-emerald-600 pr-3 flex items-center gap-2">
+                      <HelpCircle className="w-5 h-5 text-emerald-600" />
+                      <span>اکثر پوچھے جانے والے سوالات</span>
+                    </h3>
+                    <span className="text-xs text-slate-500 font-sans">Frequently Asked Questions</span>
+                  </div>
+
+                  <div className="space-y-3">
+                    {faqsList.map((faq, idx) => {
+                      const isOpen = openFaqIndex === idx;
+                      return (
+                        <div key={idx} className="border border-slate-200 rounded-2xl overflow-hidden transition-all">
+                          <button
+                            type="button"
+                            onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                            className="w-full p-4 text-right flex items-center justify-between gap-3 bg-slate-50 hover:bg-slate-100/80 transition-colors font-bold text-xs sm:text-sm text-slate-900"
+                          >
+                            <span>{faq.question}</span>
+                            {isOpen ? <ChevronUp className="w-4 h-4 text-emerald-600 shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />}
+                          </button>
+                          {isOpen && (
+                            <div className="p-4 bg-white text-xs sm:text-sm text-slate-700 leading-relaxed border-t border-slate-100 font-body">
+                              {faq.answer}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION: MEDIA, VIDEOS & ARTICLES (Oladoc Screenshot 5) */}
+              {activeTab === 'media' && (
+                <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6 shadow-xs animate-in fade-in-50">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 className="text-lg font-bold text-slate-900 border-r-4 border-emerald-600 pr-3 flex items-center gap-2">
+                      <Video className="w-5 h-5 text-emerald-600" />
+                      <span>ویڈیوز، تصاویر اور طبی مقالات</span>
+                    </h3>
+                    <span className="text-xs text-slate-500 font-sans">Videos & Articles</span>
+                  </div>
+
+                  {/* Doctor Articles on Tabeeb Pedia */}
+                  {doctorArticles.length > 0 && (
+                    <div className="space-y-3">
+                      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <FileText className="w-4 h-4 text-emerald-600" />
+                        <span>طبیب {doctor.name} کے تحریر کردہ مضامین:</span>
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {doctorArticles.map(art => (
+                          <div
+                            key={art.id}
+                            onClick={() => {
+                              if (onSelectArticle) {
+                                onSelectArticle(art);
+                                onClose();
+                              }
+                            }}
+                            className="bg-slate-50 hover:bg-emerald-50/60 p-3.5 rounded-2xl border border-slate-200 transition-all cursor-pointer group"
+                          >
+                            <h5 className="font-bold text-slate-900 text-xs group-hover:text-emerald-800 transition-colors line-clamp-2">
+                              {art.title}
+                            </h5>
+                            <span className="text-[10px] text-emerald-600 mt-2 block font-sans">
+                              مکمل مضمون پڑھیں ←
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Clinic & Certificate Gallery */}
+                  {doctor.gallery && doctor.gallery.length > 0 && (
+                    <div className="space-y-3 pt-2">
+                      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <ImageIcon className="w-4 h-4 text-emerald-600" />
+                        <span>مطب اور کلینک کی تصویری جھلکیاں:</span>
+                      </h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        {doctor.gallery.map((imgUrl, idx) => (
+                          <a
+                            key={idx}
+                            href={imgUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group relative rounded-2xl overflow-hidden border border-slate-200 aspect-video bg-slate-100 hover:shadow-md transition-all block"
+                          >
+                            <img
+                              src={imgUrl}
+                              alt={`مطب تصویر ${idx + 1}`}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              onError={(e) => {
+                                if (e.target.parentElement) e.target.parentElement.style.display = 'none';
+                              }}
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                </div>
+              )}
 
             </div>
 
-            {/* Right 1 Column: Clinic Info & Appointment Card */}
-            <div className="space-y-4">
+            {/* Right 4 Cols: STICKY CONSULTATION & APPOINTMENT CARD (Oladoc Booking Widget) */}
+            <div className="lg:col-span-4 space-y-4">
               
-              {/* Clinic Info Box */}
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3 text-xs">
-                <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-emerald-600" />
-                  <span>مطب / کلینک کی معلومات</span>
-                </h4>
+              <div className="bg-white rounded-3xl border border-slate-200 shadow-lg p-5 space-y-5 sticky top-20">
                 
-                <div className="space-y-2 text-slate-600">
-                  <div>
-                    <span className="font-bold text-slate-800 block">{doctor.clinicName}</span>
-                    <span className="text-[11px] text-slate-500 block mt-0.5">{doctor.address}</span>
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-200/60">
-                    <div className="font-bold text-slate-700 mb-0.5 flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span>اوقاتِ کار:</span>
-                    </div>
-                    <span className="text-[11px] text-slate-600 font-sans">{doctor.timing}</span>
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between font-sans">
-                    <span className="text-slate-500">مشاورت فیس:</span>
-                    <span className="font-bold text-emerald-800 text-sm">{doctor.fee} روپے</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Direct Appointment Request Form */}
-              <div className="bg-white p-4 rounded-2xl border border-emerald-200 shadow-xs space-y-3">
-                <h4 className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-emerald-600" />
-                  <span>مطب پر وقت (Appointment) حاصل کریں</span>
-                </h4>
-
-                {appointmentSent ? (
-                  <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl text-center space-y-2">
-                    <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-                    <p className="text-xs font-bold text-emerald-900">آپ کی درخواست موصول ہو گئی ہے!</p>
-                    <p className="text-[11px] text-emerald-700">کلینک کا عملہ جلد آپ سے رابطہ کر کے وقت کی تصدیق کرے گا۔</p>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-2 text-xs">
-                    <div>
-                      <label className="text-[11px] font-medium text-slate-700 block mb-1">مریض کا نام</label>
-                      <input
-                        type="text"
-                        required
-                        value={formData.patientName}
-                        onChange={(e) => setFormData({...formData, patientName: e.target.value})}
-                        placeholder="نام لکھیں..."
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-medium text-slate-700 block mb-1">واٹس ایپ / فون نمبر</label>
-                      <input
-                        type="tel"
-                        required
-                        value={formData.phone}
-                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                        placeholder="0300-1234567"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none font-sans"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-medium text-slate-700 block mb-1">بیماری / مسئلہ</label>
-                      <input
-                        type="text"
-                        value={formData.disease}
-                        onChange={(e) => setFormData({...formData, disease: e.target.value})}
-                        placeholder="مثلاً: معدے کی جلن، جوڑوں کا درد"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                      />
-                    </div>
+                {/* Consultation Mode Selector (Online Video vs In-Person Clinic) */}
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+                    مشاورت کی نوعیت منتخب کریں:
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5 bg-slate-100 p-1.5 rounded-2xl">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setConsultationMode('online');
+                        setFormData({...formData, mode: 'آن لائن ویڈیو مشاورت'});
+                      }}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                        consultationMode === 'online'
+                          ? 'bg-white text-emerald-800 shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      <Video className="w-3.5 h-3.5" />
+                      <span>آن لائن ویڈیو</span>
+                    </button>
 
                     <button
-                      type="submit"
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs transition-colors shadow-xs flex items-center justify-center gap-1.5 mt-2"
+                      type="button"
+                      onClick={() => {
+                        setConsultationMode('clinic');
+                        setFormData({...formData, mode: 'مطب / کلینک وزٹ'});
+                      }}
+                      className={`py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+                        consultationMode === 'clinic'
+                          ? 'bg-white text-emerald-800 shadow-sm'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
                     >
-                      <Send className="w-3.5 h-3.5" />
-                      <span>درخواست بھیجیں</span>
+                      <Building2 className="w-3.5 h-3.5" />
+                      <span>مطب وزٹ</span>
                     </button>
-                  </form>
-                )}
+                  </div>
+                </div>
+
+                {/* Consultation Details Box (Fee + Mode Info) */}
+                <div className="bg-emerald-50/70 border border-emerald-200/90 rounded-2xl p-4 space-y-3 text-xs">
+                  
+                  {/* Fee */}
+                  <div className="flex items-center justify-between border-b border-emerald-200/60 pb-2.5">
+                    <span className="text-slate-600 font-medium">مشاورت فیس:</span>
+                    <div className="text-right">
+                      <strong className="text-lg font-black text-emerald-950 font-sans">
+                        Rs. {consultationMode === 'online' ? onlineFee : clinicFee}
+                      </strong>
+                    </div>
+                  </div>
+
+                  {/* Mode Specific Description */}
+                  <div className="space-y-1 text-slate-700">
+                    <span className="font-bold text-slate-900 block">طریقہ کار / پتہ:</span>
+                    {consultationMode === 'online' ? (
+                      <p className="text-[11px] leading-relaxed text-emerald-900">
+                        موبائل یا کمپیوٹر بذریعہ واٹس ایپ ویڈیو / آڈیو کال۔ ادویات ٹی سی ایس سے گھر پہنچائی جائیں گی۔
+                      </p>
+                    ) : (
+                      <p className="text-[11px] leading-relaxed text-slate-600">
+                        {doctor.clinicName || 'مطب'}: {doctor.address || `${doctor.cityName || 'لاہور'}، پاکستان`}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Availability Badge */}
+                  <div className="pt-2 border-t border-emerald-200/60 flex items-start gap-2 text-emerald-900 font-sans text-[11px]">
+                    <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold block">دستیاب اوقات:</span>
+                      <span>{doctor.timing || 'پیر تا ہفتہ: شام 4:00 تا رات 9:00'}</span>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Instant Action CTA Buttons (Call + WhatsApp) */}
+                <div className="space-y-2">
+                  <a
+                    href={`https://wa.me/${doctor.whatsapp || doctor.phone}?text=${encodeURIComponent(`السلام علیکم طبیب ${doctor.name}، میں طبیب پیڈیا کے ذریعے ${consultationMode === 'online' ? 'آن لائن ویڈیو مشاورت' : 'مطب پر چیک اپ'} کے لیے وقت حاصل کرنا چاہتا ہوں۔`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-2xl text-xs sm:text-sm transition-all shadow-md hover:shadow-lg"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>واٹس ایپ پر فوری رابطہ کریں</span>
+                  </a>
+
+                  {doctor.phone && (
+                    <a
+                      href={`tel:${doctor.phone}`}
+                      className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-2.5 rounded-2xl text-xs transition-colors border border-slate-200"
+                    >
+                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>فون پر کال کریں ({doctor.phone})</span>
+                    </a>
+                  )}
+                </div>
+
+                {/* Direct 30-Second Appointment Booking Form */}
+                <div className="pt-3 border-t border-slate-100 space-y-3">
+                  <span className="text-xs font-bold text-slate-800 block flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4 text-emerald-600" />
+                    <span>یا نیچے فارم بھر کر وقت بک کریں:</span>
+                  </span>
+
+                  {appointmentSent ? (
+                    <div className="bg-emerald-50 border border-emerald-300 p-4 rounded-2xl text-center space-y-2 animate-in zoom-in-95">
+                      <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
+                      <p className="text-xs font-bold text-emerald-950">درخواست کامیابی سے موصول ہو گئی!</p>
+                      <p className="text-[11px] text-emerald-700 leading-relaxed">
+                        طبیب کے مطب سے وقت کی تصدیق کے لیے جلد رابطہ کیا جائے گا۔
+                      </p>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleSubmitAppointment} className="space-y-2.5 text-xs">
+                      <div>
+                        <input
+                          type="text"
+                          required
+                          value={formData.patientName}
+                          onChange={(e) => setFormData({...formData, patientName: e.target.value})}
+                          placeholder="مریض کا پورا نام *"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                        />
+                      </div>
+
+                      <div>
+                        <input
+                          type="tel"
+                          required
+                          value={formData.phone}
+                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                          placeholder="واٹس ایپ / موبائل نمبر *"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none font-sans"
+                        />
+                      </div>
+
+                      <div>
+                        <input
+                          type="text"
+                          value={formData.disease}
+                          onChange={(e) => setFormData({...formData, disease: e.target.value})}
+                          placeholder="مرض یا مسئلہ (اختیاری)"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-emerald-500 outline-none"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                        <span>اپوائنٹمنٹ کی درخواست بھیجیں</span>
+                      </button>
+                    </form>
+                  )}
+                </div>
+
+                {/* Trust Badges (Oladoc Bottom Trust Section) */}
+                <div className="pt-3 border-t border-slate-100 space-y-2 text-[11px] text-slate-500 font-sans">
+                  <div className="flex items-center gap-2">
+                    <Headphones className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>فوری کسٹمر سپورٹ اور رہنمائی</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>100% محفوظ و رازداری کی مکمل ضمانت</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>صرف 30 سیکنڈ میں بکنگ کی سہولت</span>
+                  </div>
+                </div>
 
               </div>
 

@@ -1,0 +1,3042 @@
+[
+  {
+    "id": 1,
+    "title": "آبکامہ( کانجی ولائتی)",
+    "slug": "%d8%a2%d8%a8%da%a9%d8%a7%d9%85%db%81-%da%a9%d8%a7%d9%86%d8%ac%db%8c-%d9%88%d9%84%d8%a7%d8%a6%d8%aa%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 2,
+    "title": "آبنوس",
+    "slug": "%d8%a2%d8%a8%d9%86%d9%88%d8%b3",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 3,
+    "title": "آڑو",
+    "slug": "peach-%d8%a2%da%91%d9%88",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 12,
+    "title": "آسارون",
+    "slug": "asarabacca-%d8%a2%d8%b3%d8%a7%d8%b1%d9%88%d9%86",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 13,
+    "title": "آک اک",
+    "slug": "giant-calotrope-%d8%a2%da%a9",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": "مزاج درجہ چہارم"
+  },
+  {
+    "id": 14,
+    "title": "آکاس بیل افتیمون",
+    "slug": "love-vine-%d8%a2%da%a9%d8%a7%d8%b3-%d8%a8%db%8c%d9%84-%d8%a7%d9%81%d8%aa%db%8c%d9%85%d9%88%d9%86",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 15,
+    "title": "آل(پتنگ )",
+    "slug": "%d8%a2%d9%84%d9%be%d8%aa%d9%86%da%af",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 16,
+    "title": "آلو",
+    "slug": "%d8%a2%d9%84%d9%88",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 18,
+    "title": "آلو بالو/ چیری",
+    "slug": "%d8%a2%d9%84%d9%88-%d8%a8%d8%a7%d9%84%d9%88-%da%86%db%8c%d8%b1%db%8c",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 19,
+    "title": "آلو بخارا",
+    "slug": "%d8%a2%d9%84%d9%88-%d8%a8%d8%ae%d8%a7%d8%b1%d8%a7",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 20,
+    "title": "آم",
+    "slug": "%d8%a2%d9%85-%d8%aa%d8%b9%d8%a7%d8%b1%d9%81-%d9%88-%d9%81%d9%88%d8%a7%d8%a6%d8%af",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 21,
+    "title": "آملہ تعارف و فوائد",
+    "slug": "%d8%a2%d9%85%d9%84%db%81-%d8%aa%d8%b9%d8%a7%d8%b1%d9%81-%d9%88-%d9%81%d9%88%d8%a7%d8%a6%d8%af",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 22,
+    "title": "آنبہ ہلدی",
+    "slug": "%d8%a2%d9%86%d8%a8%db%81-%db%81%d9%84%d8%af%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 23,
+    "title": "ابرک",
+    "slug": "%d8%a7%d8%a8%d8%b1%da%a9",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 24,
+    "title": "ابہل",
+    "slug": "%d8%a7%d8%a8%db%81%d9%84",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 25,
+    "title": "ابریشم",
+    "slug": "%d8%a7%d8%a8%d8%b1%db%8c%d8%b4%d9%85",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 26,
+    "title": "اٹنگن کے بیج",
+    "slug": "%d8%a7%d9%8f%d9%b9%d9%86%da%af%d9%86-%da%a9%db%92-%d8%a8%db%8c%d8%ac",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 27,
+    "title": "اتیس",
+    "slug": "%d8%a7%d8%aa%db%8c%d8%b3",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 28,
+    "title": "اجمود/کرفس",
+    "slug": "%d8%a7%d8%ac%d9%85%d9%88%d8%af-%da%a9%d8%b1%d9%81%d8%b3",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 32,
+    "title": "اجوائن دیسی",
+    "slug": "%d8%a7%d8%ac%d9%88%d8%a7%d8%a6%d9%86-%d8%af%db%8c%d8%b3%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 33,
+    "title": "اخروٹ",
+    "slug": "%d8%a7%d8%ae%d8%b1%d9%88%d9%b9",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 35,
+    "title": "ادرک",
+    "slug": "%d8%a7%d8%af%d8%b1%da%a9",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 36,
+    "title": "اذخر جرانکس",
+    "slug": "%d8%a7%d8%b0%d8%ae%d8%b1-%d8%ac%d8%b1%d8%a7%d9%86%da%a9%d8%b3",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 37,
+    "title": "اراروٹ / مایا",
+    "slug": "%d8%a7%d8%b1%d8%a7%d8%b1%d9%88%d9%b9-%d9%85%d8%a7%db%8c%d8%a7",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 38,
+    "title": "ارجن",
+    "slug": "%d8%a7%d8%b1%d8%ac%d9%86",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 41,
+    "title": "ارنڈ",
+    "slug": "%d8%a7%d8%b1%d9%86%da%88",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 42,
+    "title": "ارنی",
+    "slug": "%d8%a7%d8%b1%d9%86%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 43,
+    "title": "اروی",
+    "slug": "%d8%a7%d8%b1%d9%88%db%8c",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 45,
+    "title": "ارہر کی دال",
+    "slug": "%d8%a7%d8%b1%db%81%d8%b1-%da%a9%db%8c-%d8%af%d8%a7%d9%84",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 46,
+    "title": "اڑد (دال ماش)",
+    "slug": "%d8%a7%da%91%d8%af-%d8%af%d8%a7%d9%84-%d9%85%d8%a7%d8%b4",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 47,
+    "title": "اڑوسہ بانسہ",
+    "slug": "%d8%a7%da%91%d9%88%d8%b3%db%81-%d8%a8%d8%a7%d9%86%d8%b3%db%81",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 48,
+    "title": "اسفنج اسپنج",
+    "slug": "%d8%a7%d8%b3%d9%81%d9%86%d8%ac-%d8%a7%d8%b3%d9%be%d9%86%d8%ac",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 49,
+    "title": "اسپند حرمل ہرمل",
+    "slug": "%d8%a7%d8%b3%d9%be%d9%86%d8%af-%d8%ad%d8%b1%d9%85%d9%84-%db%81%d8%b1%d9%85%d9%84",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 50,
+    "title": "اسپغول",
+    "slug": "%d8%a7%d8%b3%d9%be%d8%ba%d9%88%d9%84",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 51,
+    "title": "اسطوخودوس",
+    "slug": "%d8%a7%d8%b3%d8%b7%d9%88%d8%ae%d9%88%d8%af%d9%88%d8%b3",
+    "category": "گرم تر",
+    "qanoonCategory": "",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 52,
+    "title": "اسگندھ اشوگندھا",
+    "slug": "%d8%a7%d8%b3%da%af%d9%86%d8%af%da%be",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 55,
+    "title": "اشق گوند",
+    "slug": "%d8%a7%d8%b4%d9%82",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 58,
+    "title": "اشنان لانا بوٹی",
+    "slug": "%d8%a7%d8%b4%d9%86%d8%a7%d9%86-%d9%84%d8%a7%d9%86%d8%a7-%d8%a8%d9%88%d9%b9%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 59,
+    "title": "اشوکا",
+    "slug": "%d8%a7%d8%b4%d9%88%da%a9%d8%a7",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 62,
+    "title": "افسنتین",
+    "slug": "%d8%a7%d9%81%d8%b3%d9%86%d8%aa%db%8c%d9%86",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 63,
+    "title": "افیون افیم",
+    "slug": "%d8%a7%d9%81%db%8c%d9%88%d9%86-%d8%a7%d9%81%db%8c%d9%85",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ چہارم"
+  },
+  {
+    "id": 64,
+    "title": "اگر عود",
+    "slug": "%d8%a7%da%af%d8%b1-%d8%b9%d9%88%d8%af",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 65,
+    "title": "الائچی خرد",
+    "slug": "%d8%a7%d9%84%d8%a7%d8%a6%da%86%db%8c-%d8%ae%d8%b1%d8%af",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 66,
+    "title": "الائچی کلاں",
+    "slug": "%d8%a7%d9%84%d8%a7%d8%a6%da%86%db%8c-%da%a9%d9%84%d8%a7%da%ba",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 67,
+    "title": "الٹ کمبل",
+    "slug": "%d8%a7%d9%84%d9%b9-%da%a9%d9%85%d8%a8%d9%84",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 68,
+    "title": "السی کے بیج",
+    "slug": "%d8%a7%d9%84%d8%b3%db%8c-%da%a9%db%92-%d8%a8%db%8c%d8%ac",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 69,
+    "title": "امرود",
+    "slug": "%d8%a7%d9%85%d8%b1%d9%88%d8%af",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 71,
+    "title": "امڑہ",
+    "slug": "%d8%a7%d9%85%da%91%db%81",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 72,
+    "title": "املتاس",
+    "slug": "%d8%a7%d9%85%d9%84%d8%aa%d8%a7%d8%b3",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 76,
+    "title": "املی",
+    "slug": "%d8%a7%d9%85%d9%84%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 78,
+    "title": "انار شیریں",
+    "slug": "%d8%a7%d9%86%d8%a7%d8%b1-%d8%b4%db%8c%d8%b1%db%8c%da%ba",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 79,
+    "title": "انت مول",
+    "slug": "%d8%a7%d9%86%d8%aa-%d9%85%d9%88%d9%84",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 80,
+    "title": "انجبار",
+    "slug": "%d8%a7%d9%86%d8%ac%d8%a8%d8%a7%d8%b1",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 84,
+    "title": "انجیر",
+    "slug": "%d8%a7%d9%86%d8%ac%db%8c%d8%b1",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 85,
+    "title": "اندر جو ، کڑا سک ،  کڑا چھال",
+    "slug": "%d8%a7%d9%86%d8%af%d8%b1-%d8%ac%d9%88-%d8%8c-%da%a9%da%91%d8%a7-%d8%b3%da%a9-%d8%8c-%da%a9%da%91%d8%a7-%da%86%da%be%d8%a7%d9%84",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 87,
+    "title": "اندرائن، تمہ، حنظل",
+    "slug": "%d8%a7%d9%86%d8%af%d8%b1%d8%a7%d8%a6%d9%86-%d8%aa%d9%85%db%81",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 88,
+    "title": "انڈا مرغی",
+    "slug": "%d8%a7%d9%86%da%88%d8%a7-%d9%85%d8%b1%d8%ba%db%8c",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 89,
+    "title": "انزروت",
+    "slug": "%d8%a7%d9%86%d8%b2%d8%b1%d9%88%d8%aa",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ وم"
+  },
+  {
+    "id": 92,
+    "title": "انکول",
+    "slug": "%d8%a7%d9%86%da%a9%d9%88%d9%84",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 93,
+    "title": "انگور",
+    "slug": "%d8%a7%d9%86%da%af%d9%88%d8%b1",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 94,
+    "title": "انناس",
+    "slug": "%d8%a7%d9%86%d9%86%d8%a7%d8%b3",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 96,
+    "title": "اونٹ کٹارا",
+    "slug": "%d8%a7%d9%88%d9%86%d9%b9-%da%a9%d9%b9%d8%a7%d8%b1%d8%a7",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 97,
+    "title": "ایرسہ",
+    "slug": "%d8%a7%db%8c%d8%b1%d8%b3%db%81",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 98,
+    "title": "ایشر مول / زراوند",
+    "slug": "%d8%a7%db%8c%d8%b4%d8%b1-%d9%85%d9%88%d9%84-%d8%b2%d8%b1%d8%a7%d9%88%d9%86%d8%af",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 99,
+    "title": "ایلوویرا / کوار گندل / گھیکوار",
+    "slug": "%d8%a7%db%8c%d9%84%d9%88%d9%88%db%8c%d8%b1%d8%a7",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 100,
+    "title": "انیسوں / ولائتی سونف",
+    "slug": "%d8%a7%d9%86%db%8c%d8%b3%d9%88%da%ba",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 101,
+    "title": "بابچی",
+    "slug": "%d8%a8%d8%a7%d8%a8%da%86%db%8c",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 102,
+    "title": "بابونہ / کیمومائل",
+    "slug": "%d8%a8%d8%a7%d8%a8%d9%88%d9%86%db%81",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 103,
+    "title": "باجرہ",
+    "slug": "%d8%a8%d8%a7%d8%ac%d8%b1%db%81",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 105,
+    "title": "بادام تلخ",
+    "slug": "%d8%a8%d8%a7%d8%af%d8%a7%d9%85-%d8%aa%d9%84%d8%ae",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 106,
+    "title": "بادام شیریں",
+    "slug": "%d8%a8%d8%a7%d8%af%d8%a7%d9%85-%d8%b4%db%8c%d8%b1%db%8c%da%ba",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 109,
+    "title": "بادر نجبویہ",
+    "slug": "%d8%a8%d8%a7%d8%af%d8%b1-%d9%86%d8%ac%d8%a8%d9%88%db%8c%db%81",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 111,
+    "title": "بادیان خطائی",
+    "slug": "%d8%a8%d8%a7%d8%af%db%8c%d8%a7%d9%86-%d8%ae%d8%b7%d8%a7%d8%a6%db%8c",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 112,
+    "title": "بارتنگ تخم",
+    "slug": "%d8%a8%d8%a7%d8%b1%d8%aa%d9%86%da%af-%d8%aa%d8%ae%d9%85",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 114,
+    "title": "بارہ سنگھا کے سینگ",
+    "slug": "%d8%a8%d8%a7%d8%b1%db%81-%d8%b3%d9%86%da%af%da%be%d8%a7-%da%a9%db%92-%d8%b3%db%8c%d9%86%da%af",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 118,
+    "title": "باکلہ باقلہ",
+    "slug": "%d8%a8%d8%a7%da%a9%d9%84%db%81-%d8%a8%d8%a7%d9%82%d9%84%db%81",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 120,
+    "title": "بال",
+    "slug": "%d8%a8%d8%a7%d9%84",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 123,
+    "title": "بالچھڑ",
+    "slug": "%d8%a8%d8%a7%d9%84%da%86%da%be%da%91",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 124,
+    "title": "بانس",
+    "slug": "%d8%a8%d8%a7%d9%86%d8%b3",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 125,
+    "title": "باو بڑنگ / بائے بڑنگ",
+    "slug": "%d8%a8%d8%a7%d9%88-%d8%a8%da%91%d9%86%da%af",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 126,
+    "title": "بائے کنبہ",
+    "slug": "%d8%a8%d8%a7%d8%a6%db%92-%da%a9%d9%86%d8%a8%db%81",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 127,
+    "title": "بتھوا / باتھو ساگ",
+    "slug": "%d8%a8%d8%aa%da%be%d9%88%d8%a7-%d8%a8%d8%a7%d8%aa%da%be%d9%88-%d8%b3%d8%a7%da%af",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 128,
+    "title": "بٹیر",
+    "slug": "%d8%a8%d9%b9%db%8c%d8%b1",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 130,
+    "title": "بچھناک / بیش / میٹھا تیلیا",
+    "slug": "%d8%a8%da%86%da%be%d9%86%d8%a7%da%a9",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 131,
+    "title": "بچھو / عقرب",
+    "slug": "%d8%a8%da%86%da%be%d9%88-%d8%b9%d9%82%d8%b1%d8%a8",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 132,
+    "title": "بداری کند/  بدھاری قند",
+    "slug": "%d8%a8%d8%af%d8%a7%d8%b1%db%8c-%da%a9%d9%86%d8%af",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 133,
+    "title": "بدہارا / بدھارا",
+    "slug": "%d8%a8%d8%af%db%81%d8%a7%d8%b1%d8%a7-%d8%a8%d8%af%da%be%d8%a7%d8%b1%d8%a7",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 135,
+    "title": "برف",
+    "slug": "%d8%a8%d8%b1%d9%81",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 136,
+    "title": "برہم ڈنڈی",
+    "slug": "%d8%a8%d8%b1%db%81%d9%85-%da%88%d9%86%da%88%db%8c",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 137,
+    "title": "برنا",
+    "slug": "%d8%a8%d8%b1%d9%86%d8%a7",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 138,
+    "title": "برنجاسف",
+    "slug": "%d8%a8%d8%b1%d9%86%d8%ac%d8%a7%d8%b3%d9%81",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 139,
+    "title": "برہمی",
+    "slug": "%d8%a8%d8%b1%db%81%d9%85%db%8c",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 140,
+    "title": "بریارا  / بریالہ",
+    "slug": "%d8%a8%d8%b1%db%8c%d8%a7%d8%b1%d8%a7-%d8%a8%d8%b1%db%8c%d8%a7%d9%84%db%81",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 141,
+    "title": "بڑھل / ڈھیو",
+    "slug": "%d8%a8%da%91%da%be%d9%84-%da%88%da%be%db%8c%d9%88",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 142,
+    "title": "بسد / مرجان",
+    "slug": "%d8%a8%d8%b3%d8%af-%d9%85%d8%b1%d8%ac%d8%a7%d9%86",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 143,
+    "title": "بسفائج",
+    "slug": "%d8%a8%d8%b3%d9%81%d8%a7%d8%a6%d8%ac",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 144,
+    "title": "بسکھپرا",
+    "slug": "%d8%a8%d8%b3%da%a9%da%be%d9%be%d8%b1%d8%a7",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 145,
+    "title": "بطخ",
+    "slug": "%d8%a8%d8%b7%d8%ae",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 146,
+    "title": "بکائن / دھریک",
+    "slug": "%d8%a8%da%a9%d8%a7%d8%a6%d9%86",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 150,
+    "title": "بکری",
+    "slug": "%d8%a8%da%a9%d8%b1%db%8c",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 151,
+    "title": "بکن",
+    "slug": "%d8%a8%da%a9%d9%86",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 152,
+    "title": "بلادر / بھلاواں",
+    "slug": "%d8%a8%d9%84%d8%a7%d8%af%d8%b1-%d8%a8%da%be%d9%84%d8%a7%d9%88%d8%a7%da%ba",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 153,
+    "title": "بلوط",
+    "slug": "%d8%a8%d9%84%d9%88%d8%b7",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 155,
+    "title": "بندا بیل",
+    "slug": "%d8%a8%d9%86%d8%af%d8%a7-%d8%a8%db%8c%d9%84",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 158,
+    "title": "بنفشہ",
+    "slug": "%d8%a8%d9%86%d9%81%d8%b4%db%81",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 159,
+    "title": "بنولہ",
+    "slug": "%d8%a8%d9%86%d9%88%d9%84%db%81",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 163,
+    "title": "بوٹی فرید",
+    "slug": "%d8%a8%d9%88%d9%b9%db%8c-%d9%81%d8%b1%db%8c%d8%af",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 164,
+    "title": "بورہ ارمنی",
+    "slug": "%d8%a8%d9%88%d8%b1%db%81-%d8%a7%d8%b1%d9%85%d9%86%db%8c",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 168,
+    "title": "بوزیدان",
+    "slug": "%d8%a8%d9%88%d8%b2%db%8c%d8%af%d8%a7%d9%86",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 169,
+    "title": "بونٹ / کچا چنا",
+    "slug": "%d8%a8%d9%88%d9%86%d9%b9-%da%a9%da%86%d8%a7-%da%86%d9%86%d8%a7",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 170,
+    "title": "بوہڑ / برگد",
+    "slug": "%d8%a8%d9%88%db%81%da%91-%d8%a8%d8%b1%da%af%d8%af",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 171,
+    "title": "بہمن سفید",
+    "slug": "%d8%a8%db%81%d9%85%d9%86-%d8%b3%d9%81%db%8c%d8%af",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 172,
+    "title": "بہمن سرخ",
+    "slug": "%d8%a8%db%81%d9%85%d9%86-%d8%b3%d8%b1%d8%ae",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 175,
+    "title": "بھنڈی",
+    "slug": "%d8%a8%da%be%d9%86%da%88%db%8c",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 176,
+    "title": "بھنگ",
+    "slug": "%d8%a8%da%be%d9%86%da%af",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 179,
+    "title": "بندال ڈوڈا / گھگر بیل",
+    "slug": "%d8%a8%d9%86%d8%af%d8%a7%d9%84-%da%88%d9%88%da%88%d8%a7",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 181,
+    "title": "بھنگرہ",
+    "slug": "%d8%a8%da%be%d9%86%da%af%d8%b1%db%81",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 183,
+    "title": "بھوج پتر",
+    "slug": "%d8%a8%da%be%d9%88%d8%ac-%d9%be%d8%aa%d8%b1",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 184,
+    "title": "بھون پھلی / بوپھلی /  کرنڈ",
+    "slug": "%d8%a8%da%be%d9%88%d9%86-%d9%be%da%be%d9%84%db%8c-%d8%a8%d9%88%d9%be%da%be%d9%84%db%8c-%da%a9%d8%b1%d9%86%da%88",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 185,
+    "title": "بھوسی گندم",
+    "slug": "%d8%a8%da%be%d9%88%d8%b3%db%8c-%da%af%d9%86%d8%af%d9%85",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 192,
+    "title": "بھوئی آملہ / بھومی آملہ",
+    "slug": "%d8%a8%da%be%d9%88%d8%a6%db%8c-%d8%a2%d9%85%d9%84%db%81-%d8%a8%da%be%d9%88%d9%85%db%8c-%d8%a2%d9%85%d9%84%db%81",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 193,
+    "title": "بہی دانہ",
+    "slug": "%d8%a8%db%81%db%8c-%d8%af%d8%a7%d9%86%db%81",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 194,
+    "title": "بہیڑہ",
+    "slug": "%d8%a8%db%81%db%8c%da%91%db%81",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 195,
+    "title": "بیج بند",
+    "slug": "%d8%a8%db%8c%d8%ac-%d8%a8%d9%86%d8%af",
+    "category": "خشک سرد",
+    "qanoonCategory": "",
+    "degree": ""
+  },
+  {
+    "id": 196,
+    "title": "بید سادہ",
+    "slug": "%d8%a8%db%8c%d8%af-%d8%b3%d8%a7%d8%af%db%81",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 197,
+    "title": "بید مشک",
+    "slug": "%d8%a8%db%8c%d8%af-%d9%85%d8%b4%da%a9",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 198,
+    "title": "بیر",
+    "slug": "%d8%a8%db%8c%d8%b1",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 199,
+    "title": "بیل گری",
+    "slug": "%d8%a8%db%8c%d9%84-%da%af%d8%b1%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 207,
+    "title": "بینگن",
+    "slug": "%d8%a8%db%8c%d9%86%da%af%d9%86",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 208,
+    "title": "پاڈھل",
+    "slug": "%d9%be%d8%a7%da%88%da%be%d9%84",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 209,
+    "title": "پارس پیپل",
+    "slug": "%d9%be%d8%a7%d8%b1%d8%b3-%d9%be%db%8c%d9%be%d9%84",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 210,
+    "title": "پارہ سیماب مرکری",
+    "slug": "%d9%be%d8%a7%d8%b1%db%81-%d8%b3%db%8c%d9%85%d8%a7%d8%a8-%d9%85%d8%b1%da%a9%d8%b1%db%8c",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 211,
+    "title": "پاکر/ پلخن",
+    "slug": "%d9%be%d8%a7%da%a9%d8%b1-%d9%be%d9%84%d8%ae%d9%86",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 212,
+    "title": "پالک",
+    "slug": "%d9%be%d8%a7%d9%84%da%a9",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 213,
+    "title": "پان",
+    "slug": "%d9%be%d8%a7%d9%86",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 216,
+    "title": "پیپلا مول",
+    "slug": "%d9%be%db%8c%d9%be%d9%84%d8%a7-%d9%85%d9%88%d9%84",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 217,
+    "title": "پپل / فلفل درا",
+    "slug": "%d9%be%d9%be%d9%84%db%8c-%d9%81%d9%84%d9%81%d9%84-%d8%af%d8%b1%d8%a7%d8%b2",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 220,
+    "title": "پپیتا",
+    "slug": "%d9%be%d9%be%db%8c%d8%aa%d8%a7",
+    "category": "خشک گرم",
+    "qanoonCategory": "",
+    "degree": ""
+  },
+  {
+    "id": 221,
+    "title": "پاپڑا شاہترہ",
+    "slug": "%d9%be%d8%a7%d9%be%da%91%d8%a7-%d8%b4%d8%a7%db%81%d8%aa%d8%b1%db%81",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 222,
+    "title": "پتھر پھوڑی / پتھر چٹ / زخم حیات",
+    "slug": "%d9%be%d8%aa%da%be%d8%b1-%da%86%d9%b9",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 223,
+    "title": "پد ماکھ",
+    "slug": "%d9%be%d8%af-%d9%85%d8%a7%da%a9%da%be",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 224,
+    "title": "پرسارنی",
+    "slug": "%d9%be%d8%b1%d8%b3%d8%a7%d8%b1%d9%86%db%8c",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 225,
+    "title": "پرسیاوشاں / ہنسراج",
+    "slug": "%d9%be%d8%b1%d8%b3%db%8c%d8%a7%d9%88%d8%b4%d8%a7%da%ba",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 226,
+    "title": "پرشٹ پرنی",
+    "slug": "%d9%be%d8%b1%d8%b4%d9%b9-%d9%be%d8%b1%d9%86%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 228,
+    "title": "پستہ",
+    "slug": "%d9%be%d8%b3%d8%aa%db%81",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 229,
+    "title": "پلاس پاپڑہ",
+    "slug": "%d9%be%d9%84%d8%a7%d8%b3-%d9%be%d8%a7%d9%be%da%91%db%81",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 230,
+    "title": "پلول / پرور/ پرول",
+    "slug": "%d9%be%d9%84%d9%88%d9%84-%d9%be%d8%b1%d9%88%d8%b1-%d9%be%d8%b1%d9%88%d9%84",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 233,
+    "title": "پنواڑ",
+    "slug": "%d9%be%d9%86%d9%88%d8%a7%da%91",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 234,
+    "title": "پنیر",
+    "slug": "%d9%be%d9%86%db%8c%d8%b1",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 235,
+    "title": "پنیر مایہ",
+    "slug": "%d9%be%d9%86%db%8c%d8%b1-%d9%85%d8%a7%db%8c%db%81",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 236,
+    "title": "پودینہ",
+    "slug": "%d9%be%d9%88%d8%af%db%8c%d9%86%db%81",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 237,
+    "title": "پوست",
+    "slug": "%d9%be%d9%88%d8%b3%d8%aa",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 238,
+    "title": "پوئی مالابار پالک",
+    "slug": "%d9%be%d9%88%d8%a6%db%8c-%d9%85%d8%a7%d9%84%d8%a7%d8%a8%d8%a7%d8%b1-%d9%be%d8%a7%d9%84%da%a9",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 239,
+    "title": "پھٹکڑی",
+    "slug": "%d9%be%da%be%d9%b9%da%a9%da%91%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 240,
+    "title": "پھکر مول / پوکر مول",
+    "slug": "%d9%be%da%be%da%a9%d8%b1-%d9%85%d9%88%d9%84-%d9%be%d9%88%da%a9%d8%b1-%d9%85%d9%88%d9%84",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 241,
+    "title": "پھوٹ / پھٹ",
+    "slug": "%d9%be%da%be%d9%88%d9%b9-%d9%be%da%be%d9%b9",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 242,
+    "title": "پیاز",
+    "slug": "%d9%be%db%8c%d8%a7%d8%b2",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 243,
+    "title": "پیاز جنگلی",
+    "slug": "%d9%be%db%8c%d8%a7%d8%b2-%d8%ac%d9%86%da%af%d9%84%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 244,
+    "title": "پیپل",
+    "slug": "%d9%be%db%8c%d9%be%d9%84",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 245,
+    "title": "پیٹھا",
+    "slug": "%d9%be%db%8c%d9%b9%da%be%d8%a7",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 246,
+    "title": "پیلو / مسواک درخت",
+    "slug": "%d9%be%db%8c%d9%84%d9%88",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 247,
+    "title": "تاڑ / پالمیرا کھجور",
+    "slug": "%d8%aa%d8%a7%da%91-%d9%be%d8%a7%d9%84%d9%85%db%8c%d8%b1%d8%a7-%da%a9%da%be%d8%ac%d9%88%d8%b1",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 248,
+    "title": "تال مکھانہ",
+    "slug": "%d8%aa%d8%a7%d9%84-%d9%85%da%a9%da%be%d8%a7%d9%86%db%81",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 250,
+    "title": "تالیس پتر",
+    "slug": "%d8%aa%d8%a7%d9%84%db%8c%d8%b3-%d9%be%d8%aa%d8%b1",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 251,
+    "title": "تانبا",
+    "slug": "%d8%aa%d8%a7%d9%86%d8%a8%d8%a7",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 252,
+    "title": "تباشیر / طباشیر",
+    "slug": "%d8%aa%d8%a8%d8%a7%d8%b4%db%8c%d8%b1",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 253,
+    "title": "تپتی / کھٹکل",
+    "slug": "%d8%aa%d9%be%d8%aa%db%8c-%da%a9%da%be%d9%b9%da%a9%d9%84",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 254,
+    "title": "تج / چائہ دارچینی",
+    "slug": "%d8%aa%d8%ac-%da%86%d8%a7%d8%a6%d9%86%db%81-%d8%af%d8%a7%d8%b1%da%86%db%8c%d9%86%db%8c",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 255,
+    "title": "تخم بالنگو / تخم ملنگاں",
+    "slug": "%d8%aa%d8%ae%d9%85-%d8%a8%d8%a7%d9%84%d9%86%da%af%d9%88",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 256,
+    "title": "تخم بلسان",
+    "slug": "%d8%aa%d8%ae%d9%85-%d8%a8%d9%84%d8%b3%d8%a7%d9%86",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 257,
+    "title": "تخم ریحان / نیاز بو",
+    "slug": "%d8%aa%d8%ae%d9%85-%d8%b1%db%8c%d8%ad%d8%a7%d9%86-%d9%86%db%8c%d8%a7%d8%b2-%d8%a8%d9%88",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 258,
+    "title": "تخم کثوث",
+    "slug": "%d8%aa%d8%ae%d9%85-%da%a9%d8%ab%d9%88%d8%ab",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 259,
+    "title": "تخم حیات",
+    "slug": "%d8%aa%d8%ae%d9%85-%d8%ad%db%8c%d8%a7%d8%aa",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 260,
+    "title": "تربوز",
+    "slug": "%d8%aa%d8%b1%d8%a8%d9%88%d8%b2",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 261,
+    "title": "تارا میرا / ترمراہ",
+    "slug": "%d8%aa%d8%a7%d8%b1%d8%a7-%d9%85%db%8c%d8%b1%d8%a7-%d8%aa%d8%b1%d9%85%d8%b1%d8%a7%db%81",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 262,
+    "title": "ترمس",
+    "slug": "%d8%aa%d8%b1%d9%85%d8%b3",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 263,
+    "title": "ترنج یا اترج",
+    "slug": "%d8%aa%d8%b1%d9%86%d8%ac-%db%8c%d8%a7-%d8%a7%d8%aa%d8%b1%d8%ac",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 264,
+    "title": "ترنجبین",
+    "slug": "%d8%aa%d8%b1%d9%86%d8%ac%d8%a8%db%8c%d9%86",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 265,
+    "title": "ترور / اڑوس",
+    "slug": "%d8%aa%d8%b1%d9%88%d8%b1",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 266,
+    "title": "تل",
+    "slug": "%d8%aa%d9%84",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 267,
+    "title": "تلسی",
+    "slug": "%d8%aa%d9%84%d8%b3%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 268,
+    "title": "تمباکو",
+    "slug": "%d8%aa%d9%85%d8%a8%d8%a7%da%a9%d9%88",
+    "category": "خشک سرد",
+    "qanoonCategory": "",
+    "degree": ""
+  },
+  {
+    "id": 269,
+    "title": "توت / شہتوت",
+    "slug": "%d8%aa%d9%88%d8%aa-%d8%b4%db%81%d8%aa%d9%88%d8%aa",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 271,
+    "title": "تودری",
+    "slug": "%d8%aa%d9%88%d8%af%d8%b1%db%8c",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 272,
+    "title": "توری",
+    "slug": "%d8%aa%d9%88%d8%b1%db%8c",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 273,
+    "title": "تیزپات",
+    "slug": "%d8%aa%db%8c%d8%b2%d9%be%d8%a7%d8%aa",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 274,
+    "title": "تیلنی مکھی",
+    "slug": "%d8%aa%db%8c%d9%84%d9%86%db%8c-%d9%85%da%a9%da%be%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ چہارم"
+  },
+  {
+    "id": 275,
+    "title": "تیندو",
+    "slug": "%d8%aa%db%8c%d9%86%d8%af%d9%88",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 276,
+    "title": "ٹماٹر",
+    "slug": "%d9%b9%d9%85%d8%a7%d9%b9%d8%b1",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 277,
+    "title": "ٹون کٹ علی",
+    "slug": "%d9%b9%d9%88%d9%86%da%af-%da%a9%d9%b9-%d8%b9%d9%84%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 278,
+    "title": "ٹینڈے",
+    "slug": "%d9%b9%db%8c%d9%86%da%88%db%92",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 279,
+    "title": "ثعلب مصری",
+    "slug": "%d8%ab%d8%b9%d9%84%d8%a8-%d9%85%d8%b5%d8%b1%db%8c",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 280,
+    "title": "جامن",
+    "slug": "%d8%ac%d8%a7%d9%85%d9%86",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 281,
+    "title": "جاوتری / جلوتری",
+    "slug": "%d8%ac%d8%a7%d9%88%d8%aa%d8%b1%db%8c",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 282,
+    "title": "جاو شیر",
+    "slug": "%d8%ac%d8%a7%d9%88-%d8%b4%db%8c%d8%b1",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 283,
+    "title": "جائفل",
+    "slug": "%d8%ac%d8%a7%d8%a6%d9%81%d9%84",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 284,
+    "title": "جست",
+    "slug": "%d8%ac%d8%b3%d8%aa",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 285,
+    "title": "جگنو",
+    "slug": "%d8%ac%da%af%d9%86%d9%88",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 286,
+    "title": "جلاپا",
+    "slug": "%d8%ac%d9%84%d8%a7%d9%be%d8%a7",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 287,
+    "title": "جل کھنبی",
+    "slug": "%d8%ac%d9%84-%da%a9%da%be%d9%86%d8%a8%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 288,
+    "title": "جل نیم",
+    "slug": "%d8%ac%d9%84-%d9%86%db%8c%d9%85",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 289,
+    "title": "جمال گوٹہ",
+    "slug": "%d8%ac%d9%85%d8%a7%d9%84-%da%af%d9%88%d9%b9%db%81",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 290,
+    "title": "جند بید ستر",
+    "slug": "%d8%ac%d9%86%d8%af-%d8%a8%db%8c%d8%af-%d8%b3%d8%aa%d8%b1",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 291,
+    "title": "جنطیانہ",
+    "slug": "%d8%ac%d9%86%d8%b7%db%8c%d8%a7%d9%86%db%81",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 292,
+    "title": "جو",
+    "slug": "%d8%ac%d9%88",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 294,
+    "title": "وار، چری",
+    "slug": "%d8%ac%d9%88%d8%a7%d8%b1%d8%8c-%da%86%d8%b1%db%8c",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 295,
+    "title": "جوانسہ",
+    "slug": "%d8%ac%d9%88%d8%a7%d9%86%d8%b3%db%81",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 296,
+    "title": "جوز سرو",
+    "slug": "%d8%ac%d9%88%d8%b2-%d8%b3%d8%b1%d9%88",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 297,
+    "title": "جوکھار",
+    "slug": "%d8%ac%d9%88%da%a9%da%be%d8%a7%d8%b1",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 298,
+    "title": "جونک",
+    "slug": "%d8%ac%d9%88%d9%86%da%a9",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 299,
+    "title": "جھاو",
+    "slug": "%d8%ac%da%be%d8%a7%d9%88",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 300,
+    "title": "جھڑ بیری / جنگلی بیر",
+    "slug": "%d8%ac%da%be%da%91-%d8%a8%db%8c%d8%b1%db%8c-%d8%ac%d9%86%da%af%d9%84%db%8c-%d8%a8%db%8c%d8%b1",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 301,
+    "title": "جدوار",
+    "slug": "%d8%ac%d8%af%d9%88%d8%a7%d8%b1",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 302,
+    "title": "چاسکو / چاکسو",
+    "slug": "%da%86%d8%a7%d8%b3%da%a9%d9%88-%da%86%d8%a7%da%a9%d8%b3%d9%88",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 303,
+    "title": "چال مونگرا",
+    "slug": "%da%86%d8%a7%d9%84-%d9%85%d9%88%d9%86%da%af%d8%b1%d8%a7",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 304,
+    "title": "چاندی، نقرہ",
+    "slug": "%da%86%d8%a7%d9%86%d8%af%db%8c%d8%8c-%d9%86%d9%82%d8%b1%db%81",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 305,
+    "title": "چاول",
+    "slug": "%da%86%d8%a7%d9%88%d9%84",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 306,
+    "title": "چائے",
+    "slug": "%da%86%d8%a7%d8%a6%db%92",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 307,
+    "title": "چچینڈا / چچنڈا",
+    "slug": "%da%86%da%86%db%8c%d9%86%da%88%d8%a7-%da%86%da%86%d9%86%da%88%d8%a7",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 308,
+    "title": "چرائتہ",
+    "slug": "%da%86%d8%b1%d8%a7%d8%a6%d8%aa%db%81",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 309,
+    "title": "چربی",
+    "slug": "%da%86%d8%b1%d8%a8%db%8c",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 310,
+    "title": "چرچٹہ",
+    "slug": "%da%86%d8%b1%da%86%d9%b9%db%81",
+    "category": "گرم تر",
+    "qanoonCategory": "",
+    "degree": ""
+  },
+  {
+    "id": 311,
+    "title": "چرس",
+    "slug": "%da%86%d8%b1%d8%b3",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ چہارم"
+  },
+  {
+    "id": 312,
+    "title": "چرونجی",
+    "slug": "%da%86%d8%b1%d9%88%d9%86%d8%ac%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 313,
+    "title": "چقندر / چکندر",
+    "slug": "%da%86%d9%82%d9%86%d8%af%d8%b1-%da%86%da%a9%d9%86%d8%af%d8%b1",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 314,
+    "title": "چکوترہ",
+    "slug": "%da%86%da%a9%d9%88%d8%aa%d8%b1%db%81",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 315,
+    "title": "چلغوزہ",
+    "slug": "%da%86%d9%84%d8%ba%d9%88%d8%b2%db%81",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 316,
+    "title": "چمپا / چمپکا  رابیل",
+    "slug": "%da%86%d9%85%d9%be%d8%a7-%da%86%d9%85%d9%be%da%a9%d8%a7-%d8%b1%d8%a7%d8%a8%db%8c%d9%84",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 317,
+    "title": "چمک پتھر / مقناطیس",
+    "slug": "%da%86%d9%85%da%a9-%d9%be%d8%aa%da%be%d8%b1-%d9%85%d9%82%d9%86%d8%a7%d8%b7%db%8c%d8%b3",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 318,
+    "title": "چنا",
+    "slug": "%da%86%d9%86%d8%a7",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 319,
+    "title": "چنار",
+    "slug": "%da%86%d9%86%d8%a7%d8%b1",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 320,
+    "title": "چنبیلی",
+    "slug": "%da%86%d9%86%d8%a8%db%8c%d9%84%db%8c",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 321,
+    "title": "حب الآس",
+    "slug": "myrtle-%d8%a2%d8%b3",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 322,
+    "title": "چندرس",
+    "slug": "%da%86%d9%86%d8%af%d8%b1%d8%b3",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 323,
+    "title": "چندن سفید / صندل سفید",
+    "slug": "%da%86%d9%86%d8%af%d9%86-%d8%b3%d9%81%db%8c%d8%af-%d8%b5%d9%86%d8%af%d9%84-%d8%b3%d9%81%db%8c%d8%af",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 324,
+    "title": "چوب چینی",
+    "slug": "%da%86%d9%88%d8%a8-%da%86%db%8c%d9%86%db%8c",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 325,
+    "title": "چولائی ساگ",
+    "slug": "%da%86%d9%88%d9%84%d8%a7%d8%a6%db%8c-%d8%b3%d8%a7%da%af",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 326,
+    "title": "چونا",
+    "slug": "%da%86%d9%88%d9%86%d8%a7",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ چہارم"
+  },
+  {
+    "id": 327,
+    "title": "چونگیں",
+    "slug": "%da%86%d9%88%d9%86%da%af%db%8c%da%ba",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 328,
+    "title": "چوہا کنی",
+    "slug": "%da%86%d9%88%db%81%d8%a7-%da%a9%d9%86%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 329,
+    "title": "چھڑیلہ / اشنہ",
+    "slug": "%da%86%da%be%da%91%db%8c%d9%84%db%81-%d8%a7%d8%b4%d9%86%db%81",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 330,
+    "title": "چھوٹی چندن / اسرول",
+    "slug": "%da%86%da%be%d9%88%d9%b9%db%8c-%da%86%d9%86%d8%af%d9%86",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 331,
+    "title": "چھوہارا",
+    "slug": "%da%86%da%be%d9%88%db%81%d8%a7%d8%b1%d8%a7",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 332,
+    "title": "چیتہ / چترک",
+    "slug": "%da%86%db%8c%d8%aa%db%81-%da%86%d8%aa%d8%b1%da%a9",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 333,
+    "title": "چیونٹی",
+    "slug": "%da%86%db%8c%d9%88%d9%86%d9%b9%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 334,
+    "title": "چینہ / چھوٹا باجرہ",
+    "slug": "%da%86%db%8c%d9%86%db%81-%da%86%da%be%d9%88%d9%b9%d8%a7-%d8%a8%d8%a7%d8%ac%d8%b1%db%81",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 335,
+    "title": "چینی (ریفائنڈ سفید شوگر)",
+    "slug": "%da%86%db%8c%d9%86%db%8c-%d8%b1%db%8c%d9%81%d8%a7%d8%a6%d9%86%da%88-%d8%b3%d9%81%db%8c%d8%af-%d8%b4%d9%88%da%af%d8%b1",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 336,
+    "title": "چکور",
+    "slug": "%da%86%da%a9%d9%88%d8%b1",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 337,
+    "title": "چڑیا",
+    "slug": "%da%86%da%91%db%8c%d8%a7",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 338,
+    "title": "حاشا / پہاڑی اجوئن/ جنگلی پودینہ",
+    "slug": "%d8%ad%d8%a7%d8%b4%d8%a7-%d9%be%db%81%d8%a7%da%91%db%8c-%d8%a7%d8%ac%d9%88%d8%a7%d8%a6%d9%86-%d8%ac%d9%86%da%af%d9%84%db%8c-%d9%be%d9%88%d8%af%db%8c%d9%86%db%81",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 339,
+    "title": "حب البطم / جنگلی پستہ",
+    "slug": "%d8%ad%d8%a8-%d8%a7%d9%84%d8%a8%d8%b7%d9%85-%d8%ac%d9%86%da%af%d9%84%db%8c-%d9%be%d8%b3%d8%aa%db%81",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 341,
+    "title": "حب الزلم / حب العزیز",
+    "slug": "%d8%ad%d8%a8-%d8%a7%d9%84%d8%b2%d9%84%d9%85-%d8%ad%d8%a8-%d8%a7%d9%84%d8%b9%d8%b2%db%8c%d8%b2",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 342,
+    "title": "حب القلقل",
+    "slug": "%d8%ad%d8%a8-%d8%a7%d9%84%d9%82%d9%84%d9%82%d9%84",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 343,
+    "title": "حلوہ کدو / پیٹھا",
+    "slug": "%d8%ad%d9%84%d9%88%db%81-%da%a9%d8%af%d9%88-%d9%be%db%8c%d9%b9%da%be%d8%a7",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 344,
+    "title": "خبازی / سونچل",
+    "slug": "%d8%ae%d8%a8%d8%a7%d8%b2%db%8c-%d8%b3%d9%88%d9%86%da%86%d9%84",
+    "category": "تر سرد",
+    "qanoonCategory": "",
+    "degree": ""
+  },
+  {
+    "id": 345,
+    "title": "خربوزہ",
+    "slug": "%d8%ae%d8%b1%d8%a8%d9%88%d8%b2%db%81",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 346,
+    "title": "خربوزہ  کے بیج",
+    "slug": "%d8%ae%d8%b1%d8%a8%d9%88%d8%b2%db%81-%da%a9%db%92-%d8%a8%db%8c%d8%ac",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 347,
+    "title": "خرفہ / قلفہ، کلفہ ساگ",
+    "slug": "%d8%ae%d8%b1%d9%81%db%81-%d9%82%d9%84%d9%81%db%81%d8%8c-%da%a9%d9%84%d9%81%db%81-%d8%b3%d8%a7%da%af",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 348,
+    "title": "جنڈ / کھیجڑی",
+    "slug": "%d8%ac%d9%86%da%88-%da%a9%da%be%db%8c%d8%ac%da%91%db%8c",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 349,
+    "title": "خرنوب، کاروب",
+    "slug": "%d8%ae%d8%b1%d9%86%d9%88%d8%a8%d8%8c-%da%a9%d8%a7%d8%b1%d9%88%d8%a8",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 350,
+    "title": "خس گھاس",
+    "slug": "%d8%ae%d8%b3-%da%af%da%be%d8%a7%d8%b3",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 351,
+    "title": "خشخاش",
+    "slug": "%d8%ae%d8%b4%d8%ae%d8%a7%d8%b4",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 352,
+    "title": "خطمی",
+    "slug": "%d8%ae%d8%b7%d9%85%db%8c",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 353,
+    "title": "خوبانی",
+    "slug": "%d8%ae%d9%88%d8%a8%d8%a7%d9%86%db%8c",
+    "category": "تر گرم",
+    "qanoonCategory": "",
+    "degree": ""
+  },
+  {
+    "id": 354,
+    "title": "خولنجاں",
+    "slug": "%d8%ae%d9%88%d9%84%d9%86%d8%ac%d8%a7%da%ba",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 355,
+    "title": "خوب کلاں",
+    "slug": "%d8%ae%d9%88%d8%a8-%da%a9%d9%84%d8%a7%da%ba",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 357,
+    "title": "داد مردن / داد بوٹی",
+    "slug": "%d8%af%d8%a7%d8%af-%d9%85%d8%b1%d8%af%d9%86-%d8%af%d8%a7%d8%af-%d8%a8%d9%88%d9%b9%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 358,
+    "title": "دار چکنا",
+    "slug": "%d8%af%d8%a7%d8%b1-%da%86%da%a9%d9%86%d8%a7",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ چہارم"
+  },
+  {
+    "id": 359,
+    "title": "دار چینی",
+    "slug": "%d8%af%d8%a7%d8%b1-%da%86%db%8c%d9%86%db%8c",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 360,
+    "title": "دار ہلد / سمبلو / سنبل",
+    "slug": "%d8%af%d8%a7%d8%b1-%db%81%d9%84%d8%af-%d8%b3%d9%85%d8%a8%d9%84%d9%88-%d8%b1%d8%b3%d9%88%d9%86%d8%aa",
+    "category": "خشک سرد",
+    "qanoonCategory": "",
+    "degree": ""
+  },
+  {
+    "id": 361,
+    "title": "در منہ تکی",
+    "slug": "%d8%af%d8%b1-%d9%85%d9%86%db%81-%d8%aa%d8%b1%da%a9%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 362,
+    "title": "درونج عقربی",
+    "slug": "%d8%af%d8%b1%d9%88%d9%86%d8%ac-%d8%b9%d9%82%d8%b1%d8%a8%db%8c",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 363,
+    "title": "دم الاخوین",
+    "slug": "%d8%af%d9%85-%d8%a7%d9%84%d8%a7%d8%ae%d9%88%db%8c%d9%86",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 364,
+    "title": "جنکو بائیلوبا",
+    "slug": "%d8%ac%d9%86%da%a9%d9%88-%d8%a8%d8%a7%d8%a6%db%8c%d9%84%d9%88%d8%a8%d8%a7",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 365,
+    "title": "دندان فیل / ہاتھی دانت",
+    "slug": "%d8%af%d9%86%d8%af%d8%a7%d9%86-%d9%81%db%8c%d9%84-%db%81%d8%a7%d8%aa%da%be%db%8c-%d8%af%d8%a7%d9%86%d8%aa",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 366,
+    "title": "دوب گھاس",
+    "slug": "%d8%af%d9%88%d8%a8-%da%af%da%be%d8%a7%d8%b3",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 367,
+    "title": "دودھی بوٹی",
+    "slug": "%d8%af%d9%88%d8%af%da%be%db%8c-%d8%a8%d9%88%d9%b9%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 368,
+    "title": "دودھ",
+    "slug": "%d8%af%d9%88%d8%af%da%be",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 369,
+    "title": "دودھ اونٹنی",
+    "slug": "%d8%af%d9%88%d8%af%da%be-%d8%a7%d9%88%d9%86%d9%b9%d9%86%db%8c",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 370,
+    "title": "دودھ بکری",
+    "slug": "%d8%af%d9%88%d8%af%da%be-%d8%a8%da%a9%d8%b1%db%8c",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 371,
+    "title": "دودھ بھیڑ",
+    "slug": "%d8%af%d9%88%d8%af%da%be-%d8%a8%da%be%db%8c%da%91",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 372,
+    "title": "دودھ بھینس",
+    "slug": "%d8%af%d9%88%d8%af%da%be-%d8%a8%da%be%db%8c%d9%86%d8%b3",
+    "category": "تر سرد",
+    "qanoonCategory": "",
+    "degree": ""
+  },
+  {
+    "id": 373,
+    "title": "دودھ عورت",
+    "slug": "%d8%af%d9%88%d8%af%da%be-%d8%b9%d9%88%d8%b1%d8%aa",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 374,
+    "title": "دودھ گائے",
+    "slug": "%d8%af%d9%88%d8%af%da%be-%da%af%d8%a7%d8%a6%db%92",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 375,
+    "title": "دودھ گھوڑی",
+    "slug": "%d8%af%d9%88%d8%af%da%be-%da%af%da%be%d9%88%da%91%db%8c",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 376,
+    "title": "دوقو / جنگلی گاجر",
+    "slug": "%d8%af%d9%88%d9%82%d9%88-%d8%ac%d9%86%da%af%d9%84%db%8c-%da%af%d8%a7%d8%ac%d8%b1",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 377,
+    "title": "دونا مروا",
+    "slug": "%d8%af%d9%88%d9%86%d8%a7-%d9%85%d8%b1%d9%88%d8%a7",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 378,
+    "title": "دھتورہ",
+    "slug": "%d8%af%da%be%d8%aa%d9%88%d8%b1%db%81",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 379,
+    "title": "دہماسہ بوٹی",
+    "slug": "%d8%af%db%81%d9%85%d8%a7%d8%b3%db%81-%d8%a8%d9%88%d9%b9%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 380,
+    "title": "دھنیا",
+    "slug": "%d8%af%da%be%d9%86%db%8c%d8%a7",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 381,
+    "title": "دہنہ فرہنگ/ دانہ فرہنگ پتھر",
+    "slug": "%d8%af%db%81%d9%86%db%81-%d9%81%d8%b1%db%81%d9%86%da%af-%d8%af%d8%a7%d9%86%db%81-%d9%81%d8%b1%db%81%d9%86%da%af-%d9%be%d8%aa%da%be%d8%b1",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ چہارم"
+  },
+  {
+    "id": 382,
+    "title": "دہی",
+    "slug": "%d8%af%db%81%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 383,
+    "title": "دیودار",
+    "slug": "%d8%af%db%8c%d9%88%d8%af%d8%a7%d8%b1",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 384,
+    "title": "ڈھاک",
+    "slug": "%da%88%da%be%d8%a7%da%a9",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 385,
+    "title": "ڈکملی / ڈیکا مالی",
+    "slug": "%da%88%da%a9%d9%85%d9%84%db%8c-%da%88%db%8c%da%a9%d8%a7-%d9%85%d8%a7%d9%84%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 386,
+    "title": "راب",
+    "slug": "%d8%b1%d8%a7%d8%a8",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 387,
+    "title": "اسن",
+    "slug": "%d8%b1%d8%a7%d8%b3%d9%86",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 388,
+    "title": "رال",
+    "slug": "%d8%b1%d8%a7%d9%84",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 389,
+    "title": "رانگ / قلعی",
+    "slug": "%d8%b1%d8%a7%d9%86%da%af-%d9%82%d9%84%d8%b9%db%8c",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 390,
+    "title": "رائی",
+    "slug": "%d8%b1%d8%a7%d8%a6%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 391,
+    "title": "رب السوس / ست ملٹی",
+    "slug": "%d8%b1%d8%a8-%d8%a7%d9%84%d8%b3%d9%88%d8%b3-%d8%b3%d8%aa-%d9%85%d9%84%d9%b9%da%be%db%8c",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 392,
+    "title": "رتن جوت",
+    "slug": "%d8%b1%d8%aa%d9%86-%d8%ac%d9%88%d8%aa",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 394,
+    "title": "رسکپور",
+    "slug": "%d8%b1%d8%b3%da%a9%d9%be%d9%88%d8%b1",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 396,
+    "title": "رسوت / رسونت",
+    "slug": "%d8%b1%d8%b3%d9%88%d8%aa-%d8%b1%d8%b3%d9%88%d9%86%d8%aa",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 397,
+    "title": "رودنتی",
+    "slug": "%d8%b1%d9%88%d8%af%d9%86%d8%aa%db%8c",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 398,
+    "title": "روغن اخروٹ",
+    "slug": "%d8%b1%d9%88%d8%ba%d9%86-%d8%a7%d8%ae%d8%b1%d9%88%d9%b9",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 399,
+    "title": "روغن ارنڈ",
+    "slug": "%d8%b1%d9%88%d8%ba%d9%86-%d8%a7%d8%b1%d9%86%da%88",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 400,
+    "title": "رشی مشروم / کھنبی",
+    "slug": "%d8%b1%d8%b4%db%8c-%d9%85%d8%b4%d8%b1%d9%88%d9%85-%da%a9%da%be%d9%86%d8%a8%db%8c",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 401,
+    "title": "روغن السی",
+    "slug": "%d8%b1%d9%88%d8%ba%d9%86-%d8%a7%d9%84%d8%b3%db%8c",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 403,
+    "title": "روغن بابونہ",
+    "slug": "%d8%b1%d9%88%d8%ba%d9%86-%d8%a8%d8%a7%d8%a8%d9%88%d9%86%db%81",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 406,
+    "title": "روغن بلسان",
+    "slug": "%d8%b1%d9%88%d8%ba%d9%86-%d8%a8%d9%84%d8%b3%d8%a7%d9%86",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 408,
+    "title": "روغن تارپین",
+    "slug": "%d8%b1%d9%88%d8%ba%d9%86-%d8%aa%d8%a7%d8%b1%d9%be%db%8c%d9%86",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 409,
+    "title": "روغن تل",
+    "slug": "%d8%b1%d9%88%d8%ba%d9%86-%d8%aa%d9%84",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 410,
+    "title": "روغن چنبیلی",
+    "slug": "%d8%b1%d9%88%d8%ba%d9%86-%da%86%d9%86%d8%a8%db%8c%d9%84%db%8c",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 411,
+    "title": "روغن خشخاش",
+    "slug": "%d8%b1%d9%88%d8%ba%d9%86-%d8%ae%d8%b4%d8%ae%d8%a7%d8%b4",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 412,
+    "title": "روغن زیتون",
+    "slug": "%d8%b1%d9%88%d8%ba%d9%86-%d8%b2%db%8c%d8%aa%d9%88%d9%86",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 413,
+    "title": "روغن سرسوں",
+    "slug": "%d8%b1%d9%88%d8%ba%d9%86-%d8%b3%d8%b1%d8%b3%d9%88%da%ba",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 414,
+    "title": "روغن مالکنگنی",
+    "slug": "%d8%b1%d9%88%d8%ba%d9%86-%d9%85%d8%a7%d9%84%da%a9%d9%86%da%af%d9%86%db%8c",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 415,
+    "title": "روغن ناریل",
+    "slug": "%d8%b1%d9%88%d8%ba%d9%86-%d9%86%d8%a7%d8%b1%db%8c%d9%84",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 416,
+    "title": "روہیڑا",
+    "slug": "%d8%b1%d9%88%db%81%db%8c%da%91%d8%a7",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 417,
+    "title": "ریٹھہ",
+    "slug": "%d8%b1%db%8c%d9%b9%da%be%db%81",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 418,
+    "title": "ریوند چینی / ریوند خطائی",
+    "slug": "%d8%b1%db%8c%d9%88%d9%86%d8%af-%da%86%db%8c%d9%86%db%8c-%d8%b1%db%8c%d9%88%d9%86%d8%af-%d8%ae%d8%b7%d8%a7%d8%a6%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 419,
+    "title": "ریگ ماہی",
+    "slug": "%d8%b1%db%8c%da%af-%d9%85%d8%a7%db%81%db%8c",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 420,
+    "title": "زمرد /  پنا",
+    "slug": "%d8%b2%d9%85%d8%b1%d8%af-%d9%be%d9%86%d8%a7",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 421,
+    "title": "زخم حیات",
+    "slug": "%d8%b2%d8%ae%d9%85-%d8%ad%db%8c%d8%a7%d8%aa",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 422,
+    "title": "زراوند دراز",
+    "slug": "%d8%b2%d8%b1%d8%a7%d9%88%d9%86%d8%af-%d8%af%d8%b1%d8%a7%d8%b2",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 423,
+    "title": "زراوند مدحرج",
+    "slug": "%d8%b2%d8%b1%d8%a7%d9%88%d9%86%d8%af-%d9%85%d8%af%d8%ad%d8%b1%d8%ac",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 424,
+    "title": "زرشک / سمبل پھل",
+    "slug": "%d8%b2%d8%b1%d8%b4%da%a9-%d8%b3%d9%85%d8%a8%d9%84-%d9%be%da%be%d9%84",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 425,
+    "title": "زنگار تانبا",
+    "slug": "%d8%b2%d9%86%da%af%d8%a7%d8%b1-%d8%aa%d8%a7%d9%86%d8%a8%d8%a7",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ چہارم"
+  },
+  {
+    "id": 426,
+    "title": "زہر مہرہ",
+    "slug": "%d8%b2%db%81%d8%b1-%d9%85%db%81%d8%b1%db%81",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 427,
+    "title": "زعفران",
+    "slug": "%d8%b2%d8%b9%d9%81%d8%b1%d8%a7%d9%86",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 428,
+    "title": "زیرہ",
+    "slug": "%d8%b2%db%8c%d8%b1%db%81",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 429,
+    "title": "زوفا",
+    "slug": "%d8%b2%d9%88%d9%81%d8%a7",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 430,
+    "title": "ساگوان",
+    "slug": "%d8%b3%d8%a7%da%af%d9%88%d8%a7%d9%86",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 431,
+    "title": "ساگودانہ",
+    "slug": "%d8%b3%d8%a7%da%af%d9%88%d8%af%d8%a7%d9%86%db%81",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 432,
+    "title": "سالپرنی",
+    "slug": "%d8%b3%d8%a7%d9%84%d9%be%d8%b1%d9%86%db%8c",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": ""
+  },
+  {
+    "id": 433,
+    "title": "سانپ",
+    "slug": "%d8%b3%d8%a7%d9%86%d9%be",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": "مزاج درجہ چہارم"
+  },
+  {
+    "id": 434,
+    "title": "سانڈہ",
+    "slug": "%d8%b3%d8%a7%d9%86%da%88%db%81",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 435,
+    "title": "سپاری",
+    "slug": "%d8%b3%d9%be%d8%a7%d8%b1%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 436,
+    "title": "ستاور",
+    "slug": "%d8%b3%d8%aa%d8%a7%d9%88%d8%b1",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 438,
+    "title": "ستیاناسی",
+    "slug": "%d8%b3%d8%aa%db%8c%d8%a7%d9%86%d8%a7%d8%b3%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 439,
+    "title": "سرپھوکہ",
+    "slug": "%d8%b3%d8%b1%d9%be%da%be%d9%88%da%a9%db%81",
+    "category": "گرم تر",
+    "qanoonCategory": "",
+    "degree": ""
+  },
+  {
+    "id": 440,
+    "title": "سرخس (پنکھراج)",
+    "slug": "%d8%b3%d8%b1%d8%ae%d8%b3-%d9%be%d9%86%da%a9%da%be%d8%b1%d8%a7%d8%ac",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 443,
+    "title": "سردا",
+    "slug": "%d8%b3%d8%b1%d8%af%d8%a7",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 444,
+    "title": "سرس",
+    "slug": "%d8%b3%d8%b1%d8%b3",
+    "category": "خشک سرد",
+    "qanoonCategory": "",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 445,
+    "title": "سرکہ",
+    "slug": "%d8%b3%d8%b1%da%a9%db%81",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 446,
+    "title": "سرمہ",
+    "slug": "%d8%b3%d8%b1%d9%85%db%81",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 447,
+    "title": "سروالی",
+    "slug": "%d8%b3%d8%b1%d9%88%d8%a7%d9%84%db%8c",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 448,
+    "title": "سریش",
+    "slug": "%d8%b3%d8%b1%db%8c%d8%b4",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 449,
+    "title": "سقمونیا",
+    "slug": "%d8%b3%d9%82%d9%85%d9%88%d9%86%db%8c%d8%a7",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 450,
+    "title": "سلاجیت",
+    "slug": "%d8%b3%d9%84%d8%a7%d8%ac%db%8c%d8%aa",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 452,
+    "title": "سلارس",
+    "slug": "%d8%b3%d9%84%d8%a7%d8%b1%d8%b3",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 453,
+    "title": "سمندر پھل",
+    "slug": "%d8%b3%d9%85%d9%86%d8%af%d8%b1-%d9%be%da%be%d9%84",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 454,
+    "title": "سمندر جھاگ",
+    "slug": "%d8%b3%d9%85%d9%86%d8%af%d8%b1-%d8%ac%da%be%d8%a7%da%af",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 455,
+    "title": "سمندر سوکھ",
+    "slug": "%d8%b3%d9%85%d9%86%d8%af%d8%b1-%d8%b3%d9%88%da%a9%da%be",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": ""
+  },
+  {
+    "id": 456,
+    "title": "سن",
+    "slug": "%d8%b3%d9%86",
+    "category": "تر سرد",
+    "qanoonCategory": "اعصابی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 457,
+    "title": "سناء مکی",
+    "slug": "%d8%b3%d9%86%d8%a7%d8%a1-%d9%85%da%a9%db%8c",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 458,
+    "title": "سنبھالو",
+    "slug": "%d8%b3%d9%86%d8%a8%da%be%d8%a7%d9%84%d9%88",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 459,
+    "title": "سنکھ",
+    "slug": "%d8%b3%d9%86%da%a9%da%be",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 460,
+    "title": "سرسوں",
+    "slug": "%d8%b3%d8%b1%d8%b3%d9%88%da%ba",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 461,
+    "title": "سداب",
+    "slug": "%d8%b3%d8%af%d8%a7%d8%a8",
+    "category": "خشک گرم",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 462,
+    "title": "سنگترہ",
+    "slug": "%d8%b3%d9%86%da%af%d8%aa%d8%b1%db%81",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 463,
+    "title": "سنگ جراحت",
+    "slug": "%d8%b3%d9%86%da%af-%d8%ac%d8%b1%d8%a7%d8%ad%d8%aa",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 464,
+    "title": "سنگ دانہ مرغ",
+    "slug": "%d8%b3%d9%86%da%af-%d8%af%d8%a7%d9%86%db%81-%d9%85%d8%b1%d8%ba",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 465,
+    "title": "سنگ سرماہی",
+    "slug": "%d8%b3%d9%86%da%af-%d8%b3%d8%b1%d9%85%d8%a7%db%81%db%8c",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 468,
+    "title": "سنگ یہود",
+    "slug": "%d8%b3%d9%86%da%af-%db%8c%db%81%d9%88%d8%af",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 469,
+    "title": "سنگھاڑا",
+    "slug": "%d8%b3%d9%86%da%af%da%be%d8%a7%da%91%d8%a7",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 472,
+    "title": "سورج مکھی",
+    "slug": "%d8%b3%d9%88%d8%b1%d8%ac-%d9%85%da%a9%da%be%db%8c",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 473,
+    "title": "سورنجاں تلخ",
+    "slug": "%d8%b3%d9%88%d8%b1%d9%86%d8%ac%d8%a7%da%ba-%d8%aa%d9%84%d8%ae",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": "مزاج درجہ سوم"
+  },
+  {
+    "id": 474,
+    "title": "سورنجاں شیریں",
+    "slug": "%d8%b3%d9%88%d8%b1%d9%86%d8%ac%d8%a7%da%ba-%d8%b4%db%8c%d8%b1%db%8c%da%ba",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 475,
+    "title": "سوما کلپالتا",
+    "slug": "%d8%b3%d9%88%d9%85%d8%a7-%da%a9%d9%84%d9%be%d8%a7%d9%84%d8%aa%d8%a7",
+    "category": "خشک گرم",
+    "qanoonCategory": "عضلاتی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 476,
+    "title": "سونا",
+    "slug": "%d8%b3%d9%88%d9%86%d8%a7",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": ""
+  },
+  {
+    "id": 477,
+    "title": "سونا مکھی",
+    "slug": "%d8%b3%d9%88%d9%86%d8%a7-%d9%85%da%a9%da%be%db%8c",
+    "category": "گرم خشک",
+    "qanoonCategory": "غدی عضلاتی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 478,
+    "title": "سنکھیا",
+    "slug": "%d8%b3%d9%86%da%a9%da%be%db%8c%d8%a7",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ چہارم"
+  },
+  {
+    "id": 481,
+    "title": "سونف",
+    "slug": "%d8%b3%d9%88%d9%86%d9%81",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 482,
+    "title": "سوئے / سویا",
+    "slug": "%d8%b3%d9%88%d8%a6%db%92-%d8%b3%d9%88%db%8c%d8%a7",
+    "category": "گرم تر",
+    "qanoonCategory": "غدی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 485,
+    "title": "سہاگہ",
+    "slug": "%d8%b3%db%81%d8%a7%da%af%db%81",
+    "category": "تر گرم",
+    "qanoonCategory": "اعصابی غدی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 488,
+    "title": "سیب",
+    "slug": "%d8%b3%db%8c%d8%a8",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": ""
+  },
+  {
+    "id": 489,
+    "title": "سیپ",
+    "slug": "%d8%b3%db%8c%d9%be",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ دوم"
+  },
+  {
+    "id": 490,
+    "title": "سیسہ",
+    "slug": "%d8%b3%db%8c%d8%b3%db%81",
+    "category": "خشک سرد",
+    "qanoonCategory": "عضلاتی اعصابی",
+    "degree": "مزاج درجہ چہارم"
+  }
+]

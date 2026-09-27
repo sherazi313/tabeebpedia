@@ -40,13 +40,30 @@ export default function DoctorDirectory({
   const isNavy = theme === 'navy';
   const allDoctors = doctorsList || DOCTORS;
 
+  const availableCities = React.useMemo(() => {
+    const map = new Map();
+    map.set('all', { id: 'all', name: 'تمام شہر' });
+    (citiesList || CITIES).forEach(c => {
+      if (c && c.id) map.set(c.id, c);
+    });
+    (allDoctors || []).forEach(doc => {
+      if (doc && doc.cityName) {
+        const id = doc.city || doc.cityName.toLowerCase().replace(/[\s\-_]+/g, '-');
+        if (!map.has(id)) {
+          map.set(id, { id, name: doc.cityName });
+        }
+      }
+    });
+    return Array.from(map.values());
+  }, [allDoctors, citiesList]);
+
   // Filter Doctors logic
   const filteredDoctors = (allDoctors || []).filter(doctor => {
     if (!doctor) return false;
     // Hide pending/unapproved doctors from the public directory
     if (doctor.isApproved === false || doctor.status === 'pending') return false;
 
-    const selectedCityObj = (citiesList || CITIES).find(c => c && c.id === selectedCity);
+    const selectedCityObj = availableCities.find(c => c && c.id === selectedCity);
     const selectedCityName = selectedCityObj ? selectedCityObj.name : selectedCity;
 
     const matchCity = selectedCity === 'all' || 
@@ -212,7 +229,7 @@ export default function DoctorDirectory({
                 onChange={(e) => setSelectedCity(e.target.value)}
                 className={`w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs ${isNavy ? 'focus:ring-2 focus:ring-blue-500' : 'focus:ring-2 focus:ring-emerald-500'} focus:bg-white focus:outline-none cursor-pointer font-body font-semibold`}
               >
-                {(citiesList || CITIES).map(c => (
+                {availableCities.map(c => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
               </select>
@@ -347,10 +364,14 @@ export default function DoctorDirectory({
                       
                       {/* Doctor Image & Badges */}
                       <div className="relative shrink-0 mx-auto sm:mx-0">
-                        <img
-                          src={doctor.image}
+                        <img 
+                          src={doctor.image || "/images/default_doctor.webp"} 
                           alt={doctor.name}
-                          className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-slate-100 shadow-sm"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "/images/default_doctor.webp";
+                          }}
+                          className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-slate-100 shadow-sm shrink-0 bg-white"
                         />
                         {doctor.isVerified && (
                           <div 
@@ -364,14 +385,24 @@ export default function DoctorDirectory({
                       </div>
 
                       {/* Doctor Info */}
-                      <div className="flex-1 space-y-3 text-right">
+                      <div className="flex-1 space-y-3 text-right min-w-0">
                         <div>
-                          <h3 
-                            onClick={() => onSelectDoctor(doctor)}
-                            className={`text-lg sm:text-xl font-bold text-slate-900 ${isNavy ? 'hover:text-blue-700' : 'hover:text-emerald-700'} cursor-pointer transition-colors font-heading`}
-                          >
-                            {doctor.name}
-                          </h3>
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <h3 
+                              onClick={() => onSelectDoctor(doctor)}
+                              className={`text-lg sm:text-xl font-bold text-slate-900 ${isNavy ? 'hover:text-blue-700' : 'hover:text-emerald-700'} cursor-pointer transition-colors font-heading`}
+                            >
+                              {doctor.name}
+                            </h3>
+
+                            {doctor.registrationNumber && (
+                              <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-sans font-bold px-2 py-0.5 rounded-md" title="قومی کونسل برائے طب رجسٹریشن نمبر">
+                                <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                                <span>کونسل رجسٹریشن:</span>
+                                <strong className="font-mono text-emerald-900 tracking-wider" dir="ltr">{doctor.registrationNumber}</strong>
+                              </span>
+                            )}
+                          </div>
                           
                           <p className={`text-xs sm:text-sm ${isNavy ? 'text-blue-800' : 'text-emerald-800'} font-semibold mt-0.5`}>
                             {doctor.title}
@@ -491,7 +522,7 @@ export default function DoctorDirectory({
                   onChange={(e) => setSelectedCity(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-xs"
                 >
-                  {(citiesList || CITIES).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {availableCities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
 

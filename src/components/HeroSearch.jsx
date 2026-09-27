@@ -54,7 +54,7 @@ export default function HeroSearch({
   const filteredDoctors = (allDoctors || []).filter(doc => {
     if (!doc) return false;
     if (doc.isApproved === false || doc.status === 'pending') return false;
-    const matchCity = selectedCity === 'all' || doc.city === selectedCity;
+    const matchCity = selectedCity === 'all' || doc.city === selectedCity || doc.cityName === selectedCity;
     const matchQuery = !searchQuery.trim() || 
       (doc.name && typeof doc.name === 'string' && doc.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (doc.specialties && Array.isArray(doc.specialties) && doc.specialties.some(s => s && typeof s === 'string' && s.toLowerCase().includes(searchQuery.toLowerCase()))) ||
@@ -66,6 +66,8 @@ export default function HeroSearch({
     if (!art) return false;
     return !searchQuery.trim() ||
       (art.title && typeof art.title === 'string' && art.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (art.category && typeof art.category === 'string' && art.category.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (Array.isArray(art.categories) && art.categories.some(c => c && typeof c === 'string' && c.toLowerCase().includes(searchQuery.toLowerCase()))) ||
       (Array.isArray(art.tags) ? art.tags.some(t => t && typeof t === 'string' && t.toLowerCase().includes(searchQuery.toLowerCase())) : (art.tags && typeof art.tags === 'string' && art.tags.toLowerCase().includes(searchQuery.toLowerCase())));
   }).slice(0, 3);
 
@@ -212,7 +214,15 @@ export default function HeroSearch({
                             className={`flex items-center justify-between p-2.5 rounded-xl ${isNavy ? 'hover:bg-blue-50' : 'hover:bg-emerald-50'} cursor-pointer transition-colors`}
                           >
                             <div className="flex items-center gap-3">
-                              <img src={doc.image} alt={doc.name} className="w-10 h-10 rounded-full object-cover border border-slate-200" />
+                              <img 
+                                src={doc.image || "/images/default_doctor.webp"} 
+                                alt={doc.name} 
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = "/images/default_doctor.webp";
+                                }}
+                                className="w-10 h-10 rounded-full object-cover border border-slate-200 bg-white" 
+                              />
                               <div className="text-right">
                                 <h4 className="text-sm font-bold text-slate-900 font-heading">{doc.name}</h4>
                                 <p className="text-xs text-slate-500">{doc.clinicName} • {doc.cityName}</p>
@@ -248,7 +258,9 @@ export default function HeroSearch({
                               <img src={art.featuredImage} alt={art.title} className="w-10 h-10 rounded-lg object-cover" />
                               <div className="text-right">
                                 <h4 className="text-sm font-semibold text-slate-800 line-clamp-1 font-heading">{art.title}</h4>
-                                <p className="text-xs text-slate-400">{art.categoryName} • وقت: {art.readingTime}</p>
+                                <p className="text-xs text-slate-400 font-sans">
+                                  {Array.isArray(art.categories) && art.categories.length > 0 ? art.categories.slice(0, 2).join(' • ') : (art.categoryName || art.category || 'عام زمرہ')} • وقت: {art.readingTime}
+                                </p>
                               </div>
                             </div>
                             <ArrowLeft className="w-4 h-4 text-slate-400" />
@@ -307,31 +319,6 @@ export default function HeroSearch({
 
             </div>
           )}
-        </div>
-
-        {/* Popular Disease Quick Filter Pills */}
-        <div className="space-y-2">
-          <p className="text-xs text-slate-300 font-sans">
-            عام امراض اور فوری تخصص کے تحت تلاش کریں:
-          </p>
-          <div className="flex flex-wrap justify-center gap-2 max-w-4xl mx-auto">
-            {quickPills.map(pill => {
-              const Icon = pill.icon;
-              return (
-                <button
-                  key={pill.id}
-                  onClick={() => {
-                    onSelectSpecialty(pill.id);
-                    onNavigateToDirectory();
-                  }}
-                  className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 border border-white/15 text-white text-xs sm:text-sm px-3.5 py-1.5 rounded-full backdrop-blur-sm transition-all hover:scale-105 active:scale-95 font-heading"
-                >
-                  <Icon className={`w-3.5 h-3.5 ${isNavy ? 'text-blue-300' : 'text-emerald-300'}`} />
-                  <span>{pill.label}</span>
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         {/* Doctor Join Callout in Hero */}
