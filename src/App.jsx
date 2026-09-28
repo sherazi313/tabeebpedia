@@ -436,7 +436,11 @@ export default function App() {
     }
 
     try {
-      localStorage.setItem('tabeeb_active_tab', tab);
+      if (tab === 'home') {
+        localStorage.removeItem('tabeeb_active_tab');
+      } else {
+        localStorage.setItem('tabeeb_active_tab', tab);
+      }
     } catch(e) {}
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -834,8 +838,7 @@ export default function App() {
 
   const handleDoctorLogout = () => {
     setLoggedInDoctor(null);
-    setActiveTab('home');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    handleNavigateToTab('home');
   };
 
   const handleUpdateDoctorProfile = (updatedDoctor) => {
@@ -843,9 +846,27 @@ export default function App() {
     setDoctorsList(doctorsList.map(d => (d.id === updatedDoctor.id ? updatedDoctor : d)));
   };
 
+  // Refs to always have latest data in handleUrlNavigation without re-running effect
+  const articlesListRef = React.useRef(articlesList);
+  const doctorsListRef = React.useRef(doctorsList);
+  const pagesListRef = React.useRef(pagesList);
+  const glossaryListRef = React.useRef(glossaryList);
+  const loggedInDoctorRef = React.useRef(loggedInDoctor);
+
+  useEffect(() => { articlesListRef.current = articlesList; }, [articlesList]);
+  useEffect(() => { doctorsListRef.current = doctorsList; }, [doctorsList]);
+  useEffect(() => { pagesListRef.current = pagesList; }, [pagesList]);
+  useEffect(() => { glossaryListRef.current = glossaryList; }, [glossaryList]);
+  useEffect(() => { loggedInDoctorRef.current = loggedInDoctor; }, [loggedInDoctor]);
+
   // Direct URL Navigation Handler (Opens articles from query params like ?article=101 or ?portal=doctor)
   useEffect(() => {
     const handleUrlNavigation = () => {
+      const articlesList = articlesListRef.current;
+      const doctorsList = doctorsListRef.current;
+      const pagesList = pagesListRef.current;
+      const glossaryList = glossaryListRef.current;
+      const loggedInDoctor = loggedInDoctorRef.current;
       const params = new URLSearchParams(window.location.search);
       const rawPath = window.location.pathname.substring(1).replace(/\/$/, '');
       let path = '';
@@ -1042,7 +1063,8 @@ export default function App() {
     handleUrlNavigation();
     window.addEventListener('popstate', handleUrlNavigation);
     return () => window.removeEventListener('popstate', handleUrlNavigation);
-  }, [articlesList, loggedInDoctor, pagesList, glossaryList]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const seoConfig = React.useMemo(() => {
     const BASE = 'https://tabeebpedia.com';
@@ -1395,13 +1417,12 @@ export default function App() {
           handleSelectArticle(article);
         }}
         onBackToWebsite={() => {
-          setActiveTab('home');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          handleNavigateToTab('home');
         }}
         onAdminLogout={() => {
           try { sessionStorage.removeItem('tabeeb_admin_auth'); } catch {}
           setAdminAuthenticated(false);
-          setActiveTab('home');
+          handleNavigateToTab('home');
         }}
       />
     );
@@ -1418,8 +1439,7 @@ export default function App() {
         citiesList={citiesList}
         onAddCity={handleAddCity}
         onBackToWebsite={() => {
-          setActiveTab('home');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          handleNavigateToTab('home');
         }}
         onViewPublicProfile={(doc) => {
           handleSelectDoctor(doc);
