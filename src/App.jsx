@@ -44,7 +44,9 @@ import {
   CheckCircle2,
   UserCheck,
   Award,
-  Calculator
+  Calculator,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 
 const STORAGE_KEY_ARTICLES = 'tabeeb_articles_data_v1';
