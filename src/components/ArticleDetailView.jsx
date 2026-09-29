@@ -30,6 +30,7 @@ import { injectGlossaryTooltips } from '../utils/glossaryParser';
 export default function ArticleDetailView({ 
   article, 
   articlesList, 
+  doctorsList = [],
   pagesList = [],
   categoriesList = [],
   glossaryList = [],
@@ -70,17 +71,29 @@ export default function ArticleDetailView({
     : [currentArticle.categoryName || currentArticle.category].filter(Boolean);
 
   const relatedDoctors = useMemo(() => {
-    let matches = (DOCTORS || []).filter(doc => {
+    // اگر AdminCMS میں مخصوص طبیب منتخب ہیں تو وہی دکھائیں
+    const consultIds = siteSettings?.articleConsultDoctorIds;
+    const allDocs = doctorsList && doctorsList.length > 0 ? doctorsList : DOCTORS;
+
+    if (Array.isArray(consultIds) && consultIds.length > 0) {
+      const selected = consultIds
+        .map(id => allDocs.find(d => d && String(d.id) === String(id)))
+        .filter(Boolean);
+      return selected.slice(0, 2);
+    }
+
+    // Fallback: category matching
+    let matches = allDocs.filter(doc => {
       if (!doc) return false;
       if (currentArticle.relatedDiseases && currentArticle.relatedDiseases.some(d => doc.specialties && doc.specialties.includes(d))) return true;
       if (currentCategories && currentCategories.some(cat => doc.specialties && doc.specialties.some(s => s.includes(cat) || cat.includes(s)))) return true;
       return false;
     });
     if (matches.length === 0) {
-      matches = (DOCTORS || []).slice(0, 4);
+      matches = allDocs.slice(0, 4);
     }
     return matches.slice(0, 2);
-  }, [currentArticle, currentCategories]);
+  }, [currentArticle, currentCategories, siteSettings, doctorsList]);
 
   // Related articles in same category
   const allArticles = articlesList || ARTICLES;

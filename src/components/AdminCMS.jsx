@@ -7092,6 +7092,14 @@ export default function AdminCMS({
 
             // Sort order
             currentList = [...currentList].sort((a, b) => {
+              if (doctorFeaturedFilter === 'featured') {
+                const aOrder = a.featuredOrder != null ? a.featuredOrder : 999;
+                const bOrder = b.featuredOrder != null ? b.featuredOrder : 999;
+                if (aOrder !== bOrder) {
+                  return aOrder - bOrder;
+                }
+              }
+              
               if (doctorSortOrder === 'name') {
                 return (a.name || '').localeCompare(b.name || '', 'ur');
               }
@@ -7528,9 +7536,36 @@ export default function AdminCMS({
 
                               <div className="space-y-1">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <span className="text-[11px] font-mono font-bold text-slate-400 bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800">
-                                    #{doctorStartIndex + docIdx + 1}
-                                  </span>
+                                  {doc.isFeatured ? (
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max="99"
+                                      defaultValue={doc.featuredOrder || ''}
+                                      placeholder="#"
+                                      title="ہوم پیج پر ترتیب نمبر — لکھیں اور Enter دبائیں"
+                                      onKeyDown={async (e) => {
+                                        if (e.key === 'Enter') {
+                                          e.target.blur();
+                                        }
+                                      }}
+                                      onBlur={async (e) => {
+                                        const val = parseInt(e.target.value) || null;
+                                        if (val !== (doc.featuredOrder || null)) {
+                                          const updated = doctorsList.map(d => d.id === doc.id ? { ...d, featuredOrder: val } : d);
+                                          setDoctorsList(updated);
+                                          await saveDoctorsApi(updated);
+                                          try { localStorage.setItem('tabeeb_doctors_data_v1', JSON.stringify(updated)); } catch(ex) {}
+                                          showNotification(`${doc.name} کی ترتیب #${val || '—'} محفوظ ہو گئی`);
+                                        }
+                                      }}
+                                      className="w-12 text-center text-[11px] font-mono font-bold text-amber-300 bg-purple-950/60 border border-purple-700 px-1 py-0.5 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none cursor-text"
+                                    />
+                                  ) : (
+                                    <span className="text-[11px] font-mono font-bold text-slate-400 bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800">
+                                      #{doctorStartIndex + docIdx + 1}
+                                    </span>
+                                  )}
 
                                   <h3 className="text-lg font-bold text-white font-simple">
                                     {doc.name}
@@ -9216,6 +9251,131 @@ export default function AdminCMS({
                           </select>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Featured Doctors Order */}
+                    <div className="bg-slate-900 border border-amber-800/40 rounded-3xl p-6 space-y-4">
+                      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                          <h3 className="text-base font-bold text-amber-300 font-h2">نمایاں اطباء کی ترتیب (Featured Order)</h3>
+                        </div>
+                        <button
+                          onClick={() => {
+                            // input values read کریں اور save کریں
+                            const inputs = document.querySelectorAll('[data-featured-order-id]');
+                            let updated = [...doctorsList];
+                            inputs.forEach(inp => {
+                              const docId = inp.dataset.featuredOrderId;
+                              const val = parseInt(inp.value) || null;
+                              updated = updated.map(d => String(d.id) === String(docId) ? { ...d, featuredOrder: val } : d);
+                            });
+                            setDoctorsList(updated);
+                            showNotification('نمایاں اطباء کی ترتیب محفوظ ہو گئی!');
+                          }}
+                          className="text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-lg transition-colors font-simple"
+                        >
+                          ✓ ترتیب محفوظ کریں
+                        </button>
+                      </div>
+                      <p className="text-xs text-slate-400 font-simple">ہر نمایاں طبیب کے سامنے نمبر لکھیں — جو نمبر چھوٹا ہوگا وہ پہلے نظر آئے گا (1 = سب سے پہلے)، پھر <strong className="text-amber-400">ترتیب محفوظ کریں</strong> دبائیں۔</p>
+                      <div className="space-y-2 max-h-72 overflow-y-auto pl-1">
+                        {(doctorsList || []).filter(d => d && (d.isFeatured === true || d.isFeatured === '1' || d.isFeatured === 'yes' || d.featured)).map(doc => (
+                          <div key={doc.id} className="flex items-center gap-3 bg-slate-800/60 border border-slate-700 rounded-xl px-3 py-2">
+                            <img
+                              src={doc.image || '/images/default_doctor.webp'}
+                              alt={doc.name}
+                              onError={e => { e.target.onerror = null; e.target.src = '/images/default_doctor.webp'; }}
+                              className="w-8 h-8 rounded-full object-cover border border-amber-500/40 shrink-0"
+                            />
+                            <span className="flex-1 text-sm text-slate-200 font-simple truncate">{doc.name}</span>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <label className="text-[10px] text-slate-400 font-simple">ترتیب نمبر:</label>
+                              <input
+                                type="number"
+                                min="1"
+                                max="99"
+                                data-featured-order-id={doc.id}
+                                defaultValue={doc.featuredOrder || ''}
+                                placeholder="—"
+                                className="w-16 bg-slate-700 border border-slate-600 text-white rounded-lg px-2 py-1 text-sm text-center focus:ring-2 focus:ring-amber-500 outline-none"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                        {(doctorsList || []).filter(d => d && (d.isFeatured === true || d.isFeatured === '1' || d.isFeatured === 'yes' || d.featured)).length === 0 && (
+                          <p className="text-xs text-slate-500 text-center py-4 font-simple">کوئی نمایاں طبیب نہیں — پہلے اطباء سیکشن میں کسی طبیب کو "نمایاں" کریں</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Article Bottom Consultation Doctors */}
+                    <div className="bg-slate-900 border border-emerald-800/40 rounded-3xl p-6 space-y-4">
+                      <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                        <h3 className="text-base font-bold text-emerald-300 font-h2">مضمون کے آخر میں طبیب (Article Consultation Doctors)</h3>
+                      </div>
+                      <p className="text-xs text-slate-400 font-simple">جن اطباء کو آپ ہر مضمون کے آخر میں "مستند طبی مشاورت" باکس میں دکھانا چاہتے ہیں انہیں منتخب کریں۔</p>
+
+                      {/* Search */}
+                      <input
+                        type="text"
+                        placeholder="طبیب تلاش کریں..."
+                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                        onChange={e => {
+                          const val = e.target.value.toLowerCase();
+                          const items = document.querySelectorAll('[data-consult-doc]');
+                          items.forEach(item => {
+                            item.style.display = item.dataset.consultDoc.includes(val) ? '' : 'none';
+                          });
+                        }}
+                      />
+
+                      <div className="space-y-2 max-h-72 overflow-y-auto pl-1">
+                        {(doctorsList || []).filter(d => d && d.isApproved !== false && d.status !== 'pending').map(doc => {
+                          const consultIds = Array.isArray(settingsForm.articleConsultDoctorIds) ? settingsForm.articleConsultDoctorIds : [];
+                          const isSelected = consultIds.includes(String(doc.id));
+                          return (
+                            <div
+                              key={doc.id}
+                              data-consult-doc={`${(doc.name || '').toLowerCase()} ${(doc.cityName || '').toLowerCase()}`}
+                              className={`flex items-center gap-3 border rounded-xl px-3 py-2 cursor-pointer transition-all ${isSelected ? 'bg-emerald-900/40 border-emerald-600' : 'bg-slate-800/60 border-slate-700 hover:border-slate-500'}`}
+                              onClick={() => {
+                                const currentIds = Array.isArray(settingsForm.articleConsultDoctorIds) ? settingsForm.articleConsultDoctorIds : [];
+                                const docId = String(doc.id);
+                                const updated = isSelected
+                                  ? currentIds.filter(id => id !== docId)
+                                  : [...currentIds, docId];
+                                setSettingsForm(prev => ({ ...prev, articleConsultDoctorIds: updated }));
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                readOnly
+                                className="w-4 h-4 rounded text-emerald-500 bg-slate-700 border-slate-600 shrink-0 pointer-events-none"
+                              />
+                              <img
+                                src={doc.image || '/images/default_doctor.webp'}
+                                alt={doc.name}
+                                onError={e => { e.target.onerror = null; e.target.src = '/images/default_doctor.webp'; }}
+                                className="w-8 h-8 rounded-full object-cover border border-slate-600 shrink-0"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <span className="text-sm text-slate-200 font-simple block truncate">{doc.name}</span>
+                                <span className="text-[10px] text-slate-400 font-simple">{doc.cityName} • {(doc.specialties || []).join(', ').slice(0, 40)}</span>
+                              </div>
+                              {isSelected && <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold shrink-0">منتخب</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <p className="text-[11px] text-slate-500 font-simple">
+                        منتخب: {Array.isArray(settingsForm.articleConsultDoctorIds) ? settingsForm.articleConsultDoctorIds.length : 0} طبیب
+                        {Array.isArray(settingsForm.articleConsultDoctorIds) && settingsForm.articleConsultDoctorIds.length > 2 && (
+                          <span className="text-amber-400"> (مضمون میں صرف پہلے 2 نظر آئیں گے)</span>
+                        )}
+                      </p>
                     </div>
 
                     {/* Doctors Block */}

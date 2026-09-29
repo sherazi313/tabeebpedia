@@ -341,9 +341,9 @@ export default function App() {
       const rawPath = window.location.pathname.substring(1).replace(/\/$/, '');
       const path = decodeURIComponent(rawPath);
       const params = new URLSearchParams(window.location.search);
-      if (path === 'admin' || params.get('tab') === 'admin' || localStorage.getItem('tabeeb_active_tab') === 'admin') {
-        return 'admin';
-      }
+      
+      // اگر URL میں کوئی خاص path ہے (جیسے doctors, blog یا کوئی slug) تو اسی کو دیکھیں
+      if (path === 'admin' || params.get('tab') === 'admin') return 'admin';
       if (path === 'doctors' || params.get('tab') === 'doctors') return 'doctors';
       if (path === 'blog' || params.get('tab') === 'blog') return 'blog';
       if (path === 'farhang' || path === 'glossary' || params.get('tab') === 'farhang' || params.get('tab') === 'glossary') return 'farhang';
@@ -351,6 +351,13 @@ export default function App() {
       if (path === 'herbs' || params.get('tab') === 'herbs') return 'herbs';
       if (path === 'qanoon' || params.get('tab') === 'qanoon') return 'qanoon';
       if (path === 'herb-calculator' || path === 'hec' || path === 'calculator' || path === 'mizaj-calculator' || params.get('tab') === 'herb-calculator' || params.get('tab') === 'hec') return 'herb-calculator';
+      
+      // اگر path خالی ہے (یعنی صرف / ہے) اور localStorage میں کوئی tab محفوظ ہے تو وہ کھولیں
+      if (!path && !params.get('tab')) {
+        const savedTab = localStorage.getItem('tabeeb_active_tab');
+        if (savedTab === 'admin') return 'admin';
+        // مزید saved tabs یہاں چیک کیے جا سکتے ہیں اگر چاہیں
+      }
     } catch(e) {}
     return 'home';
   }); // 'home', 'doctors', 'blog', 'farhang', 'farhang-term', 'herbs', 'qanoon', 'herb-calculator', 'admin', 'doctor-dashboard'
@@ -543,6 +550,11 @@ export default function App() {
         }
       } catch (err) {
         console.error('Error loading database data:', err);
+      } finally {
+        // Trigger URL navigation again now that data is loaded
+        setTimeout(() => {
+          window.dispatchEvent(new Event('popstate'));
+        }, 100);
       }
     };
     loadDatabaseData();
@@ -1462,7 +1474,15 @@ export default function App() {
     const featCols = siteSettings?.featuredDoctorBlockColumns || '4';
     const featGridClass = featCols === '1' ? 'grid-cols-1' : featCols === '2' ? 'grid-cols-1 sm:grid-cols-2' : featCols === '3' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
     let featuredDocs = doctorsList.filter(d => d && d.isApproved !== false && d.status !== 'pending' && (d.isFeatured === true || d.isFeatured === '1' || d.isFeatured === 'yes' || d.featured));
-    if (siteSettings?.featuredDoctorBlockSort === 'oldest') {
+    // featuredOrder سیٹ ہو تو اس سے sort کریں، ورنہ settings کے مطابق
+    const hasFeaturedOrder = featuredDocs.some(d => d.featuredOrder != null);
+    if (hasFeaturedOrder) {
+      featuredDocs = [...featuredDocs].sort((a, b) => {
+        const ao = a.featuredOrder != null ? a.featuredOrder : 999;
+        const bo = b.featuredOrder != null ? b.featuredOrder : 999;
+        return ao - bo;
+      });
+    } else if (siteSettings?.featuredDoctorBlockSort === 'oldest') {
       featuredDocs = [...featuredDocs].sort((a, b) => (parseInt(a.id) || 0) - (parseInt(b.id) || 0));
     } else {
       featuredDocs = [...featuredDocs].sort((a, b) => (parseInt(b.id) || 0) - (parseInt(a.id) || 0));
@@ -1706,7 +1726,7 @@ export default function App() {
                         </button>
                         {doctor.whatsapp && (
                           <a
-                            href={`https://wa.me/${doctor.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`السلام علیکم حکیم صاحب، میں طبیب پیڈیا کے ذریعے آپ سے رابطہ کر رہا ہوں۔`)}`}
+                            href={`https://wa.me/${doctor.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`السلام علیکم محترم ${doctor.name || 'حکیم'} صاحب\nمیں نے طبیب پیڈیا ویب سائٹ پر آپ کی پروفائل دیکھی، وہاں سے آپ کے ساتھ رابطہ کر رہا ہوں، اپنی بیماری کے بارے گفتگو کرنی ہے۔\nwww.tabeebpedia.com`)}`}
                             target="_blank"
                             rel="noreferrer"
                             className="flex items-center justify-center gap-1 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3.5 py-2.5 rounded-xl shadow-xs transition-colors font-h2"
@@ -1798,7 +1818,7 @@ export default function App() {
                           پروفائل دیکھیں
                         </button>
                         <a
-                          href={`https://wa.me/${doctor.whatsapp}?text=${encodeURIComponent(`السلام علیکم حکیم صاحب، میں طبیب پیڈیا کے ذریعے آپ سے رابطہ کر رہا ہوں۔`)}`}
+                          href={`https://wa.me/${doctor.whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`السلام علیکم محترم ${doctor.name || 'حکیم'} صاحب\nمیں نے طبیب پیڈیا ویب سائٹ پر آپ کی پروفائل دیکھی، وہاں سے آپ کے ساتھ رابطہ کر رہا ہوں، اپنی بیماری کے بارے گفتگو کرنی ہے۔\nwww.tabeebpedia.com`)}`}
                           target="_blank"
                           rel="noreferrer"
                           className="flex items-center justify-center gap-1 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3.5 py-2.5 rounded-xl shadow-xs transition-colors font-h2"
@@ -2026,6 +2046,7 @@ export default function App() {
             siteSettings={siteSettings}
             article={selectedArticle}
             articlesList={articlesList}
+            doctorsList={doctorsList}
             pagesList={pagesList}
             glossaryList={glossaryList}
             onSelectGlossaryTerm={handleSelectGlossaryTerm}

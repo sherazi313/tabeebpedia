@@ -1189,7 +1189,7 @@ export default function DoctorProfileView({
               {/* Instant Action CTA Buttons (Call + WhatsApp) */}
               <div className="space-y-2">
                 <a
-                  href={`https://wa.me/${doctor.whatsapp || doctor.phone}?text=${encodeURIComponent(`السلام علیکم طبیب ${doctor.name}، میں طبیب پیڈیا کے ذریعے ${consultationMode === 'online' ? 'آن لائن ویڈیو مشاورت' : 'مطب پر چیک اپ'} کے لیے وقت حاصل کرنا چاہتا ہوں۔`)}`}
+                  href={`https://wa.me/${(doctor.whatsapp || doctor.phone || '').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`السلام علیکم محترم ${doctor.name || 'حکیم'} صاحب\nمیں نے طبیب پیڈیا ویب سائٹ پر آپ کی پروفائل دیکھی، وہاں سے آپ کے ساتھ رابطہ کر رہا ہوں، اپنی بیماری کے بارے گفتگو کرنی ہے۔\nwww.tabeebpedia.com`)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-2xl text-xs sm:text-sm transition-all shadow-md hover:shadow-lg"
