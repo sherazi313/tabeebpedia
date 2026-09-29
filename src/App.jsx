@@ -1801,11 +1801,18 @@ export default function App() {
 
                         {/* Clinic & City */}
                         <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 mt-4 space-y-1 text-xs">
-                          <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                            <Building2 className={`w-3.5 h-3.5 ${isNavy ? 'text-blue-600' : 'text-emerald-600'}`} />
-                            <span>{doctor.clinicName}</span>
+                          <div className="flex items-center justify-between gap-1.5 font-bold text-slate-800">
+                            <div className="flex items-center gap-1.5 truncate">
+                              <Building2 className={`w-3.5 h-3.5 ${isNavy ? 'text-blue-600' : 'text-emerald-600'} shrink-0`} />
+                              <span className="truncate">{doctor.clinicName || 'مطب / کلینک'}</span>
+                            </div>
+                            <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md font-sans shrink-0 font-medium">
+                              {doctor.cityName || doctor.city || 'پاکستان'}
+                            </span>
                           </div>
-                          <p className="text-[11px] text-slate-500 truncate">{doctor.address}</p>
+                          {doctor.address && (
+                            <p className="text-[11px] text-slate-500 truncate">{doctor.address}</p>
+                          )}
                         </div>
                       </div>
 
