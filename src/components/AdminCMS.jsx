@@ -5100,7 +5100,7 @@ export default function AdminCMS({
               <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 sm:p-8 text-right">
                 <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-100">
                   <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                    <span>????? ??? ?????</span>
+                    <span>قارئین کے تبصرے</span>
                     <MessageCircle className="w-7 h-7 text-blue-600" />
                   </h2>
                 </div>
@@ -5113,9 +5113,9 @@ export default function AdminCMS({
                         <div className="flex justify-between items-start mb-2">
                           <div className="flex gap-2">
                             {c.status !== 'approved' && (
-                              <button onClick={() => handleApprove(c.id, c.articleId)} className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded text-xs font-bold hover:bg-emerald-200">????? ????</button>
+                              <button onClick={() => handleApprove(c.id, c.articleId)} className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded text-xs font-bold hover:bg-emerald-200">منظور کریں</button>
                             )}
-                            <button onClick={() => handleReject(c.id, c.articleId)} className="bg-red-100 text-red-700 px-3 py-1 rounded text-xs font-bold hover:bg-red-200">??? ????</button>
+                            <button onClick={() => handleReject(c.id, c.articleId)} className="bg-red-100 text-red-700 px-3 py-1 rounded text-xs font-bold hover:bg-red-200">حذف کریں</button>
                           </div>
                           <div>
                             <h4 className="font-bold text-sm">{c.name} ({c.email})</h4>
