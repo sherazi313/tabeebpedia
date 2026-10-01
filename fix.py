@@ -1,21 +1,9 @@
-
-import re
+﻿import sys
 
 with open('src/components/Navbar.jsx', 'r', encoding='utf-8') as f:
     c = f.read()
 
-# navItems update
-c = c.replace(
-    \x22{ id: 'herb-calculator', label: '???? ????????? (HEC)', icon: Calculator },\x22,
-    \x22{ id: 'calculators', label: '?????????', icon: Calculator, children: [{ id: 'pulse-calculator', label: '??? ?????????' }, { id: 'herb-calculator', label: '???? ???? ?????????' }] },\x22
-)
-
-c = c.replace(
-    \x22ChevronLeft,\x22,
-    \x22ChevronLeft,\n  ChevronDown,\x22
-)
-
-desktop_nav_old = \x22\x22\x22<nav className=\x22hidden lg:flex items-center gap-1\x22>
+desktop_old = """            <nav className="hidden lg:flex items-center gap-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id;
@@ -24,13 +12,13 @@ desktop_nav_old = \x22\x22\x22<nav className=\x22hidden lg:flex items-center gap
                     <a
                       key={item.id}
                       href={item.url}
-                      target=\x22_blank\x22
-                      rel=\x22noopener noreferrer\x22
-                      className=\x22relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-50\x22
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                     >
-                      <Icon className=\x22w-4 h-4 text-emerald-600\x22 />
+                      <Icon className="w-4 h-4 text-emerald-600" />
                       <span>{item.label}</span>
-                      <ExternalLink className=\x22w-3.5 h-3.5 text-slate-400\x22 />
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
                     </a>
                   );
                 }
@@ -44,56 +32,67 @@ desktop_nav_old = \x22\x22\x22<nav className=\x22hidden lg:flex items-center gap
                         setActiveTab(item.id);
                       }
                     }}
-                    className={elative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all }
+                    className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${
+                      isActive
+                        ? isNavy 
+                          ? 'text-blue-900 bg-blue-50/90 font-bold shadow-xs' 
+                          : 'text-emerald-900 bg-emerald-50/90 font-bold shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
                   >
-                    <Icon className={w-4 h-4 } />
+                    <Icon className={`w-4 h-4 ${isActive ? (isNavy ? 'text-blue-600' : 'text-emerald-600') : 'text-slate-400'}`} />
                     <span>{item.label}</span>
                     {isActive && (
-                      <span className={bsolute bottom-0 left-3 right-3 h-0.5  rounded-full} />
+                      <span className={`absolute bottom-0 left-3 right-3 h-0.5 ${isNavy ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full`} />
                     )}
                   </button>
                 );
               })}
-            </nav>\x22\x22\x22
+            </nav>"""
 
-desktop_nav_new = \x22\x22\x22<nav className=\x22hidden lg:flex items-center gap-1\x22>
+desktop_new = """            <nav className="hidden lg:flex items-center gap-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = activeTab === item.id || (item.children && item.children.some(child => activeTab === child.id));
+                const isActive = activeTab === item.id || (item.children && item.children.some(c => c.id === activeTab));
+                
                 if (item.isExternal) {
                   return (
                     <a
                       key={item.id}
                       href={item.url}
-                      target=\x22_blank\x22
-                      rel=\x22noopener noreferrer\x22
-                      className=\x22relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-50\x22
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                     >
-                      <Icon className=\x22w-4 h-4 text-emerald-600\x22 />
+                      <Icon className="w-4 h-4 text-emerald-600" />
                       <span>{item.label}</span>
-                      <ExternalLink className=\x22w-3.5 h-3.5 text-slate-400\x22 />
+                      <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
                     </a>
                   );
                 }
+
                 if (item.children) {
                   return (
-                    <div key={item.id} className=\x22relative group\x22>
-                      <button
-                        className={elative flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all }
-                      >
-                        <Icon className={w-4 h-4 } />
+                    <div key={item.id} className="relative group">
+                      <button className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${
+                        isActive
+                          ? isNavy 
+                            ? 'text-blue-900 bg-blue-50/90 font-bold shadow-xs' 
+                            : 'text-emerald-900 bg-emerald-50/90 font-bold shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                      }`}>
+                        <Icon className={`w-4 h-4 ${isActive ? (isNavy ? 'text-blue-600' : 'text-emerald-600') : 'text-slate-400'}`} />
                         <span>{item.label}</span>
-                        <ChevronDown className=\x22w-3.5 h-3.5 opacity-50\x22 />
                         {isActive && (
-                          <span className={bsolute bottom-0 left-3 right-3 h-0.5  rounded-full} />
+                          <span className={`absolute bottom-0 left-3 right-3 h-0.5 ${isNavy ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full`} />
                         )}
                       </button>
-                      <div className=\x22absolute top-full right-0 mt-1 w-48 bg-white border border-slate-100 shadow-xl rounded-2xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50\x22>
+                      <div className="absolute top-full right-0 mt-1 w-48 bg-white border border-slate-100 shadow-xl rounded-2xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                         {item.children.map(child => (
                           <button
                             key={child.id}
                             onClick={() => setActiveTab(child.id)}
-                            className={w-full text-right px-4 py-2 text-sm font-semibold transition-colors }
+                            className={`w-full text-right px-4 py-2 text-sm font-semibold transition-colors ${activeTab === child.id ? (isNavy ? 'text-blue-700 bg-blue-50' : 'text-emerald-700 bg-emerald-50') : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}
                           >
                             {child.label}
                           </button>
@@ -102,6 +101,7 @@ desktop_nav_new = \x22\x22\x22<nav className=\x22hidden lg:flex items-center gap
                     </div>
                   );
                 }
+
                 return (
                   <button
                     key={item.id}
@@ -112,125 +112,202 @@ desktop_nav_new = \x22\x22\x22<nav className=\x22hidden lg:flex items-center gap
                         setActiveTab(item.id);
                       }
                     }}
-                    className={elative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all }
+                    className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${
+                      isActive
+                        ? isNavy 
+                          ? 'text-blue-900 bg-blue-50/90 font-bold shadow-xs' 
+                          : 'text-emerald-900 bg-emerald-50/90 font-bold shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
                   >
-                    <Icon className={w-4 h-4 } />
+                    <Icon className={`w-4 h-4 ${isActive ? (isNavy ? 'text-blue-600' : 'text-emerald-600') : 'text-slate-400'}`} />
                     <span>{item.label}</span>
                     {isActive && (
-                      <span className={bsolute bottom-0 left-3 right-3 h-0.5  rounded-full} />
+                      <span className={`absolute bottom-0 left-3 right-3 h-0.5 ${isNavy ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full`} />
                     )}
                   </button>
                 );
               })}
-            </nav>\x22\x22\x22
+            </nav>"""
 
-c = c.replace(desktop_nav_old, desktop_nav_new)
-
-
-mobile_nav_old = \x22\x22\x22<nav className=\x22flex flex-col gap-1 p-3\x22>
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              if (item.isExternal) {
+mobile_old = """            <div className="space-y-1">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                if (item.isExternal) {
+                  return (
+                    <a
+                      key={item.id}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium text-slate-700 hover:bg-slate-50 transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className="w-5 h-5 text-emerald-600" />
+                        <span>{item.label}</span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-slate-400" />
+                    </a>
+                  );
+                }
                 return (
-                  <a
+                  <button
                     key={item.id}
-                    href={item.url}
-                    target=\x22_blank\x22
-                    rel=\x22noopener noreferrer\x22
-                    className=\x22flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-semibold transition-all text-slate-600 hover:bg-slate-50\x22
+                    onClick={() => {
+                      if (item.isPage && onSelectPage) {
+                        onSelectPage(item.id);
+                      } else {
+                        setActiveTab(item.id);
+                      }
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-all ${
+                      isActive
+                        ? isNavy
+                          ? 'bg-blue-50 text-blue-900 font-bold border-r-4 border-blue-600'
+                          : 'bg-emerald-50 text-emerald-900 font-bold border-r-4 border-emerald-600'
+                        : 'text-slate-700 hover:bg-slate-50'
+                    }`}
                   >
-                    <Icon className=\x22w-5 h-5 text-emerald-600\x22 />
-                    <span>{item.label}</span>
-                    <ExternalLink className=\x22w-4 h-4 text-slate-400\x22 />
-                  </a>
-                );
-              }
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    if (item.isPage && onSelectPage) {
-                      onSelectPage(item.id);
-                    } else {
-                      setActiveTab(item.id);
-                    }
-                    setMobileMenuOpen(false);
-                  }}
-                  className={lex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-semibold transition-all }
-                >
-                  <Icon className={w-5 h-5 } />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>\x22\x22\x22
-
-mobile_nav_new = \x22\x22\x22<nav className=\x22flex flex-col gap-1 p-3\x22>
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id || (item.children && item.children.some(child => activeTab === child.id));
-              if (item.isExternal) {
-                return (
-                  <a
-                    key={item.id}
-                    href={item.url}
-                    target=\x22_blank\x22
-                    rel=\x22noopener noreferrer\x22
-                    className=\x22flex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-semibold transition-all text-slate-600 hover:bg-slate-50\x22
-                  >
-                    <Icon className=\x22w-5 h-5 text-emerald-600\x22 />
-                    <span>{item.label}</span>
-                    <ExternalLink className=\x22w-4 h-4 text-slate-400\x22 />
-                  </a>
-                );
-              }
-              if (item.children) {
-                return (
-                  <div key={item.id} className=\x22flex flex-col\x22>
-                    <div className={lex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-semibold transition-all }>
-                      <Icon className={w-5 h-5 } />
+                    <div className="flex items-center gap-3">
+                      <Icon className={`w-5 h-5 ${isActive ? (isNavy ? 'text-blue-600' : 'text-emerald-600') : 'text-slate-400'}`} />
                       <span>{item.label}</span>
                     </div>
-                    <div className=\x22flex flex-col pl-10 pr-2 pb-2\x22>
-                      {item.children.map(child => (
-                        <button
-                          key={child.id}
-                          onClick={() => {
-                            setActiveTab(child.id);
-                            setMobileMenuOpen(false);
-                          }}
-                          className={lex items-center px-4 py-2.5 rounded-lg text-sm font-semibold transition-all text-right }
-                        >
-                          {child.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  </button>
                 );
-              }
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    if (item.isPage && onSelectPage) {
-                      onSelectPage(item.id);
-                    } else {
-                      setActiveTab(item.id);
-                    }
-                    setMobileMenuOpen(false);
-                  }}
-                  className={lex items-center gap-3 px-4 py-3.5 rounded-xl text-base font-semibold transition-all }
-                >
-                  <Icon className={w-5 h-5 } />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>\x22\x22\x22
+              })}
+            </div>"""
 
-c = c.replace(mobile_nav_old, mobile_nav_new)
+mobile_new = """            <div className="space-y-1">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id || (item.children && item.children.some(c => c.id === activeTab));
+                
+                if (item.isExternal) {
+                  return (
+                    <a
+                      key={item.id}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium text-slate-700 hover:bg-slate-50 transition-all"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className="w-5 h-5 text-emerald-600" />
+                        <span>{item.label}</span>
+                      </div>
+                      <ExternalLink className="w-4 h-4 text-slate-400" />
+                    </a>
+                  );
+                }
+
+                if (item.children) {
+                  return (
+                    <div key={item.id} className="flex flex-col">
+                      <div className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive ? (isNavy ? 'bg-blue-50 text-blue-900 font-bold' : 'bg-emerald-50 text-emerald-900 font-bold') : 'text-slate-700 hover:bg-slate-50'}`}>
+                        <div className="flex items-center gap-3">
+                          <Icon className={`w-5 h-5 ${isActive ? (isNavy ? 'text-blue-600' : 'text-emerald-600') : 'text-slate-400'}`} />
+                          <span>{item.label}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col pr-12 pb-2 pt-1">
+                        {item.children.map(child => (
+                          <button
+                            key={child.id}
+                            onClick={() => {
+                              setActiveTab(child.id);
+                              setMobileMenuOpen(false);
+                            }}
+                            className={`flex justify-end items-center px-4 py-2 rounded-lg text-sm transition-all ${activeTab === child.id ? (isNavy ? 'text-blue-700 font-bold' : 'text-emerald-700 font-bold') : 'text-slate-600 hover:text-slate-900'}`}
+                          >
+                            {child.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      if (item.isPage && onSelectPage) {
+                        onSelectPage(item.id);
+                      } else {
+                        setActiveTab(item.id);
+                      }
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-all ${
+                      isActive
+                        ? isNavy
+                          ? 'bg-blue-50 text-blue-900 font-bold border-r-4 border-blue-600'
+                          : 'bg-emerald-50 text-emerald-900 font-bold border-r-4 border-emerald-600'
+                        : 'text-slate-700 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className={`w-5 h-5 ${isActive ? (isNavy ? 'text-blue-600' : 'text-emerald-600') : 'text-slate-400'}`} />
+                      <span>{item.label}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>"""
+
+logo_old = """              {(siteSettings?.logoUrl || '/logo3.png') ? (
+                <img src={siteSettings?.logoUrl || '/logo3.png'} alt={brandName} className="h-10 sm:h-12 w-auto max-w-[200px] object-contain" />
+              ) : (
+                <div className={`w-12 h-12 rounded-2xl ${isNavy ? 'bg-gradient-to-br from-blue-700 via-indigo-800 to-slate-900 shadow-blue-900/20' : 'bg-gradient-to-br from-emerald-600 to-teal-800 shadow-emerald-700/20'} flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform`}>
+                  <Leaf className={`w-7 h-7 ${isNavy ? 'text-blue-200' : 'text-emerald-200'}`} />
+                </div>
+              )}
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1.5">
+                  <span className={`text-2xl font-bold ${isNavy ? 'bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900' : 'bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-950'} bg-clip-text text-transparent tracking-tight font-heading`}>
+                    {brandName}
+                  </span>
+                </div>
+                <span className={`text-[10px] ${isNavy ? 'text-slate-500' : 'text-emerald-600/80'} font-medium tracking-wide font-nastaliq leading-none mt-0.5`}>
+                  {tagline}
+                </span>
+              </div>"""
+
+logo_new = """              {(siteSettings?.logoUrl || '/logo3.png') ? (
+                <img src={siteSettings?.logoUrl || '/logo3.png'} alt={brandName} className="h-10 sm:h-12 w-auto max-w-[200px] object-contain" />
+              ) : (
+                <div className={`w-12 h-12 rounded-2xl ${isNavy ? 'bg-gradient-to-br from-blue-700 via-indigo-800 to-slate-900 shadow-blue-900/20' : 'bg-gradient-to-br from-emerald-600 to-teal-800 shadow-emerald-700/20'} flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform`}>
+                  <Leaf className={`w-7 h-7 ${isNavy ? 'text-blue-200' : 'text-emerald-200'}`} />
+                </div>
+              )}
+              {!(siteSettings?.logoUrl || '/logo3.png') && (
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-2xl font-bold ${isNavy ? 'bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900' : 'bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-950'} bg-clip-text text-transparent tracking-tight font-heading`}>
+                      {brandName}
+                    </span>
+                  </div>
+                  <span className={`text-[10px] ${isNavy ? 'text-slate-500' : 'text-emerald-600/80'} font-medium tracking-wide font-nastaliq leading-none mt-0.5`}>
+                    {tagline}
+                  </span>
+                </div>
+              )}"""
+
+if desktop_old not in c:
+    print("desktop_old NOT FOUND")
+if mobile_old not in c:
+    print("mobile_old NOT FOUND")
+if logo_old not in c:
+    print("logo_old NOT FOUND")
+
+c = c.replace(desktop_old, desktop_new)
+c = c.replace(mobile_old, mobile_new)
+c = c.replace(logo_old, logo_new)
 
 with open('src/components/Navbar.jsx', 'w', encoding='utf-8') as f:
     f.write(c)
-
+print("Updated successfully")

@@ -1,12 +1,11 @@
 ﻿const fs = require('fs');
-let c = fs.readFileSync('src/components/Navbar.jsx', 'utf8');
-let original = c;
 
-console.log("Desktop Nav Match:");
-const dMatch = c.match(/<nav className="hidden lg:flex items-center gap-1">[\s\S]*?<\/nav>/);
-if (dMatch) {
-  console.log("FOUND DESKTOP");
-  const desktopNew = `<nav className="hidden lg:flex items-center gap-1">
+let c = fs.readFileSync('src/components/Navbar.jsx', 'utf8');
+
+const desktopStart = '<nav className="hidden lg:flex items-center gap-1">';
+const desktopEnd = '</nav>';
+
+const desktopNew = `<nav className="hidden lg:flex items-center gap-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id || (item.children && item.children.some(c => c.id === activeTab));
@@ -85,15 +84,14 @@ if (dMatch) {
                 );
               })}
             </nav>`;
-  c = c.replace(dMatch[0], desktopNew);
-} else {
-  console.log("DESKTOP NOT FOUND");
-}
 
-const mMatch = c.match(/<div className="space-y-1">[\s\S]*?<\/div>\s*<div className="pt-4 border-t/);
-if (mMatch) {
-  console.log("FOUND MOBILE");
-  const mobileNew = `<div className="space-y-1">
+const dStartIdx = c.indexOf(desktopStart);
+const dEndIdx = c.indexOf(desktopEnd, dStartIdx) + desktopEnd.length;
+c = c.substring(0, dStartIdx) + desktopNew + c.substring(dEndIdx);
+
+const mobileStart = '<div className="space-y-1">';
+const mobileEnd = '</div>\n\n            <div className="pt-4 border-t';
+const mobileNew = `<div className="space-y-1">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = activeTab === item.id || (item.children && item.children.some(c => c.id === activeTab));
@@ -173,34 +171,10 @@ if (mMatch) {
             </div>
 
             <div className="pt-4 border-t`;
-  c = c.replace(mMatch[0], mobileNew);
-} else {
-  console.log("MOBILE NOT FOUND");
-}
 
-
-// Fix logo text hiding
-const logoTextMatch = c.match(/<div className="flex flex-col">\s*<div className="flex items-center gap-1\.5">[\s\S]*?<\/div>\s*<\/div>/);
-if (logoTextMatch) {
-  console.log("FOUND LOGO TEXT");
-  const logoTextNew = `{!(siteSettings?.logoUrl || '/logo3.png') && (
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className={\`text-2xl font-bold \${isNavy ? 'bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900' : 'bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-950'} bg-clip-text text-transparent tracking-tight font-heading\`}>
-                      {brandName}
-                    </span>
-                  </div>
-                  <span className={\`text-[10px] \${isNavy ? 'text-slate-500' : 'text-emerald-600/80'} font-medium tracking-wide font-nastaliq leading-none mt-0.5\`}>
-                    {tagline}
-                  </span>
-                </div>
-              )}`;
-  c = c.replace(logoTextMatch[0], logoTextNew);
-} else {
-  console.log("LOGO TEXT NOT FOUND");
-}
-
+const mStartIdx = c.indexOf(mobileStart);
+const mEndIdx = c.indexOf(mobileEnd, mStartIdx) + mobileEnd.length;
+c = c.substring(0, mStartIdx) + mobileNew + c.substring(mEndIdx);
 
 fs.writeFileSync('src/components/Navbar.jsx', c);
-console.log("Written successfully");
-
+console.log("Done");
