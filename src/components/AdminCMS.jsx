@@ -1749,12 +1749,13 @@ export default function AdminCMS({
     }
   };
 
-  const handleSaveSettings = (e) => {
-    e.preventDefault();
-    if (setSiteSettings) {
-      setSiteSettings(settingsForm);
-    }
-    showNotification('ویب سائٹ کی تمام ترتیبات (لوگو، ہیڈر، فوٹر) کامیابی کے ساتھ محفوظ ہو گئیں!');
+  const handleSaveSettings = async (e) => {
+      e.preventDefault();
+      if (setSiteSettings) {
+        setSiteSettings(settingsForm);
+      }
+      await saveSettingsApi(settingsForm);
+      showNotification('ویب سائٹ کی تمام ترتیبات (لوگو، ہیڈر، فوٹر) کامیابی کے ساتھ محفوظ ہو گئیں!');
   };
 
   // Visual WYSIWYG Command Executor
