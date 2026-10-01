@@ -93,7 +93,8 @@ import {
   Loader2,
   Download,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Upload
 } from 'lucide-react';
 import { ARTICLES, DOCTORS, CATEGORIES, SPECIALTIES } from '../data/mockData';
 import { fetchCategoriesApi, saveCategoriesApi, saveArticlesApi, saveSettingsApi, saveDoctorsApi, uploadImageApi, fetchLivePages, savePagesApi, fetchLiveGlossary, saveGlossaryApi } from '../api';
