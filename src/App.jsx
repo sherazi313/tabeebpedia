@@ -592,17 +592,6 @@ export default function App() {
     const onScroll = () => setShowScrollTop(window.scrollY > 400);
     window.addEventListener('scroll', onScroll);
     
-  useEffect(() => {
-    if (siteSettings?.faviconUrl) {
-      let link = document.querySelector("link[rel~='icon']");
-      if (!link) {
-        link = document.createElement('link');
-        link.rel = 'icon';
-        document.getElementsByTagName('head')[0].appendChild(link);
-      }
-      link.href = siteSettings.faviconUrl;
-    }
-  }, [siteSettings?.faviconUrl]);
 
   return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -1520,6 +1509,17 @@ export default function App() {
     if (siteSettings?.articleBlockSort !== 'oldest') homeArticles = homeArticles.reverse();
     const artLimit = (parseInt(artCols) || 4) * (parseInt(siteSettings?.articleBlockRows || '3') || 3);
 
+    useEffect(() => {
+    if (siteSettings?.faviconUrl) {
+      let link = document.querySelector("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
+      link.href = siteSettings.faviconUrl;
+    }
+  }, [siteSettings?.faviconUrl]);
   return (
     <div className="min-h-screen flex flex-col bg-[#f8fafc] text-slate-800 antialiased selection:bg-blue-600 selection:text-white">
       {/* Dynamic SEO Meta & Schema.org Controller */}
