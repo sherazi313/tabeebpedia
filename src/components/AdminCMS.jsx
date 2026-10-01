@@ -967,6 +967,7 @@ export default function AdminCMS({
     siteName: 'طبیب پیڈیا',
     tagline: 'جامع ہربل و طبی انسائیکلوپیڈیا',
     logoUrl: '',
+      faviconUrl: '',
     helplinePhone: '0300-1234567',
     whatsappNumber: '923001234567',
     headOffice: 'اسلام آباد، پاکستان',
@@ -2468,6 +2469,7 @@ export default function AdminCMS({
                   <button onClick={() => setAdminTab('categories')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'categories' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
                     <FolderOpen className="w-4 h-4" /> <span>Categories (کیٹیگریز)</span>
                   </button>
+                  <button onClick={() => setAdminTab('comments')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'comments' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}><MessageCircle className="w-4 h-4" /> <span>Comments</span></button>
                   <button onClick={() => setAdminTab('tags')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'tags' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
                     <Hash className="w-4 h-4" /> <span>Tags (ٹیگز)</span>
                   </button>
@@ -5052,6 +5054,81 @@ export default function AdminCMS({
             );
           })()}
 
+
+          {adminTab === 'comments' && (() => {
+            const allComments = [];
+            articlesList.forEach(article => {
+              if (article.comments && Array.isArray(article.comments)) {
+                article.comments.forEach(c => {
+                  allComments.push({ ...c, articleId: article.id, articleTitle: article.title });
+                });
+              }
+            });
+            // sort by date descending
+            allComments.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const handleApprove = (commentId, articleId) => {
+              const updatedArticles = articlesList.map(a => {
+                if (a.id === articleId) {
+                  return {
+                    ...a,
+                    comments: a.comments.map(c => c.id === commentId ? { ...c, status: 'approved' } : c)
+                  };
+                }
+                return a;
+              });
+              setArticlesList(updatedArticles);
+            };
+
+            const handleReject = (commentId, articleId) => {
+              if(!confirm('Are you sure you want to delete this comment?')) return;
+              const updatedArticles = articlesList.map(a => {
+                if (a.id === articleId) {
+                  return {
+                    ...a,
+                    comments: a.comments.filter(c => c.id !== commentId)
+                  };
+                }
+                return a;
+              });
+              setArticlesList(updatedArticles);
+            };
+
+            return (
+              <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 sm:p-8 text-right">
+                <div className="flex items-center justify-between mb-8 pb-6 border-b border-slate-100">
+                  <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                    <span>????? ??? ?????</span>
+                    <MessageCircle className="w-7 h-7 text-blue-600" />
+                  </h2>
+                </div>
+                <div className="space-y-4 text-right">
+                  {allComments.length === 0 ? (
+                    <p className="text-slate-500">No comments found.</p>
+                  ) : (
+                    allComments.map(c => (
+                      <div key={c.id} className="p-4 border border-slate-200 rounded-xl bg-slate-50">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex gap-2">
+                            {c.status !== 'approved' && (
+                              <button onClick={() => handleApprove(c.id, c.articleId)} className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded text-xs font-bold hover:bg-emerald-200">????? ????</button>
+                            )}
+                            <button onClick={() => handleReject(c.id, c.articleId)} className="bg-red-100 text-red-700 px-3 py-1 rounded text-xs font-bold hover:bg-red-200">??? ????</button>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-sm">{c.name} ({c.email})</h4>
+                            <p className="text-xs text-slate-500">on <span className="font-bold">{c.articleTitle}</span> - {new Date(c.date).toLocaleString()}</p>
+                          </div>
+                        </div>
+                        <p className="text-sm mt-2 text-slate-700 whitespace-pre-wrap">{c.text}</p>
+                        <span className={`inline-block mt-2 px-2 py-1 text-[10px] rounded font-bold ${c.status === 'approved' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>{c.status === 'approved' ? 'منظور شدہ' : 'زیر التواء'}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* VIEW: TAGS */}
           {adminTab === 'tags' && (

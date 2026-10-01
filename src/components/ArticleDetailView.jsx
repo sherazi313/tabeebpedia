@@ -41,6 +41,7 @@ export default function ArticleDetailView({
   onSelectTag, 
   onSelectPage,
   onSelectGlossaryTerm,
+  onUpdateArticle,
   siteSettings 
 }) {
   const [fontSize, setFontSize] = useState(() => {
@@ -52,6 +53,37 @@ export default function ArticleDetailView({
   }); // 'small', 'normal', 'large'
   const [copied, setCopied] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
+  
+  const [commentForm, setCommentForm] = useState({ name: '', email: '', text: '' });
+  const [commentStatus, setCommentStatus] = useState('');
+
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    if (!commentForm.name.trim() || !commentForm.text.trim()) return;
+
+    const newComment = {
+      id: Date.now().toString(),
+      name: commentForm.name.trim(),
+      email: commentForm.email.trim(),
+      text: commentForm.text.trim(),
+      date: new Date().toISOString(),
+      status: 'pending' // requires approval in admin dashboard
+    };
+
+    const updatedArticle = {
+      ...currentArticle,
+      comments: [...(currentArticle.comments || []), newComment]
+    };
+
+    if (onUpdateArticle) {
+      onUpdateArticle(updatedArticle);
+    }
+    
+    setCommentStatus('success');
+    setCommentForm({ name: '', email: '', text: '' });
+    
+    setTimeout(() => setCommentStatus(''), 5000);
+  };
 
   const handleSetFontSize = (size) => {
     setFontSize(size);
@@ -467,6 +499,76 @@ export default function ArticleDetailView({
               </div>
 
             </article>
+
+            {/* Comments Section */}
+            <div className="no-print mt-10 bg-white rounded-3xl p-6 border border-slate-200 shadow-sm text-right">
+              <h3 className="text-xl font-bold text-slate-900 mb-6 font-simple flex items-center justify-end gap-2">
+                <span>تبصرے اور جائزے</span>
+                <MessageCircle className="w-5 h-5 text-emerald-600" />
+              </h3>
+
+              {/* List of approved comments */}
+              <div className="space-y-4 mb-8">
+                {(currentArticle.comments || []).filter(c => c.status === 'approved').length === 0 ? (
+                  <p className="text-slate-500 text-sm italic">ابھی تک کوئی تبصرہ نہیں کیا گیا۔ پہلا تبصرہ کریں!</p>
+                ) : (
+                  (currentArticle.comments || []).filter(c => c.status === 'approved').map(comment => (
+                    <div key={comment.id} className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs text-slate-400 font-sans">{new Date(comment.date).toLocaleDateString('ur-PK')}</span>
+                        <h5 className="font-bold text-slate-800 text-sm">{comment.name}</h5>
+                      </div>
+                      <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap">{comment.text}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Comment Form */}
+              <form onSubmit={handleCommentSubmit} className="space-y-4 bg-emerald-50/50 p-5 rounded-2xl border border-emerald-100/50">
+                <h4 className="font-bold text-slate-800 mb-2">اپنا تبصرہ شامل کریں</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <input
+                    type="text"
+                    required
+                    placeholder="آپ کا نام"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-right focus:border-emerald-500 outline-none"
+                    value={commentForm.name}
+                    onChange={(e) => setCommentForm({...commentForm, name: e.target.value})}
+                  />
+                  <input
+                    type="email"
+                    required
+                    placeholder="ای میل (شائع نہیں کی جائے گی)"
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-right focus:border-emerald-500 outline-none"
+                    value={commentForm.email}
+                    onChange={(e) => setCommentForm({...commentForm, email: e.target.value})}
+                  />
+                </div>
+                <textarea
+                  required
+                  placeholder="اپنا تبصرہ یہاں لکھیں..."
+                  rows="4"
+                  className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-right focus:border-emerald-500 outline-none resize-none"
+                  value={commentForm.text}
+                  onChange={(e) => setCommentForm({...commentForm, text: e.target.value})}
+                ></textarea>
+                <div className="flex justify-between items-center">
+                  {commentStatus === 'success' && (
+                    <span className="text-emerald-600 text-xs font-bold flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4" /> آپ کا تبصرہ موصول ہو گیا ہے اور منظوری کا منتظر ہے۔
+                    </span>
+                  )}
+                  {commentStatus !== 'success' && <div />}
+                  <button
+                    type="submit"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center gap-2"
+                  >
+                    شائع کریں
+                  </button>
+                </div>
+              </form>
+            </div>
 
             {/* Related Articles Section */}
             {relatedArticles.length > 0 && (

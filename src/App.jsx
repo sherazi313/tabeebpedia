@@ -15,6 +15,7 @@ import AdminCMS from './components/AdminCMS';
 import Footer from './components/Footer';
 import SEOHelmet from './components/SEOHelmet';
 import HerbEffectivenessCalculator from './components/HerbEffectivenessCalculator';
+import PulseDiagnosis from './components/PulseDiagnosis';
 import GlossaryDirectory from './components/GlossaryDirectory';
 import GlossaryTermView from './components/GlossaryTermView';
 import glossaryInitialData from './data/glossaryData.json';
@@ -590,7 +591,20 @@ export default function App() {
   useEffect(() => {
     const onScroll = () => setShowScrollTop(window.scrollY > 400);
     window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    
+  useEffect(() => {
+    if (siteSettings?.faviconUrl) {
+      let link = document.querySelector("link[rel~='icon']");
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.getElementsByTagName('head')[0].appendChild(link);
+      }
+      link.href = siteSettings.faviconUrl;
+    }
+  }, [siteSettings?.faviconUrl]);
+
+  return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   // Automatic Copyright & Source Attribution on Text Copy
@@ -1540,6 +1554,7 @@ export default function App() {
             
             {/* Hero Search Section */}
             <HeroSearch
+              siteSettings={siteSettings}
               articlesList={articlesList}
               doctorsList={doctorsList}
               citiesList={citiesList}
@@ -2058,6 +2073,9 @@ export default function App() {
             glossaryList={glossaryList}
             onSelectGlossaryTerm={handleSelectGlossaryTerm}
             onSelectPage={handleSelectPage}
+            onUpdateArticle={(updated) => {
+              setArticlesList(prev => prev.map(a => a.id === updated.id ? updated : a));
+            }}
             onBack={() => handleNavigateToTab('blog')}
             onSelectArticle={handleSelectArticle}
             onSelectDoctor={handleSelectDoctor}
@@ -2130,6 +2148,15 @@ export default function App() {
               handleNavigateToTab('home');
             }}
             theme={theme}
+          />
+        )}
+
+        {/* VIEW 9: PULSE DIAGNOSIS CALCULATOR */}
+        {activeTab === 'pulse-calculator' && (
+          <PulseDiagnosis
+            onBack={() => {
+              handleNavigateToTab('home');
+            }}
           />
         )}
 

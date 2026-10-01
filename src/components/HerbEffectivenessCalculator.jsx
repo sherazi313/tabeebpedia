@@ -371,7 +371,7 @@ export default function HerbEffectivenessCalculator({
                 <span>جڑی بوٹیوں و نسخہ جات کا ڈیجیٹل مزاج کیلکولیٹر</span>
               </div>
               <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight font-h1">
-                Herb Effectiveness Calculator (HEC)
+                ??? ?????? ?? ???? ???? ?????????
               </h1>
               <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-nastaliq">
                 قانون مفرد اعضاء اور طب یونانی کے مستند ریاضیاتی فارمولے کے مطابق کسی بھی نسخے یا جڑی بوٹیوں کے مرکب کا دقیق سائنسی مزاج، حرارت، برودت، یبوست اور رطوبت کا فیصد تناسب معلوم کریں۔

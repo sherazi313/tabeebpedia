@@ -14,6 +14,7 @@ import {
   Settings,
   Palette,
   ChevronLeft,
+  ChevronDown,
   Calculator,
   ShoppingBag,
   ExternalLink
@@ -124,7 +125,7 @@ export default function Navbar({
             className="flex items-center gap-3 cursor-pointer group select-none"
           >
             {siteSettings?.logoUrl ? (
-              <img src={siteSettings.logoUrl} alt={brandName} className="w-12 h-12 object-contain rounded-2xl bg-white shadow-sm p-1 border border-slate-200" />
+              <img src={siteSettings.logoUrl} alt={brandName} className="h-10 sm:h-12 w-auto max-w-[200px] object-contain" />
             ) : (
               <div className={`w-12 h-12 rounded-2xl ${isNavy ? 'bg-gradient-to-br from-blue-700 via-indigo-800 to-slate-900 shadow-blue-900/20' : 'bg-gradient-to-br from-emerald-600 to-teal-800 shadow-emerald-700/20'} flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform`}>
                 <Leaf className={`w-7 h-7 ${isNavy ? 'text-blue-200' : 'text-emerald-200'}`} />

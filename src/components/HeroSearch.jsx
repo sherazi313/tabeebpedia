@@ -28,7 +28,8 @@ export default function HeroSearch({
   articlesList,
   doctorsList,
   citiesList = CITIES,
-  onOpenDoctorAuthModal
+  onOpenDoctorAuthModal,
+  siteSettings
 }) {
   const [selectedCity, setSelectedCity] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -38,6 +39,12 @@ export default function HeroSearch({
   const isNavy = theme === 'navy';
   const allArticles = articlesList || ARTICLES;
   const allDoctors = doctorsList || DOCTORS;
+
+  const heroTitle = siteSettings?.heroTitle || 'مستند اطباء اور حکماء سے آن لائن رہنمائی اور فوری رابطہ';
+  const titleParts = heroTitle.includes('سے') 
+    ? [heroTitle.substring(0, heroTitle.indexOf('سے') + 2), heroTitle.substring(heroTitle.indexOf('سے') + 2)] 
+    : [heroTitle, ''];
+  const heroSubtitle = siteSettings?.heroSubtitle || 'طب یونانی، قانون مفرد اعضاء، ہربل علاج اور مستند سائنسی و طبی مضامین کا سب سے بڑا ڈیجیٹل خزانہ';
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -116,16 +123,13 @@ export default function HeroSearch({
         {/* Main Heading - Crisp Tajawal/Cairo */}
         <div className="space-y-4">
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight font-heading leading-tight sm:leading-snug text-white">
-            مستند اطباء اور حکماء سے <br className="hidden sm:inline" />
+            {titleParts[0]} <br className="hidden sm:inline" />
             <span className={`bg-gradient-to-r ${isNavy ? 'from-blue-300 via-sky-200 to-teal-200' : 'from-emerald-300 via-teal-200 to-amber-200'} bg-clip-text text-transparent`}>
-              مفت آن لائن رہنمائی و فوری رابطہ
+              {titleParts[1]}
             </span>
           </h1>
-          <p className="text-sm sm:text-lg text-slate-200/90 max-w-3xl mx-auto leading-relaxed">
-            طب یونانی، قانون مفرد اعضاء، ہربل علاج اور مستند سائنسی و طبی مضامین کا مستند ڈیجیٹل خزانہ
-          </p>
+          <p className="text-sm sm:text-lg text-slate-200/90 max-w-3xl mx-auto leading-relaxed">{heroSubtitle}</p>
         </div>
-
         {/* Marham / Oladoc Style Dual Search Bar */}
         <div ref={searchContainerRef} className="relative max-w-4xl mx-auto text-slate-800">
           <form 

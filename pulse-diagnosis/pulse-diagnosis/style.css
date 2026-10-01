@@ -1,0 +1,72 @@
+#pulse-diagnosis-form {
+    width: 80%;
+    margin: 0 auto;
+    direction: rtl; /* Right-to-left alignment for Urdu text */
+}
+
+h1, h2, h3 {
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    color: #333;
+    text-align: right;
+}
+
+.question {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+    background-color: #f9f9f9;
+}
+
+.question:nth-child(odd) {
+    background-color: #e0f7fa; /* Light blue for odd questions */
+}
+
+.question:nth-child(even) {
+    background-color: #fce4ec; /* Light pink for even questions */
+}
+
+label {
+    display: block;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    text-align: right;
+}
+
+input[type="radio"] {
+    margin-left: 10px; /* Spacing between radio button and label */
+    margin-right: 5px; /* Align better in right-to-left layout */
+    transform: translateY(2px); /* Slight lift for radio button alignment */
+}
+
+button.submit-btn {
+    background-color: #00796b;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1.2em;
+}
+
+button.submit-btn:hover {
+    background-color: #004d40;
+}
+
+#diagnosis-result {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid #00796b;
+    border-radius: 5px;
+    background-color: #e0f2f1;
+    text-align: right;
+}
+
+#result-text {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #00796b;
+}

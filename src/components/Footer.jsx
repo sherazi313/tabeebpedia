@@ -29,7 +29,7 @@ export default function Footer({ onNavigate, siteSettings, onSelectPage }) {
           <div className="lg:col-span-2 space-y-5">
             <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('home')}>
               {siteSettings?.logoUrl ? (
-                <img src={siteSettings.logoUrl} alt={brandName} className="w-12 h-12 object-contain rounded-2xl bg-white/10 p-1" />
+                <img src={siteSettings.logoUrl} alt={brandName} className="h-10 sm:h-12 w-auto max-w-[200px] object-contain rounded-2xl bg-white/10 p-1" />
               ) : (
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white shadow-md">
                   <Leaf className="w-7 h-7 text-emerald-200" />
