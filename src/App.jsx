@@ -1510,14 +1510,14 @@ export default function App() {
     const artLimit = (parseInt(artCols) || 4) * (parseInt(siteSettings?.articleBlockRows || '3') || 3);
 
     useEffect(() => {
-    if (siteSettings?.faviconUrl) {
+    if (siteSettings?.faviconUrl || '/logo1.png') {
       let link = document.querySelector("link[rel~='icon']");
       if (!link) {
         link = document.createElement('link');
         link.rel = 'icon';
         document.getElementsByTagName('head')[0].appendChild(link);
       }
-      link.href = siteSettings.faviconUrl;
+      link.href = siteSettings?.faviconUrl || '/logo1.png';
     }
   }, [siteSettings?.faviconUrl]);
   return (
