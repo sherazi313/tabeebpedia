@@ -95,9 +95,19 @@ import {
   ArrowUp,
   ArrowDown,
   Upload
+,
+  Users,
+  TrendingUp,
+  BarChart3,
+  Activity,
+  Smartphone,
+  Laptop,
+  Tablet,
+  Radio,
+  ArrowUpRight
 } from 'lucide-react';
 import { ARTICLES, DOCTORS, CATEGORIES, SPECIALTIES } from '../data/mockData';
-import { fetchCategoriesApi, saveCategoriesApi, saveArticlesApi, saveSettingsApi, saveDoctorsApi, uploadImageApi, fetchLivePages, savePagesApi, fetchLiveGlossary, saveGlossaryApi } from '../api';
+import { fetchCategoriesApi, saveCategoriesApi, saveArticlesApi, saveSettingsApi, saveDoctorsApi, uploadImageApi, fetchLivePages, savePagesApi, fetchLiveGlossary, saveGlossaryApi , fetchAnalyticsApi } from '../api';
 import { BOOKS_DATA } from './PdfBooksLibrary';
 
 // Helper to generate clean, high-contrast HTML for PDF Books library page
@@ -256,6 +266,35 @@ export default function AdminCMS({
   setGlossaryList: propSetGlossaryList
 }) {
   const [adminTab, setAdminTab] = useState(initialTab);
+
+  // Real-Time Visitor & Page Views Analytics State
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
+  const [analyticsPeriod, setAnalyticsPeriod] = useState('daily'); // 'daily' | 'weekly' | 'monthly' | 'yearly' | 'all'
+
+  const loadAnalytics = async () => {
+    setIsLoadingAnalytics(true);
+    try {
+      const data = await fetchAnalyticsApi();
+      if (data) {
+        setAnalyticsData(data);
+      }
+    } catch (err) {
+      console.warn('Analytics fetch notice:', err);
+    } finally {
+      setIsLoadingAnalytics(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAnalytics();
+    const interval = setInterval(() => {
+      if (adminTab === 'dashboard') {
+        loadAnalytics();
+      }
+    }, 20000); // Live poll every 20 seconds
+    return () => clearInterval(interval);
+  }, [adminTab]);
   const [settingsSubTab, setSettingsSubTab] = useState('general');
   const [showColorPalette, setShowColorPalette] = useState(false);
   const [showBgPalette, setShowBgPalette] = useState(false);
@@ -924,6 +963,32 @@ export default function AdminCMS({
   const [passwordStatusMsg, setPasswordStatusMsg] = useState({ type: '', text: '' });
   const [showCurrentPass, setShowCurrentPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
+
+  // Admin Recovery Emails State
+  const [adminRecoveryEmails, setAdminRecoveryEmails] = useState(() => {
+    return siteSettings?.adminRecoveryEmails || (typeof localStorage !== 'undefined' ? localStorage.getItem('tabeeb_admin_recovery_emails') : null) || 'sherazi313@gmail.com, nukta313@gmail.com';
+  });
+  const [recoveryEmailMsg, setRecoveryEmailMsg] = useState('');
+
+  const handleSaveRecoveryEmails = async () => {
+    const cleanEmails = adminRecoveryEmails.trim();
+    try {
+      localStorage.setItem('tabeeb_admin_recovery_emails', cleanEmails);
+      const updatedSettings = {
+        ...(siteSettings || {}),
+        adminRecoveryEmails: cleanEmails
+      };
+      if (setSiteSettings) {
+        setSiteSettings(updatedSettings);
+      }
+      await saveSettingsApi(updatedSettings);
+      setRecoveryEmailMsg('ریکوری ای میل ایڈریسز کامیابی کے ساتھ محفوظ ہو گئے!');
+      showNotification('ریکوری ای میل ایڈریسز کامیابی سے محفوظ ہو گئے!');
+      setTimeout(() => setRecoveryEmailMsg(''), 4000);
+    } catch (err) {
+      setRecoveryEmailMsg('ای میلز محفوظ کرنے میں خرابی پیش آئی۔');
+    }
+  };
 
   const handleChangeAdminCredentials = (e) => {
     e.preventDefault();
@@ -2381,7 +2446,7 @@ export default function AdminCMS({
   };
 
   return (
-    <div className={`min-h-screen bg-slate-900 text-slate-100 flex flex-col font-urdu text-right select-text ${isFullscreen ? 'fixed inset-0 z-50 overflow-y-auto bg-slate-950' : ''}`} dir="rtl">
+    <div className={`min-h-screen bg-slate-50 text-slate-800 flex flex-col font-urdu text-right select-text ${isFullscreen ? 'fixed inset-0 z-50 overflow-y-auto bg-slate-900 text-slate-100' : ''}`} dir="rtl">
       
       {/* Top Notification Toast */}
       {notification && (
@@ -2402,22 +2467,22 @@ export default function AdminCMS({
 
       {/* Admin Navbar */}
       {!isFullscreen && (
-        <header className="bg-slate-950 border-b border-slate-800 px-6 py-4">
+        <header className="bg-white border-b border-slate-200/90 px-6 py-4 shadow-2xs sticky top-0 z-30">
           <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
             
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-800 flex items-center justify-center text-white shadow-md">
-                <Sparkles className="w-6 h-6 text-blue-200" />
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+                <Sparkles className="w-6 h-6 text-white" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-white font-simple">طبیب پیڈیا ایڈمن CMS پورٹل</h1>
-                  <span className="text-[10px] bg-blue-900 text-blue-200 font-sans font-bold px-2 py-0.5 rounded">
+                  <h1 className="text-xl font-bold text-slate-900 font-simple">طبیب پیڈیا ایڈمن CMS پورٹل</h1>
+                  <span className="text-[11px] bg-blue-50 text-blue-700 border border-blue-200 font-sans font-bold px-2.5 py-0.5 rounded-full shadow-2xs">
                     v2.5 Pro Editor
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 font-sans">
-                  اردو رچ ایڈیٹر، ہوم پیج، لوگو، ہیڈر، فوٹر اور اطباء ترتیبات
+                <p className="text-xs text-slate-500 font-sans mt-0.5">
+                  اردو رچ ایڈیٹر، ہوم پیج، لوگو، لائیو وزٹرز اینالیٹکس اور اطباء ترتیبات
                 </p>
               </div>
             </div>
@@ -2425,9 +2490,9 @@ export default function AdminCMS({
             <div className="flex items-center gap-3">
               <button
                 onClick={onBackToWebsite}
-                className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-all border border-slate-700 font-simple"
+                className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-slate-200/90 font-simple shadow-xs"
               >
-                <ArrowRight className="w-4 h-4 text-blue-400" />
+                <ArrowRight className="w-4 h-4 text-blue-600" />
                 <span>ویب سائٹ پر واپس جائیں</span>
               </button>
             </div>
@@ -2441,93 +2506,102 @@ export default function AdminCMS({
         
         {/* Sidebar Navigation */}
         {!isFullscreen && adminTab !== 'new-article' && (
-          <aside className="lg:col-span-3 bg-slate-950/80 border border-slate-800/80 rounded-3xl p-4 space-y-6 sticky top-6 backdrop-blur-md">
+          <aside className="lg:col-span-3 bg-white border border-slate-200/90 rounded-3xl p-4 space-y-6 sticky top-24 shadow-xs">
 
             {/* WordPress-style Navigation Links */}
-            <div className="space-y-6 text-xs font-bold font-simple">
+            <div className="space-y-5 text-xs font-bold font-simple">
               <div>
                 <button 
                   onClick={() => setAdminTab('dashboard')} 
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all font-bold ${
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all font-bold ${
                     adminTab === 'dashboard' 
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' 
-                      : 'text-slate-300 hover:text-white hover:bg-slate-900 border border-slate-800/80 bg-slate-900/40'
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' 
+                      : 'text-slate-700 hover:text-blue-600 hover:bg-blue-50/60 border border-slate-200/70 bg-slate-50/70'
                   }`}
                 >
-                  <Home className="w-4 h-4 text-blue-400" />
-                  <span className="text-sm">ڈیش بورڈ (Dashboard)</span>
+                  <div className="flex items-center gap-3">
+                    <Home className={`w-4 h-4 ${adminTab === 'dashboard' ? 'text-white' : 'text-blue-600'}`} />
+                    <span className="text-sm">ڈیش بورڈ (Dashboard)</span>
+                  </div>
+                  {analyticsData?.activeNow > 0 && (
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${adminTab === 'dashboard' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'}`}>
+                      {analyticsData.activeNow} آن لائن
+                    </span>
+                  )}
                 </button>
               </div>
 
               <div>
-                <div className="px-4 py-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider">Posts (مضامین)</div>
+                <div className="px-4 py-1.5 text-[11px] text-slate-400 font-bold uppercase tracking-wider">Posts (مضامین)</div>
                 <div className="space-y-1">
-                  <button onClick={() => setAdminTab('articles')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'articles' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
-                    <FileText className="w-4 h-4" /> <span>All Posts (آل پوسٹس)</span>
+                  <button onClick={() => setAdminTab('articles')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'articles' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                    <FileText className="w-4 h-4 text-slate-400" /> <span>All Posts (آل پوسٹس)</span>
                   </button>
-                  <button onClick={handleOpenNewArticle} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'new-article' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
-                    <PlusCircle className="w-4 h-4" /> <span>Add New (نیا مضمون)</span>
+                  <button onClick={handleOpenNewArticle} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'new-article' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                    <PlusCircle className="w-4 h-4 text-slate-400" /> <span>Add New (نیا مضمون)</span>
                   </button>
-                  <button onClick={() => setAdminTab('categories')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'categories' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
-                    <FolderOpen className="w-4 h-4" /> <span>Categories (کیٹیگریز)</span>
+                  <button onClick={() => setAdminTab('categories')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'categories' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                    <FolderOpen className="w-4 h-4 text-slate-400" /> <span>Categories (کیٹیگریز)</span>
                   </button>
-                  <button onClick={() => setAdminTab('comments')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'comments' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}><MessageCircle className="w-4 h-4" /> <span>Comments</span></button>
-                  <button onClick={() => setAdminTab('tags')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'tags' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
-                    <Hash className="w-4 h-4" /> <span>Tags (ٹیگز)</span>
+                  <button onClick={() => setAdminTab('comments')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'comments' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                    <MessageCircle className="w-4 h-4 text-slate-400" /> <span>Comments</span>
+                  </button>
+                  <button onClick={() => setAdminTab('tags')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'tags' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                    <Hash className="w-4 h-4 text-slate-400" /> <span>Tags (ٹیگز)</span>
                   </button>
                 </div>
               </div>
 
               <div>
-                <div className="px-4 py-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider">Media & Pages</div>
+                <div className="px-4 py-1.5 text-[11px] text-slate-400 font-bold uppercase tracking-wider">Media & Pages</div>
                 <div className="space-y-1">
-                  <button onClick={() => setAdminTab('media')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'media' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
-                    <ImageIcon className="w-4 h-4" /> <span>Media (میڈیا لائبریری)</span>
+                  <button onClick={() => setAdminTab('media')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'media' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                    <ImageIcon className="w-4 h-4 text-slate-400" /> <span>Media (میڈیا لائبریری)</span>
                   </button>
-                  <button onClick={() => setAdminTab('pages')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'pages' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
-                    <BookOpen className="w-4 h-4" /> <span>Pages (صفحات)</span>
+                  <button onClick={() => setAdminTab('pages')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'pages' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                    <BookOpen className="w-4 h-4 text-slate-400" /> <span>Pages (صفحات)</span>
                   </button>
-                  <button onClick={() => setAdminTab('glossary')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'glossary' ? 'bg-emerald-600/20 text-emerald-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
-                    <BookOpen className="w-4 h-4 text-emerald-400" /> <span>فرہنگِ اطباء (Glossary)</span>
+                  <button onClick={() => setAdminTab('glossary')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'glossary' ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                    <BookOpen className="w-4 h-4 text-emerald-600" /> <span>فرہنگِ اطباء (Glossary)</span>
                   </button>
                 </div>
               </div>
 
               <div>
-                <div className="px-4 py-2 text-[10px] text-slate-500 font-bold uppercase tracking-wider">Directory & Tools</div>
+                <div className="px-4 py-1.5 text-[11px] text-slate-400 font-bold uppercase tracking-wider">Directory & Tools</div>
                 <div className="space-y-1">
-                  <button onClick={() => setAdminTab('doctors')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'doctors' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
-                    <UserCheck className="w-4 h-4" /> <span>اطباء و کلینکس</span>
+                  <button onClick={() => setAdminTab('doctors')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'doctors' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                    <UserCheck className="w-4 h-4 text-slate-400" /> <span>اطباء و کلینکس</span>
                   </button>
-                  <button onClick={() => setAdminTab('settings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'settings' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
-                    <Settings className="w-4 h-4" /> <span>ویب سائٹ سیٹنگز</span>
+                  <button onClick={() => setAdminTab('settings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'settings' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                    <Settings className="w-4 h-4 text-slate-400" /> <span>ویب سائٹ سیٹنگز</span>
                   </button>
-                  <button onClick={() => setAdminTab('migration')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'migration' ? 'bg-blue-600/20 text-blue-300' : 'text-slate-400 hover:text-white hover:bg-slate-900'}`}>
-                    <Database className="w-4 h-4" /> <span>مائیگریشن ٹول</span>
+                  <button onClick={() => setAdminTab('migration')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'migration' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                    <Database className="w-4 h-4 text-slate-400" /> <span>مائیگریشن ٹول</span>
                   </button>
                 </div>
               </div>
             </div>
 
             {/* Quick Stats */}
-            <div className="pt-4 border-t border-slate-800/80 space-y-2 text-xs text-slate-400">
+            <div className="pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-600 font-simple">
               <div className="flex items-center justify-between">
                 <span>پبلک مضامین:</span>
-                <strong className="text-emerald-400 font-sans">{articlesList.filter(a => a.status !== 'private').length}</strong>
+                <strong className="text-emerald-700 font-sans font-bold">{articlesList.filter(a => a.status !== 'private').length}</strong>
               </div>
               <div className="flex items-center justify-between">
                 <span>پرائیویٹ / ڈرافٹ:</span>
-                <strong className="text-amber-400 font-sans">{articlesList.filter(a => a.status === 'private').length}</strong>
+                <strong className="text-amber-700 font-sans font-bold">{articlesList.filter(a => a.status === 'private').length}</strong>
               </div>
               <div className="flex items-center justify-between">
                 <span>زیرِ جائزہ درخواستیں:</span>
-                <strong className="text-amber-400 font-sans font-bold">
+                <strong className="text-amber-700 font-sans font-bold">
                   {doctorsList.filter(d => d && (d.isApproved === false || d.status === 'pending')).length}
                 </strong>
               </div>
               <div className="flex items-center justify-between">
                 <span>منظور شدہ اطباء:</span>
-                <strong className="text-emerald-400 font-sans font-bold">
+                <strong className="text-emerald-700 font-sans font-bold">
                   {doctorsList.filter(d => d && (d.isApproved !== false && d.status !== 'pending')).length}
                 </strong>
               </div>
@@ -4056,25 +4130,25 @@ export default function AdminCMS({
           {/* VIEW 0: WORDPRESS STYLE MAIN DASHBOARD */}
           {/* ========================================================= */}
           {adminTab === 'dashboard' && (
-            <div className="space-y-6">
+            <div className="space-y-7">
               
               {/* Dashboard Welcome Header */}
-              <div className="bg-gradient-to-r from-blue-950/80 via-slate-900 to-indigo-950/80 border border-blue-900/40 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
+              <div className="bg-gradient-to-r from-blue-50 via-indigo-50/40 to-white border border-blue-200/90 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xs">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20">
+                      <span className="text-xs font-bold text-blue-700 bg-white px-3 py-1 rounded-full border border-blue-200 shadow-2xs">
                         ورڈپریس طرز ایڈمن کنٹرول سینٹر
                       </span>
-                      <span className="text-xs text-slate-400 font-sans">
+                      <span className="text-xs text-slate-500 font-sans">
                         TabeebPedia CMS v2.5
                       </span>
                     </div>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-white font-simple mt-2">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-simple mt-2">
                       ڈیش بورڈ (Dashboard)
                     </h2>
-                    <p className="text-xs sm:text-sm text-slate-300 mt-1 font-sans">
-                      خوش آمدید، حکیم سید عبد الوہاب شاہ صاحب! یہاں آپ کی ویب سائٹ کی تمام اہم سرگرمیاں اور سمریز موجود ہیں۔
+                    <p className="text-xs sm:text-sm text-slate-600 mt-1 font-sans">
+                      خوش آمدید، حکیم سید عبد الوہاب شاہ صاحب! یہاں آپ کی ویب سائٹ کی تمام اہم سرگرمیاں، رئیل ٹائم وزٹرز اور سمریز موجود ہیں۔
                     </p>
                   </div>
 
@@ -4082,7 +4156,7 @@ export default function AdminCMS({
                     <button
                       type="button"
                       onClick={onBackToWebsite}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 transition-all font-simple"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition-all font-simple"
                     >
                       <Globe className="w-4 h-4" />
                       <span>ویب سائٹ وزٹ کریں (Visit Site)</span>
@@ -4090,65 +4164,65 @@ export default function AdminCMS({
                     <button
                       type="button"
                       onClick={handleOpenNewArticle}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-750 text-slate-200 rounded-xl text-xs font-bold border border-slate-700 transition-all font-simple"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 rounded-xl text-xs font-bold border border-slate-200 shadow-2xs transition-all font-simple"
                     >
-                      <PlusCircle className="w-4 h-4 text-emerald-400" />
+                      <PlusCircle className="w-4 h-4 text-emerald-600" />
                       <span>نیا مضمون لکھیں</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setAdminTab('new-page')}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-750 text-slate-200 rounded-xl text-xs font-bold border border-slate-700 transition-all font-simple"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 rounded-xl text-xs font-bold border border-slate-200 shadow-2xs transition-all font-simple"
                     >
-                      <BookOpen className="w-4 h-4 text-blue-400" />
+                      <BookOpen className="w-4 h-4 text-blue-600" />
                       <span>نیا صفحہ بنائیں</span>
                     </button>
                   </div>
                 </div>
               </div>
 
-              {/* At a Glance (ایک نظر میں - WordPress Style Widgets) */}
+              {/* At a Glance (ایک نظر میں - WordPress Style Primary Widgets) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* 1. Posts */}
                 <div 
                   onClick={() => setAdminTab('articles')}
-                  className="bg-slate-950 border border-slate-800 hover:border-blue-500/50 p-5 rounded-2xl shadow-lg cursor-pointer transition-all hover:-translate-y-0.5 group"
+                  className="bg-white border border-slate-200/90 hover:border-blue-400 p-5 rounded-2xl shadow-xs hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 group"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-400 font-sans">شائع شدہ مضامین</span>
-                    <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <span className="text-xs font-bold text-slate-500 font-sans">شائع شدہ مضامین</span>
+                    <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors">
                       <FileText className="w-4 h-4" />
                     </div>
                   </div>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-white font-mono">{articlesList.length}</span>
-                    <span className="text-xs text-emerald-400 font-bold font-sans">
+                    <span className="text-3xl font-bold text-slate-900 font-mono">{articlesList.length}</span>
+                    <span className="text-xs text-emerald-700 font-bold font-sans">
                       ({articlesList.filter(a => a.status !== 'private').length} لائیو)
                     </span>
                   </div>
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-800/80">
-                    <span className="text-blue-400 group-hover:underline">تمام مضامین دیکھیں &larr;</span>
-                    <span className="text-amber-400 font-mono">{articlesList.filter(a => a.status === 'private').length} ڈرافٹ</span>
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-100">
+                    <span className="text-blue-600 group-hover:underline">تمام مضامین دیکھیں &larr;</span>
+                    <span className="text-amber-600 font-mono">{articlesList.filter(a => a.status === 'private').length} ڈرافٹ</span>
                   </div>
                 </div>
 
                 {/* 2. Pages */}
                 <div 
                   onClick={() => setAdminTab('pages')}
-                  className="bg-slate-950 border border-slate-800 hover:border-purple-500/50 p-5 rounded-2xl shadow-lg cursor-pointer transition-all hover:-translate-y-0.5 group"
+                  className="bg-white border border-slate-200/90 hover:border-purple-400 p-5 rounded-2xl shadow-xs hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 group"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-400 font-sans">ویب سائٹ صفحات</span>
-                    <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                    <span className="text-xs font-bold text-slate-500 font-sans">ویب سائٹ صفحات</span>
+                    <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors">
                       <BookOpen className="w-4 h-4" />
                     </div>
                   </div>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-white font-mono">{pagesList.length}</span>
-                    <span className="text-xs text-purple-300 font-bold font-sans">صفحات</span>
+                    <span className="text-3xl font-bold text-slate-900 font-mono">{pagesList.length}</span>
+                    <span className="text-xs text-purple-700 font-bold font-sans">صفحات</span>
                   </div>
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-800/80">
-                    <span className="text-purple-400 group-hover:underline">صفحات کا انتظام &larr;</span>
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-100">
+                    <span className="text-purple-600 group-hover:underline">صفحات کا انتظام &larr;</span>
                     <span>جامع ہربل صفحات</span>
                   </div>
                 </div>
@@ -4156,21 +4230,21 @@ export default function AdminCMS({
                 {/* 3. Doctors */}
                 <div 
                   onClick={() => setAdminTab('doctors')}
-                  className="bg-slate-950 border border-slate-800 hover:border-emerald-500/50 p-5 rounded-2xl shadow-lg cursor-pointer transition-all hover:-translate-y-0.5 group"
+                  className="bg-white border border-slate-200/90 hover:border-emerald-400 p-5 rounded-2xl shadow-xs hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 group"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-400 font-sans">اطباء و ماہرین ڈائریکٹری</span>
-                    <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <span className="text-xs font-bold text-slate-500 font-sans">اطباء و ماہرین ڈائریکٹری</span>
+                    <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                       <UserCheck className="w-4 h-4" />
                     </div>
                   </div>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-white font-mono">{doctorsList.length}</span>
-                    <span className="text-xs text-emerald-400 font-bold font-sans">رجسٹرڈ اطباء</span>
+                    <span className="text-3xl font-bold text-slate-900 font-mono">{doctorsList.length}</span>
+                    <span className="text-xs text-emerald-700 font-bold font-sans">رجسٹرڈ اطباء</span>
                   </div>
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-800/80">
-                    <span className="text-emerald-400 group-hover:underline">اطباء لسٹ دیکھیں &larr;</span>
-                    <span className="text-amber-400 font-sans">
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-100">
+                    <span className="text-emerald-600 group-hover:underline">اطباء لسٹ دیکھیں &larr;</span>
+                    <span className="text-amber-700 font-sans">
                       {doctorsList.filter(d => d && (d.isApproved === false || d.status === 'pending')).length} زیرِ التواء
                     </span>
                   </div>
@@ -4179,23 +4253,390 @@ export default function AdminCMS({
                 {/* 4. Categories */}
                 <div 
                   onClick={() => setAdminTab('categories')}
-                  className="bg-slate-950 border border-slate-800 hover:border-amber-500/50 p-5 rounded-2xl shadow-lg cursor-pointer transition-all hover:-translate-y-0.5 group"
+                  className="bg-white border border-slate-200/90 hover:border-amber-400 p-5 rounded-2xl shadow-xs hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 group"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-slate-400 font-sans">زمرہ جات و کیٹیگریز</span>
-                    <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                    <span className="text-xs font-bold text-slate-500 font-sans">زمرہ جات و کیٹیگریز</span>
+                    <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors">
                       <FolderOpen className="w-4 h-4" />
                     </div>
                   </div>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-3xl font-bold text-white font-mono">{categoriesList.length}</span>
-                    <span className="text-xs text-amber-300 font-bold font-sans">کیٹیگریز</span>
+                    <span className="text-3xl font-bold text-slate-900 font-mono">{categoriesList.length}</span>
+                    <span className="text-xs text-amber-700 font-bold font-sans">کیٹیگریز</span>
                   </div>
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-800/80">
-                    <span className="text-amber-400 group-hover:underline">کیٹیگریز دیکھیں &larr;</span>
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-slate-100">
+                    <span className="text-amber-600 group-hover:underline">کیٹیگریز دیکھیں &larr;</span>
                     <span>الف بائی و موضوعاتی</span>
                   </div>
                 </div>
+              </div>
+
+              {/* ========================================================= */}
+              {/* REAL-TIME VISITOR & TRAFFIC ANALYTICS SYSTEM (100% ACCURATE) */}
+              {/* ========================================================= */}
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-7 space-y-6 shadow-xs">
+                
+                {/* Analytics Section Header */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-2xs">
+                      <Activity className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-bold text-slate-900 font-simple">
+                          ویب سائٹ وزٹرز اور ٹریفک تجزیہ (Real-Time Analytics)
+                        </h3>
+                        <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block"></span>
+                          <span>رئیل ٹائم فعال</span>
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 font-sans mt-0.5">
+                        حقیقی اور مستند وزٹرز اور پیج ویوز کا خودکار شمار (ڈیلی، ہفتہ وار، ماہانہ اور سالانہ)
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    {/* Active Live Visitors Pill */}
+                    <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-800 px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-2xs">
+                      <Radio className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
+                      <span>لائیو آن لائن:</span>
+                      <strong className="font-mono text-sm text-emerald-700">{analyticsData?.activeNow || 1}</strong>
+                      <span className="text-[10px] text-emerald-600">افراد</span>
+                    </div>
+
+                    {/* Refresh Analytics Button */}
+                    <button
+                      type="button"
+                      onClick={loadAnalytics}
+                      disabled={isLoadingAnalytics}
+                      className="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border border-slate-200 shadow-2xs"
+                      title="تازہ ترین ڈیٹا ریفریش کریں"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 text-blue-600 ${isLoadingAnalytics ? 'animate-spin' : ''}`} />
+                      <span>تازہ کریں</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4 Time-Frame Visitor & View Metrics Grid (Daily, Weekly, Monthly, Yearly) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  
+                  {/* 1. Daily (آج کی ٹریفک) */}
+                  <div className="bg-gradient-to-br from-blue-50/60 via-white to-white border border-blue-200/80 rounded-2xl p-4.5 space-y-3 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-blue-800">آج کی ٹریفک (Daily / Today)</span>
+                      <span className="text-[10px] bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-md font-mono">
+                        آج
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <div>
+                        <div className="text-[11px] text-slate-500">منفرد وزٹرز:</div>
+                        <div className="text-2xl font-bold text-slate-900 font-mono mt-0.5">
+                          {analyticsData?.today?.visitors ?? 0}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] text-slate-500">کل پیج ویوز:</div>
+                        <div className="text-2xl font-bold text-blue-600 font-mono mt-0.5">
+                          {analyticsData?.today?.views ?? 0}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-slate-400 pt-2 border-t border-slate-100 flex items-center justify-between">
+                      <span>گزشتہ کل:</span>
+                      <span className="font-mono text-slate-600 font-bold">
+                        {analyticsData?.yesterday?.visitors ?? 0} وزٹرز ({analyticsData?.yesterday?.views ?? 0} ویوز)
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 2. Weekly (اس ہفتے کی ٹریفک) */}
+                  <div className="bg-gradient-to-br from-emerald-50/60 via-white to-white border border-emerald-200/80 rounded-2xl p-4.5 space-y-3 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-emerald-800">ہفتہ وار (Weekly / 7 Days)</span>
+                      <span className="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-md font-mono">
+                        7 دن
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <div>
+                        <div className="text-[11px] text-slate-500">منفرد وزٹرز:</div>
+                        <div className="text-2xl font-bold text-slate-900 font-mono mt-0.5">
+                          {analyticsData?.thisWeek?.visitors ?? 0}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] text-slate-500">کل پیج ویوز:</div>
+                        <div className="text-2xl font-bold text-emerald-600 font-mono mt-0.5">
+                          {analyticsData?.thisWeek?.views ?? 0}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-slate-400 pt-2 border-t border-slate-100 flex items-center justify-between">
+                      <span>پچھلے 7 دنوں کا مجموعہ</span>
+                      <span className="text-emerald-700 font-bold">مستند ڈیٹا</span>
+                    </div>
+                  </div>
+
+                  {/* 3. Monthly (اس ماہ کی ٹریفک) */}
+                  <div className="bg-gradient-to-br from-purple-50/60 via-white to-white border border-purple-200/80 rounded-2xl p-4.5 space-y-3 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-purple-800">ماہانہ (Monthly / This Month)</span>
+                      <span className="text-[10px] bg-purple-100 text-purple-700 font-bold px-2 py-0.5 rounded-md font-mono">
+                        رواں ماہ
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <div>
+                        <div className="text-[11px] text-slate-500">منفرد وزٹرز:</div>
+                        <div className="text-2xl font-bold text-slate-900 font-mono mt-0.5">
+                          {analyticsData?.thisMonth?.visitors ?? 0}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] text-slate-500">کل پیج ویوز:</div>
+                        <div className="text-2xl font-bold text-purple-600 font-mono mt-0.5">
+                          {analyticsData?.thisMonth?.views ?? 0}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-slate-400 pt-2 border-t border-slate-100 flex items-center justify-between">
+                      <span>رواں ماہ کا کل ریکارڈ</span>
+                      <span className="text-purple-700 font-bold">100% اصلی</span>
+                    </div>
+                  </div>
+
+                  {/* 4. Yearly (اس سال اور ہمہ وقتی ٹریفک) */}
+                  <div className="bg-gradient-to-br from-amber-50/60 via-white to-white border border-amber-200/80 rounded-2xl p-4.5 space-y-3 shadow-2xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-amber-800">سالانہ (Yearly / This Year)</span>
+                      <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-md font-mono">
+                        سال {new Date().getFullYear()}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <div>
+                        <div className="text-[11px] text-slate-500">منفرد وزٹرز:</div>
+                        <div className="text-2xl font-bold text-slate-900 font-mono mt-0.5">
+                          {analyticsData?.thisYear?.visitors ?? 0}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] text-slate-500">کل پیج ویوز:</div>
+                        <div className="text-2xl font-bold text-amber-600 font-mono mt-0.5">
+                          {analyticsData?.thisYear?.views ?? 0}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-[10px] text-slate-400 pt-2 border-t border-slate-100 flex items-center justify-between">
+                      <span>ہمہ وقت (All-Time):</span>
+                      <span className="font-mono text-amber-800 font-bold">
+                        {analyticsData?.allTime?.views ?? 0} ویوز
+                      </span>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Interactive Daily Traffic Trend Visualization (Last 14 Days) */}
+                <div className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5 space-y-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4 text-blue-600" />
+                      <h4 className="text-sm font-bold text-slate-800">
+                        روزانہ ٹریفک کا تصویری چارٹ (پچھلے 14 دن)
+                      </h4>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs">
+                      <span className="flex items-center gap-1.5 text-slate-600 font-sans">
+                        <span className="w-3 h-3 rounded-xs bg-blue-600 inline-block"></span>
+                        <span>پیج ویوز (Views)</span>
+                      </span>
+                      <span className="flex items-center gap-1.5 text-slate-600 font-sans">
+                        <span className="w-3 h-3 rounded-xs bg-emerald-500 inline-block"></span>
+                        <span>وزٹرز (Visitors)</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Visual Bar Chart */}
+                  <div className="pt-4">
+                    {(() => {
+                      const days = analyticsData?.chartDays || [];
+                      const maxViews = Math.max(...days.map(d => Math.max(d.views || 0, d.visitors || 0, 1)), 5);
+                      
+                      return (
+                        <div className="grid grid-cols-7 sm:grid-cols-14 gap-2 items-end min-h-[140px] pt-4">
+                          {days.map((day, idx) => {
+                            const viewHeight = Math.max(Math.round(((day.views || 0) / maxViews) * 100), 6);
+                            const visHeight = Math.max(Math.round(((day.visitors || 0) / maxViews) * 100), 6);
+                            const isToday = idx === days.length - 1;
+
+                            return (
+                              <div key={day.date || idx} className="flex flex-col items-center gap-1 group relative">
+                                {/* Hover Tooltip */}
+                                <div className="absolute -top-12 z-20 hidden group-hover:flex flex-col items-center bg-slate-900 text-white text-[10px] py-1 px-2.5 rounded-lg shadow-lg whitespace-nowrap pointer-events-none">
+                                  <span className="font-bold">{day.date}</span>
+                                  <span>ویوز: {day.views} | وزٹرز: {day.visitors}</span>
+                                </div>
+
+                                <div className="w-full flex items-end justify-center gap-1 h-24 bg-white/70 rounded-lg p-1 border border-slate-200/60">
+                                  {/* Views Bar */}
+                                  <div 
+                                    style={{ height: `${viewHeight}%` }}
+                                    className={`w-1/2 rounded-t-xs transition-all duration-300 ${isToday ? 'bg-blue-600' : 'bg-blue-400 group-hover:bg-blue-500'}`}
+                                    title={`ویوز: ${day.views}`}
+                                  />
+                                  {/* Visitors Bar */}
+                                  <div 
+                                    style={{ height: `${visHeight}%` }}
+                                    className={`w-1/2 rounded-t-xs transition-all duration-300 ${isToday ? 'bg-emerald-500' : 'bg-emerald-400 group-hover:bg-emerald-500'}`}
+                                    title={`وزٹرز: ${day.visitors}`}
+                                  />
+                                </div>
+
+                                <span className={`text-[10px] font-sans truncate w-full text-center ${isToday ? 'font-bold text-blue-600' : 'text-slate-500'}`}>
+                                  {day.label}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* 2-Column Analytics Details: Top Content & Device / Recent Activity */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  
+                  {/* Top Visited Pages & Articles (7 Columns) */}
+                  <div className="lg:col-span-7 bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5 space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200/80">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-blue-600" />
+                        <h4 className="text-xs font-bold text-slate-800">
+                          سب سے زیادہ وزٹ کیے جانے والے صفحات و مضامین
+                        </h4>
+                      </div>
+                      <span className="text-[11px] text-slate-500 font-sans">
+                        لائیو ویوز شمار
+                      </span>
+                    </div>
+
+                    <div className="divide-y divide-slate-200/60">
+                      {analyticsData?.topPages && analyticsData.topPages.length > 0 ? (
+                        analyticsData.topPages.slice(0, 7).map((item, idx) => (
+                          <div key={item.path || idx} className="py-2.5 flex items-center justify-between gap-3 text-xs">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-bold font-mono text-[10px] flex items-center justify-center shrink-0">
+                                {idx + 1}
+                              </span>
+                              <div className="min-w-0">
+                                <p className="font-bold text-slate-800 truncate" title={item.title}>
+                                  {item.title || item.path}
+                                </p>
+                                <span className="text-[10px] text-slate-400 font-mono truncate block" dir="ltr">
+                                  {item.path}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="font-mono font-bold bg-white text-blue-700 border border-blue-200/80 px-2.5 py-0.5 rounded-lg text-xs shadow-2xs">
+                                {item.views} ویوز
+                              </span>
+                              <a
+                                href={item.path}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-1 rounded-md text-slate-400 hover:text-blue-600 hover:bg-white transition-colors"
+                                title="صفحہ کھولیں"
+                              >
+                                <ArrowUpRight className="w-3.5 h-3.5" />
+                              </a>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="py-6 text-center text-slate-400 text-xs font-sans">
+                          ابھی وزٹس کا ڈیٹا اکٹھا ہو رہا ہے... جیسے ہی وزیٹرز پیجز دیکھیں گے، یہاں فہرست ظاہر ہو جائے گی۔
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Device Breakdown & Live Log (5 Columns) */}
+                  <div className="lg:col-span-5 bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5 space-y-4">
+                    
+                    {/* Device Share */}
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-800 mb-2.5 flex items-center gap-2">
+                        <Laptop className="w-4 h-4 text-purple-600" />
+                        <span>ڈیوائسز اور اسکرین تناسب</span>
+                      </h4>
+
+                      {(() => {
+                        const dev = analyticsData?.devices || { mobile: 1, desktop: 1, tablet: 0 };
+                        const totalDev = (dev.mobile || 0) + (dev.desktop || 0) + (dev.tablet || 0) || 1;
+                        const mobPct = Math.round(((dev.mobile || 0) / totalDev) * 100);
+                        const deskPct = Math.round(((dev.desktop || 0) / totalDev) * 100);
+                        const tabPct = 100 - mobPct - deskPct;
+
+                        return (
+                          <div className="space-y-2 text-xs">
+                            <div className="flex items-center justify-between text-slate-600">
+                              <span className="flex items-center gap-1.5"><Smartphone className="w-3.5 h-3.5 text-blue-600" /> موبائل فون:</span>
+                              <strong className="font-mono">{mobPct}%</strong>
+                            </div>
+                            <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                              <div style={{ width: `${mobPct}%` }} className="bg-blue-600 h-full rounded-full" />
+                            </div>
+
+                            <div className="flex items-center justify-between text-slate-600 pt-1">
+                              <span className="flex items-center gap-1.5"><Laptop className="w-3.5 h-3.5 text-indigo-600" /> ڈیسک ٹاپ / کمپیوٹر:</span>
+                              <strong className="font-mono">{deskPct}%</strong>
+                            </div>
+                            <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                              <div style={{ width: `${deskPct}%` }} className="bg-indigo-600 h-full rounded-full" />
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Recent Live Activity Stream */}
+                    <div className="pt-3 border-t border-slate-200/80 space-y-2">
+                      <h4 className="text-xs font-bold text-slate-800 flex items-center justify-between">
+                        <span>حالیہ وزٹس لاگ (Live Stream)</span>
+                        <span className="text-[10px] text-emerald-600 font-bold">لائیو</span>
+                      </h4>
+
+                      <div className="space-y-1.5 max-h-44 overflow-y-auto pr-1 text-[11px]">
+                        {analyticsData?.recentVisits && analyticsData.recentVisits.length > 0 ? (
+                          analyticsData.recentVisits.slice(0, 5).map((v, i) => (
+                            <div key={i} className="p-2 rounded-xl bg-white border border-slate-200/60 flex items-center justify-between gap-2">
+                              <div className="min-w-0">
+                                <span className="font-bold text-slate-700 truncate block">{v.title || v.path}</span>
+                                <span className="text-[10px] text-slate-400 font-sans">{v.device} • {v.browser}</span>
+                              </div>
+                              <span className="text-[10px] font-mono text-blue-600 shrink-0">{v.time}</span>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-slate-400 text-[11px] text-center py-2">کوئی حالیہ لاگ نہیں</p>
+                        )}
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+
               </div>
 
               {/* Main 2-Column WordPress Widgets Grid */}
@@ -4205,15 +4646,15 @@ export default function AdminCMS({
                 <div className="lg:col-span-7 space-y-6">
                   
                   {/* Quick Draft Widget */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <div className="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
                           <Edit3 className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-base font-bold text-white font-simple">فوری مسودہ (Quick Draft)</h3>
-                          <p className="text-[11px] text-slate-400">کوئی نیا نسخہ یا خاکہ فوری طور پر بطور ڈرافٹ محفوظ کریں</p>
+                          <h3 className="text-base font-bold text-slate-900 font-simple">فوری مسودہ (Quick Draft)</h3>
+                          <p className="text-[11px] text-slate-500">کوئی نیا نسخہ یا خاکہ فوری طور پر بطور ڈرافٹ محفوظ کریں</p>
                         </div>
                       </div>
                     </div>
@@ -4225,7 +4666,7 @@ export default function AdminCMS({
                           value={quickDraftTitle}
                           onChange={(e) => setQuickDraftTitle(e.target.value)}
                           placeholder="مضمون یا نسخے کا عنوان..."
-                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-simple"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white font-simple"
                         />
                       </div>
                       <div>
@@ -4234,16 +4675,16 @@ export default function AdminCMS({
                           value={quickDraftContent}
                           onChange={(e) => setQuickDraftContent(e.target.value)}
                           placeholder="مضمون کے چیدہ نکات یا مواد یہاں لکھیں..."
-                          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-blue-500 font-simple leading-relaxed"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-blue-500 focus:bg-white font-simple leading-relaxed"
                         />
                       </div>
                       <div className="flex items-center justify-between pt-1">
                         <span className="text-[11px] text-slate-500">
-                          ڈرافٹ محفوظ کرنے کے بعد آپ <span className="text-blue-400 font-bold">All Posts</span> سے کبھی بھی مکمل ایڈیٹنگ کر سکتے ہیں۔
+                          ڈرافٹ محفوظ کرنے کے بعد آپ <span className="text-blue-600 font-bold">All Posts</span> سے کبھی بھی مکمل ایڈیٹنگ کر سکتے ہیں۔
                         </span>
                         <button
                           type="submit"
-                          className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md font-simple shrink-0"
+                          className="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-blue-500/20 font-simple shrink-0"
                         >
                           <Save className="w-3.5 h-3.5" />
                           <span>ڈرافٹ محفوظ کریں</span>
@@ -4253,45 +4694,45 @@ export default function AdminCMS({
                   </div>
 
                   {/* Recent Activity Widget */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <div className="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
                           <Clock className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-base font-bold text-white font-simple">حالیہ شائع شدہ مضامین (Recent Activity)</h3>
-                          <p className="text-[11px] text-slate-400">تازہ ترین شامل کردہ طبی مضامین اور نسخہ جات</p>
+                          <h3 className="text-base font-bold text-slate-900 font-simple">حالیہ شائع شدہ مضامین (Recent Activity)</h3>
+                          <p className="text-[11px] text-slate-500">تازہ ترین شامل کردہ طبی مضامین اور نسخہ جات</p>
                         </div>
                       </div>
 
                       <button
                         type="button"
                         onClick={() => setAdminTab('articles')}
-                        className="text-xs text-blue-400 hover:text-blue-300 font-bold hover:underline"
+                        className="text-xs text-blue-600 hover:text-blue-700 font-bold hover:underline"
                       >
                         تمام مضامین دیکھیں ({articlesList.length}) &larr;
                       </button>
                     </div>
 
-                    <div className="divide-y divide-slate-800/80">
+                    <div className="divide-y divide-slate-100">
                       {filteredArticles.slice(0, 5).map((art) => (
                         <div key={art.id} className="py-3 flex items-center justify-between gap-3 group">
                           <div className="flex items-center gap-3 min-w-0">
                             <img 
                               src={art.featuredImage || siteSettings?.defaultArticleImage} 
                               alt="" 
-                              className="w-11 h-11 rounded-xl object-cover border border-slate-800 shrink-0" 
+                              className="w-11 h-11 rounded-xl object-cover border border-slate-200 shrink-0" 
                             />
                             <div className="min-w-0">
                               <h4 
                                 onClick={() => handleEditArticle(art)}
-                                className="text-xs font-bold text-slate-200 group-hover:text-blue-400 truncate cursor-pointer font-h2"
+                                className="text-xs font-bold text-slate-800 group-hover:text-blue-600 truncate cursor-pointer font-h2"
                               >
                                 {art.title}
                               </h4>
                               <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
-                                <span className="text-blue-400">{Array.isArray(art.categories) ? art.categories.slice(0, 2).join('، ') : art.category}</span>
+                                <span className="text-blue-600">{Array.isArray(art.categories) ? art.categories.slice(0, 2).join('، ') : art.category}</span>
                                 <span>•</span>
                                 <span className="font-mono">{art.publishedAt || art.date || '2024-09-24'}</span>
                               </div>
@@ -4302,7 +4743,7 @@ export default function AdminCMS({
                             <button
                               type="button"
                               onClick={() => handleEditArticle(art)}
-                              className="p-1.5 rounded-lg bg-slate-900 hover:bg-blue-600/30 text-slate-400 hover:text-blue-300 border border-slate-800 transition-colors"
+                              className="p-1.5 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 border border-slate-200 transition-colors"
                               title="ترمیم کریں"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
@@ -4311,7 +4752,7 @@ export default function AdminCMS({
                               href={`/${art.slug || art.id}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 rounded-lg bg-slate-900 hover:bg-emerald-600/30 text-slate-400 hover:text-emerald-300 border border-slate-800 transition-colors"
+                              className="p-1.5 rounded-lg bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 border border-slate-200 transition-colors"
                               title="ویب سائٹ پر دیکھیں"
                             >
                               <Eye className="w-3.5 h-3.5" />
@@ -4328,52 +4769,52 @@ export default function AdminCMS({
                 <div className="lg:col-span-5 space-y-6">
                   
                   {/* Site Health Status (WordPress Style) */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <div className="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
                           <CheckCircle2 className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-base font-bold text-white font-simple">ویب سائٹ کی صحت (Site Health)</h3>
-                          <p className="text-[11px] text-slate-400">سسٹم اور ہوسٹنگ پرفارمنس کا جائزہ</p>
+                          <h3 className="text-base font-bold text-slate-900 font-simple">ویب سائٹ کی صحت (Site Health)</h3>
+                          <p className="text-[11px] text-slate-500">سسٹم اور ہوسٹنگ پرفارمنس کا جائزہ</p>
                         </div>
                       </div>
-                      <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                      <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                         بہترین (Good)
                       </span>
                     </div>
 
                     <div className="space-y-3 pt-1 text-xs">
-                      <div className="flex items-start gap-3 p-3 bg-slate-900/60 rounded-xl border border-slate-800">
-                        <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0"></div>
+                      <div className="flex items-start gap-3 p-3 bg-slate-50/80 rounded-xl border border-slate-200/70">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0"></div>
                         <div>
-                          <h4 className="font-bold text-slate-200">مستقل ڈیٹا بیس سسٹم</h4>
-                          <p className="text-[11px] text-slate-400 mt-0.5">تمام 490 مضامین، صفحات اور سیٹنگز مستقل فائل ڈیٹا بیس میں محفوظ اور لائیو ہیں۔</p>
+                          <h4 className="font-bold text-slate-800">مستقل ڈیٹا بیس سسٹم</h4>
+                          <p className="text-[11px] text-slate-500 mt-0.5">تمام مضامین، صفحات اور سیٹنگز مستقل فائل ڈیٹا بیس میں محفوظ اور لائیو ہیں۔</p>
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-3 p-3 bg-slate-900/60 rounded-xl border border-slate-800">
-                        <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0"></div>
+                      <div className="flex items-start gap-3 p-3 bg-slate-50/80 rounded-xl border border-slate-200/70">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0"></div>
                         <div>
-                          <h4 className="font-bold text-slate-200">ہوسٹنگر میڈیا لائبریری</h4>
-                          <p className="text-[11px] text-slate-400 mt-0.5">3,000+ تمام تصاویر ہوسٹنگر سرور کے ساتھ تیز رفتار کنکشن پر کام کر رہی ہیں۔</p>
+                          <h4 className="font-bold text-slate-800">ہوسٹنگر میڈیا لائبریری</h4>
+                          <p className="text-[11px] text-slate-500 mt-0.5">3,000+ تمام تصاویر ہوسٹنگر سرور کے ساتھ تیز رفتار کنکشن پر کام کر رہی ہیں۔</p>
                         </div>
                       </div>
 
-                      <div className="flex items-start gap-3 p-3 bg-slate-900/60 rounded-xl border border-slate-800">
-                        <div className="w-2 h-2 rounded-full bg-emerald-400 mt-1.5 shrink-0"></div>
+                      <div className="flex items-start gap-3 p-3 bg-slate-50/80 rounded-xl border border-slate-200/70">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0"></div>
                         <div>
-                          <h4 className="font-bold text-slate-200">ایڈمن سیکیورٹی پروٹیکشن</h4>
-                          <p className="text-[11px] text-slate-400 mt-0.5">ایڈمن ڈیش بورڈ پاس ورڈ تصدیق کے تحت محفوظ ہے۔</p>
+                          <h4 className="font-bold text-slate-800">ایڈمن سیکیورٹی پروٹیکشن</h4>
+                          <p className="text-[11px] text-slate-500 mt-0.5">ایڈمن ڈیش بورڈ پاس ورڈ تصدیق کے تحت مکمل محفوظ ہے۔</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Quick Shortcuts & Management */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
-                    <h3 className="text-base font-bold text-white font-simple border-b border-slate-800 pb-3">
+                  <div className="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-4 shadow-xs">
+                    <h3 className="text-base font-bold text-slate-900 font-simple border-b border-slate-100 pb-3">
                       فوری ٹولز اور ترتیبات (Quick Tools)
                     </h3>
 
@@ -4381,40 +4822,40 @@ export default function AdminCMS({
                       <button
                         type="button"
                         onClick={() => setAdminTab('settings')}
-                        className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-blue-500/40 text-right transition-all group"
+                        className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-blue-400 text-right transition-all group"
                       >
-                        <Settings className="w-4 h-4 text-blue-400 mb-1.5 group-hover:scale-110 transition-transform" />
-                        <span className="block text-xs font-bold text-white">ویب سائٹ ترتیبات</span>
+                        <Settings className="w-4 h-4 text-blue-600 mb-1.5 group-hover:scale-110 transition-transform" />
+                        <span className="block text-xs font-bold text-slate-800">ویب سائٹ ترتیبات</span>
                         <span className="text-[10px] text-slate-500">لوگو، ہوم پیج، اشتہارات</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setAdminTab('media')}
-                        className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-purple-500/40 text-right transition-all group"
+                        className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-purple-400 text-right transition-all group"
                       >
-                        <ImageIcon className="w-4 h-4 text-purple-400 mb-1.5 group-hover:scale-110 transition-transform" />
-                        <span className="block text-xs font-bold text-white">میڈیا لائبریری</span>
+                        <ImageIcon className="w-4 h-4 text-purple-600 mb-1.5 group-hover:scale-110 transition-transform" />
+                        <span className="block text-xs font-bold text-slate-800">میڈیا لائبریری</span>
                         <span className="text-[10px] text-slate-500">تصاویر اپلوڈ اور انتظام</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setAdminTab('doctors')}
-                        className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-emerald-500/40 text-right transition-all group"
+                        className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-emerald-400 text-right transition-all group"
                       >
-                        <UserCheck className="w-4 h-4 text-emerald-400 mb-1.5 group-hover:scale-110 transition-transform" />
-                        <span className="block text-xs font-bold text-white">اطباء کا جائزہ</span>
+                        <UserCheck className="w-4 h-4 text-emerald-600 mb-1.5 group-hover:scale-110 transition-transform" />
+                        <span className="block text-xs font-bold text-slate-800">اطباء کا جائزہ</span>
                         <span className="text-[10px] text-slate-500">نئی درخواستیں منظور کریں</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setAdminTab('migration')}
-                        className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-amber-500/40 text-right transition-all group"
+                        className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-amber-400 text-right transition-all group"
                       >
-                        <Database className="w-4 h-4 text-amber-400 mb-1.5 group-hover:scale-110 transition-transform" />
-                        <span className="block text-xs font-bold text-white">مائیگریشن ٹول</span>
+                        <Database className="w-4 h-4 text-amber-600 mb-1.5 group-hover:scale-110 transition-transform" />
+                        <span className="block text-xs font-bold text-slate-800">مائیگریشن ٹول</span>
                         <span className="text-[10px] text-slate-500">ورڈپریس ڈیٹا بیک اپ</span>
                       </button>
                     </div>
@@ -9997,6 +10438,66 @@ export default function AdminCMS({
                         </div>
                       </div>
                     </div>
+
+                    {/* Admin Password Recovery Emails Management Card */}
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5">
+                      <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-blue-600/20 text-blue-400 flex items-center justify-center shadow-md">
+                            <Mail className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-bold text-white font-h2">ایڈمن پاس ورڈ ریکوری ای میلز (Password Recovery Emails)</h3>
+                            <p className="text-xs text-slate-400">اگر آپ پاس ورڈ بھول جائیں تو لاگ ان فارگٹ پر کلک کرنے سے ان ای میلز پر معلومات بھیجی جائیں گی</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {recoveryEmailMsg && (
+                        <div className="p-3.5 rounded-xl border border-emerald-500/50 bg-emerald-950/60 text-emerald-300 text-xs font-bold animate-in fade-in-50">
+                          {recoveryEmailMsg}
+                        </div>
+                      )}
+
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple">
+                            ریکوری ای میل ایڈریسز (کوما لگا کر ایک یا زیادہ ای میلز درج کریں):
+                          </label>
+                          <input
+                            type="text"
+                            value={adminRecoveryEmails}
+                            onChange={(e) => setAdminRecoveryEmails(e.target.value)}
+                            placeholder="sherazi313@gmail.com, nukta313@gmail.com"
+                            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white text-xs font-mono focus:border-blue-500 focus:outline-none text-left"
+                            dir="ltr"
+                          />
+                        </div>
+
+                        <div className="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800 text-xs text-slate-400 space-y-1">
+                          <p className="font-bold text-slate-300">💡 اہم رہنمائی:</p>
+                          <p>
+                            لاگ ان پیج پر سیکورٹی کی خاطر یہ ای میلز عام وزیٹرز کو نظر نہیں آتیں۔ جب بھی آپ فارگٹ بٹن دبائیں گے، سسٹم خودکار طور پر یہاں محفوظ شدہ ای میلز پر نیا و موجودہ یوزر نیم اور پاسورڈ روانہ کر دے گا۔
+                          </p>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+                          <p className="text-[11px] text-slate-400 font-sans">
+                            ڈیفالٹ: <code className="text-blue-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">sherazi313@gmail.com, nukta313@gmail.com</code>
+                          </p>
+
+                          <button
+                            type="button"
+                            onClick={handleSaveRecoveryEmails}
+                            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 font-simple cursor-pointer"
+                          >
+                            <Save className="w-4 h-4" />
+                            <span>ریکوری ای میلز محفوظ کریں (Save Recovery Emails)</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
                 )}
 

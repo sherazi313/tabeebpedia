@@ -1,4 +1,17 @@
-// PERMANENT DATABASE API FOR LOCAL DEV & HOSTINGER PRODUCTION
+// PERMANENT SECURE DATABASE API FOR LOCAL DEV & HOSTINGER PRODUCTION
+
+export const getAuthHeaders = () => {
+  const headers = { 'Content-Type': 'application/json' };
+  try {
+    const token = sessionStorage.getItem('tabeeb_admin_token') || '';
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+      headers['X-Admin-Token'] = token;
+    }
+  } catch (e) {}
+  return headers;
+};
+
 export const apiFetch = async (endpoint, options = {}) => {
   try {
     const res = await fetch(endpoint, {
@@ -26,7 +39,7 @@ export const saveDoctorsApi = async (doctors) => {
   try {
     let res = await fetch('/api/doctors.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(doctors)
     });
     return res.ok;
@@ -50,7 +63,7 @@ export const saveArticlesApi = async (articles) => {
   try {
     let res = await fetch('/api/articles.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(articles)
     });
     return res.ok;
@@ -71,7 +84,7 @@ export const saveCategoriesApi = async (categories) => {
   try {
     let res = await fetch('/api/categories.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(categories)
     });
     return res.ok;
@@ -92,7 +105,7 @@ export const savePagesApi = async (pages) => {
   try {
     let res = await fetch('/api/pages.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(pages)
     });
     return res.ok;
@@ -111,18 +124,11 @@ export const fetchSettingsApi = async () => {
 
 export const saveSettingsApi = async (settings) => {
   try {
-    let res = await fetch('/api/settings', {
+    let res = await fetch('/api/settings.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(settings)
     });
-    if (!res.ok) {
-      res = await fetch('/api/settings.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
-      });
-    }
     return res.ok;
   } catch (e) {
     return false;
@@ -136,18 +142,11 @@ export const uploadImageApi = async (file) => {
       reader.onload = async () => {
         const base64Data = reader.result;
         try {
-          let res = await fetch('/api/upload', {
+          let res = await fetch('/api/upload.php', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify({ image: base64Data, filename: file.name || 'image' })
           });
-          if (!res.ok) {
-            res = await fetch('/api/upload.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ image: base64Data, filename: file.name || 'image' })
-            });
-          }
           if (res.ok) {
             const data = await res.json();
             if (data?.url) {
@@ -156,7 +155,7 @@ export const uploadImageApi = async (file) => {
             }
           }
         } catch (e) {
-          console.warn('Upload API request error, fallback to Data URL', e);
+          console.warn('Upload API request notice, fallback to Data URL', e);
         }
         // Fallback: return base64 Data URL if server upload fails
         resolve(base64Data);
@@ -171,7 +170,7 @@ export const uploadImageApi = async (file) => {
 };
 
 export const fetchLiveGlossary = async () => {
-  let data = await apiFetch('/api/glossary');
+  let data = await apiFetch('/api/glossary.php');
   if (!data || !Array.isArray(data) || data.length === 0) {
     data = await apiFetch('/data/glossary.json');
   }
@@ -180,23 +179,15 @@ export const fetchLiveGlossary = async () => {
 
 export const saveGlossaryApi = async (glossary) => {
   try {
-    let res = await fetch('/api/glossary', {
+    let res = await fetch('/api/glossary.php', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify(glossary)
     });
-    if (!res.ok) {
-      res = await fetch('/api/glossary.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(glossary)
-      });
-    }
     return res.ok;
   } catch (e) {
     return false;
   }
 };
 
-
-
+export { fetchAnalyticsApi, trackPageView, sendAnalyticsHeartbeat } from './utils/analytics';

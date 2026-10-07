@@ -1,1 +1,0 @@
-const fs = require('fs'); let c = fs.readFileSync('src/components/PulseDiagnosis.jsx', 'utf8'); c = c.replace(/className=\{[\s\S]*?items-start/g, 'className={\lex items-start'); c = c.replace(/transition-all \}/g, 'transition-all \\'); fs.writeFileSync('src/components/PulseDiagnosis.jsx', c);

@@ -1,125 +1,96 @@
 # ==============================================================================
-# Tabeeb Pedia (طبیب پیڈیا) - Apache / LiteSpeed Server Configuration
-# Website: https://tabeebpedia.com
-# Conforms to W3C, Google Search Essentials & Core Web Vitals Standards
+# TABEEB PEDIA - HOSTINGER HARDENED SECURITY & SERVER CONFIGURATION (.htaccess)
 # ==============================================================================
 
-DirectoryIndex index.html index.php
-Options -Indexes +FollowSymLinks
+# 1. DISABLE DIRECTORY BROWSING (ڈائریکٹری لسٹنگ کی مکمل بندش)
+Options -Indexes -MultiViews
 
-# ------------------------------------------------------------------------------
-# 1. REWRITE ENGINE & 301 REDIRECTS
-# ------------------------------------------------------------------------------
+# 2. FORCE HTTPS & STRICT TRANSPORT SECURITY (زبردستی محفوظ HTTPS ری ڈائریکشن)
 <IfModule mod_rewrite.c>
-  RewriteEngine On
-  RewriteBase /
+    RewriteEngine On
+    RewriteBase /
 
-  # 1.1 Force HTTPS (301 Moved Permanently)
-  RewriteCond %{HTTPS} off [OR]
-  RewriteCond %{HTTP:X-Forwarded-Proto} =http
-  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-  # 1.2 Redirect www to non-www (301 Moved Permanently to prevent duplicate content)
-  RewriteCond %{HTTP_HOST} ^www\.tabeebpedia\.com$ [NC]
-  RewriteRule ^(.*)$ https://tabeebpedia.com/$1 [L,R=301]
-
-  # 1.3 Direct file access for index.html
-  RewriteRule ^index\.html$ - [L]
-
-  # 1.4 API Requests Bypass (Hostinger PHP Backend)
-  RewriteCond %{REQUEST_URI} ^/api/
-  RewriteRule ^ - [L]
-
-  # 1.5 Allow Direct Access to Static Files & Directories
-  RewriteCond %{REQUEST_FILENAME} -f [OR]
-  RewriteCond %{REQUEST_FILENAME} -d
-  RewriteRule ^ - [L]
-
-  # 1.6 Single Page Application (SPA) Fallback Route
-  RewriteRule ^(.*)$ /index.html [L]
+    # Redirect HTTP to HTTPS
+    RewriteCond %{HTTPS} off [OR]
+    RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
+    RewriteRule ^(.*)$ https://tabeebpedia.com/$1 [L,R=301]
 </IfModule>
 
-# Custom 404 Error Document (Forward to SPA Router)
-ErrorDocument 404 /index.html
-
-# ------------------------------------------------------------------------------
-# 2. GZIP / DEFLATE COMPRESSION (CORE WEB VITALS OPTIMIZATION)
-# ------------------------------------------------------------------------------
-<IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/plain
-  AddOutputFilterByType DEFLATE text/html
-  AddOutputFilterByType DEFLATE text/xml
-  AddOutputFilterByType DEFLATE text/css
-  AddOutputFilterByType DEFLATE text/javascript
-  AddOutputFilterByType DEFLATE application/xml
-  AddOutputFilterByType DEFLATE application/xhtml+xml
-  AddOutputFilterByType DEFLATE application/rss+xml
-  AddOutputFilterByType DEFLATE application/javascript
-  AddOutputFilterByType DEFLATE application/x-javascript
-  AddOutputFilterByType DEFLATE application/json
-  AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
-  AddOutputFilterByType DEFLATE application/x-font-ttf
-  AddOutputFilterByType DEFLATE font/opentype
-  AddOutputFilterByType DEFLATE font/otf
-  AddOutputFilterByType DEFLATE font/ttf
-  AddOutputFilterByType DEFLATE font/woff
-  AddOutputFilterByType DEFLATE font/woff2
-  AddOutputFilterByType DEFLATE image/svg+xml
-  AddOutputFilterByType DEFLATE image/x-icon
-</IfModule>
-
-# ------------------------------------------------------------------------------
-# 3. BROWSER CACHING (MOD_EXPIRES)
-# ------------------------------------------------------------------------------
-<IfModule mod_expires.c>
-  ExpiresActive On
-  ExpiresDefault "access plus 1 month"
-
-  ExpiresByType image/jpeg "access plus 1 year"
-  ExpiresByType image/jpg "access plus 1 year"
-  ExpiresByType image/png "access plus 1 year"
-  ExpiresByType image/webp "access plus 1 year"
-  ExpiresByType image/gif "access plus 1 year"
-  ExpiresByType image/svg+xml "access plus 1 year"
-  ExpiresByType image/x-icon "access plus 1 year"
-
-  ExpiresByType font/ttf "access plus 1 year"
-  ExpiresByType font/otf "access plus 1 year"
-  ExpiresByType font/woff "access plus 1 year"
-  ExpiresByType font/woff2 "access plus 1 year"
-
-  ExpiresByType text/css "access plus 1 year"
-  ExpiresByType application/javascript "access plus 1 year"
-  ExpiresByType text/javascript "access plus 1 year"
-
-  ExpiresByType application/json "access plus 0 seconds"
-  ExpiresByType application/xml "access plus 1 hour"
-  ExpiresByType text/xml "access plus 1 hour"
-
-  ExpiresByType text/html "access plus 0 seconds"
-</IfModule>
-
-# ------------------------------------------------------------------------------
-# 4. HTTP CACHE-CONTROL HEADERS
-# ------------------------------------------------------------------------------
+# 3. HTTP SECURITY HEADERS (جامع سیکیورٹی ہیڈرز)
 <IfModule mod_headers.c>
-  <FilesMatch "\.(json|html|php)$">
-    Header set Cache-Control "no-cache, no-store, must-revalidate"
-    Header set Pragma "no-cache"
-    Header set Expires 0
-  </FilesMatch>
+    # Prevent Clickjacking (ویب سائٹ کو آئی فریم میں ہیکنگ سے بچاؤ)
+    Header always set X-Frame-Options "SAMEORIGIN"
 
-  <FilesMatch "\.(ico|jpe?g|png|gif|webp|svg|woff2?|ttf|otf|eot)$">
-    Header set Cache-Control "public, max-age=31536000, immutable"
-  </FilesMatch>
+    # Prevent MIME-Type Sniffing (خطرناک فائلز کی غلط انٹرپریٹیشن روکنا)
+    Header always set X-Content-Type-Options "nosniff"
 
-  <FilesMatch "\.(css|js)$">
-    Header set Cache-Control "public, max-age=31536000"
-  </FilesMatch>
+    # Enable XSS Filter in supported browsers
+    Header always set X-XSS-Protection "1; mode=block"
 
-  <FilesMatch "\.(html|htm)$">
-    Header set Cache-Control "no-cache, no-store, must-revalidate"
-    Header set Pragma "no-cache"
-    Header set Expires 0
-  </FilesMatch>
+    # Referrer Policy for Privacy Protection
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+    # Permissions Policy (مائیکروفون، کیمرہ اور لوکیشن پر غیر ضروری پابندی)
+    Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=()"
+
+    # HSTS (HTTP Strict Transport Security - 1 Year)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+    # Content Security Policy (Basic Protection)
+    Header always set Content-Security-Policy "default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval'; img-src 'self' https: data: blob:; font-src 'self' https: data:; connect-src 'self' https:;"
+</IfModule>
+
+# 4. BLOCK ACCESS TO SENSITIVE SYSTEM FILES & CONFIGS (حساس سسٹم فائلوں تک رسائی بلاک)
+<FilesMatch "\.(env|sql|log|ini|git|bak|config|json|xml|sh|bash)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Allow public sitemap and robots.txt
+<FilesMatch "^(sitemap\.xml|robots\.txt)$">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</FilesMatch>
+
+# Allow public data json files needed for client-side queries
+<FilesMatch "^(articles|categories|doctors|glossary|pages|settings|herbsCalculatorData|pdf-books)\.json$">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</FilesMatch>
+
+# 5. SPA ROUTING - FORWARD TO INDEX.HTML FOR REACT (سنگل پیج ایپلی کیشن روٹنگ)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Pass API requests directly to PHP files
+    RewriteRule ^api/(.*)$ api/$1 [L,QSA]
+
+    # If the requested file or directory exists, serve directly
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Otherwise route everything to index.html
+    RewriteRule ^ index.html [L]
+</IfModule>
+
+# 6. GZIP & BROTLI COMPRESSION (تیز رفتار پرفارمنس)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json application/xml image/svg+xml
 </IfModule>

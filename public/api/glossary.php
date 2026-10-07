@@ -1,8 +1,10 @@
 <?php
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-header('Content-Type: application/json; charset=utf-8');
+require_once __DIR__ . '/auth_guard.php';
+
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Admin-Token");
+header("Content-Type: application/json; charset=UTF-8");
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -11,29 +13,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $dataFile = __DIR__ . '/../data/glossary.json';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input = file_get_contents('php://input');
-    if ($input) {
-        $dir = dirname($dataFile);
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-        }
-        $saved = file_put_contents($dataFile, $input);
-        if ($saved !== false) {
-            echo json_encode(['success' => true, 'message' => 'Glossary saved successfully', 'bytes' => $saved]);
-        } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'error' => 'Failed to save glossary']);
-        }
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (file_exists($dataFile)) {
+        echo file_get_contents($dataFile);
     } else {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'No data provided']);
+        echo json_encode([]);
     }
     exit;
 }
 
-if (file_exists($dataFile)) {
-    echo file_get_contents($dataFile);
-} else {
-    echo json_encode([]);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    verifyAdminApiRequest();
+
+    $input = file_get_contents('php://input');
+    if ($input) {
+        $decoded = json_decode($input, true);
+        if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Invalid JSON payload']);
+            exit;
+        }
+
+        $dataDir = dirname($dataFile);
+        if (!is_dir($dataDir)) {
+            @mkdir($dataDir, 0755, true);
+        }
+
+        if (@file_put_contents($dataFile, $input, LOCK_EX) !== false) {
+            @chmod($dataFile, 0644);
+            echo json_encode(['status' => 'success', 'message' => 'Glossary saved successfully']);
+        } else {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Failed to write glossary file']);
+        }
+    } else {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'No data received']);
+    }
+    exit;
 }
+?>

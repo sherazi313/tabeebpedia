@@ -1,4 +1,0 @@
-const fs = require('fs');
-let c = fs.readFileSync('src/components/HerbEffectivenessCalculator.jsx', 'utf8');
-c = c.replace('Herb Effectiveness Calculator (HEC)', '??? ?????? ?? ???? ???? ?????????');
-fs.writeFileSync('src/components/HerbEffectivenessCalculator.jsx', c);
