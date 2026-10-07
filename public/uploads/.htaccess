@@ -17,7 +17,7 @@ Options -Indexes -ExecCGI
 </IfModule>
 
 # Force handler to none for any script extensions
-<FilesMatch "(?i)\.(php|phtml|php3|php4|php5|php7|php8|phps|cgi|pl|py|sh|bash|exe|bat|cmd|html|htm|js|svg)$">
+<FilesMatch "(?i)\.(php|phtml|php3|php4|php5|php7|php8|phps|cgi|pl|py|sh|bash|exe|bat|cmd|html|htm|js)$">
     SetHandler none
     <IfModule mod_authz_core.c>
         Require all denied
@@ -29,7 +29,8 @@ Options -Indexes -ExecCGI
 </FilesMatch>
 
 # Only allow safe image file viewing
-<FilesMatch "(?i)\.(jpg|jpeg|png|gif|webp|ico)$">
+<FilesMatch "(?i)\.(jpg|jpeg|png|gif|webp|ico|svg)$">
+
     <IfModule mod_authz_core.c>
         Require all granted
     </IfModule>

@@ -1802,15 +1802,47 @@ export default function AdminCMS({
     }
   };
 
-  // Save Website Settings
-  const handleSettingImageUpload = (e, field) => {
-    const file = e.target.files[0];
-    if (file) {
+  // Save Website Settings Image (Favicon, Logo, etc.)
+  const handleSettingImageUpload = async (e, field) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      showNotification('تصویر اپلوڈ کی جا رہی ہے، براہِ کرم انتظار کریں...');
+      const uploadedUrl = await uploadImageApi(file);
+      if (uploadedUrl) {
+        setSettingsForm(prev => {
+          const updated = { ...prev, [field]: uploadedUrl };
+          if (field === 'faviconUrl') {
+            // Immediately update browser tab icon preview
+            const oldIcons = document.querySelectorAll("link[rel*='icon']");
+            oldIcons.forEach(el => el.remove());
+            const newLink = document.createElement('link');
+            newLink.rel = 'icon';
+            newLink.href = uploadedUrl;
+            document.head.appendChild(newLink);
+          }
+          return updated;
+        });
+        showNotification('تصویر کامیابی سے اپلوڈ ہو گئی! اب نیچے "تبدیلیاں محفوظ کریں" پر کلک کریں۔');
+      } else {
+        // Fallback to DataURL
+        const reader = new FileReader();
+        reader.onload = (uploadEvent) => {
+          const resultUrl = uploadEvent.target.result;
+          setSettingsForm(prev => ({ ...prev, [field]: resultUrl }));
+          showNotification('تصویر شامل کر دی گئی! اب نیچے "تبدیلیاں محفوظ کریں" پر کلک کریں۔');
+        };
+        reader.readAsDataURL(file);
+      }
+    } catch (err) {
+      console.error(err);
       const reader = new FileReader();
       reader.onload = (uploadEvent) => {
-        setSettingsForm({ ...settingsForm, [field]: uploadEvent.target.result });
+        setSettingsForm(prev => ({ ...prev, [field]: uploadEvent.target.result }));
       };
       reader.readAsDataURL(file);
+      showNotification('تصویر شامل کر دی گئی! اب نیچے "تبدیلیاں محفوظ کریں" پر کلک کریں۔');
     }
   };
 

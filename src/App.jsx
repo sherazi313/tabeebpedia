@@ -1686,16 +1686,33 @@ export default function App() {
     const artLimit = (parseInt(artCols) || 4) * (parseInt(siteSettings?.articleBlockRows || '3') || 3);
 
     useEffect(() => {
-    if (siteSettings?.faviconUrl || '/logo1.png') {
-      let link = document.querySelector("link[rel~='icon']");
-      if (!link) {
-        link = document.createElement('link');
+      const faviconHref = siteSettings?.faviconUrl || '/leaf.svg';
+      if (faviconHref) {
+        // Remove existing icon tags to avoid browser cache/type mismatch
+        const oldIcons = document.querySelectorAll("link[rel*='icon']");
+        oldIcons.forEach(el => el.remove());
+
+        const link = document.createElement('link');
         link.rel = 'icon';
-        document.getElementsByTagName('head')[0].appendChild(link);
+        link.href = faviconHref;
+        if (faviconHref.includes('.svg')) {
+          link.type = 'image/svg+xml';
+        } else if (faviconHref.includes('.png')) {
+          link.type = 'image/png';
+        } else if (faviconHref.includes('.ico')) {
+          link.type = 'image/x-icon';
+        }
+        document.head.appendChild(link);
+
+        let appleIcon = document.querySelector("link[rel='apple-touch-icon']");
+        if (!appleIcon) {
+          appleIcon = document.createElement('link');
+          appleIcon.rel = 'apple-touch-icon';
+          document.head.appendChild(appleIcon);
+        }
+        appleIcon.href = faviconHref;
       }
-      link.href = siteSettings?.faviconUrl || '/logo1.png';
-    }
-  }, [siteSettings?.faviconUrl]);
+    }, [siteSettings?.faviconUrl]);
   return (
     <div className="min-h-screen flex flex-col bg-[#f8fafc] text-slate-800 antialiased selection:bg-blue-600 selection:text-white">
       {/* Dynamic SEO Meta & Schema.org Controller */}

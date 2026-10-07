@@ -55,23 +55,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // 3. Strict Extension Allowlist
-    $allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-    $finalExt = in_array($mimeExt, $allowedExts) ? $mimeExt : 'jpg';
+    $allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'ico', 'svg'];
+    $finalExt = in_array($mimeExt, $allowedExts) ? $mimeExt : 'png';
 
-    // 4. Binary Image Validation (MIME & Header Verification)
-    $imageInfo = @getimagesizefromstring($binary);
-    if ($imageInfo === false) {
+    // 4. Image Validation
+    $isValid = false;
+    if ($finalExt === 'svg' || $mimeExt === 'svg+xml') {
+        $finalExt = 'svg';
+        // Clean SVG check: must contain <svg and no script
+        if (strpos($binary, '<svg') !== false && stripos($binary, '<script') === false) {
+            $isValid = true;
+        }
+    } elseif ($finalExt === 'ico' || $mimeExt === 'x-icon' || $mimeExt === 'vnd.microsoft.icon') {
+        $finalExt = 'ico';
+        // ICO header signature \x00\x00\x01\x00
+        if (substr($binary, 0, 4) === "\x00\x00\x01\x00" || @getimagesizefromstring($binary) !== false) {
+            $isValid = true;
+        }
+    } else {
+        $imageInfo = @getimagesizefromstring($binary);
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/x-icon'];
+        if ($imageInfo !== false && in_array($imageInfo['mime'], $allowedMimes)) {
+            $isValid = true;
+        }
+    }
+
+    if (!$isValid) {
         http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'سیکیورٹی الرٹ: فراہم کردہ فائل ایک غیر مستند یا خراب تصویر ہے۔']);
+        echo json_encode(['status' => 'error', 'message' => 'سیکیورٹی الرٹ: فراہم کردہ فائل ایک غیر مستند یا نامعلوم تصویری فارمیٹ ہے۔ صرف (PNG, JPG, WebP, GIF, ICO, SVG) کی اجازت ہے۔']);
         exit;
     }
 
-    $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-    if (!in_array($imageInfo['mime'], $allowedMimes)) {
-        http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'صرف تصویری فائلیں (JPG, PNG, WebP, GIF) اپلوڈ کی جا سکتی ہیں۔']);
-        exit;
-    }
 
     // 5. Cryptographically Secure Sanitized Filename
     $rawFilename = isset($data['filename']) ? pathinfo($data['filename'], PATHINFO_FILENAME) : 'img';
