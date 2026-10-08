@@ -32,43 +32,47 @@ if (file_exists(__DIR__ . '/rate_limiter.php')) {
 $pdo = null;
 if (file_exists(__DIR__ . '/db.php')) {
     try {
-        require_once __DIR__ . '/db.php';
-        // $pdo is expected from db.php
-        if (isset($pdo) && $pdo instanceof PDO) {
-            // Auto-create required tables if not exist
-            $pdo->exec("CREATE TABLE IF NOT EXISTS admin_2fa_tokens (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                temp_token VARCHAR(64) NOT NULL UNIQUE,
-                code_hash VARCHAR(128) NOT NULL,
-                type ENUM('email_otp', 'totp') NOT NULL,
-                expires_at DATETIME NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                INDEX (temp_token),
-                INDEX (expires_at)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        @include_once __DIR__ . '/db.php';
+    } catch (Throwable $e) {
+        $pdo = null;
+    }
+}
 
-            $pdo->exec("CREATE TABLE IF NOT EXISTS admin_trusted_devices (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                device_token VARCHAR(64) NOT NULL UNIQUE,
-                ip_address VARCHAR(45) NULL,
-                user_agent VARCHAR(255) NULL,
-                expires_at DATETIME NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                INDEX (device_token)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+if (isset($pdo) && $pdo instanceof PDO) {
+    try {
+        // Auto-create required tables if not exist
+        $pdo->exec("CREATE TABLE IF NOT EXISTS admin_2fa_tokens (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            temp_token VARCHAR(64) NOT NULL UNIQUE,
+            code_hash VARCHAR(128) NOT NULL,
+            type ENUM('email_otp', 'totp') NOT NULL,
+            expires_at DATETIME NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX (temp_token),
+            INDEX (expires_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
-            $pdo->exec("CREATE TABLE IF NOT EXISTS password_resets (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                email VARCHAR(191) NOT NULL,
-                code_hash VARCHAR(128) NOT NULL,
-                expires_at DATETIME NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                INDEX (email),
-                INDEX (expires_at)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-        }
-    } catch (Exception $e) {
-        // Fall back gracefully to file-based storage if database connection fails
+        $pdo->exec("CREATE TABLE IF NOT EXISTS admin_trusted_devices (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            device_token VARCHAR(64) NOT NULL UNIQUE,
+            ip_address VARCHAR(45) NULL,
+            user_agent VARCHAR(255) NULL,
+            expires_at DATETIME NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX (device_token)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+        $pdo->exec("CREATE TABLE IF NOT EXISTS password_resets (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            email VARCHAR(191) NOT NULL,
+            code_hash VARCHAR(128) NOT NULL,
+            expires_at DATETIME NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX (email),
+            INDEX (expires_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    } catch (Throwable $e) {
+        // Fall back gracefully to file-based storage if tables cannot be created
         $pdo = null;
     }
 }
