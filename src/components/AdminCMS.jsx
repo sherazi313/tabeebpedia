@@ -338,7 +338,16 @@ export default function AdminCMS({
     }, 20000); // Live poll every 20 seconds
     return () => clearInterval(interval);
   }, [adminTab]);
+
   const [settingsSubTab, setSettingsSubTab] = useState('general');
+
+  // Consolidate security tab into settings
+  useEffect(() => {
+    if (adminTab === 'security') {
+      setAdminTab('settings');
+      setSettingsSubTab('security');
+    }
+  }, [adminTab]);
   const [showColorPalette, setShowColorPalette] = useState(false);
   const [showBgPalette, setShowBgPalette] = useState(false);
   const [showPageColorPalette, setShowPageColorPalette] = useState(false);
@@ -2660,9 +2669,6 @@ export default function AdminCMS({
                   </button>
                   <button onClick={() => setAdminTab('settings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'settings' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
                     <Settings className="w-4 h-4 text-slate-400" /> <span>ویب سائٹ سیٹنگز</span>
-                  </button>
-                  <button onClick={() => { setAdminTab('security'); setSettingsSubTab('security'); }} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'security' ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-300 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                    <ShieldCheck className={`w-4 h-4 ${adminTab === 'security' ? 'text-emerald-700' : 'text-emerald-600'}`} /> <span>🛡️ ایڈمن سیکیورٹی و 2FA</span>
                   </button>
                   <button onClick={() => setAdminTab('migration')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'migration' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
                     <Database className="w-4 h-4 text-slate-400" /> <span>مائیگریشن ٹول</span>
@@ -9588,21 +9594,8 @@ export default function AdminCMS({
           })()}
 
           {/* ========================================================= */}
-          {/* VIEW 4: COMPREHENSIVE WEBSITE SETTINGS (LOGO, HEADER, FOOTER) */}
+          {/* VIEW 4: COMPREHENSIVE WEBSITE SETTINGS (LOGO, HEADER, FOOTER, SECURITY) */}
           {/* ========================================================= */}
-          {/* ========================================================= */}
-          {/* VIEW: DEDICATED ADMIN SECURITY & 2FA PANEL */}
-          {/* ========================================================= */}
-          {adminTab === 'security' && (
-            <AdminSecurityTab 
-              settingsForm={settingsForm}
-              setSettingsForm={setSettingsForm}
-              siteSettings={siteSettings}
-              setSiteSettings={setSiteSettings}
-              showNotification={showNotification}
-            />
-          )}
-
           {adminTab === 'settings' && (
             <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
               
