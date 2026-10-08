@@ -44,6 +44,7 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess, siteS
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [devOtpCode, setDevOtpCode] = useState('');
 
   // Reset modal state on opening
   useEffect(() => {
@@ -54,6 +55,7 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess, siteS
       setPassword('');
       setTwoFactorCode('');
       setTempToken('');
+      setDevOtpCode('');
       setErrorMsg('');
       setSuccessMsg('');
       setLoading(false);
@@ -93,6 +95,7 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess, siteS
       if (res && res.status === '2fa_required') {
         setTempToken(res.temp_token || '');
         setTwoFactorType(res.twoFactorType || 'totp');
+        setDevOtpCode(res.dev_code || '');
         setTwoFactorCode('');
         setMode('2fa');
       } else if (res && (res.status === 'success' || res.token)) {
@@ -172,6 +175,7 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess, siteS
     try {
       const res = await forgotPasswordApi({ email: em });
       if (res && res.status === 'success') {
+        if (res.dev_code) setDevOtpCode(res.dev_code);
         setSuccessMsg(res.message || '6 ہندسوں کا کوڈ آپ کی ای میل پر بھیج دیا گیا ہے۔');
         setForgotStep(2);
       } else {
@@ -387,6 +391,24 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess, siteS
               </div>
             )}
 
+            {devOtpCode && (
+              <div className="p-4 bg-emerald-950/40 border border-emerald-500/50 rounded-2xl text-center space-y-2">
+                <div className="text-xs text-emerald-300 font-bold font-simple">
+                  🛡️ لوکل ڈویلپمنٹ او ٹی پی (Localhost Dev OTP):
+                </div>
+                <div className="font-mono text-2xl font-black text-amber-300 tracking-[0.3em] bg-slate-950/80 py-2 rounded-xl border border-emerald-500/30">
+                  {devOtpCode}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTwoFactorCode(devOtpCode)}
+                  className="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-xl font-simple font-bold transition-all cursor-pointer shadow-md shadow-emerald-900/30"
+                >
+                  یہ کوڈ خودکار درج کریں
+                </button>
+              </div>
+            )}
+
             <form onSubmit={handleVerify2faSubmit} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple text-center">
@@ -523,6 +545,24 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess, siteS
             {/* Step 2: Enter Code & New Password */}
             {forgotStep === 2 && (
               <form onSubmit={handleResetPasswordSubmit} className="space-y-4">
+                {devOtpCode && (
+                  <div className="p-4 bg-amber-950/40 border border-amber-500/50 rounded-2xl text-center space-y-2">
+                    <div className="text-xs text-amber-300 font-bold font-simple">
+                      🛡️ لوکل ڈویلپمنٹ ری سیٹ کوڈ (Localhost Dev Code):
+                    </div>
+                    <div className="font-mono text-2xl font-black text-amber-300 tracking-[0.3em] bg-slate-950/80 py-2 rounded-xl border border-amber-500/30">
+                      {devOtpCode}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setResetCode(devOtpCode)}
+                      className="text-xs bg-amber-600 hover:bg-amber-500 text-white px-4 py-1.5 rounded-xl font-simple font-bold transition-all cursor-pointer shadow-md shadow-amber-900/30"
+                    >
+                      یہ کوڈ خودکار درج کریں
+                    </button>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple text-center">
                     ای میل پر موصول شدہ 6 ہندسوں کا کوڈ:

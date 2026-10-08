@@ -57,6 +57,16 @@ function generateBase32(length = 16) {
   return res;
 }
 
+function parseEmailList(input) {
+  if (Array.isArray(input)) {
+    return input.map(e => String(e).trim().toLowerCase()).filter(Boolean);
+  }
+  if (typeof input === 'string') {
+    return input.split(/[\s,;]+/).map(e => e.trim().toLowerCase()).filter(Boolean);
+  }
+  return [];
+}
+
 function localApiPlugin() {
   return {
     name: 'local-api-plugin',
@@ -121,28 +131,29 @@ function localApiPlugin() {
             const actionParam = parsedUrl.searchParams.get('action') || '';
 
             const handleAuthRequest = (bodyStr) => {
-              let payload = {};
-              try { payload = JSON.parse(bodyStr || '{}'); } catch (e) {}
-              const action = actionParam || payload.action || (req.method === 'GET' ? 'get_2fa_setup' : 'login');
+              try {
+                let payload = {};
+                try { payload = JSON.parse(bodyStr || '{}'); } catch (e) {}
+                const action = actionParam || payload.action || (req.method === 'GET' ? 'get_2fa_setup' : 'login');
 
-              res.setHeader('Content-Type', 'application/json; charset=UTF-8');
+                res.setHeader('Content-Type', 'application/json; charset=UTF-8');
 
-              if (action === 'login') {
-                const username = (payload.username || '').trim().toLowerCase();
-                const password = (payload.password || '').trim();
-                const deviceToken = (req.headers['x-device-token'] || payload.device_token || payload.hp_2fa_device_token || '').trim();
-                const settings = getSettings();
+                if (action === 'login') {
+                  const username = (payload.username || '').trim().toLowerCase();
+                  const password = (payload.password || '').trim();
+                  const deviceToken = (req.headers['x-device-token'] || payload.device_token || payload.hp_2fa_device_token || '').trim();
+                  const settings = getSettings();
 
-                const validUser = (settings.adminUsername || 'sherazi313').toLowerCase();
-                const adminEmails = (settings.adminEmails || []).map(e => String(e).toLowerCase());
-                const userMatched = username === validUser || adminEmails.includes(username);
-                const passMatched = password === (settings.adminPassword || '5903911a');
+                  const validUser = (settings.adminUsername || 'sherazi313').toLowerCase();
+                  const adminEmails = parseEmailList(settings.adminEmails || settings.adminRecoveryEmails);
+                  const userMatched = username === validUser || adminEmails.includes(username);
+                  const passMatched = password === (settings.adminPassword || '5903911a');
 
-                if (!userMatched || !passMatched) {
-                  res.statusCode = 401;
-                  res.end(JSON.stringify({ status: 'error', message: 'یوزر نیم یا پاسورڈ غلط ہے۔ دوبارہ کوشش کریں۔' }));
-                  return;
-                }
+                  if (!userMatched || !passMatched) {
+                    res.statusCode = 401;
+                    res.end(JSON.stringify({ status: 'error', message: 'یوزر نیم یا پاسورڈ غلط ہے۔ دوبارہ کوشش کریں۔' }));
+                    return;
+                  }
 
                 // Check 30-Day Trusted Device
                 let isDeviceTrusted = false;
@@ -185,7 +196,8 @@ function localApiPlugin() {
                     requires_2fa: true,
                     twoFactorType: 'email_otp',
                     temp_token: tempToken,
-                    message: `آپ کی ای میل پر 6 ہندسوں کا تصدیقی کوڈ بھیج دیا گیا ہے۔ (Dev Code: ${otpCode})`
+                    dev_code: otpCode,
+                    message: `آپ کی ای میل پر 6 ہندسوں کا تصدیقی کوڈ بھیج دیا گیا ہے۔ (لوکل کوڈ: ${otpCode})`
                   }));
                   return;
                 }
@@ -326,7 +338,7 @@ function localApiPlugin() {
               if (action === 'forgot_password') {
                 const email = (payload.email || '').trim().toLowerCase();
                 const settings = getSettings();
-                const adminEmails = (settings.adminEmails || []).map(e => String(e).toLowerCase());
+                const adminEmails = parseEmailList(settings.adminEmails || settings.adminRecoveryEmails);
 
                 if (!adminEmails.includes(email)) {
                   res.statusCode = 404;
@@ -344,7 +356,8 @@ function localApiPlugin() {
 
                 res.end(JSON.stringify({
                   status: 'success',
-                  message: `6 ہندسوں کا پاس ورڈ ری سیٹ کوڈ ای میل پر بھیج دیا گیا ہے۔ (Dev Code: ${resetCode})`
+                  dev_code: resetCode,
+                  message: `6 ہندسوں کا پاس ورڈ ری سیٹ کوڈ ای میل پر بھیج دیا گیا ہے۔ (لوکل کوڈ: ${resetCode})`
                 }));
                 return;
               }
@@ -388,7 +401,12 @@ function localApiPlugin() {
 
               res.statusCode = 400;
               res.end(JSON.stringify({ status: 'error', message: 'درخواست کی نوعیت (action) نامعلوم ہے۔' }));
-            };
+            } catch (err) {
+              console.error('Local Auth API error:', err);
+              res.statusCode = 500;
+              res.end(JSON.stringify({ status: 'error', message: 'سرور پر اندرونی خرابی پیش آئی: ' + err.message }));
+            }
+          };
 
             if (req.method === 'GET') {
               handleAuthRequest('');

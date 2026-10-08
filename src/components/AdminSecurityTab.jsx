@@ -18,7 +18,8 @@ import {
   ShieldAlert,
   Trash2,
   ExternalLink,
-  Key
+  Key,
+  X
 } from 'lucide-react';
 import { 
   get2faSetupApi, 
@@ -45,6 +46,8 @@ export default function AdminSecurityTab({
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   // Status States
   const [isSaving, setIsSaving] = useState(false);
@@ -191,8 +194,8 @@ export default function AdminSecurityTab({
         adminEmails: settingsForm?.adminRecoveryEmails || settingsForm?.adminEmails
       };
 
-      if (newPassword) {
-        if (newPassword.length < 6) {
+      if (isChangingPassword) {
+        if (!newPassword || newPassword.length < 6) {
           setStatusMsg({ type: 'error', text: 'نیا پاس ورڈ کم از کم 6 حروف پر مشتمل ہونا چاہیے۔' });
           setIsSaving(false);
           return;
@@ -213,7 +216,7 @@ export default function AdminSecurityTab({
         ...(siteSettings || {}),
         ...settingsForm,
         ...payload,
-        adminPassword: newPassword || siteSettings?.adminPassword || '5903911a'
+        adminPassword: (isChangingPassword && newPassword) ? newPassword : (siteSettings?.adminPassword || '5903911a')
       };
 
       if (setSiteSettings) {
@@ -224,10 +227,11 @@ export default function AdminSecurityTab({
       // 3. Keep LocalStorage Synced
       localStorage.setItem('tabeeb_admin_custom_username', payload.username);
       localStorage.setItem('tabeeb_admin_secret_slug', payload.adminSecretSlug);
-      if (newPassword) {
+      if (isChangingPassword && newPassword) {
         localStorage.setItem('tabeeb_admin_custom_password', newPassword);
       }
 
+      setIsChangingPassword(false);
       setNewPassword('');
       setConfirmPassword('');
       setStatusMsg({ type: 'success', text: res?.message || 'ایڈمن سیکیورٹی و 2FA کی ترتیبات کامیابی سے محفوظ ہو گئیں!' });
@@ -249,19 +253,19 @@ export default function AdminSecurityTab({
     <div className="space-y-6 text-right animate-in fade-in-50" dir="rtl">
       
       {/* Header Banner */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
+      <div className="bg-gradient-to-r from-emerald-50 via-teal-50/40 to-white border border-emerald-200/90 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-indigo-700 flex items-center justify-center text-white shadow-lg shadow-emerald-950/30 shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 shrink-0">
             <ShieldCheck className="w-7 h-7" />
           </div>
           <div>
             <div className="flex items-center gap-2.5 flex-wrap">
-              <h2 className="text-xl sm:text-2xl font-bold text-white font-simple">ایڈمن سیکیورٹی و ملٹی فیکٹر اتھینٹیکیشن (2FA)</h2>
-              <span className="text-[11px] bg-emerald-950 border border-emerald-500/40 text-emerald-300 font-bold px-2.5 py-0.5 rounded-full font-mono">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-simple">ایڈمن سیکیورٹی و ملٹی فیکٹر اتھینٹیکیشن (2FA)</h2>
+              <span className="text-[11px] bg-emerald-100 border border-emerald-300 text-emerald-800 font-bold px-2.5 py-0.5 rounded-full font-mono">
                 Enterprise Level
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-1 font-simple">
+            <p className="text-xs text-slate-600 mt-1 font-simple">
               خفیہ ایڈمن URL، ایڈمن یوزر نیم، پاس ورڈ، ای میل OTP اور گوگل اتھینٹیکیٹر کی ترتیبات
             </p>
           </div>
@@ -271,7 +275,7 @@ export default function AdminSecurityTab({
           type="button"
           onClick={handleSaveSecurity}
           disabled={isSaving}
-          className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 transition-all font-simple shrink-0 cursor-pointer disabled:opacity-50"
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-all font-simple shrink-0 cursor-pointer disabled:opacity-50"
         >
           {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           <span>{isSaving ? 'محفوظ ہو رہا ہے...' : 'سیٹنگز محفوظ کریں'}</span>
@@ -282,8 +286,8 @@ export default function AdminSecurityTab({
       {statusMsg.text && (
         <div className={`p-4 rounded-2xl border text-xs font-bold leading-relaxed animate-in fade-in-50 flex items-center gap-2.5 ${
           statusMsg.type === 'success'
-            ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300'
-            : 'bg-red-950/60 border-red-500/50 text-red-300'
+            ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+            : 'bg-red-50 border-red-300 text-red-800'
         }`}>
           {statusMsg.type === 'success' ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertTriangle className="w-4 h-4 shrink-0" />}
           <span>{statusMsg.text}</span>
@@ -293,22 +297,22 @@ export default function AdminSecurityTab({
       {/* ============================================================ */}
       {/* SECTION 1: ADMIN CREDENTIALS & SECRET ADMIN URL              */}
       {/* ============================================================ */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-md">
-        <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-          <div className="w-9 h-9 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center">
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
+        <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+          <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center">
             <Lock className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-white font-simple">ایڈمن لاگ ان و خفیہ یو آر ایل (Credentials & Secret Route)</h3>
-            <p className="text-xs text-slate-400">یوزر نیم، نیا پاس ورڈ اور پورٹل تک رسائی کا خفیہ لنک</p>
+            <h3 className="text-base sm:text-lg font-bold text-slate-800 font-simple">ایڈمن لاگ ان و خفیہ یو آر ایل (Credentials & Secret Route)</h3>
+            <p className="text-xs text-slate-500">یوزر نیم، نیا پاس ورڈ اور پورٹل تک رسائی کا خفیہ لنک</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Admin Username */}
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-blue-400" />
+            <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5 text-blue-600" />
               <span>ایڈمن یوزر نیم (Admin Username) *</span>
             </label>
             <input
@@ -316,7 +320,7 @@ export default function AdminSecurityTab({
               value={settingsForm?.adminUsername || ''}
               onChange={(e) => setSettingsForm({ ...settingsForm, adminUsername: e.target.value })}
               placeholder="sherazi313"
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-mono focus:border-blue-500 outline-none text-left"
+              className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-slate-800 text-xs font-mono outline-none text-left transition-all"
               dir="ltr"
               required
             />
@@ -324,8 +328,8 @@ export default function AdminSecurityTab({
 
           {/* Secret URL Slug */}
           <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple flex items-center gap-1.5">
-              <LinkIcon className="w-3.5 h-3.5 text-blue-400" />
+            <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple flex items-center gap-1.5">
+              <LinkIcon className="w-3.5 h-3.5 text-blue-600" />
               <span>خفیہ ایڈمن URL سلگ (Secret URL Slug) *</span>
             </label>
             <input
@@ -336,80 +340,142 @@ export default function AdminSecurityTab({
                 setSettingsForm({ ...settingsForm, adminSecretSlug: clean });
               }}
               placeholder="tabeeb-7860"
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-mono focus:border-blue-500 outline-none text-left"
+              className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-slate-800 text-xs font-mono outline-none text-left transition-all"
               dir="ltr"
               required
             />
           </div>
 
           {/* Secret URL Live Preview Box */}
-          <div className="md:col-span-2 bg-slate-950 border border-blue-900/40 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="space-y-1">
+          <div className="md:col-span-2 bg-gradient-to-r from-blue-50/70 via-indigo-50/40 to-slate-50 border border-blue-200/90 rounded-2xl p-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="space-y-1.5">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-bold text-blue-400">🔗 آپ کا فعال خفیہ ایڈمن لاگ ان URL:</span>
+                <span className="text-xs font-bold text-blue-900">🔗 آپ کا فعال خفیہ ایڈمن لاگ ان URL:</span>
               </div>
-              <p className="text-xs sm:text-sm font-mono text-emerald-400 font-bold break-all dir-ltr text-left">
-                {fullSecretUrl}
-              </p>
-              <p className="text-[11px] text-slate-400 leading-relaxed pt-1">
-                ⚠️ سیکیورٹی نوٹس: پبلک ویب سائٹ سے <code className="text-red-400 bg-slate-900 px-1.5 py-0.5 rounded">/admin</code> یا <code className="text-red-400 bg-slate-900 px-1.5 py-0.5 rounded">/login</code> وزٹ کرنے پر عام وزیٹرز کو ہوم پیج پر بھیج دیا جائے گا۔ ایڈمن لاگ ان صرف اوپر والے خفیہ URL سے کھلے گا۔
+              <div>
+                <span className="text-xs sm:text-sm font-mono text-blue-700 font-bold break-all dir-ltr text-left select-all bg-white px-3 py-1.5 rounded-lg border border-blue-200 inline-block shadow-2xs">
+                  {fullSecretUrl}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-600 leading-relaxed pt-1">
+                ⚠️ سیکیورٹی نوٹس: پبلک ویب سائٹ سے <code className="text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded font-mono text-[10px]">/admin</code> یا <code className="text-red-700 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded font-mono text-[10px]">/login</code> وزٹ کرنے پر عام وزیٹرز کو ہوم پیج پر بھیج دیا جائے گا۔ ایڈمن لاگ ان صرف اوپر والے خفیہ URL سے کھلے گا۔
               </p>
             </div>
 
             <button
               type="button"
               onClick={handleCopyUrl}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border border-slate-700"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border border-slate-200 shadow-2xs"
             >
-              {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copiedUrl ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-slate-500" />}
               <span>{copiedUrl ? 'کاپی ہو گیا!' : 'یو آر ایل کاپی کریں'}</span>
             </button>
           </div>
 
-          {/* New Password */}
-          <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple flex items-center gap-1.5">
-              <Key className="w-3.5 h-3.5 text-blue-400" />
-              <span>نیا پاس ورڈ (خالی چھوڑنے پر پرانا پاس ورڈ برقرار رہے گا):</span>
-            </label>
-            <div className="relative">
-              <input
-                type={showNewPassword ? 'text' : 'password'}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="نیا پاس ورڈ درج کریں (اختیاری)..."
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-mono focus:border-blue-500 outline-none text-left pr-10"
-                dir="ltr"
-              />
-              <button
-                type="button"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200"
-              >
-                {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
+          {/* Password Management Card */}
+          <div className="md:col-span-2 bg-slate-50/80 border border-slate-200 rounded-2xl p-4.5 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center shrink-0">
+                  <Key className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800 flex items-center gap-2">
+                    <span>ایڈمن پاس ورڈ (Admin Password)</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-700 font-bold">محفوظ ہے</span>
+                  </h4>
+                  <p className="text-[11px] text-slate-500">اگر آپ پاس ورڈ تبدیل نہیں کرنا چاہتے تو کچھ کرنے کی ضرورت نہیں، پرانا پاس ورڈ ہی برقرار رہے گا۔</p>
+                </div>
+              </div>
 
-          {/* Confirm Password */}
-          <div>
-            <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple">
-              نئے پاس ورڈ کی تصدیق:
-            </label>
-            <input
-              type={showNewPassword ? 'text' : 'password'}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="نیا پاس ورڈ دوبارہ درج کریں..."
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-mono focus:border-blue-500 outline-none text-left"
-              dir="ltr"
-            />
+              {!isChangingPassword ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsChangingPassword(true);
+                    setNewPassword('');
+                    setConfirmPassword('');
+                  }}
+                  className="px-3.5 py-1.5 bg-white hover:bg-slate-100 text-blue-700 rounded-xl text-xs font-bold border border-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer shrink-0 self-start sm:self-auto shadow-2xs"
+                >
+                  <Key className="w-3.5 h-3.5 text-blue-600" />
+                  <span>نیا پاس ورڈ تبدیل کریں</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsChangingPassword(false);
+                    setNewPassword('');
+                    setConfirmPassword('');
+                  }}
+                  className="px-3 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-bold border border-red-200 transition-colors flex items-center gap-1 cursor-pointer shrink-0 self-start sm:self-auto"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>منسوخ کریں (کینسل)</span>
+                </button>
+              )}
+            </div>
+
+            {isChangingPassword && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-slate-200 animate-in fade-in-50 duration-200">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple flex items-center gap-1.5">
+                    <span>نیا پاس ورڈ (کم از کم 6 حروف) *</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showNewPassword ? 'text' : 'password'}
+                      name="tabeeb_sec_newpass"
+                      autoComplete="new-password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="نیا پاس ورڈ درج کریں..."
+                      className="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-slate-800 text-xs font-mono outline-none text-left pr-10"
+                      dir="ltr"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple">
+                    نئے پاس ورڈ کی تصدیق (Confirm Password) *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="tabeeb_sec_confirmpass"
+                      autoComplete="new-password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="نیا پاس ورڈ دوبارہ درج کریں..."
+                      className="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-slate-800 text-xs font-mono outline-none text-left pr-10"
+                      dir="ltr"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Admin Alert / Recovery Emails */}
           <div className="md:col-span-2">
-            <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple flex items-center gap-1.5">
-              <Mail className="w-3.5 h-3.5 text-blue-400" />
+            <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple flex items-center gap-1.5">
+              <Mail className="w-3.5 h-3.5 text-blue-600" />
               <span>نوٹیفکیشن و OTP ای میل ایڈریسز (Admin Alert Emails):</span>
             </label>
             <input
@@ -417,7 +483,7 @@ export default function AdminSecurityTab({
               value={settingsForm?.adminRecoveryEmails || ''}
               onChange={(e) => setSettingsForm({ ...settingsForm, adminRecoveryEmails: e.target.value })}
               placeholder="sherazi313@gmail.com, nukta313@gmail.com"
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-mono focus:border-blue-500 outline-none text-left"
+              className="w-full bg-slate-50 border border-slate-200 hover:border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 rounded-xl px-4 py-2.5 text-slate-800 text-xs font-mono outline-none text-left transition-all"
               dir="ltr"
             />
             <p className="text-[11px] text-slate-500 mt-1">
@@ -430,14 +496,14 @@ export default function AdminSecurityTab({
       {/* ============================================================ */}
       {/* SECTION 2: MULTI-FACTOR AUTHENTICATION (2FA) MODE SELECTION  */}
       {/* ============================================================ */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-md">
-        <div className="flex items-center gap-3 border-b border-slate-800 pb-4">
-          <div className="w-9 h-9 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center">
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
+        <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+          <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center">
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-white font-simple">ملٹی فیکٹر اتھینٹیکیشن موڈ (2FA / MFA Mode)</h3>
-            <p className="text-xs text-slate-400">اپنے ایڈمن اکاؤنٹ کی سیکیورٹی کے لیے مطلوبہ 2FA طریقہ منتخب کریں</p>
+            <h3 className="text-base sm:text-lg font-bold text-slate-800 font-simple">ملٹی فیکٹر اتھینٹیکیشن موڈ (2FA / MFA Mode)</h3>
+            <p className="text-xs text-slate-500">اپنے ایڈمن اکاؤنٹ کی سیکیورٹی کے لیے مطلوبہ 2FA طریقہ منتخب کریں</p>
           </div>
         </div>
 
@@ -448,8 +514,8 @@ export default function AdminSecurityTab({
           <label 
             className={`border rounded-2xl p-4 cursor-pointer transition-all flex flex-col justify-between space-y-3 ${
               settingsForm?.twoFactorType === 'disabled' || !settingsForm?.twoFactorType
-                ? 'bg-slate-950 border-blue-500 shadow-md ring-2 ring-blue-500/20'
-                : 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
+                ? 'bg-blue-50/60 border-2 border-blue-500 shadow-sm ring-2 ring-blue-500/10'
+                : 'bg-slate-50/60 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
             }`}
           >
             <div className="flex items-start justify-between gap-3">
@@ -461,13 +527,13 @@ export default function AdminSecurityTab({
                 onChange={() => setSettingsForm(prev => ({ ...prev, twoFactorType: 'disabled' }))}
                 className="w-4 h-4 text-blue-600 mt-1 cursor-pointer"
               />
-              <span className="text-[11px] bg-slate-800 text-slate-400 font-mono font-bold px-2 py-0.5 rounded-full">
+              <span className="text-[11px] bg-slate-100 text-slate-600 font-mono font-bold px-2 py-0.5 rounded-full">
                 بنیادی سیکیورٹی
               </span>
             </div>
             <div>
-              <h4 className="text-sm font-bold text-white font-simple">1. غیر فعال (Disabled)</h4>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+              <h4 className="text-sm font-bold text-slate-900 font-simple">1. غیر فعال (Disabled)</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                 صرف یوزر نیم اور پاس ورڈ کے ساتھ براہ راست لاگ ان۔ کوئی اضافی تصدیقی کوڈ درکار نہیں ہوگا۔
               </p>
             </div>
@@ -477,8 +543,8 @@ export default function AdminSecurityTab({
           <label 
             className={`border rounded-2xl p-4 cursor-pointer transition-all flex flex-col justify-between space-y-3 ${
               settingsForm?.twoFactorType === 'email_otp'
-                ? 'bg-slate-950 border-amber-500 shadow-md ring-2 ring-amber-500/20'
-                : 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
+                ? 'bg-amber-50/60 border-2 border-amber-500 shadow-sm ring-2 ring-amber-500/10'
+                : 'bg-slate-50/60 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
             }`}
           >
             <div className="flex items-start justify-between gap-3">
@@ -490,16 +556,16 @@ export default function AdminSecurityTab({
                 onChange={() => setSettingsForm(prev => ({ ...prev, twoFactorType: 'email_otp' }))}
                 className="w-4 h-4 text-amber-500 mt-1 cursor-pointer"
               />
-              <span className="text-[11px] bg-amber-950 border border-amber-800 text-amber-300 font-mono font-bold px-2 py-0.5 rounded-full">
+              <span className="text-[11px] bg-amber-100 text-amber-800 font-mono font-bold px-2 py-0.5 rounded-full">
                 اعلیٰ سیکیورٹی
               </span>
             </div>
             <div>
-              <h4 className="text-sm font-bold text-white font-simple flex items-center gap-1.5">
-                <Mail className="w-4 h-4 text-amber-400" />
+              <h4 className="text-sm font-bold text-slate-900 font-simple flex items-center gap-1.5">
+                <Mail className="w-4 h-4 text-amber-600" />
                 <span>2. ای میل کوڈ (Email OTP)</span>
               </h4>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                 درست پاس ورڈ درج کرنے پر آپ کی ای میل پر 6 ہندسوں کا تصدیقی OTP کوڈ بھیجا جائے گا۔
               </p>
             </div>
@@ -509,8 +575,8 @@ export default function AdminSecurityTab({
           <label 
             className={`border rounded-2xl p-4 cursor-pointer transition-all flex flex-col justify-between space-y-3 ${
               settingsForm?.twoFactorType === 'totp'
-                ? 'bg-slate-950 border-emerald-500 shadow-md ring-2 ring-emerald-500/20'
-                : 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
+                ? 'bg-emerald-50/60 border-2 border-emerald-500 shadow-sm ring-2 ring-emerald-500/10'
+                : 'bg-slate-50/60 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
             }`}
           >
             <div className="flex items-start justify-between gap-3">
@@ -526,16 +592,16 @@ export default function AdminSecurityTab({
                 }}
                 className="w-4 h-4 text-emerald-500 mt-1 cursor-pointer"
               />
-              <span className="text-[11px] bg-emerald-950 border border-emerald-800 text-emerald-300 font-mono font-bold px-2 py-0.5 rounded-full">
+              <span className="text-[11px] bg-emerald-100 text-emerald-800 font-mono font-bold px-2 py-0.5 rounded-full">
                 زیادہ محفوظ ترین
               </span>
             </div>
             <div>
-              <h4 className="text-sm font-bold text-white font-simple flex items-center gap-1.5">
-                <Smartphone className="w-4 h-4 text-emerald-400" />
+              <h4 className="text-sm font-bold text-slate-900 font-simple flex items-center gap-1.5">
+                <Smartphone className="w-4 h-4 text-emerald-600" />
                 <span>3. گوگل اتھینٹیکیٹر (TOTP)</span>
               </h4>
-              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                 گوگل یا مائیکروسافٹ اتھینٹیکیٹر ایپ کا وقت پر مبنی کوڈ (RFC 6238)۔ انٹرنیٹ کے بغیر بھی کام کرتا ہے۔
               </p>
             </div>
@@ -547,18 +613,18 @@ export default function AdminSecurityTab({
         {/* SUB-PANEL: GOOGLE AUTHENTICATOR SETUP BOX                    */}
         {/* ============================================================ */}
         {settingsForm?.twoFactorType === 'totp' && (
-          <div className="mt-6 p-6 bg-slate-950 border border-emerald-500/30 rounded-3xl space-y-6 animate-in fade-in-50">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+          <div className="mt-6 p-6 bg-slate-50 border border-emerald-300/80 rounded-3xl space-y-6 animate-in fade-in-50">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 flex-wrap gap-2">
               <div className="flex items-center gap-2">
-                <Smartphone className="w-5 h-5 text-emerald-400" />
-                <h4 className="text-base font-bold text-white font-simple">گوگل اتھینٹیکیٹر سیٹ اپ باکس (TOTP Configuration)</h4>
+                <Smartphone className="w-5 h-5 text-emerald-600" />
+                <h4 className="text-base font-bold text-slate-900 font-simple">گوگل اتھینٹیکیٹر سیٹ اپ باکس (TOTP Configuration)</h4>
               </div>
               <button
                 type="button"
                 onClick={handleGenerateNewTotp}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-slate-700"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl transition-colors cursor-pointer border border-slate-200 shadow-2xs"
               >
-                <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
+                <RefreshCw className="w-3.5 h-3.5 text-emerald-600" />
                 <span>نئی کی اور کیو آر جنریٹ کریں</span>
               </button>
             </div>
@@ -566,7 +632,7 @@ export default function AdminSecurityTab({
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
               {/* QR Code Container */}
               <div className="md:col-span-4 flex flex-col items-center justify-center space-y-2">
-                <div className="w-48 h-48 bg-white p-3 rounded-2xl shadow-xl flex items-center justify-center border-4 border-emerald-500/40">
+                <div className="w-48 h-48 bg-white p-3 rounded-2xl shadow-sm flex items-center justify-center border-2 border-emerald-500/40">
                   {isTotpLoading ? (
                     <Loader2 className="w-8 h-8 text-slate-700 animate-spin" />
                   ) : (
@@ -578,13 +644,13 @@ export default function AdminSecurityTab({
                     />
                   )}
                 </div>
-                <span className="text-[11px] text-slate-400">اپنے موبائل کیمرا یا ایپ سے اسکین کریں</span>
+                <span className="text-[11px] text-slate-500">اپنے موبائل کیمرا یا ایپ سے اسکین کریں</span>
               </div>
 
               {/* Instructions & Manual Key */}
               <div className="md:col-span-8 space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple">
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple">
                     مینوئل سیکیورٹی کی (Manual Secret Base32 Key):
                   </label>
                   <div className="flex items-center gap-2">
@@ -592,13 +658,13 @@ export default function AdminSecurityTab({
                       type="text"
                       readOnly
                       value={totpSetupData.totpSecret || settingsForm?.totpSecret || ''}
-                      className="flex-1 bg-slate-900 border border-slate-700 text-emerald-400 font-mono text-sm px-4 py-2.5 rounded-xl text-left tracking-widest outline-none"
+                      className="flex-1 bg-white border border-slate-300 text-emerald-700 font-mono text-sm px-4 py-2.5 rounded-xl text-left tracking-widest outline-none shadow-2xs"
                       dir="ltr"
                     />
                     <button
                       type="button"
                       onClick={handleCopyKey}
-                      className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-colors shrink-0 cursor-pointer shadow-md"
+                      className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-colors shrink-0 cursor-pointer shadow-sm"
                     >
                       {copiedKey ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                       <span>{copiedKey ? 'کاپی ہو گئی!' : 'کی کاپی کریں'}</span>
@@ -606,9 +672,9 @@ export default function AdminSecurityTab({
                   </div>
                 </div>
 
-                <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-xs text-slate-300 space-y-2">
-                  <p className="font-bold text-emerald-400">📱 اتھینٹیکیٹر کنیکٹ کرنے کا طریقہ:</p>
-                  <ol className="list-decimal list-inside space-y-1 text-slate-400 pr-1">
+                <div className="bg-white border border-slate-200 rounded-2xl p-4 text-xs text-slate-700 space-y-2 shadow-2xs">
+                  <p className="font-bold text-emerald-800">📱 اتھینٹیکیٹر کنیکٹ کرنے کا طریقہ:</p>
+                  <ol className="list-decimal list-inside space-y-1 text-slate-600 pr-1">
                     <li>اپنے موبائل میں <strong>Google Authenticator</strong> یا <strong>Microsoft Authenticator</strong> ایپ کھولیں۔</li>
                     <li>پلس (+) کا نشان دبا کر <strong>"Scan a QR code"</strong> منتخب کریں۔</li>
                     <li>یہ کیو آر کوڈ اسکین کریں، یا مینوئل کی داخل کریں۔</li>
@@ -625,15 +691,15 @@ export default function AdminSecurityTab({
       {/* ============================================================ */}
       {/* SECTION 3: 30-DAY TRUSTED DEVICES MANAGEMENT                 */}
       {/* ============================================================ */}
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4 shadow-md">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+      <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center">
               <Smartphone className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-white font-simple">30 دن تک تصدیق شدہ ڈیوائسز (Trusted Devices)</h3>
-              <p className="text-xs text-slate-400">جن ڈیوائسز پر 30 دن کے لیے لاگ ان یاد رکھا گیا ہے ان کی سیکیورٹی</p>
+              <h3 className="text-base sm:text-lg font-bold text-slate-800 font-simple">30 دن تک تصدیق شدہ ڈیوائسز (Trusted Devices)</h3>
+              <p className="text-xs text-slate-500">جن ڈیوائسز پر 30 دن کے لیے لاگ ان یاد رکھا گیا ہے ان کی سیکیورٹی</p>
             </div>
           </div>
 
@@ -641,14 +707,14 @@ export default function AdminSecurityTab({
             type="button"
             onClick={handleRevokeDevices}
             disabled={isRevoking}
-            className="flex items-center gap-2 px-4 py-2.5 bg-red-950/60 hover:bg-red-900 border border-red-700/60 text-red-200 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer disabled:opacity-50"
           >
-            {isRevoking ? <Loader2 className="w-4 h-4 animate-spin text-red-400" /> : <Trash2 className="w-4 h-4 text-red-400" />}
+            {isRevoking ? <Loader2 className="w-4 h-4 animate-spin text-red-500" /> : <Trash2 className="w-4 h-4 text-red-500" />}
             <span>تمام ڈیوائسز کی تصدیق ختم کریں (Revoke All)</span>
           </button>
         </div>
 
-        <p className="text-xs text-slate-400 leading-relaxed">
+        <p className="text-xs text-slate-600 leading-relaxed">
           جب آپ 2FA اسکرین پر "اس براؤزر کو 30 دن کے لیے یاد رکھیں" منتخب کرتے ہیں، تو اس ڈیوائس کا منفرد سیکیورٹی ٹوکن محفوظ ہو جاتا ہے۔ اگر آپ کسی اجنبی ڈیوائس پر لاگ ان چھوڑ آئے ہوں تو "تمام ڈیوائسز کی تصدیق ختم کریں" پر کلک کر کے فوری طور پر تمام محفوظ شدہ ٹوکنز کو بیک وقت کالعدم کر سکتے ہیں۔
         </p>
       </div>

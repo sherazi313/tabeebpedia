@@ -342,6 +342,21 @@ const DEFAULT_PAGES = [
   }
 ];
 
+const getStoredAdminSecretSlug = () => {
+  try {
+    const direct = localStorage.getItem('tabeeb_admin_secret_slug');
+    if (direct && direct.trim()) return direct.toLowerCase().trim();
+    const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed?.adminSecretSlug && String(parsed.adminSecretSlug).trim()) {
+        return String(parsed.adminSecretSlug).toLowerCase().trim();
+      }
+    }
+  } catch (e) {}
+  return 'tabeeb-7860';
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState(() => {
     try {
@@ -351,7 +366,7 @@ export default function App() {
       const params = new URLSearchParams(window.location.search);
       const isAuth = (sessionStorage.getItem('tabeeb_admin_auth') === 'true' || localStorage.getItem('tabeeb_admin_auth') === 'true') && 
                      !!(sessionStorage.getItem('tabeeb_admin_token') || localStorage.getItem('tabeeb_admin_token'));
-      const secretSlug = (localStorage.getItem('tabeeb_admin_secret_slug') || 'tabeeb-7860').toLowerCase().trim();
+      const secretSlug = getStoredAdminSecretSlug();
 
       // Secret slug routing: if authenticated -> admin, if not authenticated -> stay home (modal will open)
       if (path === secretSlug || path === 'tabeeb-7860') {
@@ -462,7 +477,7 @@ export default function App() {
     else if (tab === 'qanoon') targetUrl = '/qanoon';
     else if (tab === 'herb-calculator') targetUrl = '/herb-calculator';
     else if (tab === 'admin') {
-      const currentSlug = (siteSettings?.adminSecretSlug || localStorage.getItem('tabeeb_admin_secret_slug') || 'tabeeb-7860').toLowerCase().trim();
+      const currentSlug = (siteSettings?.adminSecretSlug || getStoredAdminSecretSlug()).toLowerCase().trim();
       targetUrl = `/${currentSlug}`;
     }
     else if (tab === 'doctor-dashboard') targetUrl = '/doctor-dashboard';
@@ -566,7 +581,21 @@ export default function App() {
         if (liveSettings && typeof liveSettings === 'object' && liveSettings.siteName) {
           setSiteSettings(prev => ({ ...prev, ...liveSettings }));
           if (liveSettings.adminSecretSlug) {
-            try { localStorage.setItem('tabeeb_admin_secret_slug', liveSettings.adminSecretSlug); } catch(e) {}
+            const fetchedSlug = liveSettings.adminSecretSlug.toLowerCase().trim();
+            try { localStorage.setItem('tabeeb_admin_secret_slug', fetchedSlug); } catch(e) {}
+            const rawP = window.location.pathname.substring(1).replace(/\/$/, '');
+            let currP = '';
+            try { currP = decodeURIComponent(rawP).toLowerCase().trim(); } catch { currP = rawP.toLowerCase().trim(); }
+            if (currP === fetchedSlug || currP === 'tabeeb-7860') {
+              const isAuth = (sessionStorage.getItem('tabeeb_admin_auth') === 'true' || localStorage.getItem('tabeeb_admin_auth') === 'true') && 
+                             !!(sessionStorage.getItem('tabeeb_admin_token') || localStorage.getItem('tabeeb_admin_token'));
+              if (isAuth) {
+                setActiveTab('admin');
+              } else {
+                setActiveTab('home');
+                setIsAdminLoginOpen(true);
+              }
+            }
           }
         }
         const livePages = await fetchLivePages();
@@ -611,7 +640,7 @@ export default function App() {
       const rawPath = window.location.pathname.substring(1).replace(/\/$/, '');
       let path = '';
       try { path = decodeURIComponent(rawPath).toLowerCase().trim(); } catch { path = rawPath.toLowerCase().trim(); }
-      const secretSlug = (localStorage.getItem('tabeeb_admin_secret_slug') || 'tabeeb-7860').toLowerCase().trim();
+      const secretSlug = getStoredAdminSecretSlug();
       const isAuth = (sessionStorage.getItem('tabeeb_admin_auth') === 'true' || localStorage.getItem('tabeeb_admin_auth') === 'true') && 
                      !!(sessionStorage.getItem('tabeeb_admin_token') || localStorage.getItem('tabeeb_admin_token'));
       return !isAuth && (path === secretSlug || path === 'tabeeb-7860');
@@ -983,7 +1012,7 @@ export default function App() {
       }
 
       const normPath = path.toLowerCase().trim();
-      const secretSlug = (siteSettings?.adminSecretSlug || localStorage.getItem('tabeeb_admin_secret_slug') || 'tabeeb-7860').toLowerCase().trim();
+      const secretSlug = (siteSettings?.adminSecretSlug || getStoredAdminSecretSlug()).toLowerCase().trim();
       const isAuth = (sessionStorage.getItem('tabeeb_admin_auth') === 'true' || localStorage.getItem('tabeeb_admin_auth') === 'true') && 
                      !!(sessionStorage.getItem('tabeeb_admin_token') || localStorage.getItem('tabeeb_admin_token'));
 
@@ -1476,6 +1505,35 @@ export default function App() {
     };
   }, [activeTab, selectedArticle, selectedDoctor, selectedPage, selectedGlossaryTerm, seoConfig]);
 
+  // Dynamic Favicon Updater Hook
+  useEffect(() => {
+    const faviconHref = siteSettings?.faviconUrl || '/leaf.svg';
+    if (faviconHref) {
+      const oldIcons = document.querySelectorAll("link[rel*='icon']");
+      oldIcons.forEach(el => el.remove());
+
+      const link = document.createElement('link');
+      link.rel = 'icon';
+      link.href = faviconHref;
+      if (faviconHref.includes('.svg')) {
+        link.type = 'image/svg+xml';
+      } else if (faviconHref.includes('.png')) {
+        link.type = 'image/png';
+      } else if (faviconHref.includes('.ico')) {
+        link.type = 'image/x-icon';
+      }
+      document.head.appendChild(link);
+
+      let appleIcon = document.querySelector("link[rel='apple-touch-icon']");
+      if (!appleIcon) {
+        appleIcon = document.createElement('link');
+        appleIcon.rel = 'apple-touch-icon';
+        document.head.appendChild(appleIcon);
+      }
+      appleIcon.href = faviconHref;
+    }
+  }, [siteSettings?.faviconUrl]);
+
   // If currently in Full-Page Admin Mode:
   if (activeTab === 'admin') {
     // Admin Login Gate - watchdog will redirect unauthenticated visitors
@@ -1573,34 +1631,6 @@ export default function App() {
     if (siteSettings?.articleBlockSort !== 'oldest') homeArticles = homeArticles.reverse();
     const artLimit = (parseInt(artCols) || 4) * (parseInt(siteSettings?.articleBlockRows || '3') || 3);
 
-    useEffect(() => {
-      const faviconHref = siteSettings?.faviconUrl || '/leaf.svg';
-      if (faviconHref) {
-        // Remove existing icon tags to avoid browser cache/type mismatch
-        const oldIcons = document.querySelectorAll("link[rel*='icon']");
-        oldIcons.forEach(el => el.remove());
-
-        const link = document.createElement('link');
-        link.rel = 'icon';
-        link.href = faviconHref;
-        if (faviconHref.includes('.svg')) {
-          link.type = 'image/svg+xml';
-        } else if (faviconHref.includes('.png')) {
-          link.type = 'image/png';
-        } else if (faviconHref.includes('.ico')) {
-          link.type = 'image/x-icon';
-        }
-        document.head.appendChild(link);
-
-        let appleIcon = document.querySelector("link[rel='apple-touch-icon']");
-        if (!appleIcon) {
-          appleIcon = document.createElement('link');
-          appleIcon.rel = 'apple-touch-icon';
-          document.head.appendChild(appleIcon);
-        }
-        appleIcon.href = faviconHref;
-      }
-    }, [siteSettings?.faviconUrl]);
   return (
     <div className="min-h-screen flex flex-col bg-[#f8fafc] text-slate-800 antialiased selection:bg-blue-600 selection:text-white">
       {/* Dynamic SEO Meta & Schema.org Controller */}
