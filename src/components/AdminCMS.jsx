@@ -2720,7 +2720,7 @@ export default function AdminCMS({
             <div className="space-y-4">
               
               {/* WordPress Top Action Bar */}
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-lg">
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-xs">
                 <div className="flex items-center gap-2.5">
                   <button
                     type="button"
@@ -2728,14 +2728,14 @@ export default function AdminCMS({
                       setIsFullscreen(false);
                       setAdminTab('articles');
                     }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold transition-all border border-slate-700 font-simple"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200 font-simple"
                   >
-                    <ArrowRight className="w-3.5 h-3.5 text-blue-400" />
+                    <ArrowRight className="w-3.5 h-3.5 text-blue-600" />
                     <span>تمام مضامین</span>
                   </button>
-                  <span className="text-slate-700 hidden sm:inline">|</span>
+                  <span className="text-slate-300 hidden sm:inline">|</span>
                   <div className="hidden sm:block">
-                    <h2 className="text-xs sm:text-sm font-bold text-white font-simple">
+                    <h2 className="text-xs sm:text-sm font-bold text-slate-900 font-simple">
                       {editingArticleId ? 'مضمون میں ترمیم کریں (Post Editor)' : 'نیا اردو طبی مضمون تحریر کریں'}
                     </h2>
                   </div>
@@ -2751,7 +2751,7 @@ export default function AdminCMS({
                       setEditorMode(editorMode === 'preview' ? 'visual' : 'preview');
                     }}
                     className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all border font-simple ${
-                      editorMode === 'preview' ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-900 text-slate-300 hover:text-white border-slate-700'
+                      editorMode === 'preview' ? 'bg-blue-600 text-white border-blue-500 shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
                     }`}
                   >
                     <Eye className="w-4 h-4" />
@@ -2764,7 +2764,7 @@ export default function AdminCMS({
                       setArticleForm(prev => ({ ...prev, status: 'private' }));
                       handleSaveArticle();
                     }}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors font-simple border border-slate-700"
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors font-simple border border-slate-200"
                   >
                     ڈرافٹ محفوظ کریں
                   </button>
@@ -2772,7 +2772,7 @@ export default function AdminCMS({
                   <button
                     type="button"
                     onClick={handleSaveArticle}
-                    className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-900/30 transition-all font-simple"
+                    className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all font-simple"
                   >
                     <Save className="w-4 h-4" />
                     <span>{editingArticleId ? 'تبدیلیاں محفوظ کریں (Update)' : 'پبلش کریں (Publish)'}</span>
@@ -2789,9 +2789,9 @@ export default function AdminCMS({
                 <div className="flex-1 min-w-0 w-full space-y-3.5">
                   
                   {/* Title Input & Permalink Bar (WordPress Style) */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-lg space-y-2.5">
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-3.5 sm:p-4 shadow-xs space-y-2.5">
                     <div>
-                      <label className="text-xs font-bold text-slate-400 block mb-1 font-simple">
+                      <label className="text-xs font-bold text-slate-700 block mb-1 font-simple">
                         عنوان (Add Title) *
                       </label>
                       <input
@@ -2807,16 +2807,16 @@ export default function AdminCMS({
                           }));
                         }}
                         placeholder="یہاں مضمون کا تفصیلی عنوان درج کریں (Add Title)..."
-                        className="w-full bg-slate-900 border border-slate-700 focus:border-blue-500 rounded-xl p-2.5 sm:p-3 text-lg sm:text-xl font-bold text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 font-simple transition-all shadow-inner"
+                        className="w-full bg-slate-50 border border-slate-300 focus:border-blue-500 rounded-xl p-2.5 sm:p-3 text-lg sm:text-xl font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 font-simple transition-all shadow-xs"
                       />
                     </div>
 
                     {/* WordPress-Style Interactive Permalink Bar */}
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-300 font-sans px-0.5 pt-1.5 border-t border-slate-800/80">
-                      <span className="font-bold text-slate-400 font-simple">مستقل لنک (Permalink):</span>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600 font-sans px-0.5 pt-1.5 border-t border-slate-200">
+                      <span className="font-bold text-slate-700 font-simple">مستقل لنک (Permalink):</span>
                       
-                      <div className="flex items-center gap-1 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800 text-[11px] font-mono dir-ltr">
-                        <span className="text-slate-400 select-none">https://tabeebpedia.com/articles/</span>
+                      <div className="flex items-center gap-1 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200 text-[11px] font-mono dir-ltr">
+                        <span className="text-slate-500 select-none">https://tabeebpedia.com/articles/</span>
                         
                         {isEditingSlug ? (
                           <div className="flex items-center gap-1.5">
@@ -2825,7 +2825,7 @@ export default function AdminCMS({
                               value={tempSlug}
                               onChange={(e) => setTempSlug(e.target.value.toLowerCase().replace(/[\s_]+/g, '-'))}
                               placeholder="custom-slug"
-                              className="bg-slate-950 border border-blue-500 rounded px-2 py-0.5 text-xs text-emerald-300 font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 min-w-[150px]"
+                              className="bg-white border border-blue-500 rounded px-2 py-0.5 text-xs text-blue-700 font-mono focus:outline-none focus:ring-1 focus:ring-blue-400 min-w-[150px] shadow-xs"
                               autoFocus
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
@@ -2847,7 +2847,7 @@ export default function AdminCMS({
                                 setIsEditingSlug(false);
                                 showNotification('پرما لنک محفوظ ہو گیا');
                               }}
-                              className="px-2.5 py-0.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-[11px] font-bold font-simple transition-colors"
+                              className="px-2.5 py-0.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-[11px] font-bold font-simple transition-colors shadow-xs"
                             >
                               OK (محفوظ کریں)
                             </button>
@@ -2857,13 +2857,13 @@ export default function AdminCMS({
                                 setTempSlug(articleForm.slug);
                                 setIsEditingSlug(false);
                               }}
-                              className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded text-[11px] font-simple transition-colors"
+                              className="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 rounded text-[11px] font-simple transition-colors"
                             >
                               منسوخ
                             </button>
                           </div>
                         ) : (
-                          <span className="font-bold text-emerald-400 px-1 select-all font-mono">
+                          <span className="font-bold text-emerald-700 px-1 select-all font-mono">
                             {articleForm.slug || generateSlugFromTitle(articleForm.title) || 'untitled-article'}
                           </span>
                         )}
@@ -2877,7 +2877,7 @@ export default function AdminCMS({
                               setTempSlug(articleForm.slug || generateSlugFromTitle(articleForm.title));
                               setIsEditingSlug(true);
                             }}
-                            className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-blue-300 hover:text-white rounded-lg border border-slate-700 text-xs font-bold transition-colors flex items-center gap-1"
+                            className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-blue-700 hover:text-blue-800 rounded-lg border border-slate-200 text-xs font-bold transition-colors flex items-center gap-1"
                             title="پرما لنک اپنی مرضی سے ایڈٹ کریں"
                           >
                             <Edit3 className="w-3 h-3" />
@@ -2892,7 +2892,7 @@ export default function AdminCMS({
                               setTempSlug(autoSlug);
                               showNotification('پرما لنک عنوان کے مطابق خودکار ری سیٹ ہو گیا');
                             }}
-                            className="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-400 hover:text-slate-200 rounded-lg border border-slate-800 text-[11px] transition-colors"
+                            className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg border border-slate-200 text-[11px] transition-colors"
                             title="عنوان کے مطابق خودکار ری سیٹ کریں"
                           >
                             خودکار ری سیٹ
@@ -2908,7 +2908,7 @@ export default function AdminCMS({
                                   navigator.clipboard.writeText(fullUrl);
                                   showNotification('مکمل پرما لنک کاپی ہو گیا!');
                                 }}
-                                className="px-2 py-1 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg border border-slate-800 text-[11px] transition-colors flex items-center gap-1"
+                                className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg border border-slate-200 text-[11px] transition-colors flex items-center gap-1"
                                 title="لنک کاپی کریں"
                               >
                                 <Copy className="w-3 h-3" />
@@ -2919,7 +2919,7 @@ export default function AdminCMS({
                                 href={`?article=${articleForm.slug || editingArticleId || generateSlugFromTitle(articleForm.title)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 hover:text-white rounded-lg border border-emerald-500/40 text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                                className="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg border border-emerald-200 text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
                                 title="مضمون کو نئی ونڈو / ٹیب میں لائیو کھولیں"
                               >
                                 <ExternalLink className="w-3.5 h-3.5" />
@@ -2933,13 +2933,13 @@ export default function AdminCMS({
                   </div>
 
                   {/* 2. ADVANCED WORDPRESS / TINYMCE VISUAL WYSIWYG EDITOR COMPONENT */}
-                  <div className="border border-slate-700 bg-slate-900 rounded-2xl shadow-xl relative">
+                  <div className="border border-slate-200 bg-white rounded-2xl shadow-xs relative">
                   
                   {/* STICKY TOP TOOLBAR HEADER - Stays pinned to top when scrolling down */}
-                  <div className="sticky top-0 z-30 bg-slate-950/95 backdrop-blur-md rounded-t-2xl border-b border-slate-700 shadow-md">
+                  <div className="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-md rounded-t-2xl border-b border-slate-200 shadow-xs">
                     
                     {/* Top Action Bar with Add Media, Add Form, Quick Save, and Visual/Code switches */}
-                    <div className="flex flex-wrap items-center justify-between gap-1.5 p-1.5 px-3 border-b border-slate-800/80">
+                    <div className="flex flex-wrap items-center justify-between gap-1.5 p-1.5 px-3 border-b border-slate-200">
                       
                       {/* Left Quick Inserters: Add Media & Add Form */}
                       <div className="flex items-center gap-1.5">
@@ -2950,9 +2950,9 @@ export default function AdminCMS({
                             saveCurrentSelection();
                             setShowMediaModal(true);
                           }}
-                          className="flex items-center gap-1 px-2.5 py-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/40 rounded-lg text-xs font-bold transition-all shadow-xs font-simple"
+                          className="flex items-center gap-1 px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold transition-all shadow-xs font-simple"
                         >
-                          <ImageIcon className="w-3.5 h-3.5 text-blue-400" />
+                          <ImageIcon className="w-3.5 h-3.5 text-blue-600" />
                           <span>Add Media (میڈیا)</span>
                         </button>
 
@@ -2963,9 +2963,9 @@ export default function AdminCMS({
                             saveCurrentSelection();
                             setShowFormModal(true);
                           }}
-                          className="flex items-center gap-1 px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 rounded-lg text-xs font-bold transition-all shadow-xs font-simple"
+                          className="flex items-center gap-1 px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition-all shadow-xs font-simple"
                         >
-                          <CheckSquare className="w-3.5 h-3.5 text-emerald-400" />
+                          <CheckSquare className="w-3.5 h-3.5 text-emerald-600" />
                           <span>Add Form (فارم)</span>
                         </button>
                       </div>
@@ -2982,7 +2982,7 @@ export default function AdminCMS({
                           <span>محفوظ کریں</span>
                         </button>
 
-                        <div className="flex items-center gap-0.5 bg-slate-900 p-0.5 rounded-lg text-xs font-simple border border-slate-800">
+                        <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded-lg text-xs font-simple border border-slate-200">
                           <button
                             type="button"
                             onClick={() => {
@@ -2991,7 +2991,7 @@ export default function AdminCMS({
                               }
                               setEditorMode('visual');
                             }}
-                            className={`px-2.5 py-0.5 rounded-md transition-colors font-bold ${editorMode === 'visual' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'}`}
+                            className={`px-2.5 py-0.5 rounded-md transition-colors font-bold ${editorMode === 'visual' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
                           >
                             Visual (ویژول)
                           </button>
@@ -3004,7 +3004,7 @@ export default function AdminCMS({
                               }
                               setEditorMode('code');
                             }}
-                            className={`px-2.5 py-0.5 rounded-md transition-colors font-bold ${editorMode === 'code' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'}`}
+                            className={`px-2.5 py-0.5 rounded-md transition-colors font-bold ${editorMode === 'code' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
                           >
                             Code (کوڈ)
                           </button>
@@ -3017,7 +3017,7 @@ export default function AdminCMS({
                               }
                               setEditorMode('preview');
                             }}
-                            className={`px-2.5 py-0.5 rounded-md transition-colors font-bold ${editorMode === 'preview' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'}`}
+                            className={`px-2.5 py-0.5 rounded-md transition-colors font-bold ${editorMode === 'preview' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
                           >
                             Preview (پریویو)
                           </button>
@@ -3030,7 +3030,7 @@ export default function AdminCMS({
                     {/* Appears smoothly when an image inside the editor is clicked */}
                     {/* ========================================================= */}
                     {selectedImgElement && (
-                      <div className="bg-gradient-to-r from-blue-950 via-slate-900 to-indigo-950 border-b-2 border-blue-500 p-3 shadow-2xl flex flex-wrap items-center justify-between gap-3 text-xs z-30 animate-in slide-in-from-top-2 duration-200 font-simple">
+                      <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-slate-50 border-b-2 border-blue-500 p-3 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs z-30 animate-in slide-in-from-top-2 duration-200 font-simple">
                         
                         {/* Image Identifier */}
                         <div className="flex items-center gap-2">
@@ -3038,14 +3038,14 @@ export default function AdminCMS({
                               <img src={selectedImgProps.src} alt="thumbnail" className="w-full h-full object-cover" />
                             </div>
                             <div>
-                              <span className="font-bold text-white block">تصویر منتخب ہے:</span>
-                              <span className="text-[10px] text-blue-300 font-sans">{selectedImgProps.widthPercent}% چوڑائی • {selectedImgProps.align}</span>
+                              <span className="font-bold text-slate-900 block">تصویر منتخب ہے:</span>
+                              <span className="text-[10px] text-blue-700 font-sans">{selectedImgProps.widthPercent}% چوڑائی • {selectedImgProps.align}</span>
                             </div>
                           </div>
 
                           {/* Quick Size Buttons & Live Slider */}
-                          <div className="flex items-center gap-2 bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-700">
-                            <span className="text-slate-300 font-bold">سائز:</span>
+                          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs">
+                            <span className="text-slate-700 font-bold">سائز:</span>
                             {[25, 50, 75, 100].map(pct => (
                               <button
                                 key={pct}
@@ -3053,8 +3053,8 @@ export default function AdminCMS({
                                 onClick={() => applyImageWidth(pct)}
                                 className={`px-2 py-0.5 rounded-lg text-xs font-sans font-bold transition-all ${
                                   selectedImgProps.widthPercent === pct 
-                                    ? 'bg-blue-600 text-white ring-2 ring-blue-400' 
-                                    : 'bg-slate-800 text-slate-300 hover:text-white'
+                                    ? 'bg-blue-600 text-white shadow-xs' 
+                                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                                 }`}
                               >
                                 {pct}%
@@ -3068,20 +3068,20 @@ export default function AdminCMS({
                                 max="100"
                                 value={selectedImgProps.widthPercent}
                                 onChange={(e) => applyImageWidth(Number(e.target.value))}
-                                className="w-20 accent-blue-500 cursor-pointer"
+                                className="w-20 accent-blue-600 cursor-pointer"
                                 title="اپنی مرضی کا سائز سلائیڈ کریں"
                               />
                             </div>
                           </div>
 
                           {/* Quick Alignment Buttons */}
-                          <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-700">
-                            <span className="text-slate-300 font-bold px-1.5">پوزیشن:</span>
+                          <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs">
+                            <span className="text-slate-700 font-bold px-1.5">پوزیشن:</span>
                             
                             <button
                               type="button"
                               onClick={() => applyImageAlign('right')}
-                              className={`px-2 py-1 rounded-lg text-xs transition-colors font-bold ${selectedImgProps.align === 'right' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 text-slate-300'}`}
+                              className={`px-2 py-1 rounded-lg text-xs transition-colors font-bold ${selectedImgProps.align === 'right' ? 'bg-blue-600 text-white' : 'hover:bg-slate-100 text-slate-700'}`}
                               title="دائیں طرف رکھیں اور ٹیکسٹ بائیں لپٹائیں (Float Right)"
                             >
                               ⬅ دائیں ریپ
@@ -3090,7 +3090,7 @@ export default function AdminCMS({
                             <button
                               type="button"
                               onClick={() => applyImageAlign('center')}
-                              className={`px-2 py-1 rounded-lg text-xs transition-colors font-bold ${selectedImgProps.align === 'center' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 text-slate-300'}`}
+                              className={`px-2 py-1 rounded-lg text-xs transition-colors font-bold ${selectedImgProps.align === 'center' ? 'bg-blue-600 text-white' : 'hover:bg-slate-100 text-slate-700'}`}
                               title="درمیان میں رکھیں (Center Block)"
                             >
                               ⬛ درمیان
@@ -3099,7 +3099,7 @@ export default function AdminCMS({
                             <button
                               type="button"
                               onClick={() => applyImageAlign('left')}
-                              className={`px-2 py-1 rounded-lg text-xs transition-colors font-bold ${selectedImgProps.align === 'left' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 text-slate-300'}`}
+                              className={`px-2 py-1 rounded-lg text-xs transition-colors font-bold ${selectedImgProps.align === 'left' ? 'bg-blue-600 text-white' : 'hover:bg-slate-100 text-slate-700'}`}
                               title="بائیں طرف رکھیں اور ٹیکسٹ دائیں لپٹائیں (Float Left)"
                             >
                               ➡ بائیں ریپ
@@ -3108,7 +3108,7 @@ export default function AdminCMS({
                             <button
                               type="button"
                               onClick={() => applyImageAlign('full')}
-                              className={`px-2 py-1 rounded-lg text-xs transition-colors font-bold ${selectedImgProps.align === 'full' ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 text-slate-300'}`}
+                              className={`px-2 py-1 rounded-lg text-xs transition-colors font-bold ${selectedImgProps.align === 'full' ? 'bg-blue-600 text-white' : 'hover:bg-slate-100 text-slate-700'}`}
                               title="فل اسکرین بینر (Full Width 100%)"
                             >
                               ↔ فل بینر
@@ -3116,8 +3116,8 @@ export default function AdminCMS({
                           </div>
 
                           {/* Rounded Corner Styles */}
-                          <div className="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-700">
-                            <span className="text-slate-300 font-bold px-1">گولائی:</span>
+                          <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs">
+                            <span className="text-slate-700 font-bold px-1">گولائی:</span>
                             {[
                               { label: 'سادہ', val: '0px' },
                               { label: 'نرم', val: '12px' },
@@ -3127,7 +3127,7 @@ export default function AdminCMS({
                                 key={item.val}
                                 type="button"
                                 onClick={() => applyImageRadius(item.val)}
-                                className={`px-2 py-0.5 rounded-lg text-xs transition-colors ${selectedImgProps.borderRadius === item.val ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800 text-slate-300'}`}
+                                className={`px-2 py-0.5 rounded-lg text-xs transition-colors ${selectedImgProps.borderRadius === item.val ? 'bg-blue-600 text-white font-bold shadow-xs' : 'hover:bg-slate-100 text-slate-700'}`}
                               >
                                 {item.label}
                               </button>
@@ -3139,7 +3139,7 @@ export default function AdminCMS({
                             <button
                               type="button"
                               onClick={() => replaceImageFileInputRef.current?.click()}
-                              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-blue-300 rounded-lg text-xs font-bold transition-colors flex items-center gap-1"
+                              className="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1"
                               title="کمپیوٹر سے نئی تصویر منتخب کریں"
                             >
                               <RefreshCw className="w-3.5 h-3.5" />
@@ -3149,7 +3149,7 @@ export default function AdminCMS({
                             <button
                               type="button"
                               onClick={handleDeleteSelectedImage}
-                              className="px-2.5 py-1 bg-red-950 hover:bg-red-900 text-red-300 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 border border-red-800"
+                              className="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 border border-rose-200"
                               title="تصویر مضمون سے ڈیلیٹ کریں"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -3162,7 +3162,7 @@ export default function AdminCMS({
                                 if (selectedImgElement) selectedImgElement.style.outline = 'none';
                                 setSelectedImgElement(null);
                               }}
-                              className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
+                              className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100"
                               title="سلیکشن بند کریں"
                             >
                               <X className="w-4 h-4" />
@@ -3175,10 +3175,10 @@ export default function AdminCMS({
                     {/* ========================================================= */}
                     {/* UNIFIED COMPACT FORMATTING TOOLBAR (Single Modern Row) */}
                     {/* ========================================================= */}
-                    <div className="bg-slate-900/95 px-2 py-1.5 border-b border-slate-800 flex flex-wrap items-center gap-1 text-xs text-slate-300 select-none">
+                    <div className="bg-slate-100/95 px-2 py-1.5 border-b border-slate-200 flex flex-wrap items-center gap-1 text-xs text-slate-700 select-none">
                       
                       {/* 1. Format / Heading Dropdown */}
-                      <div className="flex items-center gap-0.5 bg-slate-800 px-1.5 py-0.5 rounded-lg border border-slate-700 font-simple">
+                      <div className="flex items-center gap-0.5 bg-white px-1.5 py-0.5 rounded-lg border border-slate-300 font-simple shadow-xs">
                         <select
                           value={activeFormats.heading}
                           onChange={(e) => {
@@ -3191,66 +3191,66 @@ export default function AdminCMS({
                               execCmd('formatBlock', `<${tag}>`);
                             }
                           }}
-                          className="bg-transparent border-0 text-xs text-white focus:outline-none cursor-pointer font-bold pr-0.5"
+                          className="bg-transparent border-0 text-xs text-slate-800 focus:outline-none cursor-pointer font-bold pr-0.5"
                           title="ہیڈنگ یا پیراگراف منتخب کریں"
                         >
-                          <option value="p" className="bg-slate-900 text-white">Paragraph (نارمل متن)</option>
-                          <option value="h1" className="bg-slate-900 text-white">Heading 1 (مین سرخی)</option>
-                          <option value="h2" className="bg-slate-900 text-white">Heading 2 (بڑی سرخی)</option>
-                          <option value="h3" className="bg-slate-900 text-white">Heading 3 (درمیانی سرخی)</option>
-                          <option value="h4" className="bg-slate-900 text-white">Heading 4 (چھوٹی سرخی)</option>
-                          <option value="blockquote" className="bg-slate-900 text-white">Quote (اقتباس)</option>
-                          <option value="pre" className="bg-slate-900 text-white">Preformatted</option>
+                          <option value="p" className="bg-white text-slate-800">Paragraph (نارمل متن)</option>
+                          <option value="h1" className="bg-white text-slate-800">Heading 1 (مین سرخی)</option>
+                          <option value="h2" className="bg-white text-slate-800">Heading 2 (بڑی سرخی)</option>
+                          <option value="h3" className="bg-white text-slate-800">Heading 3 (درمیانی سرخی)</option>
+                          <option value="h4" className="bg-white text-slate-800">Heading 4 (چھوٹی سرخی)</option>
+                          <option value="blockquote" className="bg-white text-slate-800">Quote (اقتباس)</option>
+                          <option value="pre" className="bg-white text-slate-800">Preformatted</option>
                         </select>
                       </div>
 
                       {/* 2. Font Family Dropdown */}
-                      <div className="flex items-center gap-0.5 bg-slate-800 px-1.5 py-0.5 rounded-lg border border-slate-700">
-                        <Type className="w-3 h-3 text-blue-400 shrink-0" />
+                      <div className="flex items-center gap-0.5 bg-white px-1.5 py-0.5 rounded-lg border border-slate-300 shadow-xs">
+                        <Type className="w-3 h-3 text-blue-600 shrink-0" />
                         <select
                           value={editorFont}
                           onMouseDown={() => saveCurrentSelection()}
                           onFocus={() => saveCurrentSelection()}
                           onChange={(e) => applyFontFamily(e.target.value)}
-                          className="bg-transparent border-0 text-xs text-white focus:outline-none cursor-pointer pr-0.5 font-simple font-bold"
+                          className="bg-transparent border-0 text-xs text-slate-800 focus:outline-none cursor-pointer pr-0.5 font-simple font-bold"
                           title="فونٹ کا انداز تبدیل کریں"
                         >
-                          <option value="nastaliq" className="bg-slate-900 text-white">نستعلیق (Noto Nastaliq)</option>
-                          <option value="almarai" className="bg-slate-900 text-white">المری سادہ (Almarai)</option>
-                          <option value="tajawal" className="bg-slate-900 text-white">تجوال (Tajawal)</option>
-                          <option value="cairo" className="bg-slate-900 text-white">قاہرہ (Cairo)</option>
-                          <option value="segoe" className="bg-slate-900 text-white">Segoe UI</option>
-                          <option value="georgia" className="bg-slate-900 text-white">Georgia</option>
-                          <option value="arial" className="bg-slate-900 text-white">Arial</option>
-                          <option value="times" className="bg-slate-900 text-white">Times New Roman</option>
+                          <option value="nastaliq" className="bg-white text-slate-800">نستعلیق (Noto Nastaliq)</option>
+                          <option value="almarai" className="bg-white text-slate-800">المری سادہ (Almarai)</option>
+                          <option value="tajawal" className="bg-white text-slate-800">تجوال (Tajawal)</option>
+                          <option value="cairo" className="bg-white text-slate-800">قاہرہ (Cairo)</option>
+                          <option value="segoe" className="bg-white text-slate-800">Segoe UI</option>
+                          <option value="georgia" className="bg-white text-slate-800">Georgia</option>
+                          <option value="arial" className="bg-white text-slate-800">Arial</option>
+                          <option value="times" className="bg-white text-slate-800">Times New Roman</option>
                         </select>
                       </div>
 
                       {/* 3. Font Size Dropdown (Default 14px) */}
-                      <div className="flex items-center gap-0.5 bg-slate-800 px-1.5 py-0.5 rounded-lg border border-slate-700">
-                        <span className="text-[10px] text-slate-400 font-sans">سائز:</span>
+                      <div className="flex items-center gap-0.5 bg-white px-1.5 py-0.5 rounded-lg border border-slate-300 shadow-xs">
+                        <span className="text-[10px] text-slate-500 font-sans">سائز:</span>
                         <select
                           value={editorFontSize}
                           onMouseDown={() => saveCurrentSelection()}
                           onFocus={() => saveCurrentSelection()}
                           onChange={(e) => applyFontSize(e.target.value)}
-                          className="bg-transparent border-0 text-xs text-white focus:outline-none cursor-pointer pr-0.5 font-sans font-bold"
+                          className="bg-transparent border-0 text-xs text-slate-800 focus:outline-none cursor-pointer pr-0.5 font-sans font-bold"
                           title="فونٹ سائز تبدیل کریں"
                         >
-                          <option value="12px" className="bg-slate-900 text-white">12px</option>
-                          <option value="14px" className="bg-slate-900 text-white">14px (معیاری)</option>
-                          <option value="16px" className="bg-slate-900 text-white">16px</option>
-                          <option value="18px" className="bg-slate-900 text-white">18px</option>
-                          <option value="20px" className="bg-slate-900 text-white">20px</option>
-                          <option value="24px" className="bg-slate-900 text-white">24px</option>
-                          <option value="28px" className="bg-slate-900 text-white">28px</option>
-                          <option value="32px" className="bg-slate-900 text-white">32px</option>
-                          <option value="36px" className="bg-slate-900 text-white">36px</option>
-                          <option value="48px" className="bg-slate-900 text-white">48px</option>
+                          <option value="12px" className="bg-white text-slate-800">12px</option>
+                          <option value="14px" className="bg-white text-slate-800">14px (معیاری)</option>
+                          <option value="16px" className="bg-white text-slate-800">16px</option>
+                          <option value="18px" className="bg-white text-slate-800">18px</option>
+                          <option value="20px" className="bg-white text-slate-800">20px</option>
+                          <option value="24px" className="bg-white text-slate-800">24px</option>
+                          <option value="28px" className="bg-white text-slate-800">28px</option>
+                          <option value="32px" className="bg-white text-slate-800">32px</option>
+                          <option value="36px" className="bg-white text-slate-800">36px</option>
+                          <option value="48px" className="bg-white text-slate-800">48px</option>
                         </select>
                       </div>
 
-                      <div className="h-4 w-px bg-slate-700 mx-0.5" />
+                      <div className="h-4 w-px bg-slate-300 mx-0.5" />
 
                       {/* 4. Text Styles: Bold, Italic, Underline, Strikethrough */}
                       <button
@@ -3258,8 +3258,8 @@ export default function AdminCMS({
                         onClick={() => execCmd('bold')}
                         className={`p-1 rounded-md transition-all ${
                           activeFormats.bold 
-                            ? 'bg-blue-600 text-white font-bold ring-1 ring-blue-400' 
-                            : 'hover:bg-slate-800 text-white'
+                            ? 'bg-blue-600 text-white font-bold shadow-xs' 
+                            : 'hover:bg-slate-200 text-slate-700'
                         }`}
                         title="بولڈ (Bold: Ctrl+B)"
                       >
@@ -3271,8 +3271,8 @@ export default function AdminCMS({
                         onClick={() => execCmd('italic')}
                         className={`p-1 rounded-md transition-all ${
                           activeFormats.italic 
-                            ? 'bg-blue-600 text-white font-bold ring-1 ring-blue-400' 
-                            : 'hover:bg-slate-800 text-white'
+                            ? 'bg-blue-600 text-white font-bold shadow-xs' 
+                            : 'hover:bg-slate-200 text-slate-700'
                         }`}
                         title="اٹالک (Italic: Ctrl+I)"
                       >
@@ -3284,8 +3284,8 @@ export default function AdminCMS({
                         onClick={() => execCmd('underline')}
                         className={`p-1 rounded-md transition-all ${
                           activeFormats.underline 
-                            ? 'bg-blue-600 text-white font-bold ring-1 ring-blue-400' 
-                            : 'hover:bg-slate-800 text-white'
+                            ? 'bg-blue-600 text-white font-bold shadow-xs' 
+                            : 'hover:bg-slate-200 text-slate-700'
                         }`}
                         title="انڈر لائن (Underline: Ctrl+U)"
                       >
@@ -3297,19 +3297,19 @@ export default function AdminCMS({
                         onClick={() => execCmd('strikeThrough')}
                         className={`p-1 rounded-md transition-all ${
                           activeFormats.strike 
-                            ? 'bg-blue-600 text-white font-bold ring-1 ring-blue-400' 
-                            : 'hover:bg-slate-800 text-white'
+                            ? 'bg-blue-600 text-white font-bold shadow-xs' 
+                            : 'hover:bg-slate-200 text-slate-700'
                         }`}
                         title="اسٹرائیک تھرو (Strikethrough)"
                       >
                         <Strikethrough className="w-3.5 h-3.5" />
                       </button>
 
-                      <div className="h-4 w-px bg-slate-700 mx-0.5" />
+                      <div className="h-4 w-px bg-slate-300 mx-0.5" />
 
                       {/* 5. Colors: Text Color & Highlight */}
-                      <div className="flex items-center gap-1 bg-slate-800 px-1.5 py-0.5 rounded-md" title="ٹیکسٹ کا رنگ (Text Color)">
-                        <span className="font-extrabold font-serif text-xs text-amber-400">A</span>
+                      <div className="flex items-center gap-1 bg-white border border-slate-300 px-1.5 py-0.5 rounded-md shadow-xs" title="ٹیکسٹ کا رنگ (Text Color)">
+                        <span className="font-extrabold font-serif text-xs text-amber-600">A</span>
                         <input
                           type="color"
                           defaultValue="#0f172a"
@@ -3318,8 +3318,8 @@ export default function AdminCMS({
                         />
                       </div>
 
-                      <div className="flex items-center gap-1 bg-slate-800 px-1.5 py-0.5 rounded-md" title="ہائی لائٹر رنگ (Highlight Color)">
-                        <Highlighter className="w-3 h-3 text-yellow-300" />
+                      <div className="flex items-center gap-1 bg-white border border-slate-300 px-1.5 py-0.5 rounded-md shadow-xs" title="ہائی لائٹر رنگ (Highlight Color)">
+                        <Highlighter className="w-3 h-3 text-amber-500" />
                         <input
                           type="color"
                           defaultValue="#fef08a"
@@ -3328,14 +3328,14 @@ export default function AdminCMS({
                         />
                       </div>
 
-                      <div className="h-4 w-px bg-slate-700 mx-0.5" />
+                      <div className="h-4 w-px bg-slate-300 mx-0.5" />
 
                       {/* 6. Alignment */}
                       <button
                         type="button"
                         onClick={() => execCmd('justifyRight')}
                         className={`p-1 rounded-md transition-all ${
-                          activeFormats.align === 'right' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800 text-white'
+                          activeFormats.align === 'right' ? 'bg-blue-600 text-white font-bold shadow-xs' : 'hover:bg-slate-200 text-slate-700'
                         }`}
                         title="دائیں سے الائن (Right Align)"
                       >
@@ -3346,7 +3346,7 @@ export default function AdminCMS({
                         type="button"
                         onClick={() => execCmd('justifyCenter')}
                         className={`p-1 rounded-md transition-all ${
-                          activeFormats.align === 'center' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800 text-white'
+                          activeFormats.align === 'center' ? 'bg-blue-600 text-white font-bold shadow-xs' : 'hover:bg-slate-200 text-slate-700'
                         }`}
                         title="درمیان الائن (Center Align)"
                       >
@@ -3357,7 +3357,7 @@ export default function AdminCMS({
                         type="button"
                         onClick={() => execCmd('justifyLeft')}
                         className={`p-1 rounded-md transition-all ${
-                          activeFormats.align === 'left' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800 text-white'
+                          activeFormats.align === 'left' ? 'bg-blue-600 text-white font-bold shadow-xs' : 'hover:bg-slate-200 text-slate-700'
                         }`}
                         title="بائیں سے الائن (Left Align)"
                       >
@@ -3368,7 +3368,7 @@ export default function AdminCMS({
                         type="button"
                         onClick={() => execCmd('justifyFull')}
                         className={`p-1 rounded-md transition-all ${
-                          activeFormats.align === 'justify' ? 'bg-blue-600 text-white font-bold' : 'hover:bg-slate-800 text-white'
+                          activeFormats.align === 'justify' ? 'bg-blue-600 text-white font-bold shadow-xs' : 'hover:bg-slate-200 text-slate-700'
                         }`}
                         title="مکمل پھیلاؤ (Justify Full)"
                       >
@@ -3379,7 +3379,7 @@ export default function AdminCMS({
                       <button
                         type="button"
                         onClick={() => setDirection('rtl')}
-                        className="p-1 hover:bg-slate-800 rounded-md text-emerald-400 font-bold"
+                        className="p-1 hover:bg-slate-200 rounded-md text-emerald-600 font-bold"
                         title="دائیں سے بائیں تحریر (RTL Direction)"
                       >
                         <span className="text-[11px] font-mono">¶⮞</span>
@@ -3387,20 +3387,20 @@ export default function AdminCMS({
                       <button
                         type="button"
                         onClick={() => setDirection('ltr')}
-                        className="p-1 hover:bg-slate-800 rounded-md text-blue-400 font-bold"
+                        className="p-1 hover:bg-slate-200 rounded-md text-blue-600 font-bold"
                         title="بائیں سے دائیں تحریر (LTR Direction)"
                       >
                         <span className="text-[11px] font-mono">⮜¶</span>
                       </button>
 
-                      <div className="h-4 w-px bg-slate-700 mx-0.5" />
+                      <div className="h-4 w-px bg-slate-300 mx-0.5" />
 
                       {/* 7. Lists & Indentation */}
                       <button
                         type="button"
                         onClick={() => execCmd('insertUnorderedList')}
                         className={`p-1 rounded-md transition-all ${
-                          activeFormats.ul ? 'bg-blue-600 text-white font-bold ring-1 ring-blue-400' : 'hover:bg-slate-800 text-white'
+                          activeFormats.ul ? 'bg-blue-600 text-white font-bold shadow-xs' : 'hover:bg-slate-200 text-slate-700'
                         }`}
                         title="غیر ترتیبی فہرست (Bulleted List)"
                       >
@@ -3411,7 +3411,7 @@ export default function AdminCMS({
                         type="button"
                         onClick={() => execCmd('insertOrderedList')}
                         className={`p-1 rounded-md transition-all ${
-                          activeFormats.ol ? 'bg-blue-600 text-white font-bold ring-1 ring-blue-400' : 'hover:bg-slate-800 text-white'
+                          activeFormats.ol ? 'bg-blue-600 text-white font-bold shadow-xs' : 'hover:bg-slate-200 text-slate-700'
                         }`}
                         title="نمبر وار فہرست (Numbered List)"
                       >
@@ -3421,16 +3421,16 @@ export default function AdminCMS({
                       <button
                         type="button"
                         onClick={() => execCmd('formatBlock', '<blockquote>')}
-                        className="p-1 hover:bg-slate-800 rounded-md text-white"
+                        className="p-1 hover:bg-slate-200 rounded-md text-slate-700"
                         title="اقتباس بلاک (Blockquote)"
                       >
-                        <Quote className="w-3.5 h-3.5 text-amber-400" />
+                        <Quote className="w-3.5 h-3.5 text-amber-600" />
                       </button>
 
                       <button
                         type="button"
                         onClick={() => execCmd('indent')}
-                        className="p-1 hover:bg-slate-800 rounded-md text-slate-300"
+                        className="p-1 hover:bg-slate-200 rounded-md text-slate-700"
                         title="انڈینٹ آگے بڑھائیں (Increase Indent)"
                       >
                         <Indent className="w-3.5 h-3.5" />
@@ -3439,7 +3439,7 @@ export default function AdminCMS({
                       <button
                         type="button"
                         onClick={() => execCmd('outdent')}
-                        className="p-1 hover:bg-slate-800 rounded-md text-slate-300"
+                        className="p-1 hover:bg-slate-200 rounded-md text-slate-700"
                         title="انڈینٹ پیچھے ہٹائیں (Decrease Indent)"
                       >
                         <Outdent className="w-3.5 h-3.5" />
@@ -3448,13 +3448,13 @@ export default function AdminCMS({
                       <button
                         type="button"
                         onClick={() => execCmd('insertHorizontalRule')}
-                        className="p-1 hover:bg-slate-800 rounded-md text-slate-300"
+                        className="p-1 hover:bg-slate-200 rounded-md text-slate-700"
                         title="افقی لکیر (Horizontal Divider)"
                       >
                         <Minus className="w-3.5 h-3.5" />
                       </button>
 
-                      <div className="h-4 w-px bg-slate-700 mx-0.5" />
+                      <div className="h-4 w-px bg-slate-300 mx-0.5" />
 
                       {/* 8. Media, Links, Tables, Symbols */}
                       <button
@@ -3464,7 +3464,7 @@ export default function AdminCMS({
                           saveCurrentSelection();
                           setShowMediaModal(true);
                         }}
-                        className="p-1 hover:bg-slate-800 rounded-md text-emerald-400"
+                        className="p-1 hover:bg-slate-200 rounded-md text-emerald-600"
                         title="تصویر شامل کریں (Insert Image)"
                       >
                         <ImageIcon className="w-3.5 h-3.5" />
@@ -3473,7 +3473,7 @@ export default function AdminCMS({
                       <button
                         type="button"
                         onClick={handleInsertLink}
-                        className="p-1 hover:bg-slate-800 rounded-md text-blue-300"
+                        className="p-1 hover:bg-slate-200 rounded-md text-blue-600"
                         title="ویب لنک لگائیں (Insert Link)"
                       >
                         <LinkIcon className="w-3.5 h-3.5" />
@@ -3482,7 +3482,7 @@ export default function AdminCMS({
                       <button
                         type="button"
                         onClick={() => execCmd('unlink')}
-                        className="p-1 hover:bg-slate-800 rounded-md text-slate-400"
+                        className="p-1 hover:bg-slate-200 rounded-md text-slate-500"
                         title="لنک ختم کریں (Remove Link)"
                       >
                         <Unlink className="w-3.5 h-3.5" />
@@ -3497,17 +3497,17 @@ export default function AdminCMS({
                             saveCurrentSelection();
                             setShowSpecialChars(!showSpecialChars);
                           }}
-                          className="p-1 hover:bg-slate-800 rounded-md text-white font-bold"
+                          className="p-1 hover:bg-slate-200 rounded-md text-slate-700 font-bold"
                           title="خاص علامات و اسلامی القابات (Special Characters: Ω)"
                         >
-                          <span className="font-sans font-bold text-xs text-blue-300">Ω</span>
+                          <span className="font-sans font-bold text-xs text-blue-600">Ω</span>
                         </button>
 
                         {showSpecialChars && (
-                          <div className="absolute top-full right-0 mt-1 w-72 bg-slate-900 border border-slate-700 rounded-xl p-2.5 shadow-2xl z-50 text-right space-y-1.5 font-simple">
-                            <div className="flex items-center justify-between border-b border-slate-800 pb-1">
-                              <span className="text-xs font-bold text-slate-200">خاص علامات و رموز</span>
-                              <button type="button" onClick={() => setShowSpecialChars(false)} className="text-slate-400 hover:text-white">
+                          <div className="absolute top-full right-0 mt-1 w-72 bg-white border border-slate-200 rounded-xl p-2.5 shadow-xl z-50 text-right space-y-1.5 font-simple">
+                            <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+                              <span className="text-xs font-bold text-slate-800">خاص علامات و رموز</span>
+                              <button type="button" onClick={() => setShowSpecialChars(false)} className="text-slate-400 hover:text-slate-700">
                                 <X className="w-3.5 h-3.5" />
                               </button>
                             </div>
@@ -3517,7 +3517,7 @@ export default function AdminCMS({
                                   key={i}
                                   type="button"
                                   onClick={() => handleInsertSymbol(sym.label)}
-                                  className="p-1.5 text-center bg-slate-800 hover:bg-blue-600 hover:text-white rounded-md text-xs transition-colors"
+                                  className="p-1.5 text-center bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-800 rounded-md text-xs transition-colors"
                                   title={sym.desc}
                                 >
                                   {sym.label}
@@ -3537,7 +3537,7 @@ export default function AdminCMS({
                             saveCurrentSelection();
                             setShowTableMenu(!showTableMenu);
                           }}
-                          className="p-1 hover:bg-slate-800 rounded-md text-blue-300 flex items-center gap-0.5"
+                          className="p-1 hover:bg-slate-200 rounded-md text-blue-600 flex items-center gap-0.5"
                           title="ٹیبل داخل کریں (Insert Table)"
                         >
                           <TableIcon className="w-3.5 h-3.5" />
@@ -3545,28 +3545,28 @@ export default function AdminCMS({
                         </button>
 
                         {showTableMenu && (
-                          <div className="absolute top-full right-0 mt-1 w-52 bg-slate-900 border border-slate-700 rounded-xl p-1.5 shadow-2xl z-50 text-right space-y-1 font-simple">
-                            <div className="text-[10px] text-slate-400 font-bold px-2 py-0.5 border-b border-slate-800 font-sans">
+                          <div className="absolute top-full right-0 mt-1 w-52 bg-white border border-slate-200 rounded-xl p-1.5 shadow-xl z-50 text-right space-y-1 font-simple">
+                            <div className="text-[10px] text-slate-500 font-bold px-2 py-0.5 border-b border-slate-200 font-sans">
                               ٹیبل منتخب کریں:
                             </div>
                             <button
                               type="button"
                               onClick={() => handleInsertTable('2x2')}
-                              className="w-full text-right p-1.5 rounded-lg hover:bg-slate-800 text-slate-200 text-xs font-bold"
+                              className="w-full text-right p-1.5 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-bold"
                             >
                               2x2 سادہ ٹیبل
                             </button>
                             <button
                               type="button"
                               onClick={() => handleInsertTable('3x3')}
-                              className="w-full text-right p-1.5 rounded-lg hover:bg-slate-800 text-slate-200 text-xs font-bold"
+                              className="w-full text-right p-1.5 rounded-lg hover:bg-slate-100 text-slate-800 text-xs font-bold"
                             >
                               3x3 علامات و امراض ٹیبل
                             </button>
                             <button
                               type="button"
                               onClick={() => handleInsertTable('dosage')}
-                              className="w-full text-right p-1.5 rounded-lg hover:bg-emerald-950/60 text-emerald-300 text-xs font-bold"
+                              className="w-full text-right p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-800 text-xs font-bold"
                             >
                               4-کالم طبی نسخہ و مقدار ٹیبل
                             </button>
@@ -3592,27 +3592,27 @@ export default function AdminCMS({
                         </button>
 
                         {showBoxMenu && (
-                          <div className="absolute top-full right-0 mt-1 w-60 bg-slate-900 border border-slate-700 rounded-xl p-1.5 shadow-2xl z-50 space-y-1 text-right font-simple">
-                            <div className="text-[10px] text-slate-400 font-bold px-2 py-0.5 border-b border-slate-800 font-sans">
+                          <div className="absolute top-full right-0 mt-1 w-60 bg-white border border-slate-200 rounded-xl p-1.5 shadow-xl z-50 space-y-1 text-right font-simple">
+                            <div className="text-[10px] text-slate-500 font-bold px-2 py-0.5 border-b border-slate-200 font-sans">
                               باکس کا ڈیزائن منتخب کریں:
                             </div>
                             
                             <button
                               type="button"
                               onClick={() => insertBox('green')}
-                              className="w-full text-right p-1.5 rounded-lg hover:bg-emerald-950/60 text-emerald-300 flex items-center justify-between text-xs font-bold transition-colors"
+                              className="w-full text-right p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-800 flex items-center justify-between text-xs font-bold transition-colors"
                             >
                               <div className="flex items-center gap-1.5">
                                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                                 <span>سبز ہربل و فوائد باکس</span>
                               </div>
-                              <Check className="w-3 h-3 text-emerald-400" />
+                              <Check className="w-3 h-3 text-emerald-600" />
                             </button>
 
                             <button
                               type="button"
                               onClick={() => insertBox('blue')}
-                              className="w-full text-right p-1.5 rounded-lg hover:bg-blue-950/60 text-blue-300 flex items-center gap-1.5 text-xs font-bold transition-colors"
+                              className="w-full text-right p-1.5 rounded-lg hover:bg-blue-50 text-blue-800 flex items-center gap-1.5 text-xs font-bold transition-colors"
                             >
                               <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
                               <span>نیلا نسخہ و مقدار باکس</span>
@@ -3621,7 +3621,7 @@ export default function AdminCMS({
                             <button
                               type="button"
                               onClick={() => insertBox('amber')}
-                              className="w-full text-right p-1.5 rounded-lg hover:bg-amber-950/60 text-amber-300 flex items-center gap-1.5 text-xs font-bold transition-colors"
+                              className="w-full text-right p-1.5 rounded-lg hover:bg-amber-50 text-amber-800 flex items-center gap-1.5 text-xs font-bold transition-colors"
                             >
                               <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                               <span>پیلا پرہیز و احتیاط باکس</span>
@@ -3630,7 +3630,7 @@ export default function AdminCMS({
                             <button
                               type="button"
                               onClick={() => insertBox('red')}
-                              className="w-full text-right p-1.5 rounded-lg hover:bg-red-950/60 text-red-300 flex items-center gap-1.5 text-xs font-bold transition-colors"
+                              className="w-full text-right p-1.5 rounded-lg hover:bg-rose-50 text-rose-800 flex items-center gap-1.5 text-xs font-bold transition-colors"
                             >
                               <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
                               <span>سرخ طبی انتباہ باکس</span>
@@ -3639,22 +3639,22 @@ export default function AdminCMS({
                         )}
                       </div>
 
-                      <div className="h-4 w-px bg-slate-700 mx-0.5" />
+                      <div className="h-4 w-px bg-slate-300 mx-0.5" />
 
                       {/* 9. Utilities: Clear Formatting, Undo, Redo, Find/Replace, Shortcuts, Fullscreen */}
                       <button
                         type="button"
                         onClick={() => execCmd('removeFormat')}
-                        className="p-1 hover:bg-slate-800 rounded-md text-slate-400"
+                        className="p-1 hover:bg-slate-200 rounded-md text-slate-600"
                         title="فارمیٹنگ ختم کریں (Clear Formatting)"
                       >
-                        <Eraser className="w-3.5 h-3.5 text-amber-400" />
+                        <Eraser className="w-3.5 h-3.5 text-amber-600" />
                       </button>
 
                       <button
                         type="button"
                         onClick={() => execCmd('undo')}
-                        className="p-1 hover:bg-slate-800 rounded-md text-white"
+                        className="p-1 hover:bg-slate-200 rounded-md text-slate-700"
                         title="واپس (Undo: Ctrl+Z)"
                       >
                         <Undo className="w-3.5 h-3.5" />
@@ -3663,7 +3663,7 @@ export default function AdminCMS({
                       <button
                         type="button"
                         onClick={() => execCmd('redo')}
-                        className="p-1 hover:bg-slate-800 rounded-md text-white"
+                        className="p-1 hover:bg-slate-200 rounded-md text-slate-700"
                         title="دوبارہ (Redo: Ctrl+Y)"
                       >
                         <Redo className="w-3.5 h-3.5" />
@@ -3672,16 +3672,16 @@ export default function AdminCMS({
                       <button
                         type="button"
                         onClick={() => setShowFindReplaceModal(true)}
-                        className="p-1 hover:bg-slate-800 rounded-md text-slate-300"
+                        className="p-1 hover:bg-slate-200 rounded-md text-slate-700"
                         title="تلاش اور تبدیلی (Find & Replace)"
                       >
-                        <Search className="w-3.5 h-3.5 text-cyan-300" />
+                        <Search className="w-3.5 h-3.5 text-cyan-600" />
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setShowShortcutsModal(true)}
-                        className="p-1 hover:bg-slate-800 rounded-md text-slate-400"
+                        className="p-1 hover:bg-slate-200 rounded-md text-slate-500"
                         title="کی بورڈ شارٹ کٹس (Help & Shortcuts)"
                       >
                         <HelpCircle className="w-3.5 h-3.5" />
@@ -3690,10 +3690,10 @@ export default function AdminCMS({
                       <button
                         type="button"
                         onClick={() => setIsFullscreen(!isFullscreen)}
-                        className="p-1 hover:bg-slate-800 rounded-md text-white mr-auto"
+                        className="p-1 hover:bg-slate-200 rounded-md text-slate-700 mr-auto"
                         title={isFullscreen ? "عام موڈ پر واپس جائیں" : "فل اسکرین لکھائی موڈ (Fullscreen)"}
                       >
-                        {isFullscreen ? <Minimize2 className="w-3.5 h-3.5 text-amber-400" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                        {isFullscreen ? <Minimize2 className="w-3.5 h-3.5 text-amber-600" /> : <Maximize2 className="w-3.5 h-3.5" />}
                       </button>
 
                     </div>
@@ -3741,7 +3741,7 @@ export default function AdminCMS({
                         />
 
                         {/* Bottom Status Bar */}
-                        <div className="bg-slate-950 px-4 py-2 border-t border-slate-800 rounded-b-3xl flex items-center justify-between text-xs text-slate-400 font-sans">
+                        <div className="bg-slate-100 px-4 py-2 border-t border-slate-200 rounded-b-3xl flex items-center justify-between text-xs text-slate-600 font-sans">
                           <div className="flex items-center gap-3">
                             <span>طبیب پیڈیا ویژول ایڈیٹر (Visual Canvas)</span>
                             <span>•</span>
@@ -3760,10 +3760,10 @@ export default function AdminCMS({
 
                     {/* HTML SOURCE CODE MODE */}
                     {editorMode === 'code' && (
-                      <div className="border-t border-slate-800 rounded-b-3xl overflow-hidden">
-                        <div className="bg-slate-900 px-4 py-2 text-xs text-emerald-400 font-mono border-b border-slate-800 flex items-center justify-between">
+                      <div className="border-t border-slate-200 rounded-b-3xl overflow-hidden">
+                        <div className="bg-slate-100 px-4 py-2 text-xs text-emerald-800 font-mono border-b border-slate-200 flex items-center justify-between">
                           <span>HTML Source Code View</span>
-                          <span className="text-[11px] text-slate-400">کوڈ میں براہ راست ترمیم کر سکتے ہیں</span>
+                          <span className="text-[11px] text-slate-500">کوڈ میں براہ راست ترمیم کر سکتے ہیں</span>
                         </div>
                         <textarea
                           rows={24}
@@ -3778,8 +3778,8 @@ export default function AdminCMS({
 
                     {/* LIVE PREVIEW MODE */}
                     {editorMode === 'preview' && (
-                      <div className="bg-white text-slate-900 border-t border-slate-800 rounded-b-3xl p-8 sm:p-12 min-h-[600px] overflow-y-auto space-y-6 font-nastaliq leading-[2.2] text-right">
-                        <div className="border-b pb-4">
+                      <div className="bg-white text-slate-900 border-t border-slate-200 rounded-b-3xl p-8 sm:p-12 min-h-[600px] overflow-y-auto space-y-6 font-nastaliq leading-[2.2] text-right">
+                        <div className="border-b border-slate-100 pb-4">
                           <span className="text-xs bg-emerald-100 text-emerald-900 font-sans font-bold px-2.5 py-1 rounded-full">
                             لائیو پریویو
                           </span>
@@ -3802,15 +3802,15 @@ export default function AdminCMS({
                   </div>
 
                   {/* 3. Short Excerpt Meta Box (خلاصہ سب سے آخر میں) */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-lg space-y-2">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                      <label className="text-xs sm:text-sm font-bold text-white font-simple flex items-center gap-1.5">
-                        <FileText className="w-3.5 h-3.5 text-amber-400" />
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs space-y-2">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <label className="text-xs sm:text-sm font-bold text-slate-900 font-simple flex items-center gap-1.5">
+                        <FileText className="w-3.5 h-3.5 text-amber-500" />
                         <span>مختصر خلاصہ (Excerpt)</span>
                       </label>
                       <span className="text-[10px] text-slate-400 font-sans">اختیاری (Optional)</span>
                     </div>
-                    <p className="text-[11px] text-slate-400 font-simple">
+                    <p className="text-[11px] text-slate-500 font-simple">
                       مضمون کا خلاصہ جو ہوم پیج کارڈز، سرچ رزلٹس اور سوشل میڈیا پر نظر آئے گا:
                     </p>
                     <textarea
@@ -3818,28 +3818,28 @@ export default function AdminCMS({
                       value={articleForm.excerpt}
                       onChange={(e) => setArticleForm({...articleForm, excerpt: e.target.value})}
                       placeholder="مضمون کا جامع خلاصہ یہاں درج کریں..."
-                      className="w-full bg-slate-900 border border-slate-700/80 rounded-xl p-2.5 text-xs text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:outline-none font-nastaliq leading-relaxed shadow-inner"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none font-nastaliq leading-relaxed shadow-xs"
                     />
                   </div>
 
                   {/* 4. Author & Reading Time Meta Box */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-lg grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs font-bold text-slate-300 block mb-1 font-simple">مصنف / طبیب (Author)</label>
+                      <label className="text-xs font-bold text-slate-700 block mb-1 font-simple">مصنف / طبیب (Author)</label>
                       <input
                         type="text"
                         value={articleForm.author}
                         onChange={(e) => setArticleForm({...articleForm, author: e.target.value})}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-simple"
+                        className="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none font-simple shadow-xs"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-300 block mb-1 font-simple">مطالعہ کا تخمینی وقت (Reading Time)</label>
+                      <label className="text-xs font-bold text-slate-700 block mb-1 font-simple">مطالعہ کا تخمینی وقت (Reading Time)</label>
                       <input
                         type="text"
                         value={articleForm.readingTime}
                         onChange={(e) => setArticleForm({...articleForm, readingTime: e.target.value})}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-simple"
+                        className="w-full bg-white border border-slate-300 rounded-xl p-2 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none font-simple shadow-xs"
                       />
                     </div>
                   </div>
@@ -3852,42 +3852,42 @@ export default function AdminCMS({
                 <div className="w-full lg:w-[280px] xl:w-[300px] shrink-0 space-y-3.5 sticky top-3">
                   
                   {/* Meta Box 1: Publish / Status */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 shadow-md space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                      <h3 className="text-xs font-bold text-white font-simple flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <h3 className="text-xs font-bold text-slate-900 font-simple flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-600" />
                         <span>پبلش و اسٹیٹس (Publish)</span>
                       </h3>
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded font-sans ${articleForm.status === 'published' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-amber-950 text-amber-300 border border-amber-800'}`}>
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded font-sans ${articleForm.status === 'published' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200'}`}>
                         {articleForm.status === 'published' ? 'پبلک' : 'پرائیویٹ'}
                       </span>
                     </div>
 
                     <div className="space-y-2 text-xs font-simple">
                       <div>
-                        <label className="text-slate-400 block mb-1 text-[11px]">پبلشنگ اسٹیٹس:</label>
+                        <label className="text-slate-600 block mb-1 text-[11px]">پبلشنگ اسٹیٹس:</label>
                         <select
                           value={articleForm.status}
                           onChange={(e) => setArticleForm({...articleForm, status: e.target.value})}
-                          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-bold"
+                          className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none font-bold shadow-xs"
                         >
                           <option value="published">🌐 پبلک (لائیو شائع کریں)</option>
                           <option value="private">🔒 ڈرافٹ (محفوظ رکھیں)</option>
                         </select>
                       </div>
 
-                      <div className="pt-1.5 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                      <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
                         <span>مطالعہ کا دورانیہ:</span>
-                        <strong className="text-white font-sans">{stats.readingTime} منٹ ({stats.words} الفاظ)</strong>
+                        <strong className="text-slate-800 font-sans">{stats.readingTime} منٹ ({stats.words} الفاظ)</strong>
                       </div>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between gap-2">
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
                       {editingArticleId ? (
                         <button
                           type="button"
                           onClick={() => handleDeleteArticle(editingArticleId)}
-                          className="text-red-400 hover:text-red-300 text-[11px] font-bold underline font-simple"
+                          className="text-red-600 hover:text-red-700 text-[11px] font-bold underline font-simple"
                         >
                           ڈیلیٹ
                         </button>
@@ -3895,7 +3895,7 @@ export default function AdminCMS({
 
                       <button
                         type="submit"
-                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-lg text-xs font-bold shadow-md transition-all font-simple"
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-lg text-xs font-bold shadow-xs transition-all font-simple"
                       >
                         <Save className="w-3.5 h-3.5" />
                         <span>{editingArticleId ? 'محفوظ کریں' : 'پبلش کریں'}</span>
@@ -3904,16 +3904,16 @@ export default function AdminCMS({
                   </div>
 
                   {/* Meta Box 2: Categories */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 shadow-md space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                      <h3 className="text-xs font-bold text-white font-simple flex items-center gap-1.5">
-                        <Layers className="w-3.5 h-3.5 text-emerald-400" />
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <h3 className="text-xs font-bold text-slate-900 font-simple flex items-center gap-1.5">
+                        <Layers className="w-3.5 h-3.5 text-emerald-600" />
                         <span>زمرہ جات (Categories)</span>
                       </h3>
                       <button
                         type="button"
                         onClick={() => setShowNewCatModal(!showNewCatModal)}
-                        className="text-[11px] text-blue-400 hover:text-blue-300 font-bold font-simple"
+                        className="text-[11px] text-blue-600 hover:text-blue-700 font-bold font-simple"
                       >
                         + نیا زمرہ
                       </button>
@@ -3921,18 +3921,18 @@ export default function AdminCMS({
 
                     {/* New Category Inline Input */}
                     {showNewCatModal && (
-                      <div className="p-2 bg-slate-900 rounded-xl border border-slate-700 space-y-1.5 animate-in fade-in-50">
+                      <div className="p-2 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5 animate-in fade-in-50">
                         <input
                           type="text"
                           value={newCatName}
                           onChange={(e) => setNewCatName(e.target.value)}
                           placeholder="نئی کیٹیگری کا نام..."
-                          className="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-xs text-white focus:outline-none"
+                          className="w-full bg-white border border-slate-300 rounded-lg p-1.5 text-xs text-slate-800 focus:outline-none"
                         />
                         <button
                           type="button"
                           onClick={handleAddNewCategory}
-                          className="w-full py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold rounded-lg font-simple"
+                          className="w-full py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold rounded-lg font-simple shadow-xs"
                         >
                           شامل کریں
                         </button>
@@ -3946,7 +3946,7 @@ export default function AdminCMS({
                         placeholder="زمرہ تلاش کریں..."
                         value={categorySearchMeta}
                         onChange={(e) => setCategorySearchMeta(e.target.value)}
-                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-simple"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 font-simple"
                       />
                     </div>
 
@@ -3965,10 +3965,10 @@ export default function AdminCMS({
                               style={{ paddingRight: `${cat.depth * 18 + 8}px` }}
                               className={`flex items-center justify-between py-1.5 px-2 rounded-lg cursor-pointer transition-all border ${
                                 isChecked
-                                  ? 'bg-blue-600/20 border-blue-500/40 text-white font-bold'
+                                  ? 'bg-blue-50 border-blue-300 text-blue-900 font-bold'
                                   : cat.depth === 0
-                                    ? 'bg-slate-900/80 border-slate-800 text-slate-200 hover:bg-slate-800'
-                                    : 'bg-slate-900/40 border-slate-800/60 text-slate-300 hover:bg-slate-900 hover:text-white'
+                                    ? 'bg-slate-50 border-slate-200 text-slate-800 hover:bg-slate-100'
+                                    : 'bg-white border-slate-100 text-slate-700 hover:bg-slate-50'
                               }`}
                             >
                               <div className="flex items-center gap-1.5 min-w-0">
@@ -3988,19 +3988,19 @@ export default function AdminCMS({
                                       categories: currentCats
                                     });
                                   }}
-                                  className="accent-blue-500 w-3.5 h-3.5 cursor-pointer rounded shrink-0"
+                                  className="accent-blue-600 w-3.5 h-3.5 cursor-pointer rounded shrink-0"
                                 />
                                 {cat.depth > 0 && (
-                                  <span className="text-slate-500 select-none text-[11px] font-mono shrink-0">
+                                  <span className="text-slate-400 select-none text-[11px] font-mono shrink-0">
                                     {cat.depth === 1 ? '— ' : '—— '}
                                   </span>
                                 )}
-                                <span className={`text-xs truncate ${cat.depth === 0 ? 'font-bold text-white' : ''}`}>
+                                <span className={`text-xs truncate ${cat.depth === 0 ? 'font-bold text-slate-900' : 'text-slate-700'}`}>
                                   {cat.name}
                                 </span>
                               </div>
                               {isChecked && (
-                                <Check className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                                <Check className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                               )}
                             </label>
                           );
@@ -4009,17 +4009,17 @@ export default function AdminCMS({
                   </div>
 
                   {/* Meta Box 3: Featured Image */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 shadow-md space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                      <h3 className="text-xs font-bold text-white font-simple flex items-center gap-1.5">
-                        <ImageIcon className="w-3.5 h-3.5 text-purple-400" />
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <h3 className="text-xs font-bold text-slate-900 font-simple flex items-center gap-1.5">
+                        <ImageIcon className="w-3.5 h-3.5 text-purple-600" />
                         <span>فیچرڈ تصویر (Featured Image)</span>
                       </h3>
                     </div>
 
                     <div className="space-y-2.5">
                       {/* Image Preview Box */}
-                      <div className="h-36 rounded-xl bg-slate-900 border border-slate-800 overflow-hidden relative flex items-center justify-center group shadow-inner">
+                      <div className="h-36 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden relative flex items-center justify-center group shadow-xs">
                         {articleForm.featuredImage ? (
                           <>
                             <img
@@ -4027,7 +4027,7 @@ export default function AdminCMS({
                               alt="Featured preview"
                               className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
                             />
-                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
                               <button
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
@@ -4045,27 +4045,27 @@ export default function AdminCMS({
                             </div>
                           </>
                         ) : (
-                          <div className="text-center text-slate-500 text-xs p-3">
+                          <div className="text-center text-slate-400 text-xs p-3">
                             <ImageIcon className="w-8 h-8 mx-auto mb-1.5 opacity-40 text-slate-400" />
-                            <span className="block font-simple font-bold text-slate-400 text-xs">کوئی تصویر نہیں</span>
-                            <span className="text-[10px] text-slate-500">نیچے سے منتخب کریں</span>
+                            <span className="block font-simple font-bold text-slate-600 text-xs">کوئی تصویر نہیں</span>
+                            <span className="text-[10px] text-slate-400">نیچے سے منتخب کریں</span>
                           </div>
                         )}
                       </div>
 
                       {/* Upload Options */}
-                      <div className="flex items-center gap-1 bg-slate-900 p-0.5 rounded-lg text-xs font-simple border border-slate-800">
+                      <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-xs font-simple border border-slate-200">
                         <button
                           type="button"
                           onClick={() => setArticleForm({...articleForm, imageType: 'upload'})}
-                          className={`flex-1 py-1 rounded-md text-center text-[11px] font-bold transition-colors ${articleForm.imageType === 'upload' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                          className={`flex-1 py-1 rounded-md text-center text-[11px] font-bold transition-colors ${articleForm.imageType === 'upload' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
                         >
                           کمپیوٹر سے
                         </button>
                         <button
                           type="button"
                           onClick={() => setArticleForm({...articleForm, imageType: 'url'})}
-                          className={`flex-1 py-1 rounded-md text-center text-[11px] font-bold transition-colors ${articleForm.imageType === 'url' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                          className={`flex-1 py-1 rounded-md text-center text-[11px] font-bold transition-colors ${articleForm.imageType === 'url' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
                         >
                           آن لائن لنک
                         </button>
@@ -4083,9 +4083,9 @@ export default function AdminCMS({
                           <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="w-full border border-dashed border-slate-800 hover:border-blue-500 rounded-xl p-3 text-center text-xs text-slate-300 hover:text-white transition-all space-y-0.5 bg-slate-900/50"
+                            className="w-full border border-dashed border-slate-300 hover:border-blue-500 rounded-xl p-3 text-center text-xs text-slate-600 hover:text-slate-900 transition-all space-y-0.5 bg-slate-50"
                           >
-                            <UploadCloud className="w-5 h-5 mx-auto text-blue-400" />
+                            <UploadCloud className="w-5 h-5 mx-auto text-blue-600" />
                             <span className="font-bold block font-simple text-[11px]">کمپیوٹر سے تصویر منتخب کریں</span>
                           </button>
                         </div>
@@ -4096,7 +4096,7 @@ export default function AdminCMS({
                             value={articleForm.featuredImage}
                             onChange={(e) => setArticleForm({...articleForm, featuredImage: e.target.value})}
                             placeholder="https://example.com/image.jpg"
-                            className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-sans"
+                            className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none font-sans"
                           />
                         </div>
                       )}
@@ -4104,40 +4104,40 @@ export default function AdminCMS({
                   </div>
 
                   {/* Meta Box 5: SEO Settings */}
-                  <div className="bg-slate-950 border border-blue-900/40 rounded-2xl p-3.5 shadow-md space-y-3">
-                    <div className="flex items-center gap-1.5 border-b border-slate-800 pb-2">
-                      <h3 className="text-xs font-bold text-white font-simple flex items-center gap-1.5">
-                        <Globe className="w-3.5 h-3.5 text-blue-400" />
+                  <div className="bg-white border border-blue-200 rounded-2xl p-4 shadow-xs space-y-3">
+                    <div className="flex items-center gap-1.5 border-b border-slate-100 pb-2">
+                      <h3 className="text-xs font-bold text-slate-900 font-simple flex items-center gap-1.5">
+                        <Globe className="w-3.5 h-3.5 text-blue-600" />
                         <span>SEO / سرچ انجن سیٹنگز</span>
                       </h3>
                     </div>
                     <div className="space-y-2.5 text-xs">
                       <div>
-                        <label className="text-slate-400 block mb-1 text-[11px] font-simple">SEO عنوان (Google Title):</label>
+                        <label className="text-slate-600 block mb-1 text-[11px] font-simple">SEO عنوان (Google Title):</label>
                         <input
                           type="text"
                           value={articleForm.seoTitle || articleForm.title}
                           onChange={(e) => setArticleForm({...articleForm, seoTitle: e.target.value})}
                           placeholder="Google پر نظر آنے والا عنوان..."
                           maxLength={60}
-                          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-simple"
+                          className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none font-simple"
                         />
-                        <span className="text-[10px] text-slate-500 mt-0.5 block font-sans">{(articleForm.seoTitle || articleForm.title || '').length}/60</span>
+                        <span className="text-[10px] text-slate-400 mt-0.5 block font-sans">{(articleForm.seoTitle || articleForm.title || '').length}/60</span>
                       </div>
                       <div>
-                        <label className="text-slate-400 block mb-1 text-[11px] font-simple">SEO تفصیل (Meta Description):</label>
+                        <label className="text-slate-600 block mb-1 text-[11px] font-simple">SEO تفصیل (Meta Description):</label>
                         <textarea
                           value={articleForm.seoDescription || articleForm.excerpt}
                           onChange={(e) => setArticleForm({...articleForm, seoDescription: e.target.value})}
                           placeholder="Google میں نظر آنے والی مختصر تفصیل (160 حروف)..."
                           maxLength={160}
                           rows={3}
-                          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-simple resize-none"
+                          className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none font-simple resize-none"
                         />
-                        <span className="text-[10px] text-slate-500 mt-0.5 block font-sans">{(articleForm.seoDescription || articleForm.excerpt || '').length}/160</span>
+                        <span className="text-[10px] text-slate-400 mt-0.5 block font-sans">{(articleForm.seoDescription || articleForm.excerpt || '').length}/160</span>
                       </div>
                       {/* Google Preview */}
-                      <div className="bg-white rounded-lg p-2.5 border border-slate-300 text-left">
+                      <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200 text-left">
                         <div className="text-[11px] text-green-700 font-sans truncate">tabeebpedia.com › {articleForm.slug || 'article-slug'}</div>
                         <div className="text-[12px] text-blue-700 font-bold font-sans truncate mt-0.5">{(articleForm.seoTitle || articleForm.title || 'مضمون کا عنوان').substring(0, 55)}</div>
                         <div className="text-[10px] text-slate-600 font-sans mt-0.5 line-clamp-2">{(articleForm.seoDescription || articleForm.excerpt || 'مضمون کی تفصیل یہاں نظر آئے گی...').substring(0, 140)}</div>
@@ -4146,10 +4146,10 @@ export default function AdminCMS({
                   </div>
 
                   {/* Meta Box 4: Tags */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 shadow-md space-y-3">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                      <h3 className="text-xs font-bold text-white font-simple flex items-center gap-1.5">
-                        <FolderOpen className="w-3.5 h-3.5 text-cyan-400" />
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <h3 className="text-xs font-bold text-slate-900 font-simple flex items-center gap-1.5">
+                        <FolderOpen className="w-3.5 h-3.5 text-cyan-600" />
                         <span>ٹیگز (Tags)</span>
                       </h3>
                     </div>
@@ -4168,12 +4168,12 @@ export default function AdminCMS({
                             }
                           }}
                           placeholder="ٹیگ لکھیں..."
-                          className="flex-1 bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-white focus:ring-2 focus:ring-blue-500 focus:outline-none font-simple"
+                          className="flex-1 bg-white border border-slate-300 rounded-lg p-1.5 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none font-simple"
                         />
                         <button
                           type="button"
                           onClick={() => handleAddTag()}
-                          className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold font-simple transition-colors"
+                          className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold font-simple transition-colors shadow-xs"
                         >
                           + شامل کریں
                         </button>
@@ -4184,13 +4184,13 @@ export default function AdminCMS({
                         {(typeof articleForm.tags === 'string' ? articleForm.tags.split(',').map(t => t.trim()).filter(Boolean) : (articleForm.tags || [])).map(t => (
                           <span
                             key={t}
-                            className="inline-flex items-center gap-1 bg-blue-950/80 text-blue-200 border border-blue-800/80 px-2 py-0.5 rounded-lg text-[11px] font-simple shadow-xs"
+                            className="inline-flex items-center gap-1 bg-blue-50 text-blue-800 border border-blue-200 px-2 py-0.5 rounded-lg text-[11px] font-simple shadow-xs"
                           >
                             <span>{t}</span>
                             <button
                               type="button"
                               onClick={() => handleRemoveTag(t)}
-                              className="hover:text-red-400 transition-colors"
+                              className="hover:text-red-600 transition-colors"
                               title="ٹیگ ہٹائیں"
                             >
                               <X className="w-2.5 h-2.5" />
@@ -4200,7 +4200,7 @@ export default function AdminCMS({
                       </div>
 
                       {/* Popular Suggested Tags */}
-                      <div className="pt-2 border-t border-slate-800/80 space-y-1">
+                      <div className="pt-2 border-t border-slate-100 space-y-1">
                         <span className="text-[10px] text-slate-500 block font-simple">اکثر استعمال ہونے والے ٹیگز:</span>
                         <div className="flex flex-wrap gap-1">
                           {['طب یونانی', 'قانون مفرد اعضاء', 'جڑی بوٹیاں', 'معدہ و تبخیر', 'ہربل نسخے', 'علاج بالغذائ'].map(pt => (
@@ -4208,7 +4208,7 @@ export default function AdminCMS({
                               key={pt}
                               type="button"
                               onClick={() => handleAddTag(pt)}
-                              className="text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white px-1.5 py-0.5 rounded border border-slate-800 font-simple transition-colors"
+                              className="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200 font-simple transition-colors"
                             >
                               +{pt}
                             </button>
@@ -4972,14 +4972,14 @@ export default function AdminCMS({
           {/* VIEW 2: ARTICLES LIST & MANAGEMENT TABLE */}
           {/* ========================================================= */}
           {adminTab === 'articles' && (
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl">
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
               
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white font-simple">
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-simple">
                     شائع شدہ اور پرائیویٹ مضامین
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5 font-sans">
+                  <p className="text-xs text-slate-500 mt-0.5 font-sans">
                     تمام 300 تا 400 آرٹیکلز کی مکمل مانیٹرنگ، ایڈیٹنگ اور اسٹیٹس کنٹرول
                   </p>
                 </div>
@@ -4994,27 +4994,27 @@ export default function AdminCMS({
               </div>
 
               {/* Filters & WordPress-Style Pagination Bar (Top) */}
-              <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800">
+              <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
                 <div className="flex flex-wrap items-center gap-3 flex-1">
                   {/* Search Input */}
                   <div className="relative flex-1 sm:flex-initial sm:w-72">
-                    <Search className="w-4 h-4 text-slate-500 absolute right-3.5 top-3" />
+                    <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-3" />
                     <input
                       type="text"
                       value={searchFilter}
                       onChange={(e) => setSearchFilter(e.target.value)}
                       placeholder="مضمون کا عنوان یا مصنف تلاش کریں..."
-                      className="w-full bg-slate-950 border border-slate-700 rounded-xl pr-10 pl-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-simple"
+                      className="w-full bg-white border border-slate-300 rounded-xl pr-10 pl-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 font-simple shadow-xs"
                     />
                   </div>
 
                   {/* Status Filter */}
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-400 font-sans">اسٹیٹس:</span>
+                    <span className="text-xs text-slate-600 font-sans">اسٹیٹس:</span>
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                      className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-none cursor-pointer font-sans font-bold shadow-xs"
                     >
                       <option value="all">تمام مضامین</option>
                       <option value="published">صرف پبلک (Live)</option>
@@ -5024,11 +5024,11 @@ export default function AdminCMS({
 
                   {/* Sort Order Selector (Latest First / Oldest First) */}
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-400 font-sans">ترتیب:</span>
+                    <span className="text-xs text-slate-600 font-sans">ترتیب:</span>
                     <select
                       value={postSortOrder}
                       onChange={(e) => setPostSortOrder(e.target.value)}
-                      className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                      className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-none cursor-pointer font-sans font-bold shadow-xs"
                     >
                       <option value="latest">تازہ ترین پہلے (Latest First)</option>
                       <option value="oldest">پرانے پہلے (Oldest First)</option>
@@ -5037,7 +5037,7 @@ export default function AdminCMS({
 
                   {/* Posts Per Page Selector (Default 20, 50, 100) */}
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-slate-400 font-sans">فی صفحہ:</span>
+                    <span className="text-xs text-slate-600 font-sans">فی صفحہ:</span>
                     <select
                       value={postsPerPage}
                       onChange={(e) => {
@@ -5047,7 +5047,7 @@ export default function AdminCMS({
                           localStorage.setItem('tabeeb_admin_posts_per_page', String(val));
                         } catch {}
                       }}
-                      className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                      className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-none cursor-pointer font-sans font-bold shadow-xs"
                     >
                       <option value={20}>20 مضامین (ڈیفالٹ)</option>
                       <option value={50}>50 مضامین</option>
@@ -5057,18 +5057,18 @@ export default function AdminCMS({
                 </div>
 
                 {/* Top Pagination Summary & Quick Nav Buttons (WordPress Style) */}
-                <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-slate-400 font-sans border-t lg:border-t-0 pt-2 lg:pt-0 border-slate-800">
+                <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-slate-600 font-sans border-t lg:border-t-0 pt-2 lg:pt-0 border-slate-200">
                   <span className="whitespace-nowrap">
-                    کل <strong className="text-white font-mono">{totalFilteredPosts}</strong> مضامین | صفحہ <strong className="text-blue-400 font-mono">{safeCurrentPage}</strong> از <strong className="text-slate-200 font-mono">{totalPages}</strong>
+                    کل <strong className="text-slate-900 font-mono">{totalFilteredPosts}</strong> مضامین | صفحہ <strong className="text-blue-600 font-mono">{safeCurrentPage}</strong> از <strong className="text-slate-800 font-mono">{totalPages}</strong>
                   </span>
                   
-                  <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                  <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs">
                     <button
                       type="button"
                       disabled={safeCurrentPage <= 1}
                       onClick={() => setCurrentPage(1)}
                       title="پہلا صفحہ"
-                      className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                      className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-600 transition-colors"
                     >
                       <ChevronsRight className="w-3.5 h-3.5" />
                     </button>
@@ -5077,7 +5077,7 @@ export default function AdminCMS({
                       disabled={safeCurrentPage <= 1}
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                       title="پچھلا صفحہ"
-                      className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                      className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-600 transition-colors"
                     >
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
@@ -5086,7 +5086,7 @@ export default function AdminCMS({
                       disabled={safeCurrentPage >= totalPages}
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                       title="اگلا صفحہ"
-                      className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                      className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-600 transition-colors"
                     >
                       <ChevronLeft className="w-3.5 h-3.5" />
                     </button>
@@ -5095,7 +5095,7 @@ export default function AdminCMS({
                       disabled={safeCurrentPage >= totalPages}
                       onClick={() => setCurrentPage(totalPages)}
                       title="آخری صفحہ"
-                      className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                      className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-600 transition-colors"
                     >
                       <ChevronsLeft className="w-3.5 h-3.5" />
                     </button>
@@ -5105,8 +5105,8 @@ export default function AdminCMS({
 
               {/* Bulk Actions Banner */}
               {selectedArticleIds.length > 0 && (
-                <div className="flex items-center justify-between bg-red-500/10 border border-red-500/30 px-4 py-2.5 rounded-xl shadow-lg">
-                  <span className="text-xs text-red-300 font-bold">
+                <div className="flex items-center justify-between bg-red-50 border border-red-200 px-4 py-2.5 rounded-xl shadow-xs">
+                  <span className="text-xs text-red-700 font-bold">
                     {selectedArticleIds.length} مضامین منتخب ہیں
                   </span>
                   <button
@@ -5120,11 +5120,11 @@ export default function AdminCMS({
               )}
 
               {/* Articles Table */}
-              <div className="border border-slate-800 rounded-xl overflow-x-auto bg-slate-900/30">
-                <table className="w-full text-right text-sm text-slate-300 font-sans">
-                  <thead className="text-xs text-slate-400 border-b border-slate-800 bg-slate-900/80">
+              <div className="border border-slate-200 rounded-2xl overflow-x-auto bg-white shadow-xs">
+                <table className="w-full text-right text-sm text-slate-700 font-sans">
+                  <thead className="text-xs text-slate-700 border-b border-slate-200 bg-slate-50 font-bold">
                     <tr>
-                      <th className="px-4 py-3 w-10 text-center">
+                      <th className="px-4 py-3.5 w-10 text-center">
                         <input 
                           type="checkbox" 
                           checked={paginatedArticles.length > 0 && paginatedArticles.every(a => selectedArticleIds.includes(a.id))}
@@ -5136,34 +5136,34 @@ export default function AdminCMS({
                               setSelectedArticleIds(prev => prev.filter(id => !pageIds.has(id)));
                             }
                           }}
-                          className="rounded border-slate-700 bg-slate-800 cursor-pointer" 
+                          className="rounded border-slate-300 text-blue-600 cursor-pointer" 
                           title="اس صفحے کے تمام مضامین منتخب کریں"
                         />
                       </th>
-                      <th className="px-4 py-3 font-bold text-slate-200">Title</th>
-                      <th className="px-4 py-3 font-bold text-slate-200">Author</th>
-                      <th className="px-4 py-3 font-bold text-slate-200">Categories</th>
-                      <th className="px-4 py-3 font-bold text-slate-200">Tags</th>
+                      <th className="px-4 py-3.5 font-bold text-slate-800">Title</th>
+                      <th className="px-4 py-3.5 font-bold text-slate-800">Author</th>
+                      <th className="px-4 py-3.5 font-bold text-slate-800">Categories</th>
+                      <th className="px-4 py-3.5 font-bold text-slate-800">Tags</th>
                       <th 
-                        className="px-4 py-3 font-bold text-slate-200 cursor-pointer hover:text-blue-400 select-none transition-colors"
+                        className="px-4 py-3.5 font-bold text-slate-800 cursor-pointer hover:text-blue-600 select-none transition-colors"
                         onClick={() => setPostSortOrder(prev => prev === 'latest' ? 'oldest' : 'latest')}
                         title="تاریخ کے حساب سے ترتیب بدلیں (کلک کریں)"
                       >
                         <div className="flex items-center gap-1.5">
                           <span>Date</span>
-                          <span className="text-[10px] text-blue-400 font-mono">
+                          <span className="text-[10px] text-blue-600 font-mono">
                             {postSortOrder === 'latest' ? '▼ (Latest)' : '▲ (Oldest)'}
                           </span>
                         </div>
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/80">
+                  <tbody className="divide-y divide-slate-100">
                     {paginatedArticles.length === 0 ? (
-                      <tr><td colSpan="6" className="p-8 text-center text-slate-500">کوئی مضمون نہیں ملا</td></tr>
+                      <tr><td colSpan="6" className="p-8 text-center text-slate-500 font-simple">کوئی مضمون نہیں ملا</td></tr>
                     ) : (
                       paginatedArticles.map(art => (
-                        <tr key={art.id} className="hover:bg-slate-800/40 transition-colors group">
+                        <tr key={art.id} className="hover:bg-slate-50/80 transition-colors group">
                           <td className="px-4 py-4 text-center">
                             <input 
                               type="checkbox" 
@@ -5175,39 +5175,39 @@ export default function AdminCMS({
                                   setSelectedArticleIds(prev => prev.filter(id => id !== art.id));
                                 }
                               }}
-                              className="rounded border-slate-700 bg-slate-800 cursor-pointer" 
+                              className="rounded border-slate-300 text-blue-600 cursor-pointer" 
                             />
                           </td>
                           <td className="px-4 py-4">
                             <div className="flex items-center gap-3">
-                              <img src={art.featuredImage || siteSettings?.defaultArticleImage} alt="" className="w-10 h-10 rounded object-cover border border-slate-700 shrink-0" />
+                              <img src={art.featuredImage || siteSettings?.defaultArticleImage} alt="" className="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0" />
                               <div>
-                                <span onClick={() => handleEditArticle(art)} className="font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer font-h2 text-base">
+                                <span onClick={() => handleEditArticle(art)} className="font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-h2 text-base">
                                   {art.title} {art.status === 'private' ? '— Draft' : ''}
                                 </span>
                                 <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
-                                  <span onClick={() => handleEditArticle(art)} className="text-blue-500 hover:text-blue-400 cursor-pointer hover:underline">Edit</span>
-                                  <span onClick={() => handleDeleteArticle(art.id)} className="text-red-500 hover:text-red-400 cursor-pointer hover:underline">Trash</span>
-                                  <a href={`/${art.slug || art.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-500 hover:text-emerald-400 hover:underline">View</a>
+                                  <span onClick={() => handleEditArticle(art)} className="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline">Edit</span>
+                                  <span onClick={() => handleDeleteArticle(art.id)} className="text-red-600 hover:text-red-800 cursor-pointer hover:underline">Trash</span>
+                                  <a href={`/${art.slug || art.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-800 hover:underline">View</a>
                                 </div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-4 text-xs font-bold text-slate-300">
+                          <td className="px-4 py-4 text-xs font-bold text-slate-700">
                             {art.author || 'syed abdul wahab shah'}
                           </td>
-                          <td className="px-4 py-4 text-xs text-blue-400">
+                          <td className="px-4 py-4 text-xs text-blue-600 font-medium">
                             {Array.isArray(art.categories) && art.categories.length > 0
                               ? art.categories.join('، ')
                               : (art.categoryName || art.category || 'عام زمرہ')}
                           </td>
-                          <td className="px-4 py-4 text-xs text-slate-400">
+                          <td className="px-4 py-4 text-xs text-slate-600">
                             {Array.isArray(art.tags) && art.tags.length > 0
                               ? art.tags.join('، ')
                               : (art.tags || '—')}
                           </td>
-                          <td className="px-4 py-4 text-xs text-slate-400">
-                            <span className={art.status === 'published' ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
+                          <td className="px-4 py-4 text-xs">
+                            <span className={art.status === 'published' ? 'text-emerald-700 font-bold' : 'text-amber-700 font-medium'}>
                               {art.status === 'published' ? 'Published' : 'Draft'}
                             </span><br />
                             <span className="font-mono text-[11px] text-slate-500">
@@ -5223,10 +5223,10 @@ export default function AdminCMS({
 
               {/* Bottom Comprehensive Pagination Bar (WordPress Style) */}
               {totalPages > 1 && (
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-800 text-xs text-slate-400 font-sans">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-200 text-xs text-slate-600 font-sans">
                   {/* Range counter */}
                   <div>
-                    مضامین <strong className="text-white font-mono">{startIndex + 1}</strong> تا <strong className="text-white font-mono">{endIndex}</strong> دکھائے جا رہے ہیں (کل <strong className="text-blue-400 font-mono">{totalFilteredPosts}</strong> میں سے)
+                    مضامین <strong className="text-slate-900 font-mono">{startIndex + 1}</strong> تا <strong className="text-slate-900 font-mono">{endIndex}</strong> دکھائے جا رہے ہیں (کل <strong className="text-blue-600 font-mono">{totalFilteredPosts}</strong> میں سے)
                   </div>
 
                   {/* Numbered Pagination & Arrows */}
@@ -5236,7 +5236,7 @@ export default function AdminCMS({
                       type="button"
                       disabled={safeCurrentPage <= 1}
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 text-slate-200 transition-colors"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors shadow-xs"
                     >
                       <ChevronRight className="w-3.5 h-3.5" />
                       <span>پچھلا</span>
@@ -5245,7 +5245,7 @@ export default function AdminCMS({
                     {/* Page Numbers */}
                     {getPaginationPages().map((pNum, idx) => {
                       if (pNum === '...') {
-                        return <span key={`ellipsis-${idx}`} className="px-2 text-slate-500 font-mono">…</span>;
+                        return <span key={`ellipsis-${idx}`} className="px-2 text-slate-400 font-mono">…</span>;
                       }
                       const isCurrent = pNum === safeCurrentPage;
                       return (
@@ -5255,8 +5255,8 @@ export default function AdminCMS({
                           onClick={() => setCurrentPage(pNum)}
                           className={`min-w-8 h-8 px-2.5 rounded-xl text-xs font-bold font-mono transition-all ${
                             isCurrent
-                              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                              : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+                              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                              : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 shadow-xs'
                           }`}
                         >
                           {pNum}
@@ -5269,7 +5269,7 @@ export default function AdminCMS({
                       type="button"
                       disabled={safeCurrentPage >= totalPages}
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 text-slate-200 transition-colors"
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors shadow-xs"
                     >
                       <span>اگلا</span>
                       <ChevronLeft className="w-3.5 h-3.5" />
@@ -5293,7 +5293,7 @@ export default function AdminCMS({
                           }
                         }
                       }}
-                      className="w-14 bg-slate-900 border border-slate-700 text-white rounded-lg px-2 py-1 text-center font-mono text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+                      className="w-14 bg-white border border-slate-300 text-slate-800 rounded-lg px-2 py-1 text-center font-mono text-xs focus:ring-2 focus:ring-blue-500 outline-none shadow-xs"
                       title="نمبر لکھ کر Enter دبائیں"
                     />
                     <span>از {totalPages}</span>
@@ -5334,13 +5334,13 @@ export default function AdminCMS({
             };
 
             return (
-              <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
-                <div className="border-b border-slate-800 pb-4">
-                  <h2 className="text-xl sm:text-2xl font-bold text-white font-simple flex items-center gap-3">
-                    <FolderOpen className="w-6 h-6 text-blue-400" />
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
+                <div className="border-b border-slate-100 pb-4">
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-simple flex items-center gap-3">
+                    <FolderOpen className="w-6 h-6 text-blue-600" />
                     <span>زمرہ جات / کیٹیگریز (Categories Hierarchy)</span>
                   </h2>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     ورڈپریس طرز پر بنیادی کیٹیگریز اور ان کے تحت ذیلی کیٹیگریز (Sub-categories) کا مکمل نظام
                   </p>
                 </div>
@@ -5348,16 +5348,16 @@ export default function AdminCMS({
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                   
                   {/* Left Form: Add / Edit Category */}
-                  <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4 sticky top-6 shadow-lg">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                      <h3 className="text-base font-bold text-slate-200 font-simple">
+                  <div className="bg-slate-50 border border-slate-200/80 p-6 rounded-2xl space-y-4 sticky top-6 shadow-xs">
+                    <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
+                      <h3 className="text-base font-bold text-slate-800 font-simple">
                         {categoryForm.id ? 'کیٹیگری میں ترمیم کریں (Edit)' : 'نیا زمرہ بنائیں (Add New)'}
                       </h3>
                       {categoryForm.id && (
                         <button
                           type="button"
                           onClick={() => setCategoryForm({ id: null, name: '', slug: '', parentId: '' })}
-                          className="text-xs text-slate-400 hover:text-white"
+                          className="text-xs text-slate-500 hover:text-slate-800"
                         >
                           کینسل
                         </button>
@@ -5367,7 +5367,7 @@ export default function AdminCMS({
                     <div className="space-y-4">
                       {/* Name */}
                       <div>
-                        <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple">
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple">
                           نام (Category Name) *
                         </label>
                         <input
@@ -5383,13 +5383,13 @@ export default function AdminCMS({
                             }));
                           }}
                           placeholder="مثلاً: پھل و سبزیاں یا الف..."
-                          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-white text-xs font-bold focus:border-blue-500 outline-none"
+                          className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-800 text-xs font-bold focus:border-blue-500 outline-none shadow-xs"
                         />
                       </div>
 
                       {/* Slug */}
                       <div>
-                        <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple">
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple">
                           سلگ (Slug URL)
                         </label>
                         <input
@@ -5397,19 +5397,19 @@ export default function AdminCMS({
                           value={categoryForm.slug}
                           onChange={e => setCategoryForm({ ...categoryForm, slug: e.target.value })}
                           placeholder="alif یا fruits"
-                          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-blue-400 text-xs font-mono focus:border-blue-500 outline-none text-left dir-ltr"
+                          className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-blue-600 text-xs font-mono focus:border-blue-500 outline-none text-left dir-ltr shadow-xs"
                         />
                       </div>
 
                       {/* Parent Category Dropdown (WordPress Hierarchical) */}
                       <div>
-                        <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple">
+                        <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple">
                           والدین زمرہ (Parent Category)
                         </label>
                         <select
                           value={categoryForm.parentId || ''}
                           onChange={e => setCategoryForm({ ...categoryForm, parentId: e.target.value })}
-                          className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-200 text-xs focus:border-blue-500 outline-none font-bold"
+                          className="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-800 text-xs focus:border-blue-500 outline-none font-bold shadow-xs"
                         >
                           <option value="">— کوئی نہیں (None - بنیادی کیٹیگری) —</option>
                           {hierarchicalCategories
@@ -5460,7 +5460,7 @@ export default function AdminCMS({
                           <button
                             type="button"
                             onClick={() => setCategoryForm({ id: null, name: '', slug: '', parentId: '' })}
-                            className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-3 py-2.5 rounded-xl text-xs"
+                            className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-3 py-2.5 rounded-xl text-xs transition-colors"
                           >
                             کینسل
                           </button>
@@ -5470,33 +5470,33 @@ export default function AdminCMS({
                   </div>
 
                   {/* Right: WordPress Style Hierarchical Table */}
-                  <div className="lg:col-span-2 border border-slate-800 rounded-2xl overflow-hidden bg-slate-900/40 shadow-xl">
-                    <table className="w-full text-right text-sm text-slate-300">
-                      <thead className="bg-slate-900/90 border-b border-slate-800 text-xs text-slate-400">
+                  <div className="lg:col-span-2 border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+                    <table className="w-full text-right text-sm text-slate-700">
+                      <thead className="bg-slate-50 border-b border-slate-200 text-xs text-slate-700 font-bold">
                         <tr>
-                          <th className="p-3.5 font-bold text-slate-200">Name (نام زمرہ)</th>
-                          <th className="p-3.5 font-bold text-slate-200">Parent (والدین)</th>
-                          <th className="p-3.5 font-bold text-slate-200">Slug (سلگ)</th>
-                          <th className="p-3.5 w-28 text-center font-bold text-slate-200">مضامین (Count)</th>
-                          <th className="p-3.5 w-24 text-center font-bold text-slate-200">ایکشنز</th>
+                          <th className="p-3.5 font-bold text-slate-800">Name (نام زمرہ)</th>
+                          <th className="p-3.5 font-bold text-slate-800">Parent (والدین)</th>
+                          <th className="p-3.5 font-bold text-slate-800">Slug (سلگ)</th>
+                          <th className="p-3.5 w-28 text-center font-bold text-slate-800">مضامین (Count)</th>
+                          <th className="p-3.5 w-24 text-center font-bold text-slate-800">ایکشنز</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800/80 font-sans">
+                      <tbody className="divide-y divide-slate-100 font-sans">
                         {flattenedHierarchicalList.map(cat => {
                           const parentCat = cat.parentId ? categoriesList.find(p => p !== cat && isCategoryMatch(p, cat.parentId)) : null;
                           return (
-                            <tr key={cat.id || cat.slug} className="hover:bg-slate-800/50 transition-colors group">
+                            <tr key={cat.id || cat.slug} className="hover:bg-slate-50/80 transition-colors group">
                               <td className="p-3.5">
                                 <div className="flex items-center gap-1.5" style={{ paddingRight: `${cat.depth * 1.5}rem` }}>
                                   {cat.depth > 0 && (
-                                    <span className="text-slate-500 font-bold select-none font-mono">
+                                    <span className="text-slate-400 font-bold select-none font-mono">
                                       {cat.depth === 1 ? '— ' : '—— '}
                                     </span>
                                   )}
                                   <span
                                     onClick={() => setCategoryForm({ ...cat, parentId: cat.parentId || '' })}
                                     className={`cursor-pointer hover:underline font-h2 text-sm ${
-                                      cat.depth === 0 ? 'text-white font-bold' : 'text-blue-300'
+                                      cat.depth === 0 ? 'text-slate-900 font-bold' : 'text-blue-600'
                                     }`}
                                   >
                                     {cat.name}
@@ -5504,17 +5504,17 @@ export default function AdminCMS({
                                 </div>
                               </td>
 
-                              <td className="p-3.5 text-xs text-slate-400 font-simple">
+                              <td className="p-3.5 text-xs text-slate-600 font-simple">
                                 {parentCat ? (
-                                  <span className="text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg">
+                                  <span className="text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-lg">
                                     {parentCat.name}
                                   </span>
                                 ) : (
-                                  <span className="text-slate-600">—</span>
+                                  <span className="text-slate-400">—</span>
                                 )}
                               </td>
 
-                              <td className="p-3.5 text-xs font-mono text-slate-400">
+                              <td className="p-3.5 text-xs font-mono text-slate-500">
                                 /{cat.slug}
                               </td>
 
@@ -5529,7 +5529,7 @@ export default function AdminCMS({
                                           setAdminTab('articles');
                                         }}
                                         title={`اس زمرے اور ذیلی زمرہ جات میں کل ${stats.total} مضامین ہیں`}
-                                        className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500 hover:text-white transition-colors cursor-pointer"
+                                        className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white transition-colors cursor-pointer"
                                       >
                                         {stats.total}
                                       </span>
@@ -5543,7 +5543,7 @@ export default function AdminCMS({
                                           setAdminTab('articles');
                                         }}
                                         title={`اس زمرہ کے ${stats.direct} مضامین دیکھنے کے لیے کلک کریں`}
-                                        className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-blue-500/15 text-blue-400 border border-blue-500/30 hover:bg-blue-500 hover:text-white transition-colors cursor-pointer"
+                                        className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-600 hover:text-white transition-colors cursor-pointer"
                                       >
                                         {stats.direct}
                                       </span>
@@ -5552,7 +5552,7 @@ export default function AdminCMS({
                                   return (
                                     <span
                                       title="یہ زمرہ فی الوقت خالی ہے"
-                                      className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-mono text-slate-500 bg-slate-800/60 border border-slate-800/80 select-none"
+                                      className="inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[11px] font-mono text-slate-400 bg-slate-100 border border-slate-200 select-none"
                                     >
                                       0 (خالی)
                                     </span>
@@ -5565,7 +5565,7 @@ export default function AdminCMS({
                                   <button
                                     type="button"
                                     onClick={() => setCategoryForm({ ...cat, parentId: cat.parentId || '' })}
-                                    className="text-blue-400 hover:text-blue-300 p-1 hover:bg-slate-800 rounded transition-colors"
+                                    className="text-blue-600 hover:text-blue-800 p-1 hover:bg-slate-100 rounded transition-colors"
                                     title="ترمیم کریں (Edit)"
                                   >
                                     <Edit3 className="w-4 h-4" />
@@ -5578,7 +5578,7 @@ export default function AdminCMS({
                                         showNotification('کیٹیگری ڈیلیٹ کر دی گئی');
                                       }
                                     }}
-                                    className="text-red-400 hover:text-red-300 p-1 hover:bg-slate-800 rounded transition-colors"
+                                    className="text-red-600 hover:text-red-800 p-1 hover:bg-slate-100 rounded transition-colors"
                                     title="حذف کریں (Delete)"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -5675,22 +5675,22 @@ export default function AdminCMS({
 
           {/* VIEW: TAGS */}
           {adminTab === 'tags' && (
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-8 shadow-xl">
-              <h2 className="text-xl sm:text-2xl font-bold text-white font-simple">Tags (ٹیگز)</h2>
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-8 shadow-xs">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-simple">Tags (ٹیگز)</h2>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl h-fit">
-                  <h3 className="text-lg font-bold text-slate-200 mb-4">{tagForm.id ? 'Edit Tag' : 'Add New Tag'}</h3>
+                <div className="bg-slate-50 border border-slate-200/80 p-6 rounded-2xl h-fit shadow-xs">
+                  <h3 className="text-lg font-bold text-slate-800 mb-4">{tagForm.id ? 'Edit Tag' : 'Add New Tag'}</h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-xs text-slate-400 mb-1">Name (نام)</label>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Name (نام)</label>
                       <input type="text" value={tagForm.name} onChange={e => {
                          const name = e.target.value;
                          setTagForm(prev => ({ ...prev, name, slug: prev.id ? prev.slug : name.trim().toLowerCase().replace(/\s+/g, '-') }));
-                      }} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white outline-none focus:border-blue-500 font-bold" />
+                      }} className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 outline-none focus:border-blue-500 font-bold shadow-xs" />
                     </div>
                     <div>
-                      <label className="block text-xs text-slate-400 mb-1">Slug (سلگ)</label>
-                      <input type="text" value={tagForm.slug} onChange={e => setTagForm({...tagForm, slug: e.target.value})} className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-white outline-none focus:border-blue-500 font-sans" />
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Slug (سلگ)</label>
+                      <input type="text" value={tagForm.slug} onChange={e => setTagForm({...tagForm, slug: e.target.value})} className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-blue-600 outline-none focus:border-blue-500 font-mono shadow-xs" />
                     </div>
                     <div className="flex gap-2">
                         <button onClick={() => {
@@ -5705,34 +5705,34 @@ export default function AdminCMS({
                           {tagForm.id ? 'Update Tag' : 'Add New Tag'}
                         </button>
                         {tagForm.id && (
-                            <button onClick={() => setTagForm({ id: null, name: '', slug: '' })} className="bg-slate-700 hover:bg-slate-600 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors">
+                            <button onClick={() => setTagForm({ id: null, name: '', slug: '' })} className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-4 py-2 rounded-xl text-xs transition-colors">
                                 Cancel
                             </button>
                         )}
                     </div>
                   </div>
                 </div>
-                <div className="lg:col-span-2 border border-slate-800 rounded-2xl overflow-hidden bg-slate-900/30 self-start">
-                  <table className="w-full text-right text-sm text-slate-300">
-                    <thead className="bg-slate-900/80 border-b border-slate-800"><tr><th className="p-4 font-bold text-slate-200">Name</th><th className="p-4 font-bold text-slate-200">Slug</th><th className="p-4 w-24 text-center font-bold text-slate-200">Actions</th></tr></thead>
-                    <tbody className="divide-y divide-slate-800/80">
+                <div className="lg:col-span-2 border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs self-start">
+                  <table className="w-full text-right text-sm text-slate-700">
+                    <thead className="bg-slate-50 border-b border-slate-200"><tr><th className="p-4 font-bold text-slate-800">Name</th><th className="p-4 font-bold text-slate-800">Slug</th><th className="p-4 w-24 text-center font-bold text-slate-800">Actions</th></tr></thead>
+                    <tbody className="divide-y divide-slate-100">
                       {tagsList.map(tag => (
-                          <tr key={tag.id} className="hover:bg-slate-800/40 transition-colors">
-                              <td className="p-4 text-blue-400 font-bold font-h2">{tag.name}</td>
-                              <td className="p-4 text-slate-400 font-sans">{tag.slug}</td>
+                          <tr key={tag.id} className="hover:bg-slate-50/80 transition-colors">
+                              <td className="p-4 text-blue-600 font-bold font-h2">{tag.name}</td>
+                              <td className="p-4 text-slate-500 font-sans">{tag.slug}</td>
                               <td className="p-4 text-center">
                                 <div className="flex items-center justify-center gap-3">
-                                  <button onClick={() => setTagForm(tag)} className="text-blue-500 hover:text-blue-400 transition-colors" title="Edit"><Edit3 className="w-4 h-4" /></button>
+                                  <button onClick={() => setTagForm(tag)} className="text-blue-600 hover:text-blue-800 transition-colors p-1 hover:bg-slate-100 rounded" title="Edit"><Edit3 className="w-4 h-4" /></button>
                                   <button onClick={() => {
                                       if(window.confirm('کیا آپ واقعی یہ ٹیگ ڈیلیٹ کرنا چاہتے ہیں؟')) {
                                           setTagsList(prev => prev.filter(c => c.id !== tag.id));
                                       }
-                                  }} className="text-red-500 hover:text-red-400 transition-colors" title="Delete"><Trash2 className="w-4 h-4" /></button>
+                                  }} className="text-red-600 hover:text-red-800 transition-colors p-1 hover:bg-slate-100 rounded" title="Delete"><Trash2 className="w-4 h-4" /></button>
                                 </div>
                               </td>
                           </tr>
                       ))}
-                      {tagsList.length === 0 && <tr><td colSpan="3" className="p-8 text-center text-slate-500">کوئی ٹیگ موجود نہیں</td></tr>}
+                      {tagsList.length === 0 && <tr><td colSpan="3" className="p-8 text-center text-slate-500 font-simple">کوئی ٹیگ موجود نہیں</td></tr>}
                     </tbody>
                   </table>
                 </div>
@@ -5749,21 +5749,21 @@ export default function AdminCMS({
           {/* VIEW: MEDIA LIBRARY */}
           {/* ========================================================= */}
           {adminTab === 'media' && (
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
               
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white font-simple flex items-center gap-3">
-                    <ImageIcon className="w-6 h-6 text-blue-400" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-simple flex items-center gap-3">
+                    <ImageIcon className="w-6 h-6 text-purple-600" />
                     <span>میڈیا لائبریری (Media Library)</span>
                   </h2>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     ویب سائٹ کی تمام تصاویر، منسلک مضامین اور اپلوڈز کا مکمل کنٹرول
                   </p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <label className="relative cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md font-simple flex items-center gap-2">
+                  <label className="relative cursor-pointer bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md font-simple flex items-center gap-2">
                     <UploadCloud className="w-4 h-4" />
                     <span>نئی تصویر اپلوڈ کریں</span>
                     <input type="file" multiple accept="image/*" onChange={handleMediaUpload} className="hidden" />
@@ -5782,25 +5782,25 @@ export default function AdminCMS({
               </div>
 
               {/* Media Controls Bar */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-400 font-bold">فلٹر:</span>
-                  <div className="flex gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-bold">
+                  <span className="text-xs text-slate-600 font-bold">فلٹر:</span>
+                  <div className="flex gap-1.5 bg-white p-1 rounded-xl border border-slate-200 text-xs font-bold shadow-xs">
                     <button
                       onClick={() => setMediaFilter('all')}
-                      className={`px-3 py-1.5 rounded-lg transition-colors ${mediaFilter === 'all' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                      className={`px-3 py-1.5 rounded-lg transition-colors ${mediaFilter === 'all' ? 'bg-purple-600 text-white' : 'text-slate-600 hover:text-slate-900'}`}
                     >
                       تمام میڈیا ({mediaList.length})
                     </button>
                     <button
                       onClick={() => setMediaFilter('attached')}
-                      className={`px-3 py-1.5 rounded-lg transition-colors ${mediaFilter === 'attached' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                      className={`px-3 py-1.5 rounded-lg transition-colors ${mediaFilter === 'attached' ? 'bg-emerald-600 text-white' : 'text-slate-600 hover:text-slate-900'}`}
                     >
                       منسلک / زیر استعمال ({mediaList.filter(m => m.attachedTo).length})
                     </button>
                     <button
                       onClick={() => setMediaFilter('unattached')}
-                      className={`px-3 py-1.5 rounded-lg transition-colors ${mediaFilter === 'unattached' ? 'bg-amber-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                      className={`px-3 py-1.5 rounded-lg transition-colors ${mediaFilter === 'unattached' ? 'bg-amber-600 text-white' : 'text-slate-600 hover:text-slate-900'}`}
                     >
                       صرف اپلوڈ / غیر منسلک ({mediaList.filter(m => !m.attachedTo).length})
                     </button>
@@ -5809,13 +5809,13 @@ export default function AdminCMS({
 
                 <div className="flex items-center gap-2 w-full sm:w-64">
                   <div className="relative w-full">
-                    <Search className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-3" />
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-3" />
                     <input
                       type="text"
                       value={mediaSearch}
                       onChange={e => setMediaSearch(e.target.value)}
                       placeholder="تصویر یا فائل تلاش کریں..."
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl pr-9 pl-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-sans"
+                      className="w-full bg-white border border-slate-300 rounded-xl pr-9 pl-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-purple-500 font-sans shadow-xs"
                     />
                   </div>
                 </div>
@@ -5835,8 +5835,8 @@ export default function AdminCMS({
                     return (
                       <div
                         key={media.id}
-                        className={`group relative bg-slate-900 border rounded-2xl overflow-hidden transition-all flex flex-col ${
-                          isSelected ? 'border-blue-500 ring-2 ring-blue-500/50' : 'border-slate-800 hover:border-slate-700'
+                        className={`group relative bg-white border rounded-2xl overflow-hidden transition-all flex flex-col shadow-xs ${
+                          isSelected ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
                         }`}
                       >
                         {/* Checkbox */}
@@ -5851,23 +5851,23 @@ export default function AdminCMS({
                                 setSelectedMediaIds(prev => prev.filter(id => id !== media.id));
                               }
                             }}
-                            className="w-4 h-4 rounded border-slate-700 bg-slate-950/80 text-blue-600 focus:ring-0 cursor-pointer"
+                            className="w-4 h-4 rounded border-slate-300 bg-white text-purple-600 focus:ring-0 cursor-pointer shadow-xs"
                           />
                         </div>
 
                         {/* Image Preview */}
-                        <div className="aspect-square bg-slate-950 overflow-hidden relative">
+                        <div className="aspect-square bg-slate-100 overflow-hidden relative">
                           <img
                             src={media.url}
                             alt={media.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             loading="lazy"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-2">
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-2">
                             <button
                               type="button"
                               onClick={() => handleDeleteSingleMedia(media.id)}
-                              className="p-1.5 bg-red-600/90 hover:bg-red-600 text-white rounded-lg transition-colors"
+                              className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow"
                               title="ڈیلیٹ کریں"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -5876,7 +5876,7 @@ export default function AdminCMS({
                               href={media.url}
                               target="_blank"
                               rel="noreferrer"
-                              className="p-1.5 bg-slate-800/90 hover:bg-slate-700 text-white rounded-lg transition-colors text-[10px] font-bold"
+                              className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-[10px] font-bold shadow"
                             >
                               دیکھیں
                             </a>
@@ -5885,16 +5885,16 @@ export default function AdminCMS({
 
                         {/* Details */}
                         <div className="p-2.5 flex-1 flex flex-col justify-between space-y-1.5 text-right">
-                          <p className="text-[11px] font-bold text-slate-200 truncate font-sans" title={media.name}>
+                          <p className="text-[11px] font-bold text-slate-800 truncate font-sans" title={media.name}>
                             {media.name}
                           </p>
                           <div>
                             {media.attachedTo ? (
-                              <span className="inline-block text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md font-bold truncate max-w-full" title={`منسلک: ${media.attachedTo}`}>
+                              <span className="inline-block text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-md font-bold truncate max-w-full" title={`منسلک: ${media.attachedTo}`}>
                                 🟢 منسلک: {media.attachedTo}
                               </span>
                             ) : (
-                              <span className="inline-block text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md font-bold">
+                              <span className="inline-block text-[9px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-md font-bold">
                                 ⚪ غیر منسلک (صرف اپلوڈ)
                               </span>
                             )}
@@ -5906,9 +5906,9 @@ export default function AdminCMS({
               </div>
 
               {mediaList.length === 0 && (
-                <div className="p-12 text-center text-slate-500 space-y-3">
+                <div className="p-12 text-center text-slate-400 space-y-3">
                   <ImageIcon className="w-12 h-12 mx-auto opacity-30" />
-                  <p className="font-bold text-sm font-simple">میڈیا لائبریری خالی ہے</p>
+                  <p className="font-bold text-sm font-simple text-slate-600">میڈیا لائبریری خالی ہے</p>
                 </div>
               )}
             </div>
@@ -5923,19 +5923,19 @@ export default function AdminCMS({
             <div className="space-y-4">
               
               {/* WordPress Top Action Bar */}
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 shadow-lg">
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
                 <div className="flex items-center gap-2.5">
                   <button
                     type="button"
                     onClick={() => setAdminTab('pages')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-xl text-xs font-bold transition-all border border-slate-700 font-simple"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200 font-simple"
                   >
-                    <ArrowRight className="w-3.5 h-3.5 text-blue-400" />
+                    <ArrowRight className="w-3.5 h-3.5 text-blue-600" />
                     <span>تمام صفحات (All Pages)</span>
                   </button>
-                  <span className="text-slate-700 hidden sm:inline">|</span>
+                  <span className="text-slate-300 hidden sm:inline">|</span>
                   <div className="hidden sm:block">
-                    <h2 className="text-xs sm:text-sm font-bold text-white font-simple">
+                    <h2 className="text-xs sm:text-sm font-bold text-slate-900 font-simple">
                       {editingPageId ? 'صفحے میں ترمیم کریں (Page Editor)' : 'نیا صفحہ تحریر کریں (New Page Editor)'}
                     </h2>
                   </div>
@@ -5951,7 +5951,7 @@ export default function AdminCMS({
                       setPageEditorMode(pageEditorMode === 'preview' ? 'visual' : 'preview');
                     }}
                     className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all border font-simple ${
-                      pageEditorMode === 'preview' ? 'bg-blue-600 text-white border-blue-500' : 'bg-slate-900 text-slate-300 hover:text-white border-slate-700'
+                      pageEditorMode === 'preview' ? 'bg-blue-600 text-white border-blue-600 shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200'
                     }`}
                   >
                     <Eye className="w-4 h-4" />
@@ -5964,7 +5964,7 @@ export default function AdminCMS({
                       setPageForm(prev => ({ ...prev, status: 'draft' }));
                       handleSavePage();
                     }}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors font-simple border border-slate-700"
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors font-simple border border-slate-200"
                   >
                     ڈرافٹ محفوظ کریں
                   </button>
@@ -5972,7 +5972,7 @@ export default function AdminCMS({
                   <button
                     type="button"
                     onClick={handleSavePage}
-                    className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-900/30 transition-all font-simple"
+                    className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl text-xs font-bold shadow-xs transition-all font-simple"
                   >
                     <Save className="w-4 h-4" />
                     <span>{editingPageId ? 'صفحہ اپڈیٹ کریں (Update)' : 'صفحہ پبلش کریں (Publish)'}</span>
@@ -5987,9 +5987,9 @@ export default function AdminCMS({
                 <div className="flex-1 min-w-0 w-full space-y-4">
                   
                   {/* Title & Permalink */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 shadow-lg space-y-3">
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
                     <div>
-                      <label className="text-xs font-bold text-slate-400 block mb-1 font-simple">
+                      <label className="text-xs font-bold text-slate-700 block mb-1 font-simple">
                         صفحے کا عنوان (Page Title) *
                       </label>
                       <input
@@ -6005,21 +6005,21 @@ export default function AdminCMS({
                           }));
                         }}
                         placeholder="یہاں صفحے کا عنوان درج کریں (مثلاً: ہمارے بارے میں / رابطہ کریں)..."
-                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-base sm:text-lg font-bold focus:outline-none focus:border-blue-500 font-h2"
+                        className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 text-base sm:text-lg font-bold focus:outline-none focus:border-blue-600 font-h2 shadow-xs"
                       />
                     </div>
 
                     {/* Permalink Display */}
-                    <div className="flex items-center gap-2 text-xs bg-slate-900/80 px-3 py-1.5 rounded-xl border border-slate-800 text-slate-400">
-                      <span className="font-bold text-slate-300">مستقل لنک (Permalink):</span>
-                      <span className="text-slate-500 font-mono">http://localhost:3000/</span>
+                    <div className="flex items-center gap-2 text-xs bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600">
+                      <span className="font-bold text-slate-700">مستقل لنک (Permalink):</span>
+                      <span className="text-slate-400 font-mono">http://localhost:3000/</span>
                       {isEditingPageSlug ? (
                         <div className="flex items-center gap-1.5 flex-1">
                           <input
                             type="text"
                             value={tempPageSlug}
                             onChange={(e) => setTempPageSlug(e.target.value)}
-                            className="bg-slate-950 border border-blue-500 rounded px-2 py-0.5 text-xs text-blue-300 font-mono outline-none"
+                            className="bg-white border border-blue-500 rounded px-2 py-0.5 text-xs text-blue-700 font-mono outline-none"
                           />
                           <button
                             type="button"
@@ -6034,14 +6034,14 @@ export default function AdminCMS({
                           <button
                             type="button"
                             onClick={() => setIsEditingPageSlug(false)}
-                            className="px-2 py-0.5 bg-slate-800 text-slate-400 rounded text-[10px]"
+                            className="px-2 py-0.5 bg-slate-200 text-slate-700 rounded text-[10px]"
                           >
                             منسوخ
                           </button>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-blue-400 font-bold">
+                          <span className="font-mono text-blue-600 font-bold">
                             {pageForm.slug || 'page-slug'}
                           </span>
                           <button
@@ -6050,7 +6050,7 @@ export default function AdminCMS({
                               setTempPageSlug(pageForm.slug || '');
                               setIsEditingPageSlug(true);
                             }}
-                            className="text-blue-400 hover:text-blue-300 underline text-[11px]"
+                            className="text-blue-600 hover:text-blue-700 underline text-[11px]"
                           >
                             تبدیل کریں
                           </button>
@@ -6065,21 +6065,21 @@ export default function AdminCMS({
                   {(pageForm && (pageForm.slug === 'pdf-books' || String(pageForm.id) === '8339' || (pageForm.title && (pageForm.title.includes('پی ڈی ایف') || pageForm.title.includes('PDF Books'))))) ? (
                     <div className="space-y-4">
                       {/* Studio Top Control Card */}
-                      <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 shadow-lg">
+                      <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 flex flex-wrap items-center justify-between gap-4 shadow-xs">
                         <div className="flex items-center gap-3.5">
-                          <div className="p-3 bg-emerald-600/20 text-emerald-400 rounded-2xl border border-emerald-500/30 shrink-0">
+                          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-200 shrink-0">
                             <BookOpen className="w-7 h-7" />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <h3 className="text-base sm:text-lg font-bold text-white font-simple">
+                              <h3 className="text-base sm:text-lg font-bold text-slate-900 font-simple">
                                 پی ڈی ایف کتب لائبریری سٹوڈیو (Digital Books Studio)
                               </h3>
-                              <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs px-2.5 py-0.5 rounded-full font-bold">
+                              <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs px-2.5 py-0.5 rounded-full font-bold">
                                 {pdfBooksList.length} کتب
                               </span>
                             </div>
-                            <p className="text-xs text-slate-400 font-sans mt-0.5">
+                            <p className="text-xs text-slate-500 font-sans mt-0.5">
                               یہاں سے آپ لائبریری کی تمام کتب میں بغیر کسی کوڈنگ کے آسانی سے اضافہ، ترمیم یا حذف کر سکتے ہیں۔
                             </p>
                           </div>
@@ -6089,18 +6089,18 @@ export default function AdminCMS({
                           <button
                             type="button"
                             onClick={handleOpenAddBook}
-                            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-900/40 transition-all font-simple cursor-pointer"
+                            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-xs transition-all font-simple cursor-pointer"
                           >
                             <PlusCircle className="w-4 h-4" />
                             <span>+ نئی کتاب شامل کریں</span>
                           </button>
 
-                          <div className="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-simple">
+                          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-simple">
                             <button
                               type="button"
                               onClick={() => setPdfEditorSubTab('studio')}
                               className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                                pdfEditorSubTab === 'studio' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                                pdfEditorSubTab === 'studio' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                               }`}
                             >
                               کتب مینیجر
@@ -6109,7 +6109,7 @@ export default function AdminCMS({
                               type="button"
                               onClick={() => setPdfEditorSubTab('html')}
                               className={`px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
-                                pdfEditorSubTab === 'html' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-400 hover:text-white'
+                                pdfEditorSubTab === 'html' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                               }`}
                             >
                               خام HTML کوڈ
@@ -6120,16 +6120,16 @@ export default function AdminCMS({
 
                       {/* Sub-Tab 1: Books Manager Studio */}
                       {pdfEditorSubTab === 'studio' && (
-                        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-4 shadow-xl">
+                        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 space-y-4 shadow-xs">
                           {/* Search & Category Filter Toolbar */}
-                          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+                          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-slate-100 pb-4">
                             <div className="relative w-full sm:w-80">
                               <input
                                 type="text"
                                 value={bookSearchQuery}
                                 onChange={(e) => setBookSearchQuery(e.target.value)}
                                 placeholder="کتاب کا نام، مصنف یا موضوع تلاش کریں..."
-                                className="w-full bg-slate-900 border border-slate-700 rounded-xl pr-10 pl-4 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 font-simple"
+                                className="w-full bg-slate-50 border border-slate-300 rounded-xl pr-10 pl-4 py-2.5 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-emerald-600 font-simple shadow-xs"
                               />
                               <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-3" />
                             </div>
@@ -6155,11 +6155,11 @@ export default function AdminCMS({
                                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all font-simple cursor-pointer ${
                                       isActive 
                                         ? 'bg-emerald-600 text-white shadow-xs' 
-                                        : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'
+                                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
                                     }`}
                                   >
                                     <span>{cat.name}</span>
-                                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isActive ? 'bg-white/20' : 'bg-slate-800'}`}>{count}</span>
+                                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${isActive ? 'bg-white/20' : 'bg-slate-200'}`}>{count}</span>
                                   </button>
                                 );
                               })}
@@ -6181,12 +6181,12 @@ export default function AdminCMS({
                             if (filtered.length === 0) {
                               return (
                                 <div className="p-8 text-center space-y-3">
-                                  <BookOpen className="w-12 h-12 text-slate-600 mx-auto" />
-                                  <p className="text-sm font-bold text-slate-300 font-simple">کوئی کتاب نہیں ملی</p>
+                                  <BookOpen className="w-12 h-12 text-slate-300 mx-auto" />
+                                  <p className="text-sm font-bold text-slate-600 font-simple">کوئی کتاب نہیں ملی</p>
                                   <button
                                     type="button"
                                     onClick={() => { setBookSearchQuery(''); setBookCategoryFilter('all'); }}
-                                    className="text-xs text-blue-400 hover:underline"
+                                    className="text-xs text-blue-600 hover:underline font-bold"
                                   >
                                     فلٹرز ختم کریں
                                   </button>
@@ -6201,17 +6201,17 @@ export default function AdminCMS({
                                   return (
                                     <div
                                       key={book.id || book.title}
-                                      className="bg-slate-900/90 hover:bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all"
+                                      className="bg-slate-50 hover:bg-slate-100/90 border border-slate-200/90 hover:border-slate-300 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all shadow-xs"
                                     >
                                       {/* Book Thumbnail + Info */}
                                       <div className="flex items-center gap-3.5 min-w-0 flex-1">
                                         {/* Reorder Buttons */}
-                                        <div className="flex flex-col gap-1 text-slate-500 shrink-0">
+                                        <div className="flex flex-col gap-1 text-slate-400 shrink-0">
                                           <button
                                             type="button"
                                             disabled={originalIndex === 0}
                                             onClick={() => handleMoveBook(originalIndex, -1)}
-                                            className="p-1 hover:text-white hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"
+                                            className="p-1 hover:text-slate-800 hover:bg-slate-200 rounded disabled:opacity-20 cursor-pointer"
                                             title="اوپر کریں"
                                           >
                                             <ArrowUp className="w-3.5 h-3.5" />
@@ -6220,7 +6220,7 @@ export default function AdminCMS({
                                             type="button"
                                             disabled={originalIndex === pdfBooksList.length - 1}
                                             onClick={() => handleMoveBook(originalIndex, 1)}
-                                            className="p-1 hover:text-white hover:bg-slate-800 rounded disabled:opacity-20 cursor-pointer"
+                                            className="p-1 hover:text-slate-800 hover:bg-slate-200 rounded disabled:opacity-20 cursor-pointer"
                                             title="نیچے کریں"
                                           >
                                             <ArrowDown className="w-3.5 h-3.5" />
@@ -6228,7 +6228,7 @@ export default function AdminCMS({
                                         </div>
 
                                         {/* Thumbnail Cover */}
-                                        <div className="w-12 h-16 rounded-lg bg-slate-800 border border-slate-700 overflow-hidden shrink-0 shadow-sm relative">
+                                        <div className="w-12 h-16 rounded-lg bg-slate-200 border border-slate-300 overflow-hidden shrink-0 shadow-xs relative">
                                           <img
                                             src={book.image || '/images/books/tib-e-pakistani-urdu.jpg'}
                                             alt={book.title}
@@ -6240,10 +6240,10 @@ export default function AdminCMS({
                                         {/* Text Details */}
                                         <div className="min-w-0 space-y-1 text-right">
                                           <div className="flex flex-wrap items-center gap-2">
-                                            <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded font-bold font-simple">
+                                            <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded font-bold font-simple">
                                               {book.category}
                                             </span>
-                                            <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">
+                                            <span className="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-mono">
                                               {book.language || 'Urdu'}
                                             </span>
                                             <span className="text-[10px] text-slate-500 font-mono">
@@ -6251,12 +6251,12 @@ export default function AdminCMS({
                                             </span>
                                           </div>
 
-                                          <h4 className="text-sm sm:text-base font-bold text-white group-hover:text-emerald-400 transition-colors truncate font-h2">
+                                          <h4 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-emerald-700 transition-colors truncate font-h2">
                                             {book.title}
                                           </h4>
 
-                                          <p className="text-xs text-slate-400 truncate">
-                                            مصنف: <strong className="text-slate-300">{book.author}</strong> • {book.pages || 'PDF'}
+                                          <p className="text-xs text-slate-600 truncate">
+                                            مصنف: <strong className="text-slate-800">{book.author}</strong> • {book.pages || 'PDF'}
                                           </p>
                                         </div>
                                       </div>
@@ -6268,17 +6268,17 @@ export default function AdminCMS({
                                             href={book.downloadUrl}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-xl text-xs transition-colors"
+                                            className="p-2 bg-slate-200 hover:bg-slate-300 text-slate-700 hover:text-slate-900 rounded-xl text-xs transition-colors"
                                             title="ڈاؤن لوڈ لنک ٹیسٹ کریں"
                                           >
-                                            <Download className="w-4 h-4 text-emerald-400" />
+                                            <Download className="w-4 h-4 text-emerald-600" />
                                           </a>
                                         )}
 
                                         <button
                                           type="button"
                                           onClick={() => handleOpenEditBook(book, originalIndex)}
-                                          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 rounded-xl text-xs font-bold transition-all font-simple cursor-pointer"
+                                          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition-all font-simple cursor-pointer"
                                         >
                                           <Edit3 className="w-3.5 h-3.5" />
                                           <span>ترمیم</span>
@@ -6287,7 +6287,7 @@ export default function AdminCMS({
                                         <button
                                           type="button"
                                           onClick={() => handleDeleteBook(originalIndex)}
-                                          className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 rounded-xl text-xs font-bold transition-all font-simple cursor-pointer"
+                                          className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-all font-simple cursor-pointer"
                                         >
                                           <Trash2 className="w-3.5 h-3.5" />
                                           <span>حذف</span>
@@ -6304,13 +6304,13 @@ export default function AdminCMS({
 
                       {/* Sub-Tab 2: Raw HTML Mode */}
                       {pdfEditorSubTab === 'html' && (
-                        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 sm:p-6 space-y-3">
-                          <div className="flex items-center justify-between text-xs text-slate-400">
+                        <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-6 space-y-3 shadow-xs">
+                          <div className="flex items-center justify-between text-xs text-slate-600">
                             <span>خام HTML کوڈ ایڈیٹر</span>
                             <button
                               type="button"
                               onClick={() => setPdfEditorSubTab('studio')}
-                              className="text-emerald-400 hover:underline font-bold"
+                              className="text-emerald-700 hover:underline font-bold"
                             >
                               ← کتب سٹوڈیو پر واپس جائیں
                             </button>
@@ -6319,18 +6319,18 @@ export default function AdminCMS({
                             rows="18"
                             value={pageForm.content}
                             onChange={(e) => setPageForm({ ...pageForm, content: e.target.value })}
-                            className="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 text-emerald-400 font-mono text-xs leading-relaxed focus:outline-none focus:border-emerald-500 text-left dir-ltr"
+                            className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-emerald-400 font-mono text-xs leading-relaxed focus:outline-none focus:border-emerald-500 text-left dir-ltr"
                           />
                         </div>
                       )}
                     </div>
                   ) : (
                     /* Visual / Code / Preview Container */
-                    <div className="bg-slate-950 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+                    <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs overflow-hidden">
                     
                     {/* TinyMCE-Style Rich Formatting Toolbar */}
                     {pageEditorMode === 'visual' && (
-                      <div className="bg-slate-900/95 border-b border-slate-800 p-2.5 flex flex-wrap items-center gap-1.5 text-slate-300 sticky top-0 z-20 backdrop-blur-sm">
+                      <div className="bg-slate-100/95 border-b border-slate-200 p-2.5 flex flex-wrap items-center gap-1.5 text-slate-700 sticky top-0 z-20 backdrop-blur-sm">
                         
                         {/* Font Family */}
                         <select
@@ -6343,7 +6343,7 @@ export default function AdminCMS({
                               }`;
                             }
                           }}
-                          className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer font-bold"
+                          className="bg-white border border-slate-300 text-slate-800 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer font-bold shadow-xs"
                         >
                           <option value="nastaliq">خطِ نستعلیق (Urdu Nastaliq)</option>
                           <option value="simple">سادہ اردو (Simple Urdu)</option>
@@ -6357,7 +6357,7 @@ export default function AdminCMS({
                             if (val) execUniversalCmd('formatBlock', val);
                           }}
                           defaultValue=""
-                          className="bg-slate-800 border border-slate-700 text-slate-200 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer"
+                          className="bg-white border border-slate-300 text-slate-800 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer shadow-xs"
                         >
                           <option value="">ہیڈنگ اسٹائل...</option>
                           <option value="h1">ہیڈنگ 1 (H1 - مرکزی)</option>
@@ -6367,7 +6367,7 @@ export default function AdminCMS({
                           <option value="blockquote">اقتباس (Quote)</option>
                         </select>
 
-                        <div className="h-4 w-[1px] bg-slate-700 mx-1"></div>
+                        <div className="h-4 w-[1px] bg-slate-300 mx-1"></div>
 
                         {/* Text Color Dropdown Palette with Selection Preservation */}
                         <div className="relative">
@@ -6379,19 +6379,19 @@ export default function AdminCMS({
                               setShowPageColorPalette(!showPageColorPalette);
                               setShowPageBgPalette(false);
                             }}
-                            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-2 py-1.5 rounded-lg border border-slate-700 text-xs font-bold text-white transition-colors"
+                            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 px-2 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-700 shadow-xs transition-colors"
                             title="ٹیکسٹ کا رنگ تبدیل کریں"
                           >
-                            <Palette className="w-3.5 h-3.5 text-amber-400" />
+                            <Palette className="w-3.5 h-3.5 text-amber-500" />
                             <span>رنگ</span>
                           </button>
 
                           {showPageColorPalette && (
                             <div 
                               onMouseDown={(e) => e.preventDefault()}
-                              className="absolute top-full right-0 mt-2 bg-slate-900 border border-slate-700 rounded-2xl p-3 shadow-2xl z-50 w-64 space-y-2.5 text-right animate-in fade-in-50"
+                              className="absolute top-full right-0 mt-2 bg-white border border-slate-200 rounded-2xl p-3 shadow-xl z-50 w-64 space-y-2.5 text-right animate-in fade-in-50"
                             >
-                              <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 border-b border-slate-800 pb-1.5">
+                              <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 border-b border-slate-100 pb-1.5">
                                 <span>ٹیکسٹ رنگ منتخب کریں</span>
                                 <input
                                   type="color"
@@ -6413,7 +6413,7 @@ export default function AdminCMS({
                                       applyTextColor(c.hex);
                                       setShowPageColorPalette(false);
                                     }}
-                                    className="w-7 h-7 rounded-lg border border-slate-700/80 hover:scale-110 hover:border-white transition-all flex items-center justify-center shadow-sm"
+                                    className="w-7 h-7 rounded-lg border border-slate-200 hover:scale-110 hover:border-slate-400 transition-all flex items-center justify-center shadow-xs"
                                     style={{ backgroundColor: c.hex }}
                                     title={c.name}
                                   />
@@ -6433,19 +6433,19 @@ export default function AdminCMS({
                               setShowPageBgPalette(!showPageBgPalette);
                               setShowPageColorPalette(false);
                             }}
-                            className="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 px-2 py-1.5 rounded-lg border border-slate-700 text-xs font-bold text-white transition-colors"
+                            className="flex items-center gap-1.5 bg-white hover:bg-slate-50 px-2 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-slate-700 shadow-xs transition-colors"
                             title="بیک گراؤنڈ ہائی لائٹر"
                           >
-                            <Highlighter className="w-3.5 h-3.5 text-emerald-400" />
+                            <Highlighter className="w-3.5 h-3.5 text-emerald-600" />
                             <span>ہائی لائٹ</span>
                           </button>
 
                           {showPageBgPalette && (
                             <div 
                               onMouseDown={(e) => e.preventDefault()}
-                              className="absolute top-full right-0 mt-2 bg-slate-900 border border-slate-700 rounded-2xl p-3 shadow-2xl z-50 w-64 space-y-2.5 text-right animate-in fade-in-50"
+                              className="absolute top-full right-0 mt-2 bg-white border border-slate-200 rounded-2xl p-3 shadow-xl z-50 w-64 space-y-2.5 text-right animate-in fade-in-50"
                             >
-                              <div className="flex items-center justify-between text-[11px] font-bold text-slate-300 border-b border-slate-800 pb-1.5">
+                              <div className="flex items-center justify-between text-[11px] font-bold text-slate-700 border-b border-slate-100 pb-1.5">
                                 <span>ہائی لائٹر رنگ منتخب کریں</span>
                                 <input
                                   type="color"
@@ -6467,7 +6467,7 @@ export default function AdminCMS({
                                       applyBgColor(c.hex);
                                       setShowPageBgPalette(false);
                                     }}
-                                    className="w-7 h-7 rounded-lg border border-slate-700/80 hover:scale-110 hover:border-white transition-all flex items-center justify-center shadow-sm"
+                                    className="w-7 h-7 rounded-lg border border-slate-200 hover:scale-110 hover:border-slate-400 transition-all flex items-center justify-center shadow-xs"
                                     style={{ backgroundColor: c.hex }}
                                     title={c.name}
                                   />
@@ -6478,57 +6478,57 @@ export default function AdminCMS({
                         </div>
 
                         {/* Instant Quick Color Swatches on Toolbar */}
-                        <div className="flex items-center gap-1 bg-slate-800/90 px-2 py-1 rounded-lg border border-slate-700">
-                          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyTextColor('#ffffff'); }} className="w-4 h-4 rounded-full bg-white border border-slate-400 hover:scale-125 transition-transform" title="سفید رنگ"></button>
+                        <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-slate-300 shadow-xs">
+                          <button type="button" onMouseDown={(e) => { e.preventDefault(); applyTextColor('#ffffff'); }} className="w-4 h-4 rounded-full bg-white border border-slate-300 hover:scale-125 transition-transform" title="سفید رنگ"></button>
                           <button type="button" onMouseDown={(e) => { e.preventDefault(); applyTextColor('#10b981'); }} className="w-4 h-4 rounded-full bg-emerald-500 hover:scale-125 transition-transform" title="زمردی سبز"></button>
                           <button type="button" onMouseDown={(e) => { e.preventDefault(); applyTextColor('#38bdf8'); }} className="w-4 h-4 rounded-full bg-sky-400 hover:scale-125 transition-transform" title="آسمانی نیلا"></button>
                           <button type="button" onMouseDown={(e) => { e.preventDefault(); applyTextColor('#ef4444'); }} className="w-4 h-4 rounded-full bg-red-500 hover:scale-125 transition-transform" title="سرخ رنگ"></button>
                           <button type="button" onMouseDown={(e) => { e.preventDefault(); applyTextColor('#f59e0b'); }} className="w-4 h-4 rounded-full bg-amber-500 hover:scale-125 transition-transform" title="سنہری رنگ"></button>
                         </div>
 
-                        <div className="h-4 w-[1px] bg-slate-700 mx-1"></div>
+                        <div className="h-4 w-[1px] bg-slate-300 mx-1"></div>
 
                         {/* Basic Formatting with onMouseDown preventDefault */}
-                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('bold'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="بولڈ (Ctrl+B)">
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('bold'); }} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700" title="بولڈ (Ctrl+B)">
                           <Bold className="w-4 h-4" />
                         </button>
-                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('italic'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="اٹالک (Ctrl+I)">
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('italic'); }} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700" title="اٹالک (Ctrl+I)">
                           <Italic className="w-4 h-4" />
                         </button>
-                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('underline'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="انڈر لائن (Ctrl+U)">
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('underline'); }} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700" title="انڈر لائن (Ctrl+U)">
                           <Underline className="w-4 h-4" />
                         </button>
-                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('strikeThrough'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="سٹرائیک">
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('strikeThrough'); }} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700" title="سٹرائیک">
                           <Strikethrough className="w-4 h-4" />
                         </button>
 
-                        <div className="h-4 w-[1px] bg-slate-700 mx-1"></div>
+                        <div className="h-4 w-[1px] bg-slate-300 mx-1"></div>
 
                         {/* Alignments with onMouseDown preventDefault */}
-                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('justifyRight'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="دائیں سیدھ">
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('justifyRight'); }} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700" title="دائیں سیدھ">
                           <AlignRight className="w-4 h-4" />
                         </button>
-                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('justifyCenter'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="درمیان">
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('justifyCenter'); }} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700" title="درمیان">
                           <AlignCenter className="w-4 h-4" />
                         </button>
-                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('justifyLeft'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="بائیں سیدھ">
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('justifyLeft'); }} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700" title="بائیں سیدھ">
                           <AlignLeft className="w-4 h-4" />
                         </button>
-                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('justifyFull'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="مکمل سیدھ (Justify)">
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('justifyFull'); }} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700" title="مکمل سیدھ (Justify)">
                           <AlignJustify className="w-4 h-4" />
                         </button>
 
-                        <div className="h-4 w-[1px] bg-slate-700 mx-1"></div>
+                        <div className="h-4 w-[1px] bg-slate-300 mx-1"></div>
 
                         {/* Lists */}
-                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('insertUnorderedList'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="بلٹ لسٹ">
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('insertUnorderedList'); }} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700" title="بلٹ لسٹ">
                           <List className="w-4 h-4" />
                         </button>
-                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('insertOrderedList'); }} className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white" title="نمبر والی لسٹ">
+                        <button type="button" onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('insertOrderedList'); }} className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700" title="نمبر والی لسٹ">
                           <ListOrdered className="w-4 h-4" />
                         </button>
 
-                        <div className="h-4 w-[1px] bg-slate-700 mx-1"></div>
+                        <div className="h-4 w-[1px] bg-slate-300 mx-1"></div>
 
                         {/* Link & Computer Image Upload */}
                         <button
@@ -6537,14 +6537,14 @@ export default function AdminCMS({
                             const url = prompt('لنک درج کریں (URL):', 'https://');
                             if (url) execUniversalCmd('createLink', url);
                           }}
-                          className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white"
+                          className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700"
                           title="لنک شامل کریں"
                         >
                           <LinkIcon className="w-4 h-4" />
                         </button>
 
                         {/* Upload Image directly into text from Computer */}
-                        <label className="p-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-emerald-400 cursor-pointer flex items-center gap-1 border border-slate-700" title="کمپیوٹر سے تصویر شامل کریں">
+                        <label className="p-1.5 bg-white hover:bg-slate-50 rounded-lg text-emerald-600 cursor-pointer flex items-center gap-1 border border-slate-300 shadow-xs" title="کمپیوٹر سے تصویر شامل کریں">
                           <ImageIcon className="w-4 h-4" />
                           <span className="text-[10px] font-bold">+ تصویر</span>
                           <input type="file" accept="image/*" onChange={handlePageInlineImageUpload} className="hidden" />
@@ -6553,18 +6553,18 @@ export default function AdminCMS({
                         <button
                           type="button"
                           onMouseDown={(e) => { e.preventDefault(); execUniversalCmd('insertHorizontalRule'); }}
-                          className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-300 hover:text-white"
+                          className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700"
                           title="لائن لگائیں (Divider)"
                         >
                           <Minus className="w-4 h-4" />
                         </button>
 
                         {/* Mode Buttons on right */}
-                        <div className="mr-auto flex items-center gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800">
+                        <div className="mr-auto flex items-center gap-1 bg-slate-200/80 p-1 rounded-lg border border-slate-300">
                           <button
                             type="button"
                             onClick={() => setPageEditorMode('visual')}
-                            className={`px-2.5 py-1 rounded text-[11px] font-bold ${pageEditorMode === 'visual' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                            className={`px-2.5 py-1 rounded text-[11px] font-bold ${pageEditorMode === 'visual' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
                           >
                             Visual (ویژول)
                           </button>
@@ -6576,7 +6576,7 @@ export default function AdminCMS({
                               }
                               setPageEditorMode('code');
                             }}
-                            className={`px-2.5 py-1 rounded text-[11px] font-bold ${pageEditorMode === 'code' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                            className={`px-2.5 py-1 rounded text-[11px] font-bold ${pageEditorMode === 'code' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
                           >
                             Code (کوڈ)
                           </button>
@@ -6586,7 +6586,7 @@ export default function AdminCMS({
                     
                     {/* Editor Editable Body - International Standard Clean White Paper */}
                     {pageEditorMode === 'visual' && (
-                      <div className="bg-slate-950 p-4 sm:p-8 flex justify-center border-t border-slate-800/80">
+                      <div className="bg-slate-50 p-4 sm:p-8 flex justify-center border-t border-slate-200">
                         <div
                           ref={pageVisualEditorRef}
                           contentEditable
@@ -6599,7 +6599,7 @@ export default function AdminCMS({
                           onMouseUp={saveCurrentSelection}
                           onKeyUp={saveCurrentSelection}
                           onSelect={saveCurrentSelection}
-                          className={`w-full max-w-4xl bg-white text-slate-900 shadow-2xl rounded-2xl p-8 sm:p-12 min-h-[550px] outline-none leading-loose text-right article-rendered-content border border-slate-200 transition-all focus:ring-4 focus:ring-blue-500/20 ${
+                          className={`w-full max-w-4xl bg-white text-slate-900 shadow-xl rounded-2xl p-8 sm:p-12 min-h-[550px] outline-none leading-loose text-right article-rendered-content border border-slate-200 transition-all focus:ring-4 focus:ring-blue-500/20 ${
                             pageEditorFont === 'nastaliq' ? 'font-nastaliq text-xl' : pageEditorFont === 'simple' ? 'font-simple text-lg' : 'font-sans text-base'
                           }`}
                           style={{ minHeight: '550px', color: '#0f172a', backgroundColor: '#ffffff' }}
@@ -6609,13 +6609,13 @@ export default function AdminCMS({
 
                     {/* HTML Code Editor Mode */}
                     {pageEditorMode === 'code' && (
-                      <div className="p-4 bg-slate-950">
-                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-xs text-slate-400">
+                      <div className="p-4 bg-slate-50 border-t border-slate-200">
+                        <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200 text-xs text-slate-600">
                           <span>HTML سورس کوڈ ایڈیٹر</span>
                           <button
                             type="button"
                             onClick={() => setPageEditorMode('visual')}
-                            className="text-blue-400 hover:underline font-bold"
+                            className="text-blue-600 hover:underline font-bold"
                           >
                             ویژول موڈ پر واپس جائیں
                           </button>
@@ -6624,15 +6624,15 @@ export default function AdminCMS({
                           rows="16"
                           value={pageForm.content}
                           onChange={(e) => setPageForm({ ...pageForm, content: e.target.value })}
-                          className="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 text-emerald-400 font-mono text-xs leading-relaxed focus:outline-none focus:border-blue-500 text-left dir-ltr"
+                          className="w-full bg-slate-950 border border-slate-800 rounded-xl p-4 text-emerald-400 font-mono text-xs leading-relaxed focus:outline-none focus:border-blue-500 text-left dir-ltr"
                         />
                       </div>
                     )}
 
                     {/* Preview Mode */}
                     {pageEditorMode === 'preview' && (
-                      <div className="p-8 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-[400px]">
-                        <h1 className="text-3xl font-bold font-h1 border-b pb-4 mb-6">{pageForm.title || 'صفحے کا عنوان'}</h1>
+                      <div className="p-8 bg-white text-slate-800 min-h-[400px]">
+                        <h1 className="text-3xl font-bold font-h1 border-b border-slate-100 pb-4 mb-6">{pageForm.title || 'صفحے کا عنوان'}</h1>
                         <div 
                           className="article-rendered-content text-base leading-relaxed font-nastaliq"
                           dangerouslySetInnerHTML={{ __html: pageForm.content }}
@@ -6644,20 +6644,20 @@ export default function AdminCMS({
 
                   {/* Add / Edit Book Modal */}
                   {showBookModal && (
-                    <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in-50">
-                      <div className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-right font-sans">
+                    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in-50">
+                      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-right font-sans">
                         
                         {/* Modal Header */}
-                        <div className="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/80">
+                        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
                           <div className="flex items-center gap-2.5">
-                            <div className="p-2 bg-emerald-600/20 text-emerald-400 rounded-xl">
+                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-200">
                               <BookOpen className="w-5 h-5" />
                             </div>
                             <div>
-                              <h3 className="text-base font-bold text-white font-simple">
+                              <h3 className="text-base font-bold text-slate-900 font-simple">
                                 {editingBookIndex !== null ? 'کتاب کی تفصیلات میں ترمیم (Edit Book)' : 'نئی کتاب شامل کریں (Add New Book)'}
                               </h3>
-                              <p className="text-[11px] text-slate-400">
+                              <p className="text-[11px] text-slate-500">
                                 عنوان، سرورق، مصنف، پی ڈی ایف اور دیگر تفصیلات درج فرمائیں
                               </p>
                             </div>
@@ -6666,7 +6666,7 @@ export default function AdminCMS({
                           <button
                             type="button"
                             onClick={() => { setShowBookModal(false); setEditingBookIndex(null); }}
-                            className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                            className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
                           >
                             <X className="w-5 h-5" />
                           </button>
@@ -6677,7 +6677,7 @@ export default function AdminCMS({
                           
                           {/* Book Title */}
                           <div>
-                            <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                            <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
                               کتاب کا عنوان (Book Title) *
                             </label>
                             <input
@@ -6686,14 +6686,14 @@ export default function AdminCMS({
                               value={bookModalForm.title}
                               onChange={(e) => setBookModalForm({ ...bookModalForm, title: e.target.value })}
                               placeholder="مثلاً: کلیات تحقیقات صابر ملتانی"
-                              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:border-emerald-500 outline-none font-h2"
+                              className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:border-emerald-600 outline-none font-h2 shadow-xs"
                             />
                           </div>
 
                           {/* Author & Category in 2 columns */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                              <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
                                 مصنف / محقق کا نام *
                               </label>
                               <input
@@ -6702,12 +6702,12 @@ export default function AdminCMS({
                                 value={bookModalForm.author}
                                 onChange={(e) => setBookModalForm({ ...bookModalForm, author: e.target.value })}
                                 placeholder="مثلاً: حکیم دوست محمد صابر ملتانی"
-                                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs focus:border-emerald-500 outline-none"
+                                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 text-xs focus:border-emerald-600 outline-none shadow-xs"
                               />
                             </div>
 
                             <div>
-                              <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                              <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
                                 شعبہ / کیٹگری *
                               </label>
                               <select
@@ -6721,7 +6721,7 @@ export default function AdminCMS({
                                   else if (val.includes('صحت')) en = 'health';
                                   setBookModalForm({ ...bookModalForm, category: val, categoryEn: en });
                                 }}
-                                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs focus:border-emerald-500 outline-none font-simple"
+                                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 text-xs focus:border-emerald-600 outline-none font-simple shadow-xs"
                               >
                                 <option value="قانون مفرد اعضاء">قانون مفرد اعضاء</option>
                                 <option value="تراجم طب پاکستانی">تراجم طب پاکستانی</option>
@@ -6735,13 +6735,13 @@ export default function AdminCMS({
                           {/* Language & Edition Tag in 2 columns */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                              <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
                                 کتاب کی زبان
                               </label>
                               <select
                                 value={bookModalForm.language}
                                 onChange={(e) => setBookModalForm({ ...bookModalForm, language: e.target.value })}
-                                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs focus:border-emerald-500 outline-none"
+                                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 text-xs focus:border-emerald-600 outline-none shadow-xs"
                               >
                                 <option value="Urdu">اردو (Urdu)</option>
                                 <option value="English">انگریزی (English)</option>
@@ -6754,7 +6754,7 @@ export default function AdminCMS({
                             </div>
 
                             <div>
-                              <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                              <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
                                 نوعیت / صفحات کا ٹیگ
                               </label>
                               <input
@@ -6762,18 +6762,18 @@ export default function AdminCMS({
                                 value={bookModalForm.pages}
                                 onChange={(e) => setBookModalForm({ ...bookModalForm, pages: e.target.value })}
                                 placeholder="مثلاً: مختصر و جامع، کلاسیک شاہکار، علم النبض"
-                                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs focus:border-emerald-500 outline-none"
+                                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 text-xs focus:border-emerald-600 outline-none shadow-xs"
                               />
                             </div>
                           </div>
 
                           {/* Cover Image Upload & URL with Preview */}
-                          <div className="space-y-2 bg-slate-950 p-4 rounded-2xl border border-slate-800">
-                            <label className="block text-xs font-bold text-slate-300 font-simple">
+                          <div className="space-y-2 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <label className="block text-xs font-bold text-slate-700 font-simple">
                               کتاب کا سرورق / کور تصویر (Book Cover)
                             </label>
                             <div className="flex flex-col sm:flex-row items-center gap-3">
-                              <div className="w-16 h-22 rounded-xl bg-slate-900 border border-slate-700 overflow-hidden shrink-0 shadow-md">
+                              <div className="w-16 h-22 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 shadow-xs">
                                 <img
                                   src={bookModalForm.image || '/images/books/tib-e-pakistani-urdu.jpg'}
                                   alt="Book Cover Preview"
@@ -6788,12 +6788,12 @@ export default function AdminCMS({
                                   value={bookModalForm.image}
                                   onChange={(e) => setBookModalForm({ ...bookModalForm, image: e.target.value })}
                                   placeholder="تصویر کا لوکل پاتھ یا انٹرنیٹ URL (مثلاً: /images/books/mybook.jpg)"
-                                  className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none text-left dir-ltr font-mono"
+                                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-900 text-xs outline-none text-left dir-ltr font-mono shadow-xs"
                                 />
 
                                 <div className="flex items-center gap-2">
-                                  <label className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 rounded-xl text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 font-simple">
-                                    <UploadCloud className="w-3.5 h-3.5 text-blue-400" />
+                                  <label className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 font-simple shadow-xs">
+                                    <UploadCloud className="w-3.5 h-3.5 text-blue-600" />
                                     <span>کمپیوٹر سے کور تصویر منتخب کریں</span>
                                     <input
                                       type="file"
@@ -6819,7 +6819,7 @@ export default function AdminCMS({
                           {/* Download URL & Embed Reader URL */}
                           <div className="space-y-3">
                             <div>
-                              <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                              <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
                                 پی ڈی ایف کا ڈاؤن لوڈ لنک (Download PDF URL) *
                               </label>
                               <input
@@ -6828,12 +6828,12 @@ export default function AdminCMS({
                                 value={bookModalForm.downloadUrl}
                                 onChange={(e) => setBookModalForm({ ...bookModalForm, downloadUrl: e.target.value })}
                                 placeholder="https://archive.org/download/... یا گوگل ڈرائیو ڈاؤن لوڈ لنک"
-                                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-emerald-400 text-xs focus:border-emerald-500 outline-none text-left dir-ltr font-mono"
+                                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-emerald-700 text-xs focus:border-emerald-600 outline-none text-left dir-ltr font-mono shadow-xs"
                               />
                             </div>
 
                             <div>
-                              <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                              <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
                                 آن لائن ریڈر لنک (Online Reader Embed URL - اختیاری)
                               </label>
                               <input
@@ -6841,14 +6841,14 @@ export default function AdminCMS({
                                 value={bookModalForm.embedUrl}
                                 onChange={(e) => setBookModalForm({ ...bookModalForm, embedUrl: e.target.value })}
                                 placeholder="https://archive.org/embed/... یا گوگل ڈرائیو پریویو لنک"
-                                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-blue-400 text-xs focus:border-emerald-500 outline-none text-left dir-ltr font-mono"
+                                className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-blue-700 text-xs focus:border-emerald-600 outline-none text-left dir-ltr font-mono shadow-xs"
                               />
                             </div>
                           </div>
 
                           {/* Description */}
                           <div>
-                            <label className="block text-xs font-bold text-slate-300 mb-1 font-simple">
+                            <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
                               کتاب کا مختصر تعارف / تفصیل (Description)
                             </label>
                             <textarea
@@ -6856,18 +6856,18 @@ export default function AdminCMS({
                               value={bookModalForm.description}
                               onChange={(e) => setBookModalForm({ ...bookModalForm, description: e.target.value })}
                               placeholder="کتاب کے اہم موضوعات، ابواب یا خصوصیات کا تعارف..."
-                              className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white text-xs focus:border-emerald-500 outline-none leading-relaxed font-nastaliq"
+                              className="w-full bg-white border border-slate-300 rounded-xl p-3 text-slate-800 text-xs focus:border-emerald-600 outline-none leading-relaxed font-nastaliq shadow-xs"
                             />
                           </div>
 
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="p-4 sm:p-5 border-t border-slate-800 bg-slate-950 flex items-center justify-between gap-3">
+                        <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50 flex items-center justify-between gap-3">
                           <button
                             type="button"
                             onClick={() => { setShowBookModal(false); setEditingBookIndex(null); }}
-                            className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all font-simple cursor-pointer"
+                            className="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition-all font-simple cursor-pointer"
                           >
                             منسوخ کریں
                           </button>
@@ -6875,7 +6875,7 @@ export default function AdminCMS({
                           <button
                             type="button"
                             onClick={handleSaveBookModal}
-                            className="px-7 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-900/30 transition-all font-simple flex items-center gap-2 cursor-pointer"
+                            className="px-7 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all font-simple flex items-center gap-2 cursor-pointer"
                           >
                             <Save className="w-4 h-4" />
                             <span>کتاب محفوظ کریں</span>
@@ -6892,17 +6892,17 @@ export default function AdminCMS({
                 <div className="w-full lg:w-72 space-y-4">
                   
                   {/* Status & Publish */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-lg">
-                    <h3 className="text-xs font-bold text-slate-300 font-simple border-b border-slate-800 pb-2">
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xs">
+                    <h3 className="text-xs font-bold text-slate-900 font-simple border-b border-slate-100 pb-2">
                       پبلشنگ اسٹیٹس (Publish Status)
                     </h3>
                     
                     <div>
-                      <label className="block text-[11px] text-slate-400 mb-1">اسٹیٹس</label>
+                      <label className="block text-[11px] text-slate-600 mb-1">اسٹیٹس</label>
                       <select
                         value={pageForm.status}
                         onChange={(e) => setPageForm({ ...pageForm, status: e.target.value })}
-                        className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-2 outline-none font-bold"
+                        className="w-full bg-white border border-slate-300 text-slate-800 text-xs rounded-xl px-3 py-2 outline-none font-bold shadow-xs"
                       >
                         <option value="published">پبلک (شائع شدہ / Live)</option>
                         <option value="draft">ڈرافٹ (غیر شائع)</option>
@@ -6910,19 +6910,19 @@ export default function AdminCMS({
                     </div>
 
                     <div>
-                      <label className="block text-[11px] text-slate-400 mb-1">مصنف (Author)</label>
+                      <label className="block text-[11px] text-slate-600 mb-1">مصنف (Author)</label>
                       <input
                         type="text"
                         value={pageForm.author || ''}
                         onChange={(e) => setPageForm({ ...pageForm, author: e.target.value })}
-                        className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-2 outline-none"
+                        className="w-full bg-white border border-slate-300 text-slate-800 text-xs rounded-xl px-3 py-2 outline-none shadow-xs"
                       />
                     </div>
 
                     <button
                       type="button"
                       onClick={handleSavePage}
-                      className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-all shadow-md mt-2 flex items-center justify-center gap-2"
+                      className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition-all shadow-xs mt-2 flex items-center justify-center gap-2"
                     >
                       <Save className="w-4 h-4" />
                       <span>{editingPageId ? 'تبدیلیاں محفوظ کریں' : 'صفحہ پبلش کریں'}</span>
@@ -6930,16 +6930,16 @@ export default function AdminCMS({
                   </div>
 
                   {/* Featured Image */}
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-lg">
-                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                      <h3 className="text-xs font-bold text-slate-300 font-simple">
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 space-y-3 shadow-xs">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <h3 className="text-xs font-bold text-slate-900 font-simple">
                         نمایاں تصویر (Featured Image)
                       </h3>
                       {pageForm.featuredImage && (
                         <button
                           type="button"
                           onClick={() => setPageForm({ ...pageForm, featuredImage: '' })}
-                          className="text-[10px] text-red-400 hover:text-red-300 font-bold"
+                          className="text-[10px] text-red-600 hover:text-red-700 font-bold"
                         >
                           تصویر ہٹائیں
                         </button>
@@ -6947,10 +6947,10 @@ export default function AdminCMS({
                     </div>
 
                     {/* Upload from Computer Button */}
-                    <label className="w-full py-2.5 px-3 bg-slate-900 hover:bg-slate-800 border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-xl cursor-pointer text-center flex flex-col items-center justify-center gap-1 transition-all">
-                      <UploadCloud className="w-5 h-5 text-blue-400" />
-                      <span className="text-xs font-bold text-slate-200 font-simple">کمپیوٹر سے تصویر اپلوڈ کریں</span>
-                      <span className="text-[10px] text-slate-500">JPG, PNG, WebP فارمیٹس</span>
+                    <label className="w-full py-2.5 px-3 bg-slate-50 hover:bg-slate-100 border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-xl cursor-pointer text-center flex flex-col items-center justify-center gap-1 transition-all">
+                      <UploadCloud className="w-5 h-5 text-blue-600" />
+                      <span className="text-xs font-bold text-slate-700 font-simple">کمپیوٹر سے تصویر اپلوڈ کریں</span>
+                      <span className="text-[10px] text-slate-400">JPG, PNG, WebP فارمیٹس</span>
                       <input type="file" accept="image/*" onChange={handlePageFeaturedImageUpload} className="hidden" />
                     </label>
 
@@ -6962,12 +6962,12 @@ export default function AdminCMS({
                         value={pageForm.featuredImage || ''}
                         onChange={(e) => setPageForm({ ...pageForm, featuredImage: e.target.value })}
                         placeholder="https://example.com/image.jpg"
-                        className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-2 outline-none text-left dir-ltr"
+                        className="w-full bg-white border border-slate-300 text-slate-800 text-xs rounded-xl px-3 py-2 outline-none text-left dir-ltr shadow-xs"
                       />
                     </div>
 
                     {pageForm.featuredImage && (
-                      <div className="relative rounded-xl overflow-hidden border border-slate-800">
+                      <div className="relative rounded-xl overflow-hidden border border-slate-200 shadow-xs">
                         <img src={pageForm.featuredImage} alt="Featured Preview" className="w-full h-36 object-cover" />
                       </div>
                     )}
@@ -6984,15 +6984,15 @@ export default function AdminCMS({
           {/* VIEW: PAGES MANAGEMENT (WORDPRESS STYLE) */}
           {/* ========================================================= */}
           {adminTab === 'pages' && (
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
               
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white font-simple flex items-center gap-3">
-                    <BookOpen className="w-6 h-6 text-blue-400" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-simple flex items-center gap-3">
+                    <BookOpen className="w-6 h-6 text-blue-600" />
                     <span>صفحات (Pages)</span>
                   </h2>
-                  <p className="text-xs text-slate-400 mt-1 font-sans">
+                  <p className="text-xs text-slate-500 mt-1 font-sans">
                     ویب سائٹ کے تمام جامد صفحات (پرائیویسی، ہمارے بارے میں، رابطہ وغیرہ) کی ترامیم اور کنٹرول
                   </p>
                 </div>
@@ -7007,47 +7007,47 @@ export default function AdminCMS({
               </div>
 
               {/* Pages WordPress Style Table */}
-              <div className="border border-slate-800 rounded-2xl overflow-hidden bg-slate-900/30">
-                <table className="w-full text-right text-sm text-slate-300 font-sans">
-                  <thead className="text-xs text-slate-400 border-b border-slate-800 bg-slate-900/80">
+              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+                <table className="w-full text-right text-sm text-slate-700 font-sans">
+                  <thead className="text-xs text-slate-700 border-b border-slate-200 bg-slate-50 font-bold">
                     <tr>
-                      <th className="px-4 py-3.5 w-10 text-center"><input type="checkbox" className="rounded border-slate-700 bg-slate-800" /></th>
-                      <th className="px-4 py-3.5 font-bold text-slate-200">Title</th>
-                      <th className="px-4 py-3.5 font-bold text-slate-200">Author</th>
-                      <th className="px-4 py-3.5 font-bold text-slate-200">Slug</th>
-                      <th className="px-4 py-3.5 font-bold text-slate-200">Date</th>
+                      <th className="px-4 py-3.5 w-10 text-center"><input type="checkbox" className="rounded border-slate-300 bg-white text-blue-600" /></th>
+                      <th className="px-4 py-3.5 font-bold text-slate-800">Title</th>
+                      <th className="px-4 py-3.5 font-bold text-slate-800">Author</th>
+                      <th className="px-4 py-3.5 font-bold text-slate-800">Slug</th>
+                      <th className="px-4 py-3.5 font-bold text-slate-800">Date</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/80">
+                  <tbody className="divide-y divide-slate-100">
                     {pagesList.map(page => (
-                      <tr key={page.id} className="hover:bg-slate-800/40 transition-colors group">
+                      <tr key={page.id} className="hover:bg-slate-50/80 transition-colors group">
                         <td className="px-4 py-4 text-center">
-                          <input type="checkbox" className="rounded border-slate-700 bg-slate-800" />
+                          <input type="checkbox" className="rounded border-slate-300 bg-white text-blue-600" />
                         </td>
                         <td className="px-4 py-4">
-                          <span onClick={() => handleEditPage(page)} className="font-bold text-blue-400 hover:text-blue-300 hover:underline cursor-pointer font-h2 text-base">
+                          <span onClick={() => handleEditPage(page)} className="font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-h2 text-base">
                             {page.level === 2 ? '— — ' : page.level === 1 ? '— ' : ''}{page.title}
                           </span>
                           <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
-                            <span onClick={() => handleEditPage(page)} className="text-blue-500 hover:text-blue-400 cursor-pointer hover:underline">Edit</span>
+                            <span onClick={() => handleEditPage(page)} className="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline">Edit</span>
                             <span onClick={() => {
                               if (window.confirm('کیا آپ واقعی یہ صفحہ ڈیلیٹ کرنا چاہتے ہیں؟')) {
                                 setPagesList(prev => prev.filter(p => p.id !== page.id));
                                 showNotification('صفحہ ڈیلیٹ کر دیا گیا');
                               }
-                            }} className="text-red-500 hover:text-red-400 cursor-pointer hover:underline">Trash</span>
-                            <a href={`/${page.slug}`} target="_blank" rel="noreferrer" className="text-emerald-500 hover:text-emerald-400 hover:underline">View</a>
+                            }} className="text-red-600 hover:text-red-800 cursor-pointer hover:underline">Trash</span>
+                            <a href={`/${page.slug}`} target="_blank" rel="noreferrer" className="text-emerald-600 hover:text-emerald-800 hover:underline">View</a>
                           </div>
                         </td>
-                        <td className="px-4 py-4 text-xs font-bold text-slate-300">
+                        <td className="px-4 py-4 text-xs font-bold text-slate-700">
                           {page.author || 'syed abdul wahab shah'}
                         </td>
-                        <td className="px-4 py-4 text-xs font-mono text-slate-400">
+                        <td className="px-4 py-4 text-xs font-mono text-slate-500">
                           /{page.slug}
                         </td>
-                        <td className="px-4 py-4 text-xs text-slate-400">
-                          Published<br />
-                          {page.date}
+                        <td className="px-4 py-4 text-xs text-slate-600">
+                          <span className="text-emerald-700 font-bold">Published</span><br />
+                          <span className="font-mono text-[11px] text-slate-500">{page.date}</span>
                         </td>
                       </tr>
                     ))}
@@ -7217,13 +7217,13 @@ export default function AdminCMS({
               <div className="space-y-6">
                 
                 {/* Header & Actions */}
-                <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xl">
+                <div className="bg-white border border-slate-200/90 rounded-3xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-xs">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="text-xl">📖</span>
-                      <h2 className="text-xl font-bold text-white font-simple">فرہنگِ اطباء (Medical Glossary Studio)</h2>
+                      <h2 className="text-xl font-bold text-slate-900 font-simple">فرہنگِ اطباء (Medical Glossary Studio)</h2>
                     </div>
-                    <p className="text-xs text-slate-400 font-nastaliq">
+                    <p className="text-xs text-slate-500 font-nastaliq">
                       طبی مضامین میں ان تمام اصطلاحات پر خودکار ڈاٹڈ لائن اور ٹول ٹپ ظاہر ہوگی، اور کلک کرنے پر اس کا مکمل صفحہ کھلے گا۔
                     </p>
                   </div>
@@ -7233,7 +7233,7 @@ export default function AdminCMS({
                       href="/farhang"
                       target="_blank"
                       rel="noreferrer"
-                      className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+                      className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-emerald-700 border border-emerald-200/80 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
                       <span>لائیو فرہنگ دیکھیں</span>
@@ -7251,26 +7251,26 @@ export default function AdminCMS({
 
                 {/* Quick Statistics Bar */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-right">
-                  <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-                    <span className="text-[11px] text-slate-400 block font-simple">کل اصطلاحات:</span>
-                    <strong className="text-2xl font-bold text-white font-sans">{glossaryList.length}</strong>
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs">
+                    <span className="text-[11px] text-slate-500 block font-simple">کل اصطلاحات:</span>
+                    <strong className="text-2xl font-bold text-slate-900 font-sans">{glossaryList.length}</strong>
                   </div>
-                  <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-                    <span className="text-[11px] text-slate-400 block font-simple">فلٹر شدہ اصطلاحات:</span>
-                    <strong className="text-2xl font-bold text-emerald-400 font-sans">{filteredGlossary.length}</strong>
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs">
+                    <span className="text-[11px] text-slate-500 block font-simple">فلٹر شدہ اصطلاحات:</span>
+                    <strong className="text-2xl font-bold text-emerald-600 font-sans">{filteredGlossary.length}</strong>
                   </div>
-                  <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-                    <span className="text-[11px] text-slate-400 block font-simple">خودکار ٹول ٹپس:</span>
-                    <strong className="text-2xl font-bold text-blue-400 font-sans">فعال (Active)</strong>
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs">
+                    <span className="text-[11px] text-slate-500 block font-simple">خودکار ٹول ٹپس:</span>
+                    <strong className="text-2xl font-bold text-blue-600 font-sans">فعال (Active)</strong>
                   </div>
-                  <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4">
-                    <span className="text-[11px] text-slate-400 block font-simple">گوگل رینکنگ / SEO:</span>
-                    <strong className="text-2xl font-bold text-amber-400 font-sans">Indexable</strong>
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-xs">
+                    <span className="text-[11px] text-slate-500 block font-simple">گوگل رینکنگ / SEO:</span>
+                    <strong className="text-2xl font-bold text-amber-600 font-sans">Indexable</strong>
                   </div>
                 </div>
 
                 {/* Filter & Search Bar */}
-                <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+                <div className="bg-white border border-slate-200/90 rounded-2xl p-4 space-y-3 shadow-xs">
                   <div className="flex flex-col sm:flex-row items-center gap-3">
                     <div className="relative flex-1 w-full">
                       <input
@@ -7278,7 +7278,7 @@ export default function AdminCMS({
                         value={glossarySearch}
                         onChange={(e) => setGlossarySearch(e.target.value)}
                         placeholder="اصطلاح، تعریف یا سلگ تلاش کریں (مثلاً: مفرح، استرخا، ریاح)..."
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl pr-10 pl-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pr-10 pl-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white"
                       />
                       <Search className="w-4 h-4 text-slate-400 absolute right-3.5 top-3 pointer-events-none" />
                     </div>
@@ -7286,7 +7286,7 @@ export default function AdminCMS({
                       <button
                         type="button"
                         onClick={() => setGlossarySearch('')}
-                        className="text-xs text-slate-400 hover:text-white px-3 py-2 bg-slate-800 rounded-xl transition-colors"
+                        className="text-xs text-slate-600 hover:text-slate-900 px-3 py-2 bg-slate-100 rounded-xl transition-colors"
                       >
                         سرچ ختم کریں
                       </button>
@@ -7305,7 +7305,7 @@ export default function AdminCMS({
                           className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
                             isActive 
                               ? 'bg-emerald-600 text-white shadow-xs' 
-                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
+                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900'
                           }`}
                         >
                           {letter}
@@ -7316,19 +7316,19 @@ export default function AdminCMS({
                 </div>
 
                 {/* Glossary Table */}
-                <div className="border border-slate-800 rounded-2xl overflow-hidden bg-slate-900/30">
+                <div className="border border-slate-200/90 rounded-2xl overflow-hidden bg-white shadow-xs">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-right text-sm text-slate-300 font-sans">
-                      <thead className="text-xs text-slate-400 border-b border-slate-800 bg-slate-900/80">
+                    <table className="w-full text-right text-sm text-slate-800 font-sans">
+                      <thead className="text-xs text-slate-600 border-b border-slate-200 bg-slate-50/90 font-bold">
                         <tr>
                           <th className="px-4 py-3.5 w-12 text-center">#</th>
-                          <th className="px-4 py-3.5 font-bold text-slate-200">اصطلاح (Term)</th>
-                          <th className="px-4 py-3.5 font-bold text-slate-200">مختصر تعریف (Tooltip Preview)</th>
-                          <th className="px-4 py-3.5 font-bold text-slate-200">URL سلگ</th>
-                          <th className="px-4 py-3.5 font-bold text-slate-200 w-36 text-center">ایکشنز</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-700">اصطلاح (Term)</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-700">مختصر تعریف (Tooltip Preview)</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-700">URL سلگ</th>
+                          <th className="px-4 py-3.5 font-bold text-slate-700 w-36 text-center">ایکشنز</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-800/80">
+                      <tbody className="divide-y divide-slate-100">
                         {filteredGlossary.length === 0 ? (
                           <tr>
                             <td colSpan={5} className="px-6 py-12 text-center text-slate-500 font-simple">
@@ -7337,24 +7337,24 @@ export default function AdminCMS({
                           </tr>
                         ) : (
                           filteredGlossary.map((item, index) => (
-                            <tr key={item.id || item.slug || index} className="hover:bg-slate-800/40 transition-colors group">
-                              <td className="px-4 py-3.5 text-center text-xs text-slate-500 font-mono">
+                            <tr key={item.id || item.slug || index} className="hover:bg-slate-50/80 transition-colors group">
+                              <td className="px-4 py-3.5 text-center text-xs text-slate-400 font-mono">
                                 {index + 1}
                               </td>
                               <td className="px-4 py-3.5">
                                 <span 
                                   onClick={() => handleOpenEditGlossary(item)}
-                                  className="font-bold text-emerald-400 hover:text-emerald-300 hover:underline cursor-pointer font-h2 text-base block"
+                                  className="font-bold text-emerald-700 hover:text-emerald-800 hover:underline cursor-pointer font-h2 text-base block"
                                 >
                                   {item.term}
                                 </span>
                               </td>
                               <td className="px-4 py-3.5 max-w-md">
-                                <p className="text-xs text-slate-400 line-clamp-2 font-nastaliq leading-relaxed">
+                                <p className="text-xs text-slate-600 line-clamp-2 font-nastaliq leading-relaxed">
                                   {item.shortDefinition || item.content?.replace(/<[^>]+>/g, ' ') || '—'}
                                 </p>
                               </td>
-                              <td className="px-4 py-3.5 text-xs font-mono text-slate-400">
+                              <td className="px-4 py-3.5 text-xs font-mono text-slate-500">
                                 /farhang/{item.slug || encodeURIComponent(item.term)}
                               </td>
                               <td className="px-4 py-3.5 text-center">
@@ -7362,7 +7362,7 @@ export default function AdminCMS({
                                   <button
                                     type="button"
                                     onClick={() => handleOpenEditGlossary(item)}
-                                    className="p-1.5 bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white rounded-lg transition-all"
+                                    className="p-1.5 bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white rounded-lg transition-all border border-blue-200"
                                     title="ترمیم کریں"
                                   >
                                     <Edit3 className="w-3.5 h-3.5" />
@@ -7370,7 +7370,7 @@ export default function AdminCMS({
                                   <button
                                     type="button"
                                     onClick={() => handleDeleteGlossary(item)}
-                                    className="p-1.5 bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white rounded-lg transition-all"
+                                    className="p-1.5 bg-red-50 hover:bg-red-600 text-red-600 hover:text-white rounded-lg transition-all border border-red-200"
                                     title="ڈیلیٹ کریں"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
@@ -7379,7 +7379,7 @@ export default function AdminCMS({
                                     href={`/farhang/${item.slug || encodeURIComponent(item.term)}`}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="p-1.5 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white rounded-lg transition-all"
+                                    className="p-1.5 bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-lg transition-all border border-emerald-200"
                                     title="ویب سائٹ پر دیکھیں"
                                   >
                                     <Eye className="w-3.5 h-3.5" />
@@ -7396,18 +7396,18 @@ export default function AdminCMS({
 
                 {/* Add/Edit Modal */}
                 {isGlossaryModalOpen && (
-                  <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-                    <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 w-full max-w-2xl text-right space-y-5 shadow-2xl animate-in fade-in zoom-in duration-200">
+                  <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+                    <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 w-full max-w-2xl text-right space-y-5 shadow-2xl animate-in fade-in zoom-in duration-200 text-slate-800">
                       
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                         <button
                           type="button"
                           onClick={() => setIsGlossaryModalOpen(false)}
-                          className="p-1.5 text-slate-400 hover:text-white bg-slate-800 rounded-full"
+                          className="p-1.5 text-slate-400 hover:text-slate-700 bg-slate-100 rounded-full"
                         >
                           <X className="w-5 h-5" />
                         </button>
-                        <h3 className="text-lg font-bold text-white font-simple flex items-center gap-2">
+                        <h3 className="text-lg font-bold text-slate-900 font-simple flex items-center gap-2">
                           <span>{editingGlossaryTerm ? 'اصطلاح میں ترمیم کریں' : 'نئی طبی اصطلاح شامل کریں'}</span>
                           <span>📖</span>
                         </h3>
@@ -7415,7 +7415,7 @@ export default function AdminCMS({
 
                       <form onSubmit={handleSaveGlossaryForm} className="space-y-4">
                         <div>
-                          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                          <label className="block text-xs font-bold text-slate-700 mb-1.5">
                             اصطلاح کا نام (مثلاً: مفرح، استرخا، ریاح، مسکن):
                           </label>
                           <input
@@ -7431,12 +7431,12 @@ export default function AdminCMS({
                             }}
                             placeholder="طبی اصطلاح درج کریں..."
                             required
-                            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500"
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:border-emerald-500 focus:bg-white"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                          <label className="block text-xs font-bold text-slate-700 mb-1.5">
                             URL سلگ (Clean Slug for SEO):
                           </label>
                           <input
@@ -7444,13 +7444,13 @@ export default function AdminCMS({
                             value={glossaryForm.slug}
                             onChange={(e) => setGlossaryForm({ ...glossaryForm, slug: e.target.value })}
                             placeholder="مثلاً: salabat یا صلابت"
-                            className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-sans focus:outline-none focus:border-emerald-500"
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-slate-800 text-xs font-sans focus:outline-none focus:border-emerald-500 focus:bg-white"
                             dir="auto"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                          <label className="block text-xs font-bold text-slate-700 mb-1.5">
                             مختصر تعریف (Tooltip Preview - جو ماؤس لے جانے پر پاپ اپ کارڈ میں نظر آئے گی):
                           </label>
                           <textarea
@@ -7458,12 +7458,12 @@ export default function AdminCMS({
                             value={glossaryForm.shortDefinition}
                             onChange={(e) => setGlossaryForm({ ...glossaryForm, shortDefinition: e.target.value })}
                             placeholder="سادہ 2-3 سطری خلاصہ..."
-                            className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white text-xs font-nastaliq leading-relaxed focus:outline-none focus:border-emerald-500"
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-800 text-xs font-nastaliq leading-relaxed focus:outline-none focus:border-emerald-500 focus:bg-white"
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-slate-300 mb-1.5">
+                          <label className="block text-xs font-bold text-slate-700 mb-1.5">
                             مکمل تفصیلی تشریح و طبی افعال (Full Page Explanation):
                           </label>
                           <textarea
@@ -7471,15 +7471,15 @@ export default function AdminCMS({
                             value={glossaryForm.content}
                             onChange={(e) => setGlossaryForm({ ...glossaryForm, content: e.target.value })}
                             placeholder="اصطلاح کی مکمل سائنسی و یونانی طبی تفصیل سادہ اردو پیراگراف میں درج کریں۔ (کوڈنگ یا HTML ٹیگز لکھنے کی ضرورت نہیں ہے)"
-                            className="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-white text-xs font-nastaliq leading-relaxed focus:outline-none focus:border-emerald-500"
+                            className="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-slate-800 text-xs font-nastaliq leading-relaxed focus:outline-none focus:border-emerald-500 focus:bg-white"
                           />
                         </div>
 
-                        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                        <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
                           <button
                             type="button"
                             onClick={() => setIsGlossaryModalOpen(false)}
-                            className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-colors font-simple"
+                            className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors font-simple border border-slate-200"
                           >
                             منسوخ کریں
                           </button>
@@ -7492,7 +7492,6 @@ export default function AdminCMS({
                           </button>
                         </div>
                       </form>
-
                     </div>
                   </div>
                 )}
@@ -7758,37 +7757,37 @@ export default function AdminCMS({
             };
 
             return (
-              <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+              <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
                 
                 
                 {/* Password Requests Section */}
                 {passwordRequests.length > 0 && (
-                  <div className="bg-amber-950/20 border border-amber-900/50 rounded-2xl p-4 md:p-6 shadow-sm mb-8 animate-in fade-in duration-300">
+                  <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 md:p-6 shadow-xs mb-8 animate-in fade-in duration-300">
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="p-2.5 bg-amber-900/30 text-amber-400 rounded-xl">
+                        <div className="p-2.5 bg-amber-100 text-amber-700 rounded-xl">
                           <Lock className="w-5 h-5" />
                         </div>
                         <div>
-                          <h3 className="text-sm font-bold text-amber-400 font-simple">پاسورڈ بھولنے کی درخواستیں ({passwordRequests.length})</h3>
-                          <p className="text-[11px] text-amber-500/70 mt-1 font-simple">مندرجہ ذیل اطباء نے پاسورڈ بھول جانے کی اطلاع دی ہے۔ ان کی پروفائل ایڈٹ کر کے پاسورڈ تبدیل کریں اور انہیں مطلع کریں۔</p>
+                          <h3 className="text-sm font-bold text-amber-800 font-simple">پاسورڈ بھولنے کی درخواستیں ({passwordRequests.length})</h3>
+                          <p className="text-[11px] text-amber-700 mt-1 font-simple">مندرجہ ذیل اطباء نے پاسورڈ بھول جانے کی اطلاع دی ہے۔ ان کی پروفائل ایڈٹ کر کے پاسورڈ تبدیل کریں اور انہیں مطلع کریں۔</p>
                         </div>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       {passwordRequests.map(req => (
-                        <div key={req.id} className="bg-slate-900/80 border border-slate-700 rounded-xl p-3 flex justify-between items-center shadow-inner">
+                        <div key={req.id} className="bg-white border border-amber-200 rounded-xl p-3 flex justify-between items-center shadow-xs">
                           <div>
-                            <span className="text-[10px] text-slate-400 block font-simple mb-0.5">شناخت (ای میل یا فون):</span>
-                            <strong className="text-slate-200 text-sm font-sans tracking-wide">{req.identifier}</strong>
-                            <span className="text-[10px] text-slate-500 block mt-1 font-sans">{new Date(req.date).toLocaleString('ur-PK')}</span>
+                            <span className="text-[10px] text-slate-500 block font-simple mb-0.5">شناخت (ای میل یا فون):</span>
+                            <strong className="text-slate-800 text-sm font-sans tracking-wide">{req.identifier}</strong>
+                            <span className="text-[10px] text-slate-400 block mt-1 font-sans">{new Date(req.date).toLocaleString('ur-PK')}</span>
                           </div>
                           <button
                             onClick={() => handleClearPasswordRequest(req.id)}
-                            className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 hover:text-white text-slate-300 font-bold rounded-lg text-[10px] transition-colors flex items-center gap-1.5 font-simple shadow-sm"
+                            className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 text-slate-700 font-bold rounded-lg text-[10px] transition-colors flex items-center gap-1.5 font-simple border border-slate-200"
                             title="درخواست کو فہرست سے ہٹائیں"
                           >
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                             مکمل / حذف
                           </button>
                         </div>
@@ -7798,13 +7797,13 @@ export default function AdminCMS({
                 )}
 
                 {/* Header */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                   <div>
-                    <h2 className="text-xl sm:text-2xl font-bold text-white font-simple flex items-center gap-2">
-                      <UserCheck className="w-6 h-6 text-blue-400" />
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-simple flex items-center gap-2">
+                      <UserCheck className="w-6 h-6 text-blue-600" />
                       <span>اطباء و کلینکس مینجمنٹ اور رجسٹریشن منظوری</span>
                     </h2>
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs text-slate-500 mt-1">
                       نئی رجسٹریشن کی درخواستوں کا جائزہ لیں، قبول کریں یا مسترد کریں۔ صرف منظور شدہ اطباء ہی پبلک ویب سائٹ پر نظر آئیں گے۔
                     </p>
                   </div>
@@ -7858,28 +7857,28 @@ export default function AdminCMS({
                         setDoctorTabFilter('pending');
                         showNotification('ٹیسٹ رجسٹریشن کی درخواست ایڈمن پینل میں شامل کر دی گئی ہے!');
                       }}
-                      className="flex items-center gap-1.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-300 text-xs font-bold px-3 py-1.5 rounded-xl transition-all font-simple"
+                      className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-xl transition-all font-simple"
                     >
                       <PlusCircle className="w-4 h-4" />
                       <span>+ فرضی ٹیسٹ درخواست شامل کریں</span>
                     </button>
 
-                    <span className="text-xs bg-slate-900 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-xl font-bold font-sans">
-                      کل اطباء: <strong className="text-blue-400">{doctorsList.length}</strong>
+                    <span className="text-xs bg-slate-50 border border-slate-200 text-slate-700 px-3 py-1.5 rounded-xl font-bold font-sans">
+                      کل اطباء: <strong className="text-blue-600">{doctorsList.length}</strong>
                     </span>
                   </div>
                 </div>
 
                 {/* Sub-Tabs Row */}
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex flex-wrap items-center gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 font-simple text-xs">
+                  <div className="flex flex-wrap items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-200 font-simple text-xs">
                     <button
                       type="button"
                       onClick={() => setDoctorTabFilter('all')}
                       className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 ${
                         doctorTabFilter === 'all'
                           ? 'bg-blue-600 text-white shadow-md'
-                          : 'text-slate-400 hover:text-white'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       <UserCheck className="w-4 h-4" />
@@ -7891,15 +7890,15 @@ export default function AdminCMS({
                       onClick={() => setDoctorTabFilter('pending')}
                       className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 ${
                         doctorTabFilter === 'pending'
-                          ? 'bg-amber-500 text-slate-950 shadow-md'
-                          : 'text-slate-400 hover:text-white'
+                          ? 'bg-amber-500 text-white shadow-md'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       <Clock className="w-4 h-4" />
                       <span>نئی درخواستیں برائے منظوری</span>
                       {pendingDoctors.length > 0 && (
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-sans font-extrabold ${
-                          doctorTabFilter === 'pending' ? 'bg-slate-950 text-amber-400' : 'bg-amber-500/20 text-amber-300 animate-pulse'
+                          doctorTabFilter === 'pending' ? 'bg-amber-600 text-white' : 'bg-amber-100 text-amber-800 animate-pulse'
                         }`}>
                           {pendingDoctors.length} نئی
                         </span>
@@ -7912,7 +7911,7 @@ export default function AdminCMS({
                       className={`px-4 py-2 rounded-xl font-bold transition-all flex items-center gap-2 ${
                         doctorTabFilter === 'approved'
                           ? 'bg-emerald-600 text-white shadow-md'
-                          : 'text-slate-400 hover:text-white'
+                          : 'text-slate-600 hover:text-slate-900'
                       }`}
                     >
                       <CheckCircle2 className="w-4 h-4" />
@@ -7931,7 +7930,7 @@ export default function AdminCMS({
                         setDoctorCityFilter('all');
                         setDoctorSortOrder('latest');
                       }}
-                      className="text-xs text-amber-400 hover:text-amber-300 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-simple"
+                      className="text-xs text-amber-800 hover:text-amber-900 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-simple"
                     >
                       <X className="w-3.5 h-3.5" />
                       <span>تمام فلٹرز ختم کریں</span>
@@ -7940,24 +7939,24 @@ export default function AdminCMS({
                 </div>
 
                 {/* WordPress-style Doctors Filter & Pagination Toolbar */}
-                <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+                <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
                   <div className="flex flex-wrap items-center gap-3">
                     
                     {/* Search Input */}
                     <div className="relative min-w-[210px] flex-1 sm:flex-none">
-                      <Search className="w-4 h-4 text-slate-500 absolute right-3 top-2.5" />
+                      <Search className="w-4 h-4 text-slate-400 absolute right-3 top-2.5" />
                       <input
                         type="text"
                         placeholder="ڈاکٹر، مطب، شہر، فون، رجسٹریشن..."
                         value={doctorSearchFilter}
                         onChange={(e) => setDoctorSearchFilter(e.target.value)}
-                        className="w-full bg-slate-950 border border-slate-700 rounded-xl pr-9 pl-8 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-sans"
+                        className="w-full bg-white border border-slate-300 rounded-xl pr-9 pl-8 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 font-sans shadow-xs"
                       />
                       {doctorSearchFilter && (
                         <button
                           type="button"
                           onClick={() => setDoctorSearchFilter('')}
-                          className="absolute left-2.5 top-2.5 text-slate-500 hover:text-white"
+                          className="absolute left-2.5 top-2.5 text-slate-400 hover:text-slate-700"
                           title="تلاش ختم کریں"
                         >
                           <X className="w-3.5 h-3.5" />
@@ -7967,11 +7966,11 @@ export default function AdminCMS({
 
                     {/* Verification Filter Dropdown */}
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-slate-400 font-sans">تصدیق:</span>
+                      <span className="text-xs text-slate-600 font-sans">تصدیق:</span>
                       <select
                         value={doctorVerifiedFilter}
                         onChange={(e) => setDoctorVerifiedFilter(e.target.value)}
-                        className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                        className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-none cursor-pointer font-sans font-bold shadow-xs"
                       >
                         <option value="all">تمام (تصدیق شدہ و غیر تصدیق شدہ)</option>
                         <option value="verified">صرف تصدیق شدہ (Verified ✓)</option>
@@ -7981,11 +7980,11 @@ export default function AdminCMS({
 
                     {/* Featured Filter Dropdown */}
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-slate-400 font-sans">نمایاں:</span>
+                      <span className="text-xs text-slate-600 font-sans">نمایاں:</span>
                       <select
                         value={doctorFeaturedFilter}
                         onChange={(e) => setDoctorFeaturedFilter(e.target.value)}
-                        className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                        className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-none cursor-pointer font-sans font-bold shadow-xs"
                       >
                         <option value="all">تمام اطباء</option>
                         <option value="featured">صرف ہوم پیج پر نمایاں (Featured ★)</option>
@@ -7996,11 +7995,11 @@ export default function AdminCMS({
                     {/* City Filter Dropdown */}
                     {availableDoctorCities.length > 0 && (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs text-slate-400 font-sans">شہر:</span>
+                        <span className="text-xs text-slate-600 font-sans">شہر:</span>
                         <select
                           value={doctorCityFilter}
                           onChange={(e) => setDoctorCityFilter(e.target.value)}
-                          className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold max-w-[150px]"
+                          className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-none cursor-pointer font-sans font-bold max-w-[150px] shadow-xs"
                         >
                           <option value="all">تمام شہر ({availableDoctorCities.length})</option>
                           {availableDoctorCities.map(city => (
@@ -8012,11 +8011,11 @@ export default function AdminCMS({
 
                     {/* Sort Order Selector */}
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-slate-400 font-sans">ترتیب:</span>
+                      <span className="text-xs text-slate-600 font-sans">ترتیب:</span>
                       <select
                         value={doctorSortOrder}
                         onChange={(e) => setDoctorSortOrder(e.target.value)}
-                        className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                        className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-none cursor-pointer font-sans font-bold shadow-xs"
                       >
                         <option value="latest">تازہ ترین پہلے (Latest First)</option>
                         <option value="oldest">پرانے پہلے (Oldest First)</option>
@@ -8027,7 +8026,7 @@ export default function AdminCMS({
 
                     {/* Doctors Per Page Selector (Default 20, 50, 100, all) */}
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs text-slate-400 font-sans">فی صفحہ:</span>
+                      <span className="text-xs text-slate-600 font-sans">فی صفحہ:</span>
                       <select
                         value={doctorsPerPage}
                         onChange={(e) => {
@@ -8037,7 +8036,7 @@ export default function AdminCMS({
                             localStorage.setItem('tabeeb_admin_doctors_per_page', String(val));
                           } catch {}
                         }}
-                        className="bg-slate-950 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none cursor-pointer font-sans font-bold"
+                        className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-none cursor-pointer font-sans font-bold shadow-xs"
                       >
                         <option value={20}>20 اطباء (ڈیفالٹ)</option>
                         <option value={50}>50 اطباء</option>
@@ -8049,18 +8048,18 @@ export default function AdminCMS({
                   </div>
 
                   {/* Top Pagination Summary & Quick Nav Buttons (WordPress Style) */}
-                  <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-slate-400 font-sans border-t lg:border-t-0 pt-2 lg:pt-0 border-slate-800">
+                  <div className="flex items-center justify-between sm:justify-end gap-3 text-xs text-slate-600 font-sans border-t lg:border-t-0 pt-2 lg:pt-0 border-slate-200">
                     <span className="whitespace-nowrap">
-                      کل <strong className="text-white font-mono">{totalFilteredDoctors}</strong> اطباء | صفحہ <strong className="text-blue-400 font-mono">{safeDoctorCurrentPage}</strong> از <strong className="text-slate-200 font-mono">{totalDoctorPages}</strong>
+                      کل <strong className="text-slate-900 font-mono">{totalFilteredDoctors}</strong> اطباء | صفحہ <strong className="text-blue-600 font-mono">{safeDoctorCurrentPage}</strong> از <strong className="text-slate-800 font-mono">{totalDoctorPages}</strong>
                     </span>
                     
-                    <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                    <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-slate-200 shadow-xs">
                       <button
                         type="button"
                         disabled={safeDoctorCurrentPage <= 1}
                         onClick={() => setDoctorCurrentPage(1)}
                         title="پہلا صفحہ"
-                        className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                        className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-600 transition-colors"
                       >
                         <ChevronsRight className="w-3.5 h-3.5" />
                       </button>
@@ -8069,7 +8068,7 @@ export default function AdminCMS({
                         disabled={safeDoctorCurrentPage <= 1}
                         onClick={() => setDoctorCurrentPage(p => Math.max(1, p - 1))}
                         title="پچھلا صفحہ"
-                        className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                        className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-600 transition-colors"
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
                       </button>
@@ -8078,7 +8077,7 @@ export default function AdminCMS({
                         disabled={safeDoctorCurrentPage >= totalDoctorPages}
                         onClick={() => setDoctorCurrentPage(p => Math.min(totalDoctorPages, p + 1))}
                         title="اگلا صفحہ"
-                        className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                        className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-600 transition-colors"
                       >
                         <ChevronLeft className="w-3.5 h-3.5" />
                       </button>
@@ -8087,7 +8086,7 @@ export default function AdminCMS({
                         disabled={safeDoctorCurrentPage >= totalDoctorPages}
                         onClick={() => setDoctorCurrentPage(totalDoctorPages)}
                         title="آخری صفحہ"
-                        className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-850 text-slate-300 transition-colors"
+                        className="p-1.5 rounded-lg disabled:opacity-25 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-600 transition-colors"
                       >
                         <ChevronsLeft className="w-3.5 h-3.5" />
                       </button>
@@ -8099,11 +8098,11 @@ export default function AdminCMS({
                 {/* Content List */}
                 <div className="space-y-4">
                   {paginatedDoctors.length === 0 ? (
-                    <div className="text-center py-12 bg-slate-900/50 rounded-3xl border border-slate-800 space-y-3">
-                      <div className="w-12 h-12 rounded-2xl bg-slate-800 text-slate-500 mx-auto flex items-center justify-center">
+                    <div className="text-center py-12 bg-slate-50 rounded-3xl border border-slate-200 space-y-3">
+                      <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center">
                         <UserCheck className="w-6 h-6" />
                       </div>
-                      <p className="text-sm font-bold text-slate-300 font-simple">
+                      <p className="text-sm font-bold text-slate-700 font-simple">
                         {doctorTabFilter === 'pending'
                           ? 'اس وقت کوئی نئی رجسٹریشن کی درخواست زیرِ جائزہ نہیں ہے۔'
                           : 'کوئی معالج یا کلینک نہیں ملا۔'}
@@ -8123,7 +8122,7 @@ export default function AdminCMS({
                             setDoctorCityFilter('all');
                             setDoctorSortOrder('latest');
                           }}
-                          className="mt-2 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2 rounded-xl font-simple transition-colors inline-flex items-center gap-1.5"
+                          className="mt-2 text-xs bg-white hover:bg-slate-100 text-slate-700 font-bold px-4 py-2 rounded-xl font-simple border border-slate-200 transition-colors inline-flex items-center gap-1.5 shadow-xs"
                         >
                           <X className="w-3.5 h-3.5" />
                           <span>تمام فلٹرز ختم کریں</span>
@@ -8139,19 +8138,19 @@ export default function AdminCMS({
                           key={doc.id}
                           className={`rounded-3xl border p-5 sm:p-6 space-y-4 transition-all ${
                             isPending
-                              ? 'bg-slate-900/90 border-amber-500/40 shadow-lg shadow-amber-950/20'
-                              : 'bg-slate-900 border-slate-800'
+                              ? 'bg-amber-50/40 border-amber-300 shadow-sm'
+                              : 'bg-white border-slate-200/90 shadow-xs hover:border-slate-300'
                           }`}
                         >
                           {/* Doctor Top Header Row */}
-                          <div className="flex flex-col sm:flex-row items-start justify-between gap-4 border-b border-slate-800/80 pb-4">
+                          <div className="flex flex-col sm:flex-row items-start justify-between gap-4 border-b border-slate-100 pb-4">
                             
                             <div className="flex items-start gap-4">
                               <img
                                 src={doc.image || '/images/default_doctor.webp'}
                                 alt={doc.name}
                                 onError={(e) => { e.target.onerror = null; e.target.src = '/images/default_doctor.webp'; }}
-                                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-slate-700 shrink-0 bg-white"
+                                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-slate-200 shrink-0 bg-white shadow-xs"
                               />
 
                               <div className="space-y-1">
@@ -8179,57 +8178,57 @@ export default function AdminCMS({
                                           showNotification(`${doc.name} کی ترتیب #${val || '—'} محفوظ ہو گئی`);
                                         }
                                       }}
-                                      className="w-12 text-center text-[11px] font-mono font-bold text-amber-300 bg-purple-950/60 border border-purple-700 px-1 py-0.5 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none cursor-text"
+                                      className="w-12 text-center text-[11px] font-mono font-bold text-amber-700 bg-amber-50 border border-amber-300 px-1 py-0.5 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none cursor-text shadow-xs"
                                     />
                                   ) : (
-                                    <span className="text-[11px] font-mono font-bold text-slate-400 bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800">
+                                    <span className="text-[11px] font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-lg border border-slate-200">
                                       #{doctorStartIndex + docIdx + 1}
                                     </span>
                                   )}
 
-                                  <h3 className="text-lg font-bold text-white font-simple">
+                                  <h3 className="text-lg font-bold text-slate-900 font-simple">
                                     {doc.name}
                                   </h3>
 
                                   {isPending ? (
-                                    <span className="bg-amber-500/20 text-amber-300 border border-amber-400/40 text-[10px] px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 font-sans">
+                                    <span className="bg-amber-100 text-amber-800 border border-amber-200 text-[10px] px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 font-sans">
                                       <Clock className="w-3 h-3" />
                                       <span>زیرِ جائزہ (Pending Approval)</span>
                                     </span>
                                   ) : (
-                                    <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 font-sans">
+                                    <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 font-sans">
                                       <CheckCircle2 className="w-3 h-3" />
                                       <span>پبلش شدہ و فعال (Live)</span>
                                     </span>
                                   )}
 
                                   {doc.isVerified ? (
-                                    <span className="bg-emerald-950/60 text-emerald-300 border border-emerald-800/80 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans flex items-center gap-1">
-                                      <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                                    <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans flex items-center gap-1">
+                                      <ShieldCheck className="w-3 h-3 text-emerald-600" />
                                       <span>تصدیق شدہ معالج ✓</span>
                                     </span>
                                   ) : (
-                                    <span className="bg-amber-950/60 text-amber-300 border border-amber-800/80 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans">
+                                    <span className="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans">
                                       غیر تصدیق شدہ
                                     </span>
                                   )}
 
                                   {doc.emailVerified && (
-                                    <span className="bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans">
+                                    <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans">
                                       ای میل تصدیق شدہ ✓
                                     </span>
                                   )}
 
                                   {doc.isFeatured && (
-                                    <span className="bg-purple-500/20 text-purple-300 border border-purple-400/30 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans flex items-center gap-1">
-                                      <Sparkles className="w-3 h-3 text-purple-400" />
+                                    <span className="bg-purple-50 text-purple-700 border border-purple-200 text-[10px] px-2 py-0.5 rounded-full font-bold font-sans flex items-center gap-1">
+                                      <Sparkles className="w-3 h-3 text-purple-600" />
                                       <span>ہوم پیج پر نمایاں ★</span>
                                     </span>
                                   )}
                                 </div>
 
-                                <p className="text-xs text-blue-400 font-bold font-simple">{doc.title}</p>
-                                <p className="text-[11px] text-slate-400 font-sans">
+                                <p className="text-xs text-blue-600 font-bold font-simple">{doc.title}</p>
+                                <p className="text-[11px] text-slate-500 font-sans">
                                   {doc.qualifications} {doc.councilRegNo ? `• رجسٹریشن نمبر: ${doc.councilRegNo}` : ''}
                                 </p>
                               </div>
@@ -8242,7 +8241,7 @@ export default function AdminCMS({
                                   <button
                                     type="button"
                                     onClick={() => handleApproveDoctor(doc.id)}
-                                    className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"
+                                    className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5"
                                   >
                                     <CheckCircle2 className="w-4 h-4" />
                                     <span>قبول کریں اور پبلش کریں (Approve)</span>
@@ -8251,7 +8250,7 @@ export default function AdminCMS({
                                   <button
                                     type="button"
                                     onClick={() => handleRejectDoctor(doc.id)}
-                                    className="p-2 bg-red-950 text-red-400 hover:bg-red-900 border border-red-800 rounded-xl transition-all"
+                                    className="p-2 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-xl transition-all"
                                     title="پروفائل مسترد کریں"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -8260,7 +8259,7 @@ export default function AdminCMS({
                                   <button
                                     type="button"
                                     onClick={() => handleEditDoctor(doc)}
-                                    className="p-2 bg-blue-900/50 hover:bg-blue-800 border border-blue-700/50 text-blue-300 font-bold rounded-xl transition-all"
+                                    className="p-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 font-bold rounded-xl transition-all"
                                     title="تفصیلات تبدیل کریں"
                                   >
                                     <Edit3 className="w-4 h-4" />
@@ -8270,7 +8269,7 @@ export default function AdminCMS({
                                     href={'https://wa.me/' + (doc.whatsapp?.replace(new RegExp('[^0-9]', 'g'), '') || doc.phone?.replace(new RegExp('[^0-9]', 'g'), '') || '')}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="p-2 bg-green-900/50 hover:bg-green-800 border border-green-700/50 text-green-300 font-bold rounded-xl transition-all"
+                                    className="p-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-600 font-bold rounded-xl transition-all"
                                     title="طبیب کو وٹس اپ میسج کریں"
                                   >
                                     <MessageCircle className="w-4 h-4" />
@@ -8281,7 +8280,7 @@ export default function AdminCMS({
                                   <button
                                     type="button"
                                     onClick={() => handleToggleDoctorVerified(doc.id)}
-                                    className={'px-3 py-2 rounded-xl font-bold border transition-all ' + (doc.isVerified ? 'bg-emerald-950/60 border-emerald-800 text-emerald-300' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white')}
+                                    className={'px-3 py-2 rounded-xl font-bold border transition-all ' + (doc.isVerified ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200')}
                                     title="طبیب کی تصدیق کا سٹیٹس بدلیں"
                                   >
                                     {doc.isVerified ? 'تصدیق شدہ' : 'تصدیق کریں'}
@@ -8290,7 +8289,7 @@ export default function AdminCMS({
                                   <button
                                     type="button"
                                     onClick={() => handleToggleDoctorFeatured(doc.id)}
-                                    className={'px-3 py-2 rounded-xl font-bold border transition-all ' + (doc.isFeatured ? 'bg-purple-950/60 border-purple-800 text-purple-300' : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white')}
+                                    className={'px-3 py-2 rounded-xl font-bold border transition-all ' + (doc.isFeatured ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200')}
                                     title="ہوم پیج پر نمایاں کریں"
                                   >
                                     {doc.isFeatured ? 'نمایاں' : 'نمایاں کریں'}
@@ -8299,7 +8298,7 @@ export default function AdminCMS({
                                   <button
                                     type="button"
                                     onClick={() => handleUnpublishDoctor(doc.id)}
-                                    className="px-3 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-bold rounded-xl transition-all"
+                                    className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold rounded-xl transition-all"
                                     title="پروفائل کو غیر پبلش کریں"
                                   >
                                     ان پبلش کریں
@@ -8308,7 +8307,7 @@ export default function AdminCMS({
                                   <button
                                     type="button"
                                     onClick={() => handleRejectDoctor(doc.id)}
-                                    className="p-2 bg-red-950 text-red-400 hover:bg-red-900 border border-red-800 rounded-xl transition-all"
+                                    className="p-2 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-xl transition-all"
                                     title="پروفائل ڈیلیٹ کریں"
                                   >
                                     <Trash2 className="w-4 h-4" />
@@ -8317,7 +8316,7 @@ export default function AdminCMS({
                                   <button
                                     type="button"
                                     onClick={() => handleEditDoctor(doc)}
-                                    className="p-2 bg-blue-900/50 hover:bg-blue-800 border border-blue-700/50 text-blue-300 font-bold rounded-xl transition-all"
+                                    className="p-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-600 font-bold rounded-xl transition-all"
                                     title="تفصیلات تبدیل کریں"
                                   >
                                     <Edit3 className="w-4 h-4" />
@@ -8327,7 +8326,7 @@ export default function AdminCMS({
                                     href={'https://wa.me/' + (doc.whatsapp?.replace(new RegExp('[^0-9]', 'g'), '') || doc.phone?.replace(new RegExp('[^0-9]', 'g'), '') || '')}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="p-2 bg-green-900/50 hover:bg-green-800 border border-green-700/50 text-green-300 font-bold rounded-xl transition-all"
+                                    className="p-2 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-600 font-bold rounded-xl transition-all"
                                     title="طبیب کو وٹس اپ میسج کریں"
                                   >
                                     <MessageCircle className="w-4 h-4" />
@@ -8341,29 +8340,29 @@ export default function AdminCMS({
                           {/* Doctor Information Grid */}
                           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
                             
-                            <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80 space-y-1">
-                              <span className="text-[10px] text-slate-400 font-simple block">مطب / کلینک کا نام:</span>
-                              <strong className="text-slate-200 block font-simple">{doc.clinicName || 'مطب کا نام درج نہیں'}</strong>
-                              <span className="text-[11px] text-slate-400 font-sans block">{doc.address || doc.cityName}</span>
+                            <div className="bg-slate-50/80 p-3 rounded-2xl border border-slate-200/80 space-y-1">
+                              <span className="text-[10px] text-slate-500 font-simple block">مطب / کلینک کا نام:</span>
+                              <strong className="text-slate-800 block font-simple">{doc.clinicName || 'مطب کا نام درج نہیں'}</strong>
+                              <span className="text-[11px] text-slate-500 font-sans block">{doc.address || doc.cityName}</span>
                             </div>
 
-                            <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80 space-y-1">
-                              <span className="text-[10px] text-slate-400 font-simple block">رابطہ و ای میل:</span>
-                              <div className="text-emerald-400 font-sans font-bold flex items-center gap-1">
+                            <div className="bg-slate-50/80 p-3 rounded-2xl border border-slate-200/80 space-y-1">
+                              <span className="text-[10px] text-slate-500 font-simple block">رابطہ و ای میل:</span>
+                              <div className="text-emerald-700 font-sans font-bold flex items-center gap-1">
                                 <Phone className="w-3.5 h-3.5" />
                                 <span>{doc.whatsapp || doc.phone || 'نمبر موجود نہیں'}</span>
                               </div>
-                              <div className="text-blue-300 font-sans truncate flex items-center gap-1">
+                              <div className="text-blue-600 font-sans truncate flex items-center gap-1">
                                 <Mail className="w-3.5 h-3.5" />
                                 <span>{doc.email || 'ای میل موجود نہیں'}</span>
                               </div>
                             </div>
 
-                            <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80 space-y-1">
-                              <span className="text-[10px] text-slate-400 font-simple block">طریقہ علاج، تجربہ و فیس:</span>
-                              <div className="text-amber-300 font-simple font-bold">{doc.treatmentType}</div>
-                              <div className="text-slate-300 font-sans">
-                                تجربہ: <strong className="text-white">{doc.experience} سال</strong> • فیس: <strong className="text-white">Rs. {doc.fee}</strong>
+                            <div className="bg-slate-50/80 p-3 rounded-2xl border border-slate-200/80 space-y-1">
+                              <span className="text-[10px] text-slate-500 font-simple block">طریقہ علاج، تجربہ و فیس:</span>
+                              <div className="text-amber-800 font-simple font-bold">{doc.treatmentType}</div>
+                              <div className="text-slate-600 font-sans">
+                                تجربہ: <strong className="text-slate-800">{doc.experience} سال</strong> • فیس: <strong className="text-slate-800">Rs. {doc.fee}</strong>
                               </div>
                             </div>
 
@@ -8372,11 +8371,11 @@ export default function AdminCMS({
                           {/* Specialties Chips */}
                           {doc.specialties && Array.isArray(doc.specialties) && doc.specialties.length > 0 && (
                             <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                              <span className="text-[11px] text-slate-400 font-simple ml-1">منتخب شعبہ جات:</span>
+                              <span className="text-[11px] text-slate-500 font-simple ml-1">منتخب شعبہ جات:</span>
                               {doc.specialties.map((spec, i) => (
                                 <span
                                   key={i}
-                                  className="bg-blue-950/70 border border-blue-800/80 text-blue-300 text-[11px] px-2.5 py-0.5 rounded-full font-simple"
+                                  className="bg-blue-50 border border-blue-200 text-blue-700 text-[11px] px-2.5 py-0.5 rounded-full font-simple"
                                 >
                                   {spec}
                                 </span>
@@ -8386,15 +8385,15 @@ export default function AdminCMS({
 
                           {/* About Doctor Bio (if present) */}
                           {doc.about && (
-                            <p className="text-xs text-slate-400 bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/50 leading-relaxed font-simple">
-                              <strong className="text-slate-300">تعارف: </strong>
+                            <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-200 leading-relaxed font-simple">
+                              <strong className="text-slate-800">تعارف: </strong>
                               {doc.about}
                             </p>
                           )}
 
                           {/* Application timestamp (if pending) */}
                           {isPending && doc.appliedDate && (
-                            <div className="text-[11px] text-amber-400/80 font-sans text-left">
+                            <div className="text-[11px] text-amber-700 font-sans text-left">
                               درخواست تاریخ: {doc.appliedDate}
                             </div>
                           )}
@@ -8407,10 +8406,10 @@ export default function AdminCMS({
 
                 {/* Bottom Comprehensive Pagination Bar for Doctors (WordPress Style) */}
                 {totalDoctorPages > 1 && (
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-800 text-xs text-slate-400 font-sans">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200 text-xs text-slate-600 font-sans">
                     {/* Range counter */}
                     <div>
-                      اطباء <strong className="text-white font-mono">{doctorStartIndex + 1}</strong> تا <strong className="text-white font-mono">{doctorEndIndex}</strong> دکھائے جا رہے ہیں (کل <strong className="text-blue-400 font-mono">{totalFilteredDoctors}</strong> میں سے)
+                      اطباء <strong className="text-slate-900 font-mono">{doctorStartIndex + 1}</strong> تا <strong className="text-slate-900 font-mono">{doctorEndIndex}</strong> دکھائے جا رہے ہیں (کل <strong className="text-blue-600 font-mono">{totalFilteredDoctors}</strong> میں سے)
                     </div>
 
                     {/* Numbered Pagination & Arrows */}
@@ -8420,7 +8419,7 @@ export default function AdminCMS({
                         type="button"
                         disabled={safeDoctorCurrentPage <= 1}
                         onClick={() => setDoctorCurrentPage(p => Math.max(1, p - 1))}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 text-slate-200 transition-colors"
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors shadow-xs"
                       >
                         <ChevronRight className="w-3.5 h-3.5" />
                         <span>پچھلا</span>
@@ -8429,7 +8428,7 @@ export default function AdminCMS({
                       {/* Page Numbers */}
                       {getDoctorPaginationPages().map((pNum, idx) => {
                         if (pNum === '...') {
-                          return <span key={`doc-ellipsis-${idx}`} className="px-2 text-slate-500 font-mono">…</span>;
+                          return <span key={`doc-ellipsis-${idx}`} className="px-2 text-slate-400 font-mono">…</span>;
                         }
                         const isCurrent = pNum === safeDoctorCurrentPage;
                         return (
@@ -8439,8 +8438,8 @@ export default function AdminCMS({
                             onClick={() => setDoctorCurrentPage(pNum)}
                             className={`min-w-8 h-8 px-2.5 rounded-xl text-xs font-bold font-mono transition-all ${
                               isCurrent
-                                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                                : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'
+                                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200 shadow-xs'
                             }`}
                           >
                             {pNum}
@@ -8453,7 +8452,7 @@ export default function AdminCMS({
                         type="button"
                         disabled={safeDoctorCurrentPage >= totalDoctorPages}
                         onClick={() => setDoctorCurrentPage(p => Math.min(totalDoctorPages, p + 1))}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-800 text-slate-200 transition-colors"
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white border border-slate-300 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 text-slate-700 transition-colors shadow-xs"
                       >
                         <span>اگلا</span>
                         <ChevronLeft className="w-3.5 h-3.5" />
@@ -8477,7 +8476,7 @@ export default function AdminCMS({
                             }
                           }
                         }}
-                        className="w-14 bg-slate-900 border border-slate-700 text-white rounded-lg px-2 py-1 text-center font-mono text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+                        className="w-14 bg-white border border-slate-300 text-slate-800 rounded-lg px-2 py-1 text-center font-mono text-xs focus:ring-2 focus:ring-blue-500 outline-none shadow-xs"
                         title="نمبر لکھ کر Enter دبائیں"
                       />
                       <span>از {totalDoctorPages}</span>
@@ -8487,25 +8486,25 @@ export default function AdminCMS({
 
                 {/* Edit Doctor Modal */}
                 {editingDoctorId && doctorForm && (
-                  <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-                    <div className="bg-slate-900 border border-slate-700/80 rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
+                  <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+                    <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl animate-in zoom-in-95 duration-200 overflow-hidden">
                       
                       {/* Modal Header */}
-                      <div className="p-4 sm:p-5 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between gap-4 shrink-0">
+                      <div className="p-4 sm:p-5 border-b border-slate-200 bg-white flex items-center justify-between gap-4 shrink-0">
                         <div className="flex items-center gap-3 min-w-0">
                           <img 
                             src={doctorForm.image || "/images/default_doctor.webp"} 
                             alt={doctorForm.name} 
                             onError={(e) => { e.target.onerror = null; e.target.src = "/images/default_doctor.webp"; }}
-                            className="w-12 h-12 rounded-xl object-cover border border-slate-700 shrink-0 bg-white"
+                            className="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0 bg-white shadow-xs"
                           />
                           <div className="min-w-0 text-right">
-                            <h3 className="text-base sm:text-lg font-bold text-white font-simple truncate">
+                            <h3 className="text-base sm:text-lg font-bold text-slate-900 font-simple truncate">
                               طبیب کا پروفائل ایڈٹ کریں: {doctorForm.name}
                             </h3>
-                            <div className="flex items-center justify-end gap-2 text-xs text-slate-400 font-sans mt-0.5">
+                            <div className="flex items-center justify-end gap-2 text-xs text-slate-500 font-sans mt-0.5">
                               {doctorForm.registrationNumber && (
-                                <span className="text-emerald-400 font-mono font-bold" dir="ltr">{doctorForm.registrationNumber}</span>
+                                <span className="text-emerald-600 font-mono font-bold" dir="ltr">{doctorForm.registrationNumber}</span>
                               )}
                               <span>• آئی ڈی: #{doctorForm.id}</span>
                             </div>
@@ -8514,14 +8513,14 @@ export default function AdminCMS({
 
                         <button 
                           onClick={() => { setEditingDoctorId(null); setDoctorForm(null); }} 
-                          className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-colors shrink-0"
+                          className="p-2 hover:bg-slate-100 rounded-xl text-slate-400 hover:text-slate-700 transition-colors shrink-0"
                         >
                           <X className="w-5 h-5" />
                         </button>
                       </div>
 
                       {/* Navigation Sub-Tabs */}
-                      <div className="sticky top-0 z-20 flex items-center gap-1.5 overflow-x-auto p-2.5 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 text-xs font-simple no-scrollbar shrink-0 shadow-md">
+                      <div className="sticky top-0 z-20 flex items-center gap-1.5 overflow-x-auto p-2.5 bg-slate-50/95 backdrop-blur-md border-b border-slate-200 text-xs font-simple no-scrollbar shrink-0 shadow-xs">
                         {[
                           { id: 'basic', label: 'بنیادی معلومات', icon: UserCheck },
                           { id: 'clinic', label: 'مطب، اوقات و رابطہ', icon: Building2 },
@@ -8547,8 +8546,8 @@ export default function AdminCMS({
                               }}
                               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl whitespace-nowrap transition-all font-bold ${
                                 isActive 
-                                  ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-400/30' 
-                                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                                  ? 'bg-blue-600 text-white shadow-xs' 
+                                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                               }`}
                             >
                               <Icon className="w-3.5 h-3.5" />
@@ -8579,51 +8578,51 @@ export default function AdminCMS({
                       >
                         
                         {/* SECTION 1: BASIC INFO */}
-                        <div id="admin-doc-basic" className="scroll-mt-3 space-y-4 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
-                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-emerald-400">
+                        <div id="admin-doc-basic" className="scroll-mt-3 space-y-4 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-200 text-emerald-600">
                             <div className="flex items-center gap-2">
-                              <UserCheck className="w-5 h-5 text-emerald-400" />
-                              <h4 className="font-bold text-base text-white">بنیادی معلومات و شخصی کوائف</h4>
+                              <UserCheck className="w-5 h-5 text-emerald-600" />
+                              <h4 className="font-bold text-base text-slate-900">بنیادی معلومات و شخصی کوائف</h4>
                             </div>
-                            <span className="text-[11px] text-slate-400">نام، ٹائٹل، رجسٹریشن، فیس و رابطہ</span>
+                            <span className="text-[11px] text-slate-500">نام، ٹائٹل، رجسٹریشن، فیس و رابطہ</span>
                           </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">پورا نام (Full Name)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">پورا نام (Full Name)</label>
                                 <input 
                                   type="text" 
                                   value={doctorForm.name || ''} 
                                   onChange={(e) => setDoctorForm({...doctorForm, name: e.target.value})}
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-xs"
                                 />
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">ٹائٹل / ذیلی عنوان (Sub Heading)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">ٹائٹل / ذیلی عنوان (Sub Heading)</label>
                                 <input 
                                   type="text" 
                                   value={doctorForm.title || ''} 
                                   onChange={(e) => setDoctorForm({...doctorForm, title: e.target.value})}
                                   placeholder="طبیب حاذق، ماہر نباض..."
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-xs"
                                 />
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">قومی کونسل برائے طب رجسٹریشن نمبر (Council Reg No)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">قومی کونسل برائے طب رجسٹریشن نمبر (Council Reg No)</label>
                                 <input 
                                   type="text" 
                                   value={doctorForm.registrationNumber || ''} 
                                   onChange={(e) => setDoctorForm({...doctorForm, registrationNumber: e.target.value})}
                                   placeholder="مثلاً: 16455-FTJ"
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-emerald-400 font-mono focus:border-emerald-500 outline-none"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-emerald-600 font-mono font-bold focus:ring-2 focus:ring-emerald-500 outline-none shadow-xs"
                                   dir="ltr"
                                 />
                               </div>
 
                               {/* Doctor Profile Picture Card */}
-                              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-3">
-                                <label className="block text-slate-300 text-xs font-bold">
+                              <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-3 shadow-xs">
+                                <label className="block text-slate-700 text-xs font-bold">
                                   طبیب کی پروفائل تصویر (Profile Picture):
                                 </label>
 
@@ -8650,7 +8649,7 @@ export default function AdminCMS({
                                         type="button"
                                         disabled={isAdminUploadingAvatar}
                                         onClick={() => adminDoctorAvatarFileRef.current?.click()}
-                                        className="px-3.5 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs"
+                                        className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-xs"
                                       >
                                         {isAdminUploadingAvatar ? (
                                           <>
@@ -8671,7 +8670,7 @@ export default function AdminCMS({
                                           setDoctorForm({ ...doctorForm, image: '/images/default_doctor.webp' });
                                           showNotification('ڈیفالٹ (غیر تصدیق شدہ) تصویر سیٹ کر دی گئی');
                                         }}
-                                        className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-400/30 rounded-xl text-xs font-bold transition-all"
+                                        className="px-3 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-300 rounded-xl text-xs font-bold transition-all shadow-xs"
                                         title="غیر تصدیق شدہ بیج لگائیں"
                                       >
                                         ڈیفالٹ بیج لگائیں (Unverified)
@@ -8680,13 +8679,13 @@ export default function AdminCMS({
 
                                     {/* Direct URL input option */}
                                     <div className="flex items-center gap-2 pt-1">
-                                      <span className="text-[11px] text-slate-400 font-simple shrink-0">یا URL:</span>
+                                      <span className="text-[11px] text-slate-500 font-simple shrink-0">یا URL:</span>
                                       <input 
                                         type="text" 
                                         value={doctorForm.image || ''} 
                                         onChange={(e) => setDoctorForm({...doctorForm, image: e.target.value})}
                                         placeholder="تصویر کا آن لائن URL درج کریں..."
-                                        className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-white focus:border-blue-500 outline-none text-xs font-mono"
+                                        className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none text-xs font-mono shadow-xs"
                                         dir="ltr"
                                       />
                                     </div>
@@ -8695,11 +8694,11 @@ export default function AdminCMS({
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">طریقہ علاج (Treatment System)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">طریقہ علاج (Treatment System)</label>
                                 <select
                                   value={doctorForm.treatmentType || 'طب یونانی و قانون مفرد اعضاء'}
                                   onChange={(e) => setDoctorForm({...doctorForm, treatmentType: e.target.value})}
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none cursor-pointer"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-xs"
                                 >
                                   <option value="طب یونانی و قانون مفرد اعضاء">طب یونانی و قانون مفرد اعضاء</option>
                                   <option value="طب یونانی">طب یونانی (Unani Medicine)</option>
@@ -8712,18 +8711,18 @@ export default function AdminCMS({
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">طبی تجربہ سال (Experience in Years)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">طبی تجربہ سال (Experience in Years)</label>
                                 <input 
                                   type="number" 
                                   value={doctorForm.experience || ''} 
                                   onChange={(e) => setDoctorForm({...doctorForm, experience: Number(e.target.value)})}
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-sans"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none font-sans shadow-xs"
                                   dir="ltr"
                                 />
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">ریٹنگ (Rating out of 5)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">ریٹنگ (Rating out of 5)</label>
                                 <input 
                                   type="number" 
                                   step="0.1"
@@ -8731,18 +8730,18 @@ export default function AdminCMS({
                                   max="5"
                                   value={doctorForm.rating || 4.9} 
                                   onChange={(e) => setDoctorForm({...doctorForm, rating: parseFloat(e.target.value)})}
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-sans"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none font-sans shadow-xs"
                                   dir="ltr"
                                 />
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">ریویوز کی تعداد (Reviews Count)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">ریویوز کی تعداد (Reviews Count)</label>
                                 <input 
                                   type="number" 
                                   value={doctorForm.reviewsCount || 120} 
                                   onChange={(e) => setDoctorForm({...doctorForm, reviewsCount: parseInt(e.target.value, 10)})}
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-sans"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none font-sans shadow-xs"
                                   dir="ltr"
                                 />
                               </div>
@@ -8750,56 +8749,56 @@ export default function AdminCMS({
 
                             {/* Badges / Checkboxes */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                              <label className="flex items-center gap-3 p-3 bg-slate-950 border border-slate-800 rounded-2xl cursor-pointer hover:border-emerald-500/50 transition-colors">
+                              <label className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-2xl cursor-pointer hover:border-emerald-500/50 transition-colors shadow-xs">
                                 <input 
                                   type="checkbox" 
                                   checked={!!doctorForm.isVerified}
                                   onChange={(e) => setDoctorForm({...doctorForm, isVerified: e.target.checked})}
-                                  className="w-4 h-4 rounded text-emerald-600 focus:ring-0 bg-slate-900 border-slate-700"
+                                  className="w-4 h-4 rounded text-emerald-600 focus:ring-0 bg-white border-slate-300"
                                 />
                                 <div>
-                                  <span className="font-bold text-white text-xs block">مصدقہ طبیب بیج (Verified Badge)</span>
-                                  <span className="text-[11px] text-slate-400 block">پروفائل پر سبز رنگ کا مصدقہ بیج دکھائی دے گا۔</span>
+                                  <span className="font-bold text-slate-900 text-xs block">مصدقہ طبیب بیج (Verified Badge)</span>
+                                  <span className="text-[11px] text-slate-500 block">پروفائل پر سبز رنگ کا مصدقہ بیج دکھائی دے گا۔</span>
                                 </div>
                               </label>
 
-                              <label className="flex items-center gap-3 p-3 bg-slate-950 border border-slate-800 rounded-2xl cursor-pointer hover:border-amber-500/50 transition-colors">
+                              <label className="flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-2xl cursor-pointer hover:border-amber-500/50 transition-colors shadow-xs">
                                 <input 
                                   type="checkbox" 
                                   checked={!!doctorForm.isFeatured}
                                   onChange={(e) => setDoctorForm({...doctorForm, isFeatured: e.target.checked})}
-                                  className="w-4 h-4 rounded text-amber-500 focus:ring-0 bg-slate-900 border-slate-700"
+                                  className="w-4 h-4 rounded text-amber-500 focus:ring-0 bg-white border-slate-300"
                                 />
                                 <div>
-                                  <span className="font-bold text-white text-xs block">نمایاں طبیب (Featured Status)</span>
-                                  <span className="text-[11px] text-slate-400 block">ڈائریکٹری میں سرفہرست سنہری بیج کے ساتھ نظر آئے گا۔</span>
+                                  <span className="font-bold text-slate-900 text-xs block">نمایاں طبیب (Featured Status)</span>
+                                  <span className="text-[11px] text-slate-500 block">ڈائریکٹری میں سرفہرست سنہری بیج کے ساتھ نظر آئے گا۔</span>
                                 </div>
                               </label>
                             </div>
                           </div>
 
                         {/* SECTION 2: CLINIC, ADDRESS & CONTACT */}
-                        <div id="admin-doc-clinic" className="scroll-mt-3 space-y-4 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
-                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-blue-400">
+                        <div id="admin-doc-clinic" className="scroll-mt-3 space-y-4 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-200 text-blue-600">
                             <div className="flex items-center gap-2">
-                              <Building2 className="w-5 h-5 text-blue-400" />
-                              <h4 className="font-bold text-base text-white">مطب / کلینک، اوقات و لوکیشن</h4>
+                              <Building2 className="w-5 h-5 text-blue-600" />
+                              <h4 className="font-bold text-base text-slate-900">مطب / کلینک، اوقات و لوکیشن</h4>
                             </div>
-                            <span className="text-[11px] text-slate-400">شہر، پتہ، روزانہ کے اوقات، نقشہ لنک</span>
+                            <span className="text-[11px] text-slate-500">شہر، پتہ، روزانہ کے اوقات، نقشہ لنک</span>
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">مطب / کلینک کا نام (Clinic Name)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">مطب / کلینک کا نام (Clinic Name)</label>
                                 <input 
                                   type="text" 
                                   value={doctorForm.clinicName || ''} 
                                   onChange={(e) => setDoctorForm({...doctorForm, clinicName: e.target.value})}
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none shadow-xs"
                                 />
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">شہر (City)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">شہر (City)</label>
                                 <input 
                                   type="text" 
                                   value={doctorForm.cityName || ''} 
@@ -8809,159 +8808,159 @@ export default function AdminCMS({
                                     setDoctorForm({...doctorForm, cityName: c, city: slug});
                                   }}
                                   placeholder="لاہور، اسلام آباد، کراچی، ایبٹ آباد..."
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none shadow-xs"
                                 />
                               </div>
 
                               <div className="sm:col-span-2">
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">تفصیلی پتہ (Detailed Street Address)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">تفصیلی پتہ (Detailed Street Address)</label>
                                 <input 
                                   type="text" 
                                   value={doctorForm.address || ''} 
                                   onChange={(e) => setDoctorForm({...doctorForm, address: e.target.value})}
                                   placeholder="پلازہ، مین روڈ، نزد سنگ میل..."
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none shadow-xs"
                                 />
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">اوقات کار (Clinic Timings)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">اوقات کار (Clinic Timings)</label>
                                 <input 
                                   type="text" 
                                   value={doctorForm.timing || ''} 
-                                  onChange={(e) => setDoctorForm({...doctorForm, timing: e.target.value})}
+                                  onChange={(e) => setDoctorForm({...doctorForm, timing: e.target.value})} 
                                   placeholder="پیر تا ہفتہ: صبح 10:00 تا شام 7:00"
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none shadow-xs"
                                 />
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">مشاورت فیس (Consultation Fee Rs)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">مشاورت فیس (Consultation Fee Rs)</label>
                                 <input 
                                   type="number" 
                                   value={doctorForm.fee || ''} 
                                   onChange={(e) => setDoctorForm({...doctorForm, fee: Number(e.target.value)})}
                                   placeholder="500"
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-sans"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none font-sans shadow-xs"
                                   dir="ltr"
                                 />
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">آن لائن ویڈیو مشاورت فیس (Online Fee Rs)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">آن لائن ویڈیو مشاورت فیس (Online Fee Rs)</label>
                                 <input 
                                   type="number" 
                                   value={doctorForm.onlineFee || ''} 
                                   onChange={(e) => setDoctorForm({...doctorForm, onlineFee: Number(e.target.value)})}
                                   placeholder="800"
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-sans"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none font-sans shadow-xs"
                                   dir="ltr"
                                 />
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">اوسط انتظار کا وقت (Average Wait Time)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">اوسط انتظار کا وقت (Average Wait Time)</label>
                                 <input 
                                   type="text" 
                                   value={doctorForm.waitTime || ''} 
                                   onChange={(e) => setDoctorForm({...doctorForm, waitTime: e.target.value})}
                                   placeholder="15 منٹ سے کم"
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none shadow-xs"
                                 />
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">واٹس ایپ نمبر (WhatsApp)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">واٹس ایپ نمبر (WhatsApp)</label>
                                 <input 
                                   type="text" 
                                   value={doctorForm.whatsapp || ''} 
                                   onChange={(e) => setDoctorForm({...doctorForm, whatsapp: e.target.value})}
                                   placeholder="923001234567"
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-mono"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none font-mono shadow-xs"
                                   dir="ltr"
                                 />
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">فون / موبائل نمبر (Phone)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">فون / موبائل نمبر (Phone)</label>
                                 <input 
                                   type="text" 
                                   value={doctorForm.phone || ''} 
                                   onChange={(e) => setDoctorForm({...doctorForm, phone: e.target.value})}
                                   placeholder="0300-1234567"
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-mono"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none font-mono shadow-xs"
                                   dir="ltr"
                                 />
                               </div>
 
                               <div>
-                                <label className="block text-slate-300 mb-1 text-xs font-bold">ای میل (Email)</label>
+                                <label className="block text-slate-700 mb-1 text-xs font-bold">ای میل (Email)</label>
                                 <input 
                                   type="email" 
                                   value={doctorForm.email || ''} 
                                   onChange={(e) => setDoctorForm({...doctorForm, email: e.target.value})}
                                   placeholder="hakeem@example.com"
-                                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white focus:border-blue-500 outline-none font-mono"
+                                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none font-mono shadow-xs"
                                   dir="ltr"
                                 />
                               </div>
 
-                              <div className="bg-blue-950/40 p-3 rounded-2xl border border-blue-600/50">
-                                <label className="block text-blue-300 mb-1 text-xs font-bold flex items-center gap-1.5">
-                                  <Lock className="w-3.5 h-3.5 text-blue-400" />
+                              <div className="bg-blue-50/70 p-3 rounded-2xl border border-blue-200 shadow-xs">
+                                <label className="block text-blue-900 mb-1 text-xs font-bold flex items-center gap-1.5">
+                                  <Lock className="w-3.5 h-3.5 text-blue-600" />
                                   <span>لاگ ان پاسورڈ (Login Password):</span>
                                 </label>
                                 <input 
                                   type="text" 
                                   value={doctorForm.password || 'password123'} 
                                   onChange={(e) => setDoctorForm({...doctorForm, password: e.target.value})}
-                                  className="w-full bg-slate-900 border border-blue-500 rounded-xl p-2 text-emerald-400 font-bold focus:border-blue-400 outline-none text-xs tracking-wider font-mono"
+                                  className="w-full bg-white border border-blue-300 rounded-xl p-2 text-emerald-600 font-bold focus:ring-2 focus:ring-blue-500 outline-none text-xs tracking-wider font-mono shadow-xs"
                                   dir="ltr"
                                 />
-                                <span className="text-[10px] text-slate-400 mt-1 block">طبیب اس پاسورڈ سے اپنے ڈیش بورڈ پر لاگ ان ہو سکتا ہے۔</span>
+                                <span className="text-[10px] text-slate-500 mt-1 block">طبیب اس پاسورڈ سے اپنے ڈیش بورڈ پر لاگ ان ہو سکتا ہے۔</span>
                               </div>
                             </div>
                           </div>
 
                         {/* SECTION 3: ABOUT / BIO */}
-                        <div id="admin-doc-about" className="scroll-mt-3 space-y-3 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
-                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-indigo-400">
+                        <div id="admin-doc-about" className="scroll-mt-3 space-y-3 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-200 text-indigo-600">
                             <div className="flex items-center gap-2">
-                              <FileText className="w-5 h-5 text-indigo-400" />
-                              <h4 className="font-bold text-base text-white">معالج کا تفصیلی تعارف اور طریقہ علاج</h4>
+                              <FileText className="w-5 h-5 text-indigo-600" />
+                              <h4 className="font-bold text-base text-slate-900">معالج کا تفصیلی تعارف اور طریقہ علاج</h4>
                             </div>
-                            <span className="text-[11px] text-slate-400">پیراگراف یا لسٹ کی صورت میں لکھیں</span>
+                            <span className="text-[11px] text-slate-500">پیراگراف یا لسٹ کی صورت میں لکھیں</span>
                           </div>
                             <div className="flex items-center justify-between">
-                              <label className="block text-slate-300 text-xs font-bold">
+                              <label className="block text-slate-700 text-xs font-bold">
                                 معالج کا تفصیلی تعارف اور طریقہ علاج (Doctor Bio):
                               </label>
-                              <span className="text-[11px] text-slate-400">پیراگراف یا لسٹ کی صورت میں لکھیں</span>
+                              <span className="text-[11px] text-slate-500">پیراگراف یا لسٹ کی صورت میں لکھیں</span>
                             </div>
                             <textarea 
                               value={doctorForm.about || ''} 
                               onChange={(e) => setDoctorForm({...doctorForm, about: e.target.value})}
                               placeholder="معالج کے تعارف، طریقہ علاج اور تجربات کے بارے میں تفصیلی معلومات..."
                               rows={9}
-                              className="w-full bg-slate-950 border border-slate-700 rounded-2xl p-4 text-white focus:border-blue-500 outline-none leading-relaxed text-sm"
+                              className="w-full bg-white border border-slate-300 rounded-2xl p-4 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none leading-relaxed text-sm shadow-xs"
                             />
                           </div>
 
                         {/* SECTION 4: SPECIALTIES & SERVICES */}
-                        <div id="admin-doc-specialties" className="scroll-mt-3 space-y-6 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
-                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-amber-400">
+                        <div id="admin-doc-specialties" className="scroll-mt-3 space-y-6 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-200 text-amber-600">
                             <div className="flex items-center gap-2">
-                              <Sparkles className="w-5 h-5 text-amber-400" />
-                              <h4 className="font-bold text-base text-white">تخصص، امراض و فراہم کردہ خدمات</h4>
+                              <Sparkles className="w-5 h-5 text-amber-600" />
+                              <h4 className="font-bold text-base text-slate-900">تخصص، امراض و فراہم کردہ خدمات</h4>
                             </div>
-                            <span className="text-[11px] text-slate-400">
+                            <span className="text-[11px] text-slate-500">
                               تخصص: {(doctorForm.specialties || []).length} | خدمات: {(doctorForm.services || []).length}
                             </span>
                           </div>
                           
                           {/* Specialties */}
-                          <div className="space-y-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
-                              <label className="block text-slate-200 font-bold text-xs">
+                          <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                              <label className="block text-slate-800 font-bold text-xs">
                                 تخصص / امراض (Specialties)
                               </label>
                               
@@ -8969,7 +8968,7 @@ export default function AdminCMS({
                                 {(doctorForm.specialties || []).map((spec, idx) => (
                                   <span 
                                     key={idx} 
-                                    className="inline-flex items-center gap-1.5 bg-slate-800 text-slate-200 text-xs px-3 py-1.5 rounded-xl border border-slate-700"
+                                    className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-800 text-xs px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs"
                                   >
                                     <span>{spec}</span>
                                     <button 
@@ -8978,7 +8977,7 @@ export default function AdminCMS({
                                         const updated = doctorForm.specialties.filter((_, i) => i !== idx);
                                         setDoctorForm({...doctorForm, specialties: updated});
                                       }}
-                                      className="text-slate-400 hover:text-red-400"
+                                      className="text-slate-400 hover:text-red-500"
                                     >
                                       <X className="w-3.5 h-3.5" />
                                     </button>
@@ -8992,7 +8991,7 @@ export default function AdminCMS({
                                   value={newSpecialtyInput}
                                   onChange={(e) => setNewSpecialtyInput(e.target.value)}
                                   placeholder="نیا شعبہ یا بیماری لکھیں (مثلاً: امراض معدہ، جوڑوں کا درد)..."
-                                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-blue-500 font-simple"
+                                  className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 text-xs outline-none focus:ring-2 focus:ring-blue-500 font-simple shadow-xs"
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                       e.preventDefault();
@@ -9023,7 +9022,7 @@ export default function AdminCMS({
                                       setNewSpecialtyInput('');
                                     }
                                   }}
-                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 font-simple"
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 font-simple shadow-xs"
                                 >
                                   <Plus className="w-3.5 h-3.5" />
                                   <span>شامل کریں</span>
@@ -9032,8 +9031,8 @@ export default function AdminCMS({
                             </div>
 
                             {/* Services */}
-                            <div className="space-y-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
-                              <label className="block text-slate-200 font-bold text-xs">
+                            <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                              <label className="block text-slate-800 font-bold text-xs">
                                 خصوصی طبی خدمات (Offered Services)
                               </label>
 
@@ -9041,7 +9040,7 @@ export default function AdminCMS({
                                 {(doctorForm.services || []).map((srv, idx) => (
                                   <div 
                                     key={idx} 
-                                    className="flex items-center justify-between bg-slate-900 border border-slate-800 p-2.5 rounded-xl text-xs text-slate-300"
+                                    className="flex items-center justify-between bg-slate-50 border border-slate-200 p-2.5 rounded-xl text-xs text-slate-800"
                                   >
                                     <span>{srv}</span>
                                     <button 
@@ -9050,7 +9049,7 @@ export default function AdminCMS({
                                         const updated = doctorForm.services.filter((_, i) => i !== idx);
                                         setDoctorForm({...doctorForm, services: updated});
                                       }}
-                                      className="text-slate-400 hover:text-red-400 p-1"
+                                      className="text-slate-400 hover:text-red-500 p-1"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
                                     </button>
@@ -9064,7 +9063,7 @@ export default function AdminCMS({
                                   value={newServiceInput}
                                   onChange={(e) => setNewServiceInput(e.target.value)}
                                   placeholder="نئی طبی خدمت درج کریں (مثلاً: نبض سے مکمل تشخیص)..."
-                                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-blue-500"
+                                  className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 text-xs outline-none focus:ring-2 focus:ring-blue-500 shadow-xs"
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                       e.preventDefault();
@@ -9083,7 +9082,7 @@ export default function AdminCMS({
                                       setNewServiceInput('');
                                     }
                                   }}
-                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1"
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 shadow-xs"
                                 >
                                   <Plus className="w-3.5 h-3.5" />
                                   <span>شامل کریں</span>
@@ -9092,8 +9091,8 @@ export default function AdminCMS({
                             </div>
 
                             {/* Conditions Treated (Oladoc Style) */}
-                            <div className="space-y-3 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
-                              <label className="block text-slate-200 font-bold text-xs">
+                            <div className="space-y-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                              <label className="block text-slate-800 font-bold text-xs">
                                 زیرِ علاج امراض اور علامات (Conditions Treated)
                               </label>
 
@@ -9101,7 +9100,7 @@ export default function AdminCMS({
                                 {(doctorForm.conditions || []).map((cond, idx) => (
                                   <span 
                                     key={idx} 
-                                    className="inline-flex items-center gap-1.5 bg-blue-950 text-blue-200 text-xs px-3 py-1.5 rounded-xl border border-blue-800"
+                                    className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-800 text-xs px-3 py-1.5 rounded-xl border border-blue-200 shadow-xs"
                                   >
                                     <span>• {cond}</span>
                                     <button 
@@ -9110,7 +9109,7 @@ export default function AdminCMS({
                                         const updated = doctorForm.conditions.filter((_, i) => i !== idx);
                                         setDoctorForm({...doctorForm, conditions: updated});
                                       }}
-                                      className="text-blue-400 hover:text-red-400"
+                                      className="text-blue-500 hover:text-red-500"
                                     >
                                       <X className="w-3.5 h-3.5" />
                                     </button>
@@ -9124,7 +9123,7 @@ export default function AdminCMS({
                                   value={newConditionInput}
                                   onChange={(e) => setNewConditionInput(e.target.value)}
                                   placeholder="نیا مرض لکھیں (مثلاً: معدے کا السر، دائمی قبض، جوڑوں کا درد)..."
-                                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none focus:border-blue-500 font-simple"
+                                  className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 text-xs outline-none focus:ring-2 focus:ring-blue-500 font-simple shadow-xs"
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
                                       e.preventDefault();
@@ -9145,7 +9144,7 @@ export default function AdminCMS({
                                       setNewConditionInput('');
                                     }
                                   }}
-                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 font-simple"
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 font-simple shadow-xs"
                                 >
                                   <Plus className="w-3.5 h-3.5" />
                                   <span>شامل کریں</span>
@@ -9156,27 +9155,27 @@ export default function AdminCMS({
                           </div>
 
                         {/* SECTION 5: EDUCATION & QUALIFICATIONS */}
-                        <div id="admin-doc-education" className="scroll-mt-3 space-y-4 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
-                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-purple-400">
+                        <div id="admin-doc-education" className="scroll-mt-3 space-y-4 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-200 text-purple-600">
                             <div className="flex items-center gap-2">
-                              <GraduationCap className="w-5 h-5 text-purple-400" />
-                              <h4 className="font-bold text-base text-white">طبی اسناد، ڈگریاں و تعلیم</h4>
+                              <GraduationCap className="w-5 h-5 text-purple-600" />
+                              <h4 className="font-bold text-base text-slate-900">طبی اسناد، ڈگریاں و تعلیم</h4>
                             </div>
-                            <span className="text-[11px] text-slate-400">کل اسناد: {(doctorForm.education || []).length}</span>
+                            <span className="text-[11px] text-slate-500">کل اسناد: {(doctorForm.education || []).length}</span>
                           </div>
                           <div className="space-y-2">
-                              <label className="block text-slate-300 text-xs font-bold">موجودہ طبی اسناد (Degrees & Education):</label>
+                              <label className="block text-slate-700 text-xs font-bold">موجودہ طبی اسناد (Degrees & Education):</label>
                               {(doctorForm.education || []).length === 0 ? (
-                                <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center text-slate-500 text-xs">
+                                <div className="p-4 bg-white rounded-xl border border-slate-200 text-center text-slate-500 text-xs shadow-xs">
                                   کوئی سند شامل نہیں ہے۔ نیچے فارم کے ذریعے نئی سند شامل کریں۔
                                 </div>
                               ) : (
                                 <div className="space-y-2">
                                   {doctorForm.education.map((edu, idx) => (
-                                    <div key={idx} className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between gap-3 text-xs">
+                                    <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between gap-3 text-xs shadow-xs">
                                       <div>
-                                        <span className="font-bold text-white block">{edu.degree}</span>
-                                        <span className="text-slate-400 text-[11px] block">{edu.institute} {edu.year ? `(${edu.year})` : ''}</span>
+                                        <span className="font-bold text-slate-900 block">{edu.degree}</span>
+                                        <span className="text-slate-500 text-[11px] block">{edu.institute} {edu.year ? `(${edu.year})` : ''}</span>
                                       </div>
                                       <button 
                                         type="button" 
@@ -9184,7 +9183,7 @@ export default function AdminCMS({
                                           const updated = doctorForm.education.filter((_, i) => i !== idx);
                                           setDoctorForm({...doctorForm, education: updated});
                                         }}
-                                        className="text-slate-400 hover:text-red-400 p-1.5"
+                                        className="text-slate-400 hover:text-red-500 p-1.5"
                                         title="حذف کریں"
                                       >
                                         <Trash2 className="w-4 h-4" />
@@ -9196,30 +9195,30 @@ export default function AdminCMS({
                             </div>
 
                             {/* Add Education Form */}
-                            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3">
-                              <span className="text-xs font-bold text-slate-200 block">نئی سند یا ڈگری شامل کریں:</span>
+                            <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-3 shadow-xs">
+                              <span className="text-xs font-bold text-slate-800 block">نئی سند یا ڈگری شامل کریں:</span>
                               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <input 
                                   type="text" 
-                                  value={newEduForm.degree}
+                                  value={newEduForm.degree} 
                                   onChange={(e) => setNewEduForm({...newEduForm, degree: e.target.value})}
                                   placeholder="ڈگری کا نام (مثلاً: فاضل الطب)"
-                                  className="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none"
+                                  className="bg-white border border-slate-300 rounded-xl p-2 text-slate-800 text-xs outline-none focus:ring-2 focus:ring-blue-500 shadow-xs"
                                 />
                                 <input 
                                   type="text" 
-                                  value={newEduForm.institute}
+                                  value={newEduForm.institute} 
                                   onChange={(e) => setNewEduForm({...newEduForm, institute: e.target.value})}
                                   placeholder="ادارہ (مثلاً: طبیہ کالج لاہور)"
-                                  className="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none"
+                                  className="bg-white border border-slate-300 rounded-xl p-2 text-slate-800 text-xs outline-none focus:ring-2 focus:ring-blue-500 shadow-xs"
                                 />
                                 <div className="flex gap-2">
                                   <input 
                                     type="text" 
-                                    value={newEduForm.year}
+                                    value={newEduForm.year} 
                                     onChange={(e) => setNewEduForm({...newEduForm, year: e.target.value})}
                                     placeholder="سال (مثلاً: 2015)"
-                                    className="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none font-sans"
+                                    className="flex-1 bg-white border border-slate-300 rounded-xl p-2 text-slate-800 text-xs outline-none font-sans focus:ring-2 focus:ring-blue-500 shadow-xs"
                                     dir="ltr"
                                   />
                                   <button
@@ -9233,7 +9232,7 @@ export default function AdminCMS({
                                         setNewEduForm({ degree: '', institute: '', year: '' });
                                       }
                                     }}
-                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0"
+                                    className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shrink-0 shadow-xs"
                                   >
                                     شامل کریں
                                   </button>
@@ -9244,31 +9243,31 @@ export default function AdminCMS({
                           </div>
 
                         {/* SECTION 6: EXPERIENCES */}
-                        <div id="admin-doc-experiences" className="scroll-mt-3 space-y-4 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
-                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-teal-400">
+                        <div id="admin-doc-experiences" className="scroll-mt-3 space-y-4 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-200 text-teal-600">
                             <div className="flex items-center gap-2">
-                              <Award className="w-5 h-5 text-teal-400" />
-                              <h4 className="font-bold text-base text-white">طبی و کلینیکل تجربات</h4>
+                              <Award className="w-5 h-5 text-teal-600" />
+                              <h4 className="font-bold text-base text-slate-900">طبی و کلینیکل تجربات</h4>
                             </div>
-                            <span className="text-[11px] text-slate-400">کل تجربات: {(doctorForm.experiences || []).length}</span>
+                            <span className="text-[11px] text-slate-500">کل تجربات: {(doctorForm.experiences || []).length}</span>
                           </div>
                           <div className="space-y-2">
-                              <label className="block text-slate-300 text-xs font-bold">طبی تجربات و خدمات (Clinical Experiences):</label>
+                              <label className="block text-slate-700 text-xs font-bold">طبی تجربات و خدمات (Clinical Experiences):</label>
                               {(doctorForm.experiences || []).length === 0 ? (
-                                <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center text-slate-500 text-xs">
+                                <div className="p-4 bg-white rounded-xl border border-slate-200 text-center text-slate-500 text-xs shadow-xs">
                                   کوئی تجربہ شامل نہیں ہے۔ نیچے سے نیا تجربہ شامل کریں۔
                                 </div>
                               ) : (
                                 <div className="space-y-2">
                                   {doctorForm.experiences.map((exp, idx) => (
-                                    <div key={idx} className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-start justify-between gap-3 text-xs">
+                                    <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 flex items-start justify-between gap-3 text-xs shadow-xs">
                                       <div className="space-y-0.5">
                                         <div className="flex items-center gap-2">
-                                          <span className="font-bold text-white">{exp.companyName || exp.jobTitle}</span>
-                                          {exp.duration && <span className="text-slate-400 font-sans text-[11px]">({exp.duration})</span>}
+                                          <span className="font-bold text-slate-900">{exp.companyName || exp.jobTitle}</span>
+                                          {exp.duration && <span className="text-slate-500 font-sans text-[11px]">({exp.duration})</span>}
                                         </div>
-                                        {exp.jobTitle && <span className="text-blue-400 text-[11px] block">{exp.jobTitle}</span>}
-                                        {exp.description && <p className="text-slate-400 text-[11px] mt-1">{exp.description}</p>}
+                                        {exp.jobTitle && <span className="text-blue-600 text-[11px] block">{exp.jobTitle}</span>}
+                                        {exp.description && <p className="text-slate-600 text-[11px] mt-1">{exp.description}</p>}
                                       </div>
                                       <button 
                                         type="button" 
@@ -9276,7 +9275,7 @@ export default function AdminCMS({
                                           const updated = doctorForm.experiences.filter((_, i) => i !== idx);
                                           setDoctorForm({...doctorForm, experiences: updated});
                                         }}
-                                        className="text-slate-400 hover:text-red-400 p-1.5 shrink-0"
+                                        className="text-slate-400 hover:text-red-500 p-1.5 shrink-0"
                                         title="حذف کریں"
                                       >
                                         <Trash2 className="w-4 h-4" />
@@ -9288,39 +9287,39 @@ export default function AdminCMS({
                             </div>
 
                             {/* Add Experience Form */}
-                            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3">
-                              <span className="text-xs font-bold text-slate-200 block">نیا تجربہ شامل کریں:</span>
+                            <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-3 shadow-xs">
+                              <span className="text-xs font-bold text-slate-800 block">نیا تجربہ شامل کریں:</span>
                               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <input 
                                   type="text" 
-                                  value={newExpForm.companyName}
+                                  value={newExpForm.companyName} 
                                   onChange={(e) => setNewExpForm({...newExpForm, companyName: e.target.value})}
                                   placeholder="ادارہ یا مطب کا نام"
-                                  className="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none"
+                                  className="bg-white border border-slate-300 rounded-xl p-2 text-slate-800 text-xs outline-none focus:ring-2 focus:ring-blue-500 shadow-xs"
                                 />
                                 <input 
                                   type="text" 
-                                  value={newExpForm.jobTitle}
+                                  value={newExpForm.jobTitle} 
                                   onChange={(e) => setNewExpForm({...newExpForm, jobTitle: e.target.value})}
                                   placeholder="عہدہ (مثلاً: سینئر طبیب)"
-                                  className="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none"
+                                  className="bg-white border border-slate-300 rounded-xl p-2 text-slate-800 text-xs outline-none focus:ring-2 focus:ring-blue-500 shadow-xs"
                                 />
                                 <input 
                                   type="text" 
-                                  value={newExpForm.duration}
+                                  value={newExpForm.duration} 
                                   onChange={(e) => setNewExpForm({...newExpForm, duration: e.target.value})}
                                   placeholder="مدت (مثلاً: 2018 - 2024)"
-                                  className="bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none font-sans"
+                                  className="bg-white border border-slate-300 rounded-xl p-2 text-slate-800 text-xs outline-none font-sans focus:ring-2 focus:ring-blue-500 shadow-xs"
                                   dir="ltr"
                                 />
                               </div>
                               <div className="flex gap-2">
                                 <input 
                                   type="text" 
-                                  value={newExpForm.description}
+                                  value={newExpForm.description} 
                                   onChange={(e) => setNewExpForm({...newExpForm, description: e.target.value})}
                                   placeholder="مختصر تفصیل..."
-                                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none"
+                                  className="flex-1 bg-white border border-slate-300 rounded-xl p-2 text-slate-800 text-xs outline-none focus:ring-2 focus:ring-blue-500 shadow-xs"
                                 />
                                 <button
                                   type="button"
@@ -9333,7 +9332,7 @@ export default function AdminCMS({
                                       setNewExpForm({ companyName: '', jobTitle: '', duration: '', description: '' });
                                     }
                                   }}
-                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0"
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shrink-0 shadow-xs"
                                 >
                                   شامل کریں
                                 </button>
@@ -9343,27 +9342,27 @@ export default function AdminCMS({
                           </div>
 
                         {/* SECTION 7: AWARDS */}
-                        <div id="admin-doc-awards" className="scroll-mt-3 space-y-4 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
-                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-yellow-400">
+                        <div id="admin-doc-awards" className="scroll-mt-3 space-y-4 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-200 text-yellow-600">
                             <div className="flex items-center gap-2">
-                              <Award className="w-5 h-5 text-yellow-400" />
-                              <h4 className="font-bold text-base text-white">اعزازات و شیلڈز (Awards & Distinctions)</h4>
+                              <Award className="w-5 h-5 text-yellow-600" />
+                              <h4 className="font-bold text-base text-slate-900">اعزازات و شیلڈز (Awards & Distinctions)</h4>
                             </div>
-                            <span className="text-[11px] text-slate-400">کل اعزازات: {(doctorForm.awards || []).length}</span>
+                            <span className="text-[11px] text-slate-500">کل اعزازات: {(doctorForm.awards || []).length}</span>
                           </div>
                           <div className="space-y-2">
-                              <label className="block text-slate-300 text-xs font-bold">اعزازات و شیلڈز (Awards & Distinctions):</label>
+                              <label className="block text-slate-700 text-xs font-bold">اعزازات و شیلڈز (Awards & Distinctions):</label>
                               {(doctorForm.awards || []).length === 0 ? (
-                                <div className="p-4 bg-slate-950 rounded-xl border border-slate-800 text-center text-slate-500 text-xs">
+                                <div className="p-4 bg-white rounded-xl border border-slate-200 text-center text-slate-500 text-xs shadow-xs">
                                   کوئی اعزاز درج نہیں ہے۔
                                 </div>
                               ) : (
                                 <div className="space-y-2">
                                   {doctorForm.awards.map((aw, idx) => (
-                                    <div key={idx} className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between gap-3 text-xs">
+                                    <div key={idx} className="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between gap-3 text-xs shadow-xs">
                                       <div>
-                                        <span className="font-bold text-amber-300 block">{aw.title}</span>
-                                        {aw.year && <span className="text-slate-400 font-sans text-[11px] block">{aw.year}</span>}
+                                        <span className="font-bold text-amber-600 block">{aw.title}</span>
+                                        {aw.year && <span className="text-slate-500 font-sans text-[11px] block">{aw.year}</span>}
                                       </div>
                                       <button 
                                         type="button" 
@@ -9371,7 +9370,7 @@ export default function AdminCMS({
                                           const updated = doctorForm.awards.filter((_, i) => i !== idx);
                                           setDoctorForm({...doctorForm, awards: updated});
                                         }}
-                                        className="text-slate-400 hover:text-red-400 p-1.5"
+                                        className="text-slate-400 hover:text-red-500 p-1.5"
                                         title="حذف کریں"
                                       >
                                         <Trash2 className="w-4 h-4" />
@@ -9383,22 +9382,22 @@ export default function AdminCMS({
                             </div>
 
                             {/* Add Award Form */}
-                            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-3">
-                              <span className="text-xs font-bold text-slate-200 block">نیا اعزاز شامل کریں:</span>
+                            <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-3 shadow-xs">
+                              <span className="text-xs font-bold text-slate-800 block">نیا اعزاز شامل کریں:</span>
                               <div className="flex gap-2">
                                 <input 
                                   type="text" 
-                                  value={newAwardForm.title}
+                                  value={newAwardForm.title} 
                                   onChange={(e) => setNewAwardForm({...newAwardForm, title: e.target.value})}
                                   placeholder="اعزاز کا عنوان (مثلاً: گولڈ میڈل برائے نبض شناسی)"
-                                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none"
+                                  className="flex-1 bg-white border border-slate-300 rounded-xl p-2 text-slate-800 text-xs outline-none focus:ring-2 focus:ring-blue-500 shadow-xs"
                                 />
                                 <input 
                                   type="text" 
-                                  value={newAwardForm.year}
+                                  value={newAwardForm.year} 
                                   onChange={(e) => setNewAwardForm({...newAwardForm, year: e.target.value})}
                                   placeholder="سال (2020)"
-                                  className="w-28 bg-slate-900 border border-slate-700 rounded-xl p-2 text-white text-xs outline-none font-sans"
+                                  className="w-28 bg-white border border-slate-300 rounded-xl p-2 text-slate-800 text-xs outline-none font-sans focus:ring-2 focus:ring-blue-500 shadow-xs"
                                   dir="ltr"
                                 />
                                 <button
@@ -9412,7 +9411,7 @@ export default function AdminCMS({
                                       setNewAwardForm({ title: '', year: '' });
                                     }
                                   }}
-                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0"
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shrink-0 shadow-xs"
                                 >
                                   شامل کریں
                                 </button>
@@ -9422,47 +9421,47 @@ export default function AdminCMS({
                           </div>
 
                         {/* SECTION 8: PHOTO GALLERY */}
-                        <div id="admin-doc-gallery" className="scroll-mt-3 space-y-4 bg-slate-950/40 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-sm">
-                          <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-rose-400">
+                        <div id="admin-doc-gallery" className="scroll-mt-3 space-y-4 bg-slate-50 p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                          <div className="flex items-center justify-between pb-3 border-b border-slate-200 text-rose-600">
                             <div className="flex items-center gap-2">
-                              <ImageIcon className="w-5 h-5 text-rose-400" />
-                              <h4 className="font-bold text-base text-white">مطب و اسناد کی فوٹو گیلری</h4>
+                              <ImageIcon className="w-5 h-5 text-rose-600" />
+                              <h4 className="font-bold text-base text-slate-900">مطب و اسناد کی فوٹو گیلری</h4>
                             </div>
-                            <span className="text-[11px] text-slate-400">کل تصاویر: {(doctorForm.gallery || []).length}</span>
+                            <span className="text-[11px] text-slate-500">کل تصاویر: {(doctorForm.gallery || []).length}</span>
                           </div>
                           
                           <div className="flex items-center justify-between">
-                              <label className="block text-slate-300 text-xs font-bold">
+                              <label className="block text-slate-700 text-xs font-bold">
                                 مطب اور اسناد کی تصاویر (Gallery Images):
                               </label>
-                              <span className="text-xs text-slate-400 font-sans">
+                              <span className="text-xs text-slate-500 font-sans">
                                 کل تصاویر: {(doctorForm.gallery || []).length}
                               </span>
                             </div>
 
                             {/* Gallery Grid with Delete Option */}
                             {(doctorForm.gallery || []).length === 0 ? (
-                              <div className="p-8 bg-slate-950 rounded-2xl border border-slate-800 text-center text-slate-500 text-xs space-y-1">
-                                <ImageIcon className="w-8 h-8 text-slate-600 mx-auto" />
+                              <div className="p-8 bg-white rounded-2xl border border-slate-200 text-center text-slate-500 text-xs space-y-1 shadow-xs">
+                                <ImageIcon className="w-8 h-8 text-slate-400 mx-auto" />
                                 <p>فی الوقت کوئی تصویر شامل نہیں ہے۔</p>
                               </div>
                             ) : (
                               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                 {doctorForm.gallery.map((imgUrl, idx) => (
-                                  <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-700 aspect-video bg-slate-950">
+                                  <div key={idx} className="relative group rounded-xl overflow-hidden border border-slate-200 aspect-video bg-white shadow-xs">
                                     <img 
                                       src={imgUrl} 
                                       alt={`Gallery ${idx + 1}`} 
                                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                                       onError={(e) => { e.target.parentElement.style.opacity = '0.5'; }}
                                     />
-                                    <button
-                                      type="button"
+                                    <button 
+                                      type="button" 
                                       onClick={() => {
                                         const updated = doctorForm.gallery.filter((_, i) => i !== idx);
                                         setDoctorForm({...doctorForm, gallery: updated});
                                       }}
-                                      className="absolute top-1.5 right-1.5 p-1 bg-red-600/90 hover:bg-red-600 text-white rounded-lg shadow-md transition-all opacity-90 group-hover:opacity-100"
+                                      className="absolute top-1.5 right-1.5 p-1 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-md transition-all opacity-90 group-hover:opacity-100"
                                       title="تصویر حذف کریں"
                                     >
                                       <Trash2 className="w-3.5 h-3.5" />
@@ -9473,24 +9472,24 @@ export default function AdminCMS({
                             )}
 
                             {/* Add Gallery Image Form */}
-                            <div className="bg-slate-950/70 p-4 rounded-2xl border border-slate-800 space-y-4">
+                            <div className="bg-white p-4 rounded-2xl border border-slate-200 space-y-4 shadow-xs">
                               <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-                                <span className="text-xs font-bold text-slate-200">
+                                <span className="text-xs font-bold text-slate-800">
                                   نئی تصاویر شامل کریں (کمپیوٹر/موبائل سے فائل اپلوڈ کریں یا URL درج کریں):
                                 </span>
-                                <input
-                                  type="file"
+                                <input 
+                                  type="file" 
                                   ref={adminDoctorGalleryFileRef}
                                   onChange={handleAdminDoctorGalleryUpload}
                                   accept="image/*"
                                   multiple
-                                  className="hidden"
+                                  className="hidden" 
                                 />
-                                <button
-                                  type="button"
+                                <button 
+                                  type="button" 
                                   disabled={isAdminUploadingGallery}
                                   onClick={() => adminDoctorGalleryFileRef.current?.click()}
-                                  className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-xs"
+                                  className="w-full sm:w-auto px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-xs"
                                 >
                                   {isAdminUploadingGallery ? (
                                     <>
@@ -9509,7 +9508,7 @@ export default function AdminCMS({
                               <div className="flex gap-2">
                                 <input 
                                   type="text" 
-                                  value={newGalleryInput}
+                                  value={newGalleryInput} 
                                   onChange={(e) => setNewGalleryInput(e.target.value)}
                                   onKeyDown={(e) => {
                                     if (e.key === 'Enter') {
@@ -9524,11 +9523,11 @@ export default function AdminCMS({
                                     }
                                   }}
                                   placeholder="یا تصویر کا آن لائن لنک (URL) یہاں چسپاں کریں..."
-                                  className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white text-xs outline-none font-mono"
+                                  className="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-slate-800 text-xs outline-none font-mono focus:ring-2 focus:ring-blue-500 shadow-xs"
                                   dir="ltr"
                                 />
-                                <button
-                                  type="button"
+                                <button 
+                                  type="button" 
                                   onClick={() => {
                                     if (newGalleryInput.trim()) {
                                       setDoctorForm({
@@ -9538,7 +9537,7 @@ export default function AdminCMS({
                                       setNewGalleryInput('');
                                     }
                                   }}
-                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1"
+                                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 shadow-xs"
                                 >
                                   <Plus className="w-3.5 h-3.5" />
                                   <span>لنک شامل کریں</span>
@@ -9551,11 +9550,11 @@ export default function AdminCMS({
                       </div>
                       
                       {/* Modal Footer */}
-                      <div className="p-4 border-t border-slate-800 bg-slate-900/90 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                      <div className="p-4 border-t border-slate-200 bg-white flex flex-wrap items-center justify-between gap-3 shrink-0">
                         <button 
-                          type="button"
+                          type="button" 
                           onClick={() => handleDeleteDoctor(doctorForm.id)}
-                          className="px-4 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl font-bold transition-all text-xs flex items-center gap-1.5"
+                          className="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl font-bold transition-all text-xs flex items-center gap-1.5 shadow-xs"
                         >
                           <Trash2 className="w-4 h-4" />
                           <span>طبیب کو مکمل ڈیلیٹ کریں</span>
@@ -9563,16 +9562,16 @@ export default function AdminCMS({
 
                         <div className="flex items-center gap-2">
                           <button 
-                            type="button"
+                            type="button" 
                             onClick={() => { setEditingDoctorId(null); setDoctorForm(null); }}
-                            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-bold transition-all text-xs"
+                            className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl font-bold transition-all text-xs"
                           >
                             کینسل
                           </button>
                           <button 
-                            type="button"
+                            type="button" 
                             onClick={handleSaveDoctor}
-                            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold transition-all text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-900/20"
+                            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/20"
                           >
                             <Save className="w-4 h-4" />
                             <span>تبدیلیاں محفوظ کریں</span>
@@ -9605,16 +9604,16 @@ export default function AdminCMS({
           )}
 
           {adminTab === 'settings' && (
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
               
               {/* Header & Global Save */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                 <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white font-simple flex items-center gap-2.5">
-                    <Settings className="w-6 h-6 text-blue-400" />
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-simple flex items-center gap-2.5">
+                    <Settings className="w-6 h-6 text-blue-600" />
                     <span>ویب سائٹ ترتیبات (Website Settings)</span>
                   </h2>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     ورڈپریس طرز پر اپنی ویب سائٹ کی تمام ترتیبات، ہوم پیج، سائیڈ بار اشتہار اور سیکیورٹی کو منظم کریں
                   </p>
                 </div>
@@ -9622,7 +9621,7 @@ export default function AdminCMS({
                 <button
                   type="button"
                   onClick={handleSaveSettings}
-                  className="flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-lg shadow-blue-600/30 transition-all font-simple shrink-0"
+                  className="flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-md transition-all font-simple shrink-0"
                 >
                   <Save className="w-4 h-4" />
                   <span>تمام ترتیبات محفوظ کریں</span>
@@ -9630,7 +9629,7 @@ export default function AdminCMS({
               </div>
 
               {/* WordPress-Style Sub-Tabs Navigation */}
-              <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-4">
+              <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 pb-4">
                 {[
                   { id: 'general', label: 'عمومی سیٹنگز', icon: Globe },
                   { id: 'homepage', label: 'ہوم پیج بلاکس', icon: Home },
@@ -9648,11 +9647,11 @@ export default function AdminCMS({
                       onClick={() => setSettingsSubTab(tab.id)}
                       className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
                         isActive
-                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                          : 'bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-850 border border-slate-800'
+                          ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20'
+                          : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200 shadow-xs'
                       }`}
                     >
-                      <TabIcon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                      <TabIcon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-500'}`} />
                       <span>{tab.label}</span>
                     </button>
                   );
@@ -9664,54 +9663,54 @@ export default function AdminCMS({
                 {/* 1. GENERAL SETTINGS */}
                 {settingsSubTab === 'general' && (
                   <div className="space-y-6 animate-in fade-in-50">
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
-                      <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
-                        <div className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-xs">
+                      <div className="flex items-center gap-3 border-b border-slate-200/80 pb-3">
+                        <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold border border-blue-200">
                           <Globe className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-base font-bold text-white font-simple">ویب سائٹ کی بنیادی معلومات</h3>
-                          <p className="text-xs text-slate-400">سائٹ کا عنوان، ٹیگ لائن اور ہیلپ لائن رابطہ نمبرز</p>
+                          <h3 className="text-base font-bold text-slate-900 font-simple">ویب سائٹ کی بنیادی معلومات</h3>
+                          <p className="text-xs text-slate-500">سائٹ کا عنوان، ٹیگ لائن اور ہیلپ لائن رابطہ نمبرز</p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">ویب سائٹ کا نام (Site Name)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">ویب سائٹ کا نام (Site Name)</label>
                           <input 
                             type="text" 
                             value={settingsForm.siteName || ''} 
                             onChange={e => setSettingsForm({...settingsForm, siteName: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" 
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">ٹیگ لائن (Tagline)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">ٹیگ لائن (Tagline)</label>
                           <input 
                             type="text" 
                             value={settingsForm.tagline || ''} 
                             onChange={e => setSettingsForm({...settingsForm, tagline: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" 
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-400 mb-1">ٹاپ بار نوٹس / اعلان (Topbar Announcement)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">ٹاپ بار نوٹس / اعلان (Topbar Announcement)</label>
                           <input 
                             type="text" 
                             value={settingsForm.topbarNotice || ''} 
                             onChange={e => setSettingsForm({...settingsForm, topbarNotice: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" 
                           />
                         </div>
-                        <div className="md:col-span-2 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-                          <label className="block text-xs font-bold text-slate-400 mb-2">ویب سائٹ کا لوگو (Logo)</label>
+                        <div className="md:col-span-2 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+                          <label className="block text-xs font-bold text-slate-700 mb-2">ویب سائٹ کا لوگو (Logo)</label>
                           <div className="flex flex-col sm:flex-row gap-3">
                             <div className="flex-1">
                               <input 
                                 type="text" 
                                 value={settingsForm.logoUrl || ''} 
                                 onChange={e => setSettingsForm({...settingsForm, logoUrl: e.target.value})} 
-                                className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                                className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr shadow-xs" 
                                 placeholder="تصویر کا لنک (URL) یہاں ڈالیں" 
                               />
                             </div>
@@ -9722,26 +9721,26 @@ export default function AdminCMS({
                                 onChange={(e) => handleSettingImageUpload(e, 'logoUrl')} 
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
                               />
-                              <button type="button" className="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                              <button type="button" className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-xs">
                                 <UploadCloud className="w-4 h-4" /> کمپیوٹر سے اپلوڈ کریں
                               </button>
                             </div>
                           </div>
                           {settingsForm.logoUrl && (
-                            <div className="mt-3 inline-block bg-white p-2 rounded-xl shadow-sm border border-slate-700">
+                            <div className="mt-3 inline-block bg-white p-2 rounded-xl shadow-xs border border-slate-200">
                               <img src={settingsForm.logoUrl} alt="Logo Preview" className="h-10 object-contain" />
                               </div>
                             )}
                           </div>
                           <div>
-                            <label className="block text-xs font-bold text-slate-400 mb-1 font-simple mt-4">آئیکن (Favicon - Browser Tab)</label>
+                            <label className="block text-xs font-bold text-slate-700 mb-1 font-simple mt-4">آئیکن (Favicon - Browser Tab)</label>
                             <div className="flex flex-col sm:flex-row gap-2 relative">
                               <div className="flex-1">
                                 <input 
                                   type="text" 
                                   value={settingsForm.faviconUrl || ''} 
                                   onChange={e => setSettingsForm({...settingsForm, faviconUrl: e.target.value})} 
-                                  className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                                  className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr shadow-xs" 
                                   placeholder="URL" 
                                 />
                               </div>
@@ -9752,43 +9751,43 @@ export default function AdminCMS({
                                   onChange={(e) => handleSettingImageUpload(e, 'faviconUrl')} 
                                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
                                 />
-                                <button type="button" className="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                                <button type="button" className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-xs">
                                   <Upload className="w-4 h-4" /> اپلوڈ کریں
                                 </button>
                               </div>
                             </div>
                             {settingsForm.faviconUrl && (
-                              <div className="mt-3 inline-block bg-white p-2 rounded-xl shadow-sm border border-slate-700">
+                              <div className="mt-3 inline-block bg-white p-2 rounded-xl shadow-xs border border-slate-200">
                                 <img src={settingsForm.faviconUrl} alt="Favicon Preview" className="h-10 w-10 object-contain" />
                               </div>
                             )}
                           </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">ہیلپ لائن فون</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">ہیلپ لائن فون</label>
                           <input 
                             type="text" 
                             value={settingsForm.helplinePhone || ''} 
                             onChange={e => setSettingsForm({...settingsForm, helplinePhone: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr shadow-xs" 
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">واٹس ایپ نمبر (بغیر + کے، جیسے 923001234567)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">واٹس ایپ نمبر (بغیر + کے، جیسے 923001234567)</label>
                           <input 
                             type="text" 
                             value={settingsForm.whatsappNumber || ''} 
                             onChange={e => setSettingsForm({...settingsForm, whatsappNumber: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr shadow-xs" 
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">مرکزی دفتر کا پتہ (Head Office Location)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">مرکزی دفتر کا پتہ (Head Office Location)</label>
                           <input 
                             type="text" 
                             value={settingsForm.headOffice || ''} 
                             placeholder="اسلام آباد، پاکستان"
                             onChange={e => setSettingsForm({...settingsForm, headOffice: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-right font-simple" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-right font-simple shadow-xs" 
                           />
                         </div>
                       </div>
@@ -9800,54 +9799,54 @@ export default function AdminCMS({
                 {settingsSubTab === 'homepage' && (
                   <div className="space-y-6 animate-in fade-in-50">
                     {/* Hero Section */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
-                      <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-xs">
+                      <div className="flex items-center gap-3 border-b border-slate-200/80 pb-3">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center font-bold">
                           <Home className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-base font-bold text-white font-simple">ہوم پیج: مرکزی ہیرو بینر (Hero Section)</h3>
-                          <p className="text-xs text-slate-400">مین پیج کا نمایاں ٹائٹل اور سب ٹائٹل</p>
+                          <h3 className="text-base font-bold text-slate-900 font-simple">ہوم پیج: مرکزی ہیرو بینر (Hero Section)</h3>
+                          <p className="text-xs text-slate-500">مین پیج کا نمایاں ٹائٹل اور سب ٹائٹل</p>
                         </div>
                       </div>
 
                       <div className="space-y-3 pt-2">
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">ہیرو کا مرکزی عنوان (Hero Title)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">ہیرو کا مرکزی عنوان (Hero Title)</label>
                           <input 
                             type="text" 
                             value={settingsForm.heroTitle || ''} 
                             onChange={e => setSettingsForm({...settingsForm, heroTitle: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" 
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">ہیرو کا ذیلی عنوان / تفصیل (Hero Subtitle)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">ہیرو کا ذیلی عنوان / تفصیل (Hero Subtitle)</label>
                           <textarea 
                             rows="2"
                             value={settingsForm.heroSubtitle || ''} 
                             onChange={e => setSettingsForm({...settingsForm, heroSubtitle: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none leading-relaxed" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none leading-relaxed shadow-xs" 
                           />
                         </div>
                       </div>
                     </div>
 
                     {/* Featured Doctors Block */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-xs">
+                      <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
                         <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                          <h3 className="text-base font-bold text-slate-100 font-h2">
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                          <h3 className="text-base font-bold text-slate-900 font-h2">
                             نمایاں اطباء کا بلاک (Featured Doctors Grid)
                           </h3>
                         </div>
-                        <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-amber-400">
+                        <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-amber-700">
                           <input 
                             type="checkbox" 
                             checked={settingsForm.featuredDoctorBlockEnabled !== false} 
                             onChange={e => setSettingsForm({...settingsForm, featuredDoctorBlockEnabled: e.target.checked})}
-                            className="w-4 h-4 rounded text-amber-500 focus:ring-0 bg-slate-800 border-slate-700"
+                            className="w-4 h-4 rounded text-amber-600 focus:ring-0 bg-white border-slate-300" 
                           />
                           <span>ہوم پیج پر شو کریں</span>
                         </label>
@@ -9855,33 +9854,33 @@ export default function AdminCMS({
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-400 mb-1">بلاک کا ٹائٹل (Title)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">بلاک کا ٹائٹل (Title)</label>
                           <input 
                             type="text" 
                             value={settingsForm.featuredDoctorBlockTitle || ''} 
                             onChange={e => setSettingsForm({...settingsForm, featuredDoctorBlockTitle: e.target.value})} 
                             placeholder="نمایاں اطباء کرام (Featured Doctors)"
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none shadow-xs" 
                           />
                         </div>
 
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-400 mb-1">بلاک کی سب ٹائٹل / تفصیل (Subtitle)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">بلاک کی سب ٹائٹل / تفصیل (Subtitle)</label>
                           <input 
                             type="text" 
                             value={settingsForm.featuredDoctorBlockSubtitle || ''} 
                             onChange={e => setSettingsForm({...settingsForm, featuredDoctorBlockSubtitle: e.target.value})} 
                             placeholder="پاکستان بھر کے منتخب اور مستند اطباء و ماہرین طب یونانی"
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none shadow-xs" 
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">کالمز کی تعداد (Columns: 1 سے 4)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">کالمز کی تعداد (Columns: 1 سے 4)</label>
                           <select 
                             value={settingsForm.featuredDoctorBlockColumns || '4'} 
                             onChange={e => setSettingsForm({...settingsForm, featuredDoctorBlockColumns: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none shadow-xs"
                           >
                             <option value="1">1 کالم</option>
                             <option value="2">2 کالم</option>
@@ -9891,23 +9890,23 @@ export default function AdminCMS({
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">لائنوں کی تعداد (Rows: 1 سے 10)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">لائنوں کی تعداد (Rows: 1 سے 10)</label>
                           <input 
                             type="number" 
                             min="1" 
                             max="10" 
                             value={settingsForm.featuredDoctorBlockRows || '1'} 
                             onChange={e => setSettingsForm({...settingsForm, featuredDoctorBlockRows: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none shadow-xs" 
                           />
                         </div>
 
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-400 mb-1">ترتیب (Sort Order)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">ترتیب (Sort Order)</label>
                           <select 
                             value={settingsForm.featuredDoctorBlockSort || 'latest'} 
                             onChange={e => setSettingsForm({...settingsForm, featuredDoctorBlockSort: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none"
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none shadow-xs"
                           >
                             <option value="latest">تازہ ترین نمایاں اطباء پہلے (Latest First)</option>
                             <option value="oldest">پرانے نمایاں اطباء پہلے (Oldest First)</option>
@@ -9917,15 +9916,14 @@ export default function AdminCMS({
                     </div>
 
                     {/* Featured Doctors Order */}
-                    <div className="bg-slate-900 border border-amber-800/40 rounded-3xl p-6 space-y-4">
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-xs">
+                      <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
                         <div className="flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-                          <h3 className="text-base font-bold text-amber-300 font-h2">نمایاں اطباء کی ترتیب (Featured Order)</h3>
+                          <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                          <h3 className="text-base font-bold text-slate-900 font-h2">نمایاں اطباء کی ترتیب (Featured Order)</h3>
                         </div>
                         <button
                           onClick={() => {
-                            // input values read کریں اور save کریں
                             const inputs = document.querySelectorAll('[data-featured-order-id]');
                             let updated = [...doctorsList];
                             inputs.forEach(inp => {
@@ -9936,24 +9934,24 @@ export default function AdminCMS({
                             setDoctorsList(updated);
                             showNotification('نمایاں اطباء کی ترتیب محفوظ ہو گئی!');
                           }}
-                          className="text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-lg transition-colors font-simple"
+                          className="text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-lg transition-colors font-simple shadow-xs"
                         >
                           ✓ ترتیب محفوظ کریں
                         </button>
                       </div>
-                      <p className="text-xs text-slate-400 font-simple">ہر نمایاں طبیب کے سامنے نمبر لکھیں — جو نمبر چھوٹا ہوگا وہ پہلے نظر آئے گا (1 = سب سے پہلے)، پھر <strong className="text-amber-400">ترتیب محفوظ کریں</strong> دبائیں۔</p>
+                      <p className="text-xs text-slate-500 font-simple">ہر نمایاں طبیب کے سامنے نمبر لکھیں — جو نمبر چھوٹا ہوگا وہ پہلے نظر آئے گا (1 = سب سے پہلے)، پھر <strong className="text-amber-700">ترتیب محفوظ کریں</strong> دبائیں۔</p>
                       <div className="space-y-2 max-h-72 overflow-y-auto pl-1">
                         {(doctorsList || []).filter(d => d && (d.isFeatured === true || d.isFeatured === '1' || d.isFeatured === 'yes' || d.featured)).map(doc => (
-                          <div key={doc.id} className="flex items-center gap-3 bg-slate-800/60 border border-slate-700 rounded-xl px-3 py-2">
+                          <div key={doc.id} className="flex items-center gap-3 bg-white border border-slate-200 rounded-xl px-3 py-2 shadow-xs">
                             <img
                               src={doc.image || '/images/default_doctor.webp'}
                               alt={doc.name}
                               onError={e => { e.target.onerror = null; e.target.src = '/images/default_doctor.webp'; }}
-                              className="w-8 h-8 rounded-full object-cover border border-amber-500/40 shrink-0"
+                              className="w-8 h-8 rounded-full object-cover border border-amber-300 shrink-0"
                             />
-                            <span className="flex-1 text-sm text-slate-200 font-simple truncate">{doc.name}</span>
+                            <span className="flex-1 text-sm text-slate-800 font-simple truncate">{doc.name}</span>
                             <div className="flex items-center gap-1.5 shrink-0">
-                              <label className="text-[10px] text-slate-400 font-simple">ترتیب نمبر:</label>
+                              <label className="text-[10px] text-slate-500 font-simple">ترتیب نمبر:</label>
                               <input
                                 type="number"
                                 min="1"
@@ -9961,30 +9959,30 @@ export default function AdminCMS({
                                 data-featured-order-id={doc.id}
                                 defaultValue={doc.featuredOrder || ''}
                                 placeholder="—"
-                                className="w-16 bg-slate-700 border border-slate-600 text-white rounded-lg px-2 py-1 text-sm text-center focus:ring-2 focus:ring-amber-500 outline-none"
+                                className="w-16 bg-slate-50 border border-slate-300 text-slate-800 rounded-lg px-2 py-1 text-sm text-center focus:ring-2 focus:ring-amber-500 outline-none shadow-xs"
                               />
                             </div>
                           </div>
                         ))}
                         {(doctorsList || []).filter(d => d && (d.isFeatured === true || d.isFeatured === '1' || d.isFeatured === 'yes' || d.featured)).length === 0 && (
-                          <p className="text-xs text-slate-500 text-center py-4 font-simple">کوئی نمایاں طبیب نہیں — پہلے اطباء سیکشن میں کسی طبیب کو "نمایاں" کریں</p>
+                          <p className="text-xs text-slate-400 text-center py-4 font-simple">کوئی نمایاں طبیب نہیں — پہلے اطباء سیکشن میں کسی طبیب کو "نمایاں" کریں</p>
                         )}
                       </div>
                     </div>
 
                     {/* Article Bottom Consultation Doctors */}
-                    <div className="bg-slate-900 border border-emerald-800/40 rounded-3xl p-6 space-y-4">
-                      <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                        <h3 className="text-base font-bold text-emerald-300 font-h2">مضمون کے آخر میں طبیب (Article Consultation Doctors)</h3>
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-xs">
+                      <div className="flex items-center gap-2 border-b border-slate-200/80 pb-3">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        <h3 className="text-base font-bold text-slate-900 font-h2">مضمون کے آخر میں طبیب (Article Consultation Doctors)</h3>
                       </div>
-                      <p className="text-xs text-slate-400 font-simple">جن اطباء کو آپ ہر مضمون کے آخر میں "مستند طبی مشاورت" باکس میں دکھانا چاہتے ہیں انہیں منتخب کریں۔</p>
+                      <p className="text-xs text-slate-500 font-simple">جن اطباء کو آپ ہر مضمون کے آخر میں "مستند طبی مشاورت" باکس میں دکھانا چاہتے ہیں انہیں منتخب کریں۔</p>
 
                       {/* Search */}
                       <input
                         type="text"
                         placeholder="طبیب تلاش کریں..."
-                        className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"
+                        className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none shadow-xs placeholder-slate-400"
                         onChange={e => {
                           const val = e.target.value.toLowerCase();
                           const items = document.querySelectorAll('[data-consult-doc]');
@@ -10002,7 +10000,7 @@ export default function AdminCMS({
                             <div
                               key={doc.id}
                               data-consult-doc={`${(doc.name || '').toLowerCase()} ${(doc.cityName || '').toLowerCase()}`}
-                              className={`flex items-center gap-3 border rounded-xl px-3 py-2 cursor-pointer transition-all ${isSelected ? 'bg-emerald-900/40 border-emerald-600' : 'bg-slate-800/60 border-slate-700 hover:border-slate-500'}`}
+                              className={`flex items-center gap-3 border rounded-xl px-3 py-2 cursor-pointer transition-all ${isSelected ? 'bg-emerald-50 border-emerald-400' : 'bg-white border-slate-200 hover:border-slate-300 shadow-xs'}`}
                               onClick={() => {
                                 const currentIds = Array.isArray(settingsForm.articleConsultDoctorIds) ? settingsForm.articleConsultDoctorIds : [];
                                 const docId = String(doc.id);
@@ -10016,19 +10014,19 @@ export default function AdminCMS({
                                 type="checkbox"
                                 checked={isSelected}
                                 readOnly
-                                className="w-4 h-4 rounded text-emerald-500 bg-slate-700 border-slate-600 shrink-0 pointer-events-none"
+                                className="w-4 h-4 rounded text-emerald-600 bg-white border-slate-300 shrink-0 pointer-events-none"
                               />
                               <img
                                 src={doc.image || '/images/default_doctor.webp'}
                                 alt={doc.name}
                                 onError={e => { e.target.onerror = null; e.target.src = '/images/default_doctor.webp'; }}
-                                className="w-8 h-8 rounded-full object-cover border border-slate-600 shrink-0"
+                                className="w-8 h-8 rounded-full object-cover border border-slate-200 shrink-0"
                               />
                               <div className="flex-1 min-w-0">
-                                <span className="text-sm text-slate-200 font-simple block truncate">{doc.name}</span>
-                                <span className="text-[10px] text-slate-400 font-simple">{doc.cityName} • {(doc.specialties || []).join(', ').slice(0, 40)}</span>
+                                <span className="text-sm text-slate-800 font-simple block truncate">{doc.name}</span>
+                                <span className="text-[10px] text-slate-500 font-simple">{doc.cityName} • {(doc.specialties || []).join(', ').slice(0, 40)}</span>
                               </div>
-                              {isSelected && <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold shrink-0">منتخب</span>}
+                              {isSelected && <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold shrink-0 shadow-xs">منتخب</span>}
                             </div>
                           );
                         })}
@@ -10036,26 +10034,26 @@ export default function AdminCMS({
                       <p className="text-[11px] text-slate-500 font-simple">
                         منتخب: {Array.isArray(settingsForm.articleConsultDoctorIds) ? settingsForm.articleConsultDoctorIds.length : 0} طبیب
                         {Array.isArray(settingsForm.articleConsultDoctorIds) && settingsForm.articleConsultDoctorIds.length > 2 && (
-                          <span className="text-amber-400"> (مضمون میں صرف پہلے 2 نظر آئیں گے)</span>
+                          <span className="text-amber-600"> (مضمون میں صرف پہلے 2 نظر آئیں گے)</span>
                         )}
                       </p>
                     </div>
 
                     {/* Doctors Block */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
-                      <h3 className="text-base font-bold text-slate-100 font-h2 border-b border-slate-800 pb-3">عمومی اطباء کا بلاک (All / Latest Doctors Grid)</h3>
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-xs">
+                      <h3 className="text-base font-bold text-slate-900 font-h2 border-b border-slate-200/80 pb-3">عمومی اطباء کا بلاک (All / Latest Doctors Grid)</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-400 mb-1">بلاک کا ٹائٹل</label>
-                          <input type="text" value={settingsForm.doctorBlockTitle || ''} onChange={e => setSettingsForm({...settingsForm, doctorBlockTitle: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                          <label className="block text-xs font-bold text-slate-700 mb-1">بلاک کا ٹائٹل</label>
+                          <input type="text" value={settingsForm.doctorBlockTitle || ''} onChange={e => setSettingsForm({...settingsForm, doctorBlockTitle: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-400 mb-1">بلاک کی سب ٹائٹل / تفصیل</label>
-                          <input type="text" value={settingsForm.doctorBlockSubtitle || ''} onChange={e => setSettingsForm({...settingsForm, doctorBlockSubtitle: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                          <label className="block text-xs font-bold text-slate-700 mb-1">بلاک کی سب ٹائٹل / تفصیل</label>
+                          <input type="text" value={settingsForm.doctorBlockSubtitle || ''} onChange={e => setSettingsForm({...settingsForm, doctorBlockSubtitle: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">کالمز کی تعداد (1 سے 4)</label>
-                          <select value={settingsForm.doctorBlockColumns || '4'} onChange={e => setSettingsForm({...settingsForm, doctorBlockColumns: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">کالمز کی تعداد (1 سے 4)</label>
+                          <select value={settingsForm.doctorBlockColumns || '4'} onChange={e => setSettingsForm({...settingsForm, doctorBlockColumns: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs">
                             <option value="1">1 کالم</option>
                             <option value="2">2 کالم</option>
                             <option value="3">3 کالم</option>
@@ -10063,12 +10061,12 @@ export default function AdminCMS({
                           </select>
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">لائنوں کی تعداد</label>
-                          <input type="number" min="1" max="10" value={settingsForm.doctorBlockRows || '2'} onChange={e => setSettingsForm({...settingsForm, doctorBlockRows: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                          <label className="block text-xs font-bold text-slate-700 mb-1">لائنوں کی تعداد</label>
+                          <input type="number" min="1" max="10" value={settingsForm.doctorBlockRows || '2'} onChange={e => setSettingsForm({...settingsForm, doctorBlockRows: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-400 mb-1">ترتیب (کون پہلے نظر آئے؟)</label>
-                          <select value={settingsForm.doctorBlockSort || 'latest'} onChange={e => setSettingsForm({...settingsForm, doctorBlockSort: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">ترتیب (کون پہلے نظر آئے؟)</label>
+                          <select value={settingsForm.doctorBlockSort || 'latest'} onChange={e => setSettingsForm({...settingsForm, doctorBlockSort: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs">
                             <option value="latest">نئے شامل ہونے والے اطباء پہلے (Latest First)</option>
                             <option value="oldest">پرانے اطباء پہلے (Oldest First)</option>
                           </select>
@@ -10077,16 +10075,16 @@ export default function AdminCMS({
                     </div>
 
                     {/* Articles Block */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
-                      <h3 className="text-base font-bold text-slate-100 font-h2 border-b border-slate-800 pb-3">طبی مضامین کا بلاک (Articles Grid)</h3>
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-xs">
+                      <h3 className="text-base font-bold text-slate-900 font-h2 border-b border-slate-200/80 pb-3">طبی مضامین کا بلاک (Articles Grid)</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-400 mb-1">بلاک کا ٹائٹل</label>
-                          <input type="text" value={settingsForm.articleBlockTitle || ''} onChange={e => setSettingsForm({...settingsForm, articleBlockTitle: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                          <label className="block text-xs font-bold text-slate-700 mb-1">بلاک کا ٹائٹل</label>
+                          <input type="text" value={settingsForm.articleBlockTitle || ''} onChange={e => setSettingsForm({...settingsForm, articleBlockTitle: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">کالمز کی تعداد (1 سے 4)</label>
-                          <select value={settingsForm.articleBlockColumns || '4'} onChange={e => setSettingsForm({...settingsForm, articleBlockColumns: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">کالمز کی تعداد (1 سے 4)</label>
+                          <select value={settingsForm.articleBlockColumns || '4'} onChange={e => setSettingsForm({...settingsForm, articleBlockColumns: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs">
                             <option value="1">1 کالم</option>
                             <option value="2">2 کالم</option>
                             <option value="3">3 کالم</option>
@@ -10094,12 +10092,12 @@ export default function AdminCMS({
                           </select>
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">لائنوں کی تعداد</label>
-                          <input type="number" min="1" max="10" value={settingsForm.articleBlockRows || '3'} onChange={e => setSettingsForm({...settingsForm, articleBlockRows: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+                          <label className="block text-xs font-bold text-slate-700 mb-1">لائنوں کی تعداد</label>
+                          <input type="number" min="1" max="10" value={settingsForm.articleBlockRows || '3'} onChange={e => setSettingsForm({...settingsForm, articleBlockRows: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-400 mb-1">ترتیب (کون پہلے نظر آئے؟)</label>
-                          <select value={settingsForm.articleBlockSort || 'latest'} onChange={e => setSettingsForm({...settingsForm, articleBlockSort: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">ترتیب (کون پہلے نظر آئے؟)</label>
+                          <select value={settingsForm.articleBlockSort || 'latest'} onChange={e => setSettingsForm({...settingsForm, articleBlockSort: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs">
                             <option value="latest">تازہ ترین مضامین پہلے (Latest)</option>
                             <option value="oldest">پرانے مضامین پہلے</option>
                           </select>
@@ -10113,234 +10111,234 @@ export default function AdminCMS({
                 {settingsSubTab === 'sidebar' && (
                   <div className="space-y-6 animate-in fade-in-50">
                     {/* Widget Toggles */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
-                      <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
-                        <div className="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-xs">
+                      <div className="flex items-center gap-3 border-b border-slate-200/80 pb-3">
+                        <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 border border-purple-200 flex items-center justify-center font-bold">
                           <Layout className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-base font-bold text-white font-simple">مضمون ریڈنگ پیج سائیڈ بار وجیٹس</h3>
-                          <p className="text-xs text-slate-400">کنٹرول کریں کہ مضمون پڑھتے وقت سائیڈ بار پر کون سے سیکشنز نظر آئیں</p>
+                          <h3 className="text-base font-bold text-slate-900 font-simple">مضمون ریڈنگ پیج سائیڈ بار وجیٹس</h3>
+                          <p className="text-xs text-slate-500">کنٹرول کریں کہ مضمون پڑھتے وقت سائیڈ بار پر کون سے سیکشنز نظر آئیں</p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                        <label className="flex items-center gap-3 p-3.5 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200 cursor-pointer transition-all shadow-xs">
                           <input 
                             type="checkbox" 
                             checked={settingsForm.sidebarShowSearch !== false}
                             onChange={e => setSettingsForm({...settingsForm, sidebarShowSearch: e.target.checked})}
-                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                            className="w-4 h-4 text-blue-600 rounded bg-white border-slate-300 focus:ring-blue-500" 
                           />
                           <div>
-                            <span className="text-xs font-bold text-white block">مضامین سرچ باکس دکھائیں</span>
-                            <span className="text-[11px] text-slate-400">سائیڈ بار میں سرچ کی سہولت</span>
+                            <span className="text-xs font-bold text-slate-800 block">مضامین سرچ باکس دکھائیں</span>
+                            <span className="text-[11px] text-slate-500">سائیڈ بار میں سرچ کی سہولت</span>
                           </div>
                         </label>
 
-                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                        <label className="flex items-center gap-3 p-3.5 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200 cursor-pointer transition-all shadow-xs">
                           <input 
                             type="checkbox" 
                             checked={settingsForm.sidebarShowCategories !== false}
                             onChange={e => setSettingsForm({...settingsForm, sidebarShowCategories: e.target.checked})}
-                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                            className="w-4 h-4 text-blue-600 rounded bg-white border-slate-300 focus:ring-blue-500" 
                           />
                           <div>
-                            <span className="text-xs font-bold text-white block">مقبول کیٹگریز کی لسٹ دکھائیں</span>
-                            <span className="text-[11px] text-slate-400">کیٹگری کے مضامین کی تعداد معہ کلک ایبل فلٹر</span>
+                            <span className="text-xs font-bold text-slate-800 block">مقبول کیٹگریز کی لسٹ دکھائیں</span>
+                            <span className="text-[11px] text-slate-500">کیٹگری کے مضامین کی تعداد معہ کلک ایبل فلٹر</span>
                           </div>
                         </label>
 
-                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                        <label className="flex items-center gap-3 p-3.5 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200 cursor-pointer transition-all shadow-xs">
                           <input 
                             type="checkbox" 
                             checked={settingsForm.sidebarShowRecent !== false}
                             onChange={e => setSettingsForm({...settingsForm, sidebarShowRecent: e.target.checked})}
-                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                            className="w-4 h-4 text-blue-600 rounded bg-white border-slate-300 focus:ring-blue-500" 
                           />
                           <div>
-                            <span className="text-xs font-bold text-white block">تازہ ترین مضامین لسٹ دکھائیں</span>
-                            <span className="text-[11px] text-slate-400">حالیہ شائع شدہ طبی مضامین</span>
+                            <span className="text-xs font-bold text-slate-800 block">تازہ ترین مضامین لسٹ دکھائیں</span>
+                            <span className="text-[11px] text-slate-500">حالیہ شائع شدہ طبی مضامین</span>
                           </div>
                         </label>
 
-                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                        <label className="flex items-center gap-3 p-3.5 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200 cursor-pointer transition-all shadow-xs">
                           <input 
                             type="checkbox" 
                             checked={settingsForm.sidebarShowConsultation !== false}
                             onChange={e => setSettingsForm({...settingsForm, sidebarShowConsultation: e.target.checked})}
-                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                            className="w-4 h-4 text-blue-600 rounded bg-white border-slate-300 focus:ring-blue-500" 
                           />
                           <div>
-                            <span className="text-xs font-bold text-white block">آن لائن رہنمائی و مشورہ کارڈ دکھائیں</span>
-                            <span className="text-[11px] text-slate-400">اطباء سے فوری آن لائن رابطے کا کارڈ</span>
+                            <span className="text-xs font-bold text-slate-800 block">آن لائن رہنمائی و مشورہ کارڈ دکھائیں</span>
+                            <span className="text-[11px] text-slate-500">اطباء سے فوری آن لائن رابطے کا کارڈ</span>
                           </div>
                         </label>
 
-                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                        <label className="flex items-center gap-3 p-3.5 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200 cursor-pointer transition-all shadow-xs">
                           <input 
                             type="checkbox" 
                             checked={settingsForm.sidebarShowCategoriesDropdown !== false}
                             onChange={e => setSettingsForm({...settingsForm, sidebarShowCategoriesDropdown: e.target.checked})}
-                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                            className="w-4 h-4 text-blue-600 rounded bg-white border-slate-300 focus:ring-blue-500" 
                           />
                           <div>
-                            <span className="text-xs font-bold text-white block">تمام کیٹگریز کا ڈراپ ڈاؤن دکھائیں</span>
-                            <span className="text-[11px] text-slate-400">سائیڈ بار میں سلیکٹ ڈراپ ڈاؤن لسٹ</span>
+                            <span className="text-xs font-bold text-slate-800 block">تمام کیٹگریز کا ڈراپ ڈاؤن دکھائیں</span>
+                            <span className="text-[11px] text-slate-500">سائیڈ بار میں سلیکٹ ڈراپ ڈاؤن لسٹ</span>
                           </div>
                         </label>
 
-                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                        <label className="flex items-center gap-3 p-3.5 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200 cursor-pointer transition-all shadow-xs">
                           <input 
                             type="checkbox" 
                             checked={settingsForm.sidebarShowPagesDropdown !== false}
                             onChange={e => setSettingsForm({...settingsForm, sidebarShowPagesDropdown: e.target.checked})}
-                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                            className="w-4 h-4 text-blue-600 rounded bg-white border-slate-300 focus:ring-blue-500" 
                           />
                           <div>
-                            <span className="text-xs font-bold text-white block">صفحات کا ڈراپ ڈاؤن دکھائیں</span>
-                            <span className="text-[11px] text-slate-400">سائیڈ بار میں اہم صفحات پر فوری چھلانگ</span>
+                            <span className="text-xs font-bold text-slate-800 block">صفحات کا ڈراپ ڈاؤن دکھائیں</span>
+                            <span className="text-[11px] text-slate-500">سائیڈ بار میں اہم صفحات پر فوری چھلانگ</span>
                           </div>
                         </label>
                       </div>
                     </div>
 
                     {/* Pages Sidebar Controls */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
-                      <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
-                        <div className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold">
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-xs">
+                      <div className="flex items-center gap-3 border-b border-slate-200/80 pb-3">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-200 flex items-center justify-center font-bold">
                           <BookOpen className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-base font-bold text-white font-simple">ویب سائٹ صفحات (Pages) سائیڈ بار وجیٹس</h3>
-                          <p className="text-xs text-slate-400">کنٹرول کریں کہ صفحات (ہمارے بارے میں، رابطہ، پرائیویسی وغیرہ) پر سائیڈ بار میں کون سے ویجیٹس نظر آئیں</p>
+                          <h3 className="text-base font-bold text-slate-900 font-simple">ویب سائٹ صفحات (Pages) سائیڈ بار وجیٹس</h3>
+                          <p className="text-xs text-slate-500">کنٹرول کریں کہ صفحات (ہمارے بارے میں، رابطہ، پرائیویسی وغیرہ) پر سائیڈ بار میں کون سے ویجیٹس نظر آئیں</p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                        <label className="flex items-center gap-3 p-3.5 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200 cursor-pointer transition-all shadow-xs">
                           <input 
                             type="checkbox" 
                             checked={settingsForm.pageSidebarShowPagesList !== false}
                             onChange={e => setSettingsForm({...settingsForm, pageSidebarShowPagesList: e.target.checked})}
-                            className="w-4 h-4 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500" 
+                            className="w-4 h-4 text-indigo-600 rounded bg-white border-slate-300 focus:ring-indigo-500" 
                           />
                           <div>
-                            <span className="text-xs font-bold text-white block">فہرستِ صفحات (Pages Directory)</span>
-                            <span className="text-[11px] text-slate-400">تمام سرکاری و کارپوریٹ صفحات کی لسٹ</span>
+                            <span className="text-xs font-bold text-slate-800 block">فہرستِ صفحات (Pages Directory)</span>
+                            <span className="text-[11px] text-slate-500">تمام سرکاری و کارپوریٹ صفحات کی لسٹ</span>
                           </div>
                         </label>
 
-                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                        <label className="flex items-center gap-3 p-3.5 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200 cursor-pointer transition-all shadow-xs">
                           <input 
                             type="checkbox" 
                             checked={settingsForm.pageSidebarShowRecentPosts !== false}
                             onChange={e => setSettingsForm({...settingsForm, pageSidebarShowRecentPosts: e.target.checked})}
-                            className="w-4 h-4 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500" 
+                            className="w-4 h-4 text-indigo-600 rounded bg-white border-slate-300 focus:ring-indigo-500" 
                           />
                           <div>
-                            <span className="text-xs font-bold text-white block">حالیہ شائع شدہ مضامین (Recent Posts)</span>
-                            <span className="text-[11px] text-slate-400">تازہ ترین مضامین کے تصویری کارڈز</span>
+                            <span className="text-xs font-bold text-slate-800 block">حالیہ شائع شدہ مضامین (Recent Posts)</span>
+                            <span className="text-[11px] text-slate-500">تازہ ترین مضامین کے تصویری کارڈز</span>
                           </div>
                         </label>
 
-                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                        <label className="flex items-center gap-3 p-3.5 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200 cursor-pointer transition-all shadow-xs">
                           <input 
                             type="checkbox" 
                             checked={settingsForm.pageSidebarShowDoctors !== false}
                             onChange={e => setSettingsForm({...settingsForm, pageSidebarShowDoctors: e.target.checked})}
-                            className="w-4 h-4 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500" 
+                            className="w-4 h-4 text-indigo-600 rounded bg-white border-slate-300 focus:ring-indigo-500" 
                           />
                           <div>
-                            <span className="text-xs font-bold text-white block">مستند اطباء و نبض شناس (Doctors)</span>
-                            <span className="text-[11px] text-slate-400">معالجین کے کارڈز اور فوری رابطہ بٹن</span>
+                            <span className="text-xs font-bold text-slate-800 block">مستند اطباء و نبض شناس (Doctors)</span>
+                            <span className="text-[11px] text-slate-500">معالجین کے کارڈز اور فوری رابطہ بٹن</span>
                           </div>
                         </label>
 
-                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                        <label className="flex items-center gap-3 p-3.5 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200 cursor-pointer transition-all shadow-xs">
                           <input 
                             type="checkbox" 
                             checked={settingsForm.pageSidebarShowCategories !== false}
                             onChange={e => setSettingsForm({...settingsForm, pageSidebarShowCategories: e.target.checked})}
-                            className="w-4 h-4 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500" 
+                            className="w-4 h-4 text-indigo-600 rounded bg-white border-slate-300 focus:ring-indigo-500" 
                           />
                           <div>
-                            <span className="text-xs font-bold text-white block">اہم کیٹگریز و شعبہ جات (Categories)</span>
-                            <span className="text-[11px] text-slate-400">کیٹگریز ڈراپ ڈاؤن اور پِلز (Pills) لسٹ</span>
+                            <span className="text-xs font-bold text-slate-800 block">اہم کیٹگریز و شعبہ جات (Categories)</span>
+                            <span className="text-[11px] text-slate-500">کیٹگریز ڈراپ ڈاؤن اور پِلز (Pills) لسٹ</span>
                           </div>
                         </label>
 
-                        <label className="flex items-center gap-3 p-3.5 bg-slate-800/60 hover:bg-slate-800 rounded-2xl border border-slate-700/60 cursor-pointer transition-all">
+                        <label className="flex items-center gap-3 p-3.5 bg-white hover:bg-slate-50 rounded-2xl border border-slate-200 cursor-pointer transition-all shadow-xs">
                           <input 
                             type="checkbox" 
                             checked={settingsForm.pageSidebarShowHelpline !== false}
                             onChange={e => setSettingsForm({...settingsForm, pageSidebarShowHelpline: e.target.checked})}
-                            className="w-4 h-4 text-indigo-600 rounded bg-slate-900 border-slate-700 focus:ring-indigo-500" 
+                            className="w-4 h-4 text-indigo-600 rounded bg-white border-slate-300 focus:ring-indigo-500" 
                           />
                           <div>
-                            <span className="text-xs font-bold text-white block">ہیلپ لائن و واٹس ایپ سپورٹ باکس</span>
-                            <span className="text-[11px] text-slate-400">سرکاری اوقات، فون اور ایک کلک واٹس ایپ</span>
+                            <span className="text-xs font-bold text-slate-800 block">ہیلپ لائن و واٹس ایپ سپورٹ باکس</span>
+                            <span className="text-[11px] text-slate-500">سرکاری اوقات، فون اور ایک کلک واٹس ایپ</span>
                           </div>
                         </label>
                       </div>
                     </div>
 
                     {/* Custom Image Banner Ad */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-xs">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
+                          <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center font-bold">
                             <Sparkles className="w-4 h-4" />
                           </div>
                           <div>
-                            <h3 className="text-base font-bold text-white font-simple">کسٹم اشتہار / سپانسرڈ بینر (Custom Sidebar Banner)</h3>
-                            <p className="text-xs text-slate-400">سائیڈ بار پر اپنی مرضی کی تصویر، اشتہار یا بینر لگائیں</p>
+                            <h3 className="text-base font-bold text-slate-900 font-simple">کسٹم اشتہار / سپانسرڈ بینر (Custom Sidebar Banner)</h3>
+                            <p className="text-xs text-slate-500">سائیڈ بار پر اپنی مرضی کی تصویر، اشتہار یا بینر لگائیں</p>
                           </div>
                         </div>
 
-                        <label className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 cursor-pointer self-start sm:self-auto">
+                        <label className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white border border-slate-300 cursor-pointer self-start sm:self-auto shadow-xs">
                           <input 
                             type="checkbox" 
                             checked={settingsForm.sidebarAdEnabled !== false}
                             onChange={e => setSettingsForm({...settingsForm, sidebarAdEnabled: e.target.checked})}
-                            className="w-4 h-4 text-blue-600 rounded bg-slate-900 border-slate-700 focus:ring-blue-500" 
+                            className="w-4 h-4 text-blue-600 rounded bg-white border-slate-300 focus:ring-blue-500" 
                           />
-                          <span className="text-xs font-bold text-slate-200">اشتہار فعال کریں (Active)</span>
+                          <span className="text-xs font-bold text-slate-800">اشتہار فعال کریں (Active)</span>
                         </label>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-400 mb-1">اشتہار کا عنوان (Ad Title)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">اشتہار کا عنوان (Ad Title)</label>
                           <input 
                             type="text" 
                             value={settingsForm.sidebarAdTitle || ''} 
                             onChange={e => setSettingsForm({...settingsForm, sidebarAdTitle: e.target.value})} 
                             placeholder="مثلاً: طبی مشورہ اور رہنمائی"
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" 
                           />
                         </div>
 
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-400 mb-1">اشتہار کی تفصیل / ذیلی عنوان (Ad Subtitle)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">اشتہار کی تفصیل / ذیلی عنوان (Ad Subtitle)</label>
                           <textarea 
                             rows="2"
                             value={settingsForm.sidebarAdSubtitle || ''} 
                             onChange={e => setSettingsForm({...settingsForm, sidebarAdSubtitle: e.target.value})} 
                             placeholder="مثلاً: مستند اور ماہر اطباء سے آن لائن رہنمائی حاصل کریں۔"
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none leading-relaxed" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none leading-relaxed shadow-xs" 
                           />
                         </div>
 
-                        <div className="md:col-span-2 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-                          <label className="block text-xs font-bold text-slate-300 mb-2">اشتہار کی تصویر (Banner Image)</label>
+                        <div className="md:col-span-2 bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+                          <label className="block text-xs font-bold text-slate-700 mb-2">اشتہار کی تصویر (Banner Image)</label>
                           <div className="flex flex-col sm:flex-row gap-3">
                             <div className="flex-1">
                               <input 
                                 type="text" 
                                 value={settingsForm.sidebarAdImage || ''} 
                                 onChange={e => setSettingsForm({...settingsForm, sidebarAdImage: e.target.value})} 
-                                className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                                className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr shadow-xs" 
                                 placeholder="تصویر کا URL لنک ڈالیں یا کمپیوٹر سے اپلوڈ کریں" 
                               />
                             </div>
@@ -10351,47 +10349,47 @@ export default function AdminCMS({
                                 onChange={(e) => handleSettingImageUpload(e, 'sidebarAdImage')} 
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
                               />
-                              <button type="button" className="w-full sm:w-auto bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                              <button type="button" className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-xs">
                                 <UploadCloud className="w-4 h-4" /> کمپیوٹر سے تصویر منتخب کریں
                               </button>
                             </div>
                           </div>
 
                           {settingsForm.sidebarAdImage && (
-                            <div className="mt-4 flex flex-col sm:flex-row items-center gap-4 bg-slate-950/60 p-3 rounded-2xl border border-slate-800">
+                            <div className="mt-4 flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-3 rounded-2xl border border-slate-200 shadow-xs">
                               <img 
                                 src={settingsForm.sidebarAdImage} 
                                 alt="Sidebar Ad Preview" 
-                                className="w-full sm:w-48 h-28 object-cover rounded-xl border border-slate-700" 
+                                className="w-full sm:w-48 h-28 object-cover rounded-xl border border-slate-200" 
                               />
                               <div className="text-right">
-                                <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">لائیو پری ویو</span>
-                                <h4 className="font-bold text-white text-sm mt-1">{settingsForm.sidebarAdTitle || 'عنوان'}</h4>
-                                <p className="text-xs text-slate-400 line-clamp-2 mt-0.5">{settingsForm.sidebarAdSubtitle || 'تفصیل'}</p>
+                                <span className="text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">لائیو پری ویو</span>
+                                <h4 className="font-bold text-slate-900 text-sm mt-1">{settingsForm.sidebarAdTitle || 'عنوان'}</h4>
+                                <p className="text-xs text-slate-500 line-clamp-2 mt-0.5">{settingsForm.sidebarAdSubtitle || 'تفصیل'}</p>
                               </div>
                             </div>
                           )}
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">اشتہار پر کلک کرنے کا ہدف لنک (URL / WhatsApp Link)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">اشتہار پر کلک کرنے کا ہدف لنک (URL / WhatsApp Link)</label>
                           <input 
                             type="text" 
                             value={settingsForm.sidebarAdLink || ''} 
                             onChange={e => setSettingsForm({...settingsForm, sidebarAdLink: e.target.value})} 
                             placeholder="https://wa.me/923001234567 یا ویب سائٹ لنک"
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr shadow-xs" 
                           />
                         </div>
 
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">بٹن کا متن (Button Text)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">بٹن کا متن (Button Text)</label>
                           <input 
                             type="text" 
                             value={settingsForm.sidebarAdButtonText || ''} 
                             onChange={e => setSettingsForm({...settingsForm, sidebarAdButtonText: e.target.value})} 
                             placeholder="مثلاً: ابھی رابطہ کریں / تفصیلات دیکھیں"
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" 
                           />
                         </div>
                       </div>
@@ -10402,44 +10400,44 @@ export default function AdminCMS({
                 {/* 4. MEDIA SETTINGS */}
                 {settingsSubTab === 'media' && (
                   <div className="space-y-6 animate-in fade-in-50">
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
-                      <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
-                        <div className="w-8 h-8 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center font-bold">
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 space-y-4">
+                      <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
+                        <div className="w-8 h-8 rounded-lg bg-pink-500/10 text-pink-600 flex items-center justify-center font-bold">
                           <ImageIcon className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-base font-bold text-white font-simple">بائی ڈیفالٹ تصاویر کی سیٹنگز</h3>
-                          <p className="text-xs text-slate-400">اگر کسی مضمون یا طبیب کے ساتھ تصویر نہ لگی ہو، تو یہ ڈیفالٹ تصاویر شو ہوں گی۔</p>
+                          <h3 className="text-base font-bold text-slate-900 font-simple">بائی ڈیفالٹ تصاویر کی سیٹنگز</h3>
+                          <p className="text-xs text-slate-500">اگر کسی مضمون یا طبیب کے ساتھ تصویر نہ لگی ہو، تو یہ ڈیفالٹ تصاویر شو ہوں گی۔</p>
                         </div>
                       </div>
                       
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                        <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-                          <label className="block text-xs font-bold text-slate-300 mb-2">طبی مضامین کی ڈیفالٹ تصویر</label>
+                        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+                          <label className="block text-xs font-bold text-slate-700 mb-2">طبی مضامین کی ڈیفالٹ تصویر</label>
                           <div className="flex flex-col gap-3">
-                            <input type="text" value={settingsForm.defaultArticleImage || ''} onChange={e => setSettingsForm({...settingsForm, defaultArticleImage: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" placeholder="تصویر کا لنک (URL)" />
+                            <input type="text" value={settingsForm.defaultArticleImage || ''} onChange={e => setSettingsForm({...settingsForm, defaultArticleImage: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr shadow-xs" placeholder="تصویر کا لنک (URL)" />
                             <div className="relative overflow-hidden shrink-0">
                               <input type="file" accept="image/*" onChange={(e) => handleSettingImageUpload(e, 'defaultArticleImage')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                              <button type="button" className="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                              <button type="button" className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
                                 <UploadCloud className="w-4 h-4" /> اپلوڈ کریں
                               </button>
                             </div>
                           </div>
-                          {settingsForm.defaultArticleImage && <img src={settingsForm.defaultArticleImage} className="w-full h-32 mt-3 object-cover rounded-lg border border-slate-700" alt="Preview" />}
+                          {settingsForm.defaultArticleImage && <img src={settingsForm.defaultArticleImage} className="w-full h-32 mt-3 object-cover rounded-lg border border-slate-200 shadow-xs" alt="Preview" />}
                         </div>
 
-                        <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
-                          <label className="block text-xs font-bold text-slate-300 mb-2">اطباء کی ڈیفالٹ پروفائل تصویر</label>
+                        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+                          <label className="block text-xs font-bold text-slate-700 mb-2">اطباء کی ڈیفالٹ پروفائل تصویر</label>
                           <div className="flex flex-col gap-3">
-                            <input type="text" value={settingsForm.defaultDoctorImage || ''} onChange={e => setSettingsForm({...settingsForm, defaultDoctorImage: e.target.value})} className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" placeholder="تصویر کا لنک (URL)" />
+                            <input type="text" value={settingsForm.defaultDoctorImage || ''} onChange={e => setSettingsForm({...settingsForm, defaultDoctorImage: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr shadow-xs" placeholder="تصویر کا لنک (URL)" />
                             <div className="relative overflow-hidden shrink-0">
                               <input type="file" accept="image/*" onChange={(e) => handleSettingImageUpload(e, 'defaultDoctorImage')} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                              <button type="button" className="w-full bg-slate-700 hover:bg-slate-600 text-slate-200 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                              <button type="button" className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2">
                                 <UploadCloud className="w-4 h-4" /> اپلوڈ کریں
                               </button>
                             </div>
                           </div>
-                          {settingsForm.defaultDoctorImage && <img src={settingsForm.defaultDoctorImage} className="w-24 h-24 mt-3 object-cover rounded-full border-2 border-slate-700 mx-auto" alt="Preview" />}
+                          {settingsForm.defaultDoctorImage && <img src={settingsForm.defaultDoctorImage} className="w-24 h-24 mt-3 object-cover rounded-full border-2 border-slate-200 shadow-xs mx-auto" alt="Preview" />}
                         </div>
                       </div>
                     </div>
@@ -10460,84 +10458,84 @@ export default function AdminCMS({
                 {/* 6. FOOTER & SOCIAL SETTINGS */}
                 {settingsSubTab === 'footer' && (
                   <div className="space-y-6 animate-in fade-in-50">
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
-                      <div className="flex items-center gap-3 border-b border-slate-800 pb-3">
-                        <div className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold">
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 space-y-4">
+                      <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
+                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-600 flex items-center justify-center font-bold">
                           <Share2 className="w-4 h-4" />
                         </div>
                         <div>
-                          <h3 className="text-base font-bold text-white font-simple">فوٹر کی سیٹنگز و سوشل لنکس</h3>
-                          <p className="text-xs text-slate-400">ویب سائٹ کا تعارف، کاپی رائٹ اور تمام سوشل میڈیا اکاؤنٹس</p>
+                          <h3 className="text-base font-bold text-slate-900 font-simple">فوٹر کی سیٹنگز و سوشل لنکس</h3>
+                          <p className="text-xs text-slate-500">ویب سائٹ کا تعارف، کاپی رائٹ اور تمام سوشل میڈیا اکاؤنٹس</p>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-400 mb-1">ویب سائٹ کا تعارف (About Text)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">ویب سائٹ کا تعارف (About Text)</label>
                           <textarea 
                             rows="3" 
                             value={settingsForm.footerAboutText || settingsForm.footerAbout || ''} 
                             onChange={e => setSettingsForm({...settingsForm, footerAboutText: e.target.value, footerAbout: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none leading-relaxed"
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none leading-relaxed shadow-xs"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">پتہ (Address)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">پتہ (Address)</label>
                           <input 
                             type="text" 
                             value={settingsForm.footerAddress || ''} 
                             onChange={e => setSettingsForm({...settingsForm, footerAddress: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" 
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1">ای میل (Email)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">ای میل (Email)</label>
                           <input 
                             type="email" 
                             value={settingsForm.footerEmail || ''} 
                             onChange={e => setSettingsForm({...settingsForm, footerEmail: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr shadow-xs" 
                           />
                         </div>
                         <div className="md:col-span-2">
-                          <label className="block text-xs font-bold text-slate-400 mb-1">کاپی رائٹ ٹیکسٹ (Copyright)</label>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">کاپی رائٹ ٹیکسٹ (Copyright)</label>
                           <input 
                             type="text" 
                             value={settingsForm.footerCopyright || settingsForm.copyrightText || ''} 
                             onChange={e => setSettingsForm({...settingsForm, footerCopyright: e.target.value, copyrightText: e.target.value})} 
-                            className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" 
                           />
                         </div>
 
                         {/* Social Links */}
-                        <div className="md:col-span-2 border-t border-slate-800 pt-3">
-                          <h4 className="text-xs font-bold text-slate-300 mb-3">سوشل میڈیا لنکس (Social Profiles)</h4>
+                        <div className="md:col-span-2 border-t border-slate-200 pt-3">
+                          <h4 className="text-xs font-bold text-slate-800 mb-3">سوشل میڈیا لنکس (Social Profiles)</h4>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-400 mb-1">فیس بک (Facebook URL)</label>
+                              <label className="block text-[11px] font-bold text-slate-600 mb-1">فیس بک (Facebook URL)</label>
                               <input 
                                 type="text" 
                                 value={settingsForm.facebookUrl || ''} 
                                 onChange={e => setSettingsForm({...settingsForm, facebookUrl: e.target.value})} 
-                                className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                                className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr shadow-xs" 
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-400 mb-1">انسٹاگرام (Instagram URL)</label>
+                              <label className="block text-[11px] font-bold text-slate-600 mb-1">انسٹاگرام (Instagram URL)</label>
                               <input 
                                 type="text" 
                                 value={settingsForm.instagramUrl || ''} 
                                 onChange={e => setSettingsForm({...settingsForm, instagramUrl: e.target.value})} 
-                                className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                                className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr shadow-xs" 
                               />
                             </div>
                             <div>
-                              <label className="block text-[11px] font-bold text-slate-400 mb-1">یوٹیوب (YouTube URL)</label>
+                              <label className="block text-[11px] font-bold text-slate-600 mb-1">یوٹیوب (YouTube URL)</label>
                               <input 
                                 type="text" 
                                 value={settingsForm.youtubeUrl || ''} 
                                 onChange={e => setSettingsForm({...settingsForm, youtubeUrl: e.target.value})} 
-                                className="w-full bg-slate-800 border border-slate-700 text-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr" 
+                                className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none text-left dir-ltr shadow-xs" 
                               />
                             </div>
                           </div>
@@ -10548,13 +10546,13 @@ export default function AdminCMS({
                 )}
 
                 {/* Bottom Save Button Bar */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-800">
-                  <p className="text-xs text-slate-400">
-                    تبدیلیاں کرنے کے بعد <span className="text-blue-400 font-bold">محفوظ کریں</span> کے بٹن پر لازمی کلک کریں۔
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200">
+                  <p className="text-xs text-slate-500">
+                    تبدیلیاں کرنے کے بعد <span className="text-blue-600 font-bold">محفوظ کریں</span> کے بٹن پر لازمی کلک کریں۔
                   </p>
                   <button
                     type="submit"
-                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-lg shadow-blue-600/30 font-h2 flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-8 py-3 rounded-xl transition-all shadow-md shadow-blue-600/20 font-h2 flex items-center justify-center gap-2"
                   >
                     <Save className="w-5 h-5" />
                     <span>تبدیلیاں محفوظ کریں (Save Settings)</span>
@@ -10569,32 +10567,32 @@ export default function AdminCMS({
           {/* VIEW 5: WORDPRESS MIGRATION ENGINE */}
           {/* ========================================================= */}
           {adminTab === 'migration' && (
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl">
-              <div className="bg-blue-950/60 border border-blue-800 p-6 rounded-3xl space-y-2">
-                <div className="flex items-center gap-2 font-bold text-white text-lg font-simple">
-                  <Database className="w-6 h-6 text-blue-400" />
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs">
+              <div className="bg-blue-50/70 border border-blue-200 p-6 rounded-2xl space-y-2">
+                <div className="flex items-center gap-2 font-bold text-blue-950 text-lg font-simple">
+                  <Database className="w-6 h-6 text-blue-600" />
                   <span>ورڈپریس ٹو کسٹم ڈیٹا امپورٹ انجن (WordPress Migration)</span>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
                   ورڈپریس ڈیٹا بیس کی تمام 300 سے 400 پوسٹس، تصاویر اور Doctreat تھیم سے ڈاکٹرز کا ڈیٹا 100% تحفظ اور پرانے یو آر ایل اسلگز (URL Slugs) کے ساتھ منتقل کرنے کے لیے یہ ٹول ڈیزائن کیا گیا ہے۔
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-3">
-                  <h4 className="font-bold text-white text-sm font-simple">1. ورڈپریس SQL فائل</h4>
-                  <div className="border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-2xl p-8 text-center space-y-2 cursor-pointer transition-colors">
-                    <UploadCloud className="w-8 h-8 text-blue-400 mx-auto" />
-                    <p className="text-xs text-slate-300 font-bold font-simple">ورڈپریس کا SQL ڈیٹا بیس یہاں اپلوڈ کریں</p>
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200/80 space-y-3">
+                  <h4 className="font-bold text-slate-900 text-sm font-simple">1. ورڈپریس SQL فائل</h4>
+                  <div className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-2xl p-8 text-center space-y-2 cursor-pointer transition-colors bg-white shadow-xs">
+                    <UploadCloud className="w-8 h-8 text-blue-600 mx-auto" />
+                    <p className="text-xs text-slate-800 font-bold font-simple">ورڈپریس کا SQL ڈیٹا بیس یہاں اپلوڈ کریں</p>
                     <span className="text-[10px] text-slate-500 font-sans block">.sql, .sql.gz, .xml فارمیٹس</span>
                   </div>
                 </div>
 
-                <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-3">
-                  <h4 className="font-bold text-white text-sm font-simple">2. میڈیا مائیگریشن (uploads.zip)</h4>
-                  <div className="border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-2xl p-8 text-center space-y-2 cursor-pointer transition-colors">
-                    <UploadCloud className="w-8 h-8 text-emerald-400 mx-auto" />
-                    <p className="text-xs text-slate-300 font-bold font-simple">تمام تصاویر کا زپ فولڈر اپلوڈ کریں</p>
+                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200/80 space-y-3">
+                  <h4 className="font-bold text-slate-900 text-sm font-simple">2. میڈیا مائیگریشن (uploads.zip)</h4>
+                  <div className="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-2xl p-8 text-center space-y-2 cursor-pointer transition-colors bg-white shadow-xs">
+                    <UploadCloud className="w-8 h-8 text-emerald-600 mx-auto" />
+                    <p className="text-xs text-slate-800 font-bold font-simple">تمام تصاویر کا زپ فولڈر اپلوڈ کریں</p>
                     <span className="text-[10px] text-slate-500 font-sans block">wp-content/uploads.zip</span>
                   </div>
                 </div>
@@ -10609,43 +10607,43 @@ export default function AdminCMS({
       {/* MODAL 1: ADD MEDIA (COMPUTER UPLOAD, URL, STOCK LIBRARY) */}
       {/* ========================================================= */}
       {showMediaModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full p-6 space-y-6 shadow-2xl text-right animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full p-6 space-y-6 shadow-2xl text-right animate-in zoom-in-95 duration-150">
             
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3 font-simple">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 font-simple">
               <div className="flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-blue-400" />
-                <h3 className="text-lg font-bold text-white">میڈیا مینیجر (Add Media)</h3>
+                <ImageIcon className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg font-bold text-slate-900">میڈیا مینیجر (Add Media)</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowMediaModal(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg"
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Media Tabs */}
-            <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-800 text-xs font-simple">
+            <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 text-xs font-simple">
               <button
                 type="button"
                 onClick={() => setMediaTab('upload')}
-                className={`flex-1 py-2 rounded-xl transition-all font-bold ${mediaTab === 'upload' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
+                className={`flex-1 py-2 rounded-xl transition-all font-bold ${mediaTab === 'upload' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
               >
                 کمپیوٹر سے اپلوڈ کریں
               </button>
               <button
                 type="button"
                 onClick={() => setMediaTab('url')}
-                className={`flex-1 py-2 rounded-xl transition-all font-bold ${mediaTab === 'url' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
+                className={`flex-1 py-2 rounded-xl transition-all font-bold ${mediaTab === 'url' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
               >
                 ویب لنک (Image URL)
               </button>
               <button
                 type="button"
                 onClick={() => setMediaTab('library')}
-                className={`flex-1 py-2 rounded-xl transition-all font-bold ${mediaTab === 'library' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}`}
+                className={`flex-1 py-2 rounded-xl transition-all font-bold ${mediaTab === 'library' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
               >
                 طبی و ہربل گیلری لائبریری
               </button>
@@ -10663,11 +10661,11 @@ export default function AdminCMS({
                 />
                 <div
                   onClick={() => mediaFileInputRef.current?.click()}
-                  className="border-2 border-dashed border-slate-700 hover:border-blue-500 rounded-3xl p-10 text-center space-y-3 cursor-pointer transition-colors bg-slate-950/50"
+                  className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-3xl p-10 text-center space-y-3 cursor-pointer transition-colors bg-slate-50"
                 >
-                  <UploadCloud className="w-10 h-10 text-blue-400 mx-auto" />
-                  <p className="text-sm font-bold text-white font-simple">کمپیوٹر سے فائل منتخب کریں</p>
-                  <span className="text-xs text-slate-400 block font-sans">JPG, PNG, GIF, WebP (کوئی بھی سائز)</span>
+                  <UploadCloud className="w-10 h-10 text-blue-600 mx-auto" />
+                  <p className="text-sm font-bold text-slate-800 font-simple">کمپیوٹر سے فائل منتخب کریں</p>
+                  <span className="text-xs text-slate-500 block font-sans">JPG, PNG, GIF, WebP (کوئی بھی سائز)</span>
                 </div>
               </div>
             )}
@@ -10676,17 +10674,17 @@ export default function AdminCMS({
             {mediaTab === 'url' && (
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-slate-300 block mb-1 font-simple">تصویر کا براہ راست URL:</label>
+                  <label className="text-xs font-bold text-slate-700 block mb-1 font-simple">تصویر کا براہ راست URL:</label>
                   <input
                     type="url"
                     value={mediaUrlInput}
                     onChange={(e) => setMediaUrlInput(e.target.value)}
                     placeholder="https://images.unsplash.com/photo-..."
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-blue-500 font-sans"
+                    className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:border-blue-500 font-sans shadow-xs"
                   />
                 </div>
                 {mediaUrlInput && (
-                  <div className="h-40 rounded-2xl bg-slate-950 overflow-hidden border border-slate-800 flex items-center justify-center">
+                  <div className="h-40 rounded-2xl bg-slate-50 overflow-hidden border border-slate-200 flex items-center justify-center">
                     <img src={mediaUrlInput} alt="Preview" className="h-full object-cover" />
                   </div>
                 )}
@@ -10700,23 +10698,23 @@ export default function AdminCMS({
                   <div
                     key={idx}
                     onClick={() => handleInsertMediaFromModal(item.url)}
-                    className="group rounded-2xl overflow-hidden border border-slate-800 hover:border-blue-500 cursor-pointer bg-slate-950 transition-all space-y-1 p-1.5"
+                    className="group rounded-2xl overflow-hidden border border-slate-200 hover:border-blue-500 cursor-pointer bg-slate-50 transition-all space-y-1 p-1.5 hover:shadow-xs"
                   >
                     <img src={item.url} alt={item.title} className="w-full h-20 object-cover rounded-xl group-hover:scale-105 transition-transform" />
-                    <p className="text-[11px] font-bold text-slate-200 line-clamp-1 font-simple">{item.title}</p>
+                    <p className="text-[11px] font-bold text-slate-800 line-clamp-1 font-simple">{item.title}</p>
                   </div>
                 ))}
               </div>
             )}
 
             {/* Common Image Options (Alignment, Caption, Width) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-800 font-simple text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-200 font-simple text-xs">
               <div>
-                <label className="block text-slate-400 mb-1">الائنمنٹ:</label>
+                <label className="block text-slate-700 mb-1">الائنمنٹ:</label>
                 <select
                   value={mediaAlignment}
                   onChange={(e) => setMediaAlignment(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2 text-white"
+                  className="w-full bg-white border border-slate-300 rounded-xl p-2 text-slate-800 shadow-xs"
                 >
                   <option value="center">درمیان (Center)</option>
                   <option value="right">دائیں لپٹا ہوا (Float Right)</option>
@@ -10726,11 +10724,11 @@ export default function AdminCMS({
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">چوڑائی سائز:</label>
+                <label className="block text-slate-700 mb-1">چوڑائی سائز:</label>
                 <select
                   value={mediaWidth}
                   onChange={(e) => setMediaWidth(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2 text-white font-sans"
+                  className="w-full bg-white border border-slate-300 rounded-xl p-2 text-slate-800 font-sans shadow-xs"
                 >
                   <option value="100%">100% (بڑا)</option>
                   <option value="75%">75% (درمیانہ)</option>
@@ -10740,13 +10738,13 @@ export default function AdminCMS({
               </div>
 
               <div>
-                <label className="block text-slate-400 mb-1">تصویر کا کیپشن (اختیاری):</label>
+                <label className="block text-slate-700 mb-1">تصویر کا کیپشن (اختیاری):</label>
                 <input
                   type="text"
                   value={mediaCaption}
                   onChange={(e) => setMediaCaption(e.target.value)}
                   placeholder="تصویر کے نیچے تحریر..."
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2 text-white"
+                  className="w-full bg-white border border-slate-300 rounded-xl p-2 text-slate-800 shadow-xs"
                 />
               </div>
             </div>
@@ -10757,7 +10755,7 @@ export default function AdminCMS({
                 <button
                   type="button"
                   onClick={() => handleInsertMediaFromModal()}
-                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-colors font-simple"
+                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-colors font-simple shadow-xs"
                 >
                   مضمون میں تصویر لگائیں
                 </button>
@@ -10772,69 +10770,69 @@ export default function AdminCMS({
       {/* MODAL 2: ADD FORM (CONSULTATION, ORDER, QUESTION) */}
       {/* ========================================================= */}
       {showFormModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl text-right animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 space-y-6 shadow-2xl text-right animate-in zoom-in-95 duration-150">
             
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3 font-simple">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3 font-simple">
               <div className="flex items-center gap-2">
-                <CheckSquare className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-lg font-bold text-white">فارم شامل کریں (Add Form)</h3>
+                <CheckSquare className="w-5 h-5 text-emerald-600" />
+                <h3 className="text-lg font-bold text-slate-900">فارم شامل کریں (Add Form)</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowFormModal(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg"
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3 font-simple">
-              <label className="text-xs text-slate-300 font-bold block">مضمون کے اندر کس قسم کا فارم شامل کرنا چاہتے ہیں؟</label>
+              <label className="text-xs text-slate-700 font-bold block">مضمون کے اندر کس قسم کا فارم شامل کرنا چاہتے ہیں؟</label>
               
               <div
                 onClick={() => setFormType('consultation')}
                 className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                  formType === 'consultation' ? 'bg-blue-950/60 border-blue-500 text-white' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
+                  formType === 'consultation' ? 'bg-blue-50 border-blue-500 text-blue-950 shadow-xs' : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
                 }`}
               >
-                <h4 className="font-bold text-sm text-blue-300">1. طبیب سے آن لائن مشورہ فارم</h4>
-                <p className="text-xs text-slate-400 mt-1">مریض مضمون پڑھنے کے دوران اپنا نام، واٹس ایپ اور علامات درج کر کے رابطہ کر سکے گا۔</p>
+                <h4 className="font-bold text-sm text-blue-700">1. طبیب سے آن لائن مشورہ فارم</h4>
+                <p className="text-xs text-slate-600 mt-1">مریض مضمون پڑھنے کے دوران اپنا نام، واٹس ایپ اور علامات درج کر کے رابطہ کر سکے گا۔</p>
               </div>
 
               <div
                 onClick={() => setFormType('order')}
                 className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                  formType === 'order' ? 'bg-emerald-950/60 border-emerald-500 text-white' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
+                  formType === 'order' ? 'bg-emerald-50 border-emerald-500 text-emerald-950 shadow-xs' : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
                 }`}
               >
-                <h4 className="font-bold text-sm text-emerald-300">2. ہربل نسخہ / دوا ہوم ڈیلیوری فارم</h4>
-                <p className="text-xs text-slate-400 mt-1">مضمون میں بتائے گئے نسخہ کی کیش آن ڈیلیوری آرڈر حاصل کرنے کے لیے فارم بکس۔</p>
+                <h4 className="font-bold text-sm text-emerald-700">2. ہربل نسخہ / دوا ہوم ڈیلیوری فارم</h4>
+                <p className="text-xs text-slate-600 mt-1">مضمون میں بتائے گئے نسخہ کی کیش آن ڈیلیوری آرڈر حاصل کرنے کے لیے فارم بکس۔</p>
               </div>
 
               <div
                 onClick={() => setFormType('question')}
                 className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                  formType === 'question' ? 'bg-purple-950/60 border-purple-500 text-white' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'
+                  formType === 'question' ? 'bg-purple-50 border-purple-500 text-purple-950 shadow-xs' : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-slate-300'
                 }`}
               >
-                <h4 className="font-bold text-sm text-purple-300">3. سوال پوچھیں و فیڈ بیک فارم</h4>
-                <p className="text-xs text-slate-400 mt-1">مضمون کے متعلق قارئین سے طبی سوالات اور رائے حاصل کرنے کا فارم۔</p>
+                <h4 className="font-bold text-sm text-purple-700">3. سوال پوچھیں و فیڈ بیک فارم</h4>
+                <p className="text-xs text-slate-600 mt-1">مضمون کے متعلق قارئین سے طبی سوالات اور رائے حاصل کرنے کا فارم۔</p>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-2 border-t border-slate-800 font-simple">
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 font-simple">
               <button
                 type="button"
                 onClick={() => setShowFormModal(false)}
-                className="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs transition-colors"
               >
                 منسوخ
               </button>
               <button
                 type="button"
                 onClick={handleInsertFormWidget}
-                className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-colors"
+                className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-colors shadow-xs"
               >
                 فارم مضمون میں داخل کریں
               </button>
@@ -10848,18 +10846,18 @@ export default function AdminCMS({
       {/* MODAL 3: FIND & REPLACE */}
       {/* ========================================================= */}
       {showFindReplaceModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl text-right animate-in zoom-in-95 duration-150 font-simple">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl text-right animate-in zoom-in-95 duration-150 font-simple">
             
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div className="flex items-center gap-2">
-                <Search className="w-5 h-5 text-cyan-400" />
-                <h3 className="text-base font-bold text-white">تلاش اور تبدیلی (Find & Replace)</h3>
+                <Search className="w-5 h-5 text-cyan-600" />
+                <h3 className="text-base font-bold text-slate-900">تلاش اور تبدیلی (Find & Replace)</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowFindReplaceModal(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-slate-700"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -10867,25 +10865,25 @@ export default function AdminCMS({
 
             <form onSubmit={handleExecuteFindReplace} className="space-y-4">
               <div>
-                <label className="text-xs text-slate-300 block mb-1">مطلوبہ لفظ (Find):</label>
+                <label className="text-xs text-slate-700 block mb-1">مطلوبہ لفظ (Find):</label>
                 <input
                   type="text"
                   required
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="وہ لفظ جو تلاش کرنا ہے..."
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-xs text-slate-800 focus:outline-none focus:border-cyan-500 shadow-xs"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-slate-300 block mb-1">نئے لفظ سے تبدیل کریں (Replace with):</label>
+                <label className="text-xs text-slate-700 block mb-1">نئے لفظ سے تبدیل کریں (Replace with):</label>
                 <input
                   type="text"
                   value={replaceTerm}
                   onChange={(e) => setReplaceTerm(e.target.value)}
                   placeholder="نیا متبادل لفظ..."
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
+                  className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-xs text-slate-800 focus:outline-none focus:border-cyan-500 shadow-xs"
                 />
               </div>
 
@@ -10893,13 +10891,13 @@ export default function AdminCMS({
                 <button
                   type="button"
                   onClick={() => setShowFindReplaceModal(false)}
-                  className="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs"
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs transition-colors"
                 >
                   بند کریں
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-xl text-xs"
+                  className="px-6 py-2 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-xl text-xs shadow-xs"
                 >
                   تمام کو تبدیل کریں (Replace All)
                 </button>
@@ -10914,47 +10912,47 @@ export default function AdminCMS({
       {/* MODAL 4: KEYBOARD SHORTCUTS & HELP */}
       {/* ========================================================= */}
       {showShortcutsModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl text-right animate-in zoom-in-95 duration-150 font-simple">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl text-right animate-in zoom-in-95 duration-150 font-simple">
             
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
               <div className="flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-blue-400" />
-                <h3 className="text-base font-bold text-white">کی بورڈ شارٹ کٹس (Shortcuts)</h3>
+                <HelpCircle className="w-5 h-5 text-blue-600" />
+                <h3 className="text-base font-bold text-slate-900">کی بورڈ شارٹ کٹس (Shortcuts)</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowShortcutsModal(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-slate-700"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="space-y-2 text-xs divide-y divide-slate-800 font-sans">
+            <div className="space-y-2 text-xs divide-y divide-slate-100 font-sans">
               <div className="flex items-center justify-between py-1.5">
-                <span className="text-slate-300 font-simple">بولڈ (Bold)</span>
-                <kbd className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200">Ctrl + B</kbd>
+                <span className="text-slate-700 font-simple">بولڈ (Bold)</span>
+                <kbd className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-slate-800 font-mono shadow-xs">Ctrl + B</kbd>
               </div>
               <div className="flex items-center justify-between py-1.5">
-                <span className="text-slate-300 font-simple">اٹالک (Italic)</span>
-                <kbd className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200">Ctrl + I</kbd>
+                <span className="text-slate-700 font-simple">اٹالک (Italic)</span>
+                <kbd className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-slate-800 font-mono shadow-xs">Ctrl + I</kbd>
               </div>
               <div className="flex items-center justify-between py-1.5">
-                <span className="text-slate-300 font-simple">انڈر لائن (Underline)</span>
-                <kbd className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200">Ctrl + U</kbd>
+                <span className="text-slate-700 font-simple">انڈر لائن (Underline)</span>
+                <kbd className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-slate-800 font-mono shadow-xs">Ctrl + U</kbd>
               </div>
               <div className="flex items-center justify-between py-1.5">
-                <span className="text-slate-300 font-simple">واپس (Undo)</span>
-                <kbd className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200">Ctrl + Z</kbd>
+                <span className="text-slate-700 font-simple">واپس (Undo)</span>
+                <kbd className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-slate-800 font-mono shadow-xs">Ctrl + Z</kbd>
               </div>
               <div className="flex items-center justify-between py-1.5">
-                <span className="text-slate-300 font-simple">دوبارہ (Redo)</span>
-                <kbd className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200">Ctrl + Y</kbd>
+                <span className="text-slate-700 font-simple">دوبارہ (Redo)</span>
+                <kbd className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-slate-800 font-mono shadow-xs">Ctrl + Y</kbd>
               </div>
               <div className="flex items-center justify-between py-1.5">
-                <span className="text-slate-300 font-simple">سب منتخب کریں</span>
-                <kbd className="px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200">Ctrl + A</kbd>
+                <span className="text-slate-700 font-simple">سب منتخب کریں</span>
+                <kbd className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-slate-800 font-mono shadow-xs">Ctrl + A</kbd>
               </div>
             </div>
 
@@ -10962,7 +10960,7 @@ export default function AdminCMS({
               <button
                 type="button"
                 onClick={() => setShowShortcutsModal(false)}
-                className="px-6 py-2 bg-blue-600 text-white font-bold rounded-xl text-xs"
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-xs"
               >
                 ٹھیک ہے
               </button>
