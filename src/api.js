@@ -8,6 +8,10 @@ export const getAuthHeaders = () => {
       headers['Authorization'] = `Bearer ${token}`;
       headers['X-Admin-Token'] = token;
     }
+    const deviceToken = localStorage.getItem('tabeeb_2fa_device_token') || '';
+    if (deviceToken) {
+      headers['X-Device-Token'] = deviceToken;
+    }
   } catch (e) {}
   return headers;
 };
@@ -190,4 +194,161 @@ export const saveGlossaryApi = async (glossary) => {
   }
 };
 
+// ==========================================
+// ENTERPRISE ADMIN AUTH & 2FA API
+// ==========================================
+
+export const loginAdminApi = async ({ username, password, deviceToken }) => {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    const devToken = deviceToken || localStorage.getItem('tabeeb_2fa_device_token') || '';
+    if (devToken) {
+      headers['X-Device-Token'] = devToken;
+    }
+    const res = await fetch('/api/auth.php?action=login', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        action: 'login',
+        username,
+        password,
+        device_token: devToken
+      })
+    });
+    const text = await res.text();
+    const cleanText = text.replace(/^\uFEFF/, '');
+    return JSON.parse(cleanText);
+  } catch (err) {
+    console.error('Login API error:', err);
+    return { status: 'error', message: 'سرور سے رابطہ قائم نہیں ہو سکا۔' };
+  }
+};
+
+export const verify2faApi = async ({ temp_token, code, remember_device }) => {
+  try {
+    const res = await fetch('/api/auth.php?action=verify_2fa', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'verify_2fa',
+        temp_token,
+        code,
+        remember_device
+      })
+    });
+    const text = await res.text();
+    const cleanText = text.replace(/^\uFEFF/, '');
+    return JSON.parse(cleanText);
+  } catch (err) {
+    console.error('Verify 2FA API error:', err);
+    return { status: 'error', message: 'سرور سے رابطہ قائم نہیں ہو سکا۔' };
+  }
+};
+
+export const get2faSetupApi = async () => {
+  try {
+    const res = await fetch(`/api/auth.php?action=get_2fa_setup&v=${Date.now()}`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    const text = await res.text();
+    const cleanText = text.replace(/^\uFEFF/, '');
+    return JSON.parse(cleanText);
+  } catch (err) {
+    console.error('Get 2FA Setup API error:', err);
+    return null;
+  }
+};
+
+export const changeCredentialsApi = async (payload) => {
+  try {
+    const res = await fetch('/api/auth.php?action=change_credentials', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        action: 'change_credentials',
+        ...payload
+      })
+    });
+    const text = await res.text();
+    const cleanText = text.replace(/^\uFEFF/, '');
+    return JSON.parse(cleanText);
+  } catch (err) {
+    console.error('Change Credentials API error:', err);
+    return { status: 'error', message: 'سیٹنگز محفوظ کرنے میں رکاوٹ آئی۔' };
+  }
+};
+
+export const revokeDevicesApi = async () => {
+  try {
+    const res = await fetch('/api/auth.php?action=revoke_devices', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ action: 'revoke_devices' })
+    });
+    const text = await res.text();
+    const cleanText = text.replace(/^\uFEFF/, '');
+    return JSON.parse(cleanText);
+  } catch (err) {
+    console.error('Revoke Devices API error:', err);
+    return { status: 'error', message: 'ڈیوائسز منسوخ نہیں کی جا سکیں۔' };
+  }
+};
+
+export const forgotPasswordApi = async ({ email }) => {
+  try {
+    const res = await fetch('/api/auth.php?action=forgot_password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'forgot_password',
+        email
+      })
+    });
+    const text = await res.text();
+    const cleanText = text.replace(/^\uFEFF/, '');
+    return JSON.parse(cleanText);
+  } catch (err) {
+    console.error('Forgot Password API error:', err);
+    return { status: 'error', message: 'ری سیٹ کوڈ بھیجنے میں خرابی ہوئی۔' };
+  }
+};
+
+export const resetPasswordApi = async ({ email, code, new_password }) => {
+  try {
+    const res = await fetch('/api/auth.php?action=reset_password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'reset_password',
+        email,
+        code,
+        new_password
+      })
+    });
+    const text = await res.text();
+    const cleanText = text.replace(/^\uFEFF/, '');
+    return JSON.parse(cleanText);
+  } catch (err) {
+    console.error('Reset Password API error:', err);
+    return { status: 'error', message: 'پاس ورڈ ری سیٹ کرنے میں خرابی ہوئی۔' };
+  }
+};
+
+export const logoutAdminApi = async () => {
+  try {
+    await fetch('/api/auth.php?action=logout', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ action: 'logout' })
+    });
+  } catch (e) {}
+  try {
+    sessionStorage.removeItem('tabeeb_admin_token');
+    sessionStorage.removeItem('tabeeb_admin_auth');
+  } catch (e) {}
+  return true;
+};
+
 export { fetchAnalyticsApi, trackPageView, sendAnalyticsHeartbeat } from './utils/analytics';
+

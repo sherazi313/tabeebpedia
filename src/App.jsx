@@ -13,6 +13,7 @@ import PageView from './components/PageView';
 import HerbsEncyclopedia from './components/HerbsEncyclopedia';
 import QanoonMufradAzaGuide from './components/QanoonMufradAzaGuide';
 import AdminCMS from './components/AdminCMS';
+import AdminLoginModal from './components/AdminLoginModal';
 import Footer from './components/Footer';
 import SEOHelmet from './components/SEOHelmet';
 import HerbEffectivenessCalculator from './components/HerbEffectivenessCalculator';
@@ -345,11 +346,31 @@ export default function App() {
   const [activeTab, setActiveTab] = useState(() => {
     try {
       const rawPath = window.location.pathname.substring(1).replace(/\/$/, '');
-      const path = decodeURIComponent(rawPath);
+      let path = '';
+      try { path = decodeURIComponent(rawPath).toLowerCase().trim(); } catch { path = rawPath.toLowerCase().trim(); }
       const params = new URLSearchParams(window.location.search);
-      
-      // اگر URL میں کوئی خاص path ہے (جیسے doctors, blog یا کوئی slug) تو اسی کو دیکھیں
-      if (path === 'admin' || params.get('tab') === 'admin') return 'admin';
+      const isAuth = (sessionStorage.getItem('tabeeb_admin_auth') === 'true' || localStorage.getItem('tabeeb_admin_auth') === 'true') && 
+                     !!(sessionStorage.getItem('tabeeb_admin_token') || localStorage.getItem('tabeeb_admin_token'));
+      const secretSlug = (localStorage.getItem('tabeeb_admin_secret_slug') || 'tabeeb-7860').toLowerCase().trim();
+
+      // Secret slug routing: if authenticated -> admin, if not authenticated -> stay home (modal will open)
+      if (path === secretSlug || path === 'tabeeb-7860') {
+        if (isAuth) return 'admin';
+        return 'home';
+      }
+
+      // Public /admin or /login or /dashboard: redirect unauthenticated visitors to '/'
+      if (path === 'admin' || path === 'login' || path === 'dashboard' || params.get('tab') === 'admin') {
+        if (isAuth) {
+          return 'admin';
+        } else {
+          if (typeof window !== 'undefined') {
+            window.history.replaceState(null, '', '/');
+          }
+          return 'home';
+        }
+      }
+
       if (path === 'doctors' || params.get('tab') === 'doctors') return 'doctors';
       if (path === 'blog' || params.get('tab') === 'blog') return 'blog';
       if (path === 'farhang' || path === 'glossary' || params.get('tab') === 'farhang' || params.get('tab') === 'glossary') return 'farhang';
@@ -361,8 +382,10 @@ export default function App() {
       // اگر path خالی ہے (یعنی صرف / ہے) اور localStorage میں کوئی tab محفوظ ہے تو وہ کھولیں
       if (!path && !params.get('tab')) {
         const savedTab = localStorage.getItem('tabeeb_active_tab');
-        if (savedTab === 'admin') return 'admin';
-        // مزید saved tabs یہاں چیک کیے جا سکتے ہیں اگر چاہیں
+        if (savedTab === 'admin') {
+          if (isAuth) return 'admin';
+          localStorage.removeItem('tabeeb_active_tab');
+        }
       }
     } catch(e) {}
     return 'home';
@@ -438,7 +461,10 @@ export default function App() {
     else if (tab === 'herbs') targetUrl = '/herbs';
     else if (tab === 'qanoon') targetUrl = '/qanoon';
     else if (tab === 'herb-calculator') targetUrl = '/herb-calculator';
-    else if (tab === 'admin') targetUrl = '/admin';
+    else if (tab === 'admin') {
+      const currentSlug = (siteSettings?.adminSecretSlug || localStorage.getItem('tabeeb_admin_secret_slug') || 'tabeeb-7860').toLowerCase().trim();
+      targetUrl = `/${currentSlug}`;
+    }
     else if (tab === 'doctor-dashboard') targetUrl = '/doctor-dashboard';
     else if (tab === 'home') targetUrl = '/';
 
@@ -539,6 +565,9 @@ export default function App() {
         const liveSettings = await fetchSettingsApi();
         if (liveSettings && typeof liveSettings === 'object' && liveSettings.siteName) {
           setSiteSettings(prev => ({ ...prev, ...liveSettings }));
+          if (liveSettings.adminSecretSlug) {
+            try { localStorage.setItem('tabeeb_admin_secret_slug', liveSettings.adminSecretSlug); } catch(e) {}
+          }
         }
         const livePages = await fetchLivePages();
         if (Array.isArray(livePages) && livePages.length > 0) {
@@ -566,68 +595,70 @@ export default function App() {
     loadDatabaseData();
   }, []);
 
-  // Admin Login Protection (Username + Password)
+  // Admin Authentication & Secret URL State (2FA Supported)
   const [adminAuthenticated, setAdminAuthenticated] = useState(() => {
-    try { return sessionStorage.getItem('tabeeb_admin_auth') === 'true'; } catch { return false; }
+    try {
+      const isAuth = sessionStorage.getItem('tabeeb_admin_auth') === 'true' || localStorage.getItem('tabeeb_admin_auth') === 'true';
+      const token = sessionStorage.getItem('tabeeb_admin_token') || localStorage.getItem('tabeeb_admin_token');
+      return Boolean(isAuth && token);
+    } catch {
+      return false;
+    }
   });
-  const [adminUsernameInput, setAdminUsernameInput] = useState('');
-  const [adminPasswordInput, setAdminPasswordInput] = useState('');
-  const [showAdminPassword, setShowAdminPassword] = useState(false);
-  const [adminLoginError, setAdminLoginError] = useState('');
 
-  const getAdminUsername = () => {
+  const [isAdminLoginOpen, setIsAdminLoginOpen] = useState(() => {
     try {
-      return localStorage.getItem('tabeeb_admin_custom_username') || 'sherazi313';
-    } catch(e) {
-      return 'sherazi313';
+      const rawPath = window.location.pathname.substring(1).replace(/\/$/, '');
+      let path = '';
+      try { path = decodeURIComponent(rawPath).toLowerCase().trim(); } catch { path = rawPath.toLowerCase().trim(); }
+      const secretSlug = (localStorage.getItem('tabeeb_admin_secret_slug') || 'tabeeb-7860').toLowerCase().trim();
+      const isAuth = (sessionStorage.getItem('tabeeb_admin_auth') === 'true' || localStorage.getItem('tabeeb_admin_auth') === 'true') && 
+                     !!(sessionStorage.getItem('tabeeb_admin_token') || localStorage.getItem('tabeeb_admin_token'));
+      return !isAuth && (path === secretSlug || path === 'tabeeb-7860');
+    } catch {
+      return false;
     }
-  };
+  });
 
-  const getAdminPassword = () => {
-    try {
-      return localStorage.getItem('tabeeb_admin_custom_password') || '5903911a';
-    } catch(e) {
-      return '5903911a';
-    }
-  };
-
-  // Forgot Password / Admin Credentials Recovery State
-  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
-  const [forgotLoading, setForgotLoading] = useState(false);
-  const [forgotResult, setForgotResult] = useState(null);
-
-  const handleSendRecoveryEmail = async () => {
-    setForgotLoading(true);
-    setForgotResult(null);
-    const u = getAdminUsername();
-    const p = getAdminPassword();
-    const recoveryEmails = siteSettings?.adminRecoveryEmails || localStorage.getItem('tabeeb_admin_recovery_emails') || 'sherazi313@gmail.com, nukta313@gmail.com';
-
-    try {
-      const res = await fetch('/api/forgot_admin.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: u, password: p, recoveryEmails })
-      });
-      const data = await res.json();
-      if (data && data.status === 'success') {
-        setForgotResult({
-          type: 'success',
-          message: 'ایڈمن لاگ ان کی تفصیلات کامیابی کے ساتھ رجسٹرڈ ریکوری ای میل پتوں پر ارسال کر دی گئی ہیں۔'
-        });
-      } else {
-        setForgotResult({
-          type: 'success',
-          message: 'تفصیلات رجسٹرڈ ایڈمن ای میل پر کامیابی سے بھیج دی گئی ہیں۔'
-        });
+  // Watchdog: If activeTab is 'admin' but user is not authenticated, immediately redirect to '/'
+  useEffect(() => {
+    if (!adminAuthenticated && activeTab === 'admin') {
+      setActiveTab('home');
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '/');
       }
-    } catch (err) {
-      setForgotResult({
-        type: 'success',
-        message: 'ایڈمن لاگ ان کی تفصیلات رجسٹرڈ ای میل ایڈریسز پر ارسال کر دی گئی ہیں۔'
-      });
-    } finally {
-      setForgotLoading(false);
+    }
+  }, [adminAuthenticated, activeTab]);
+
+  const handleAdminLoginSuccess = () => {
+    setAdminAuthenticated(true);
+    setIsAdminLoginOpen(false);
+    setActiveTab('admin');
+    try {
+      localStorage.setItem('tabeeb_active_tab', 'admin');
+    } catch(e) {}
+  };
+
+  const handleCloseAdminLogin = () => {
+    setIsAdminLoginOpen(false);
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', '/');
+    }
+  };
+
+  const handleAdminLogout = () => {
+    try {
+      sessionStorage.removeItem('tabeeb_admin_auth');
+      sessionStorage.removeItem('tabeeb_admin_token');
+      localStorage.removeItem('tabeeb_admin_auth');
+      localStorage.removeItem('tabeeb_admin_token');
+      localStorage.removeItem('tabeeb_active_tab');
+    } catch(e) {}
+    setAdminAuthenticated(false);
+    setIsAdminLoginOpen(false);
+    setActiveTab('home');
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', '/');
     }
   };
 
@@ -951,10 +982,35 @@ export default function App() {
         path = rawPath;
       }
 
-      // Check Admin Route
-      if (path === 'admin' || params.get('tab') === 'admin' || path === 'dashboard') {
-        setActiveTab('admin');
-        try { localStorage.setItem('tabeeb_active_tab', 'admin'); } catch(e) {}
+      const normPath = path.toLowerCase().trim();
+      const secretSlug = (siteSettings?.adminSecretSlug || localStorage.getItem('tabeeb_admin_secret_slug') || 'tabeeb-7860').toLowerCase().trim();
+      const isAuth = (sessionStorage.getItem('tabeeb_admin_auth') === 'true' || localStorage.getItem('tabeeb_admin_auth') === 'true') && 
+                     !!(sessionStorage.getItem('tabeeb_admin_token') || localStorage.getItem('tabeeb_admin_token'));
+
+      // Check Secret Admin Slug (e.g. /tabeeb-7860 or customized slug)
+      if (normPath === secretSlug || normPath === 'tabeeb-7860') {
+        if (isAuth) {
+          setActiveTab('admin');
+          try { localStorage.setItem('tabeeb_active_tab', 'admin'); } catch(e) {}
+        } else {
+          setActiveTab('home');
+          setIsAdminLoginOpen(true);
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      // Check Public Admin Route (/admin, /login, /dashboard) -> redirect unauthenticated to '/'
+      if (normPath === 'admin' || normPath === 'login' || normPath === 'dashboard' || params.get('tab') === 'admin') {
+        if (isAuth) {
+          setActiveTab('admin');
+          try { localStorage.setItem('tabeeb_active_tab', 'admin'); } catch(e) {}
+        } else {
+          if (typeof window !== 'undefined') {
+            window.history.replaceState(null, '', '/');
+          }
+          setActiveTab('home');
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
@@ -1054,7 +1110,7 @@ export default function App() {
       }
 
       // Check Pages (e.g. /about-us, /contact, /privacy-policy, /disclaimer)
-      if (path && !path.startsWith('api') && path !== 'login') {
+      if (path && !path.startsWith('api') && path !== 'login' && normPath !== secretSlug && normPath !== 'tabeeb-7860') {
         // Load latest pages from localStorage or state
         let currentPages = pagesList;
         try {
@@ -1062,12 +1118,12 @@ export default function App() {
           if (Array.isArray(savedPages) && savedPages.length > 0) currentPages = savedPages;
         } catch(e) {}
 
-        const normPath = path.toLowerCase().trim().replace(/[\s_]+/g, '-');
+        const normPathSlug = path.toLowerCase().trim().replace(/[\s_]+/g, '-');
         const foundPage = currentPages.find(p => {
           if (!p || !p.slug) return false;
           const normSlug = p.slug.toLowerCase().trim().replace(/[\s_]+/g, '-');
-          return normSlug === normPath ||
-                 normPath.endsWith('/' + normSlug) ||
+          return normSlug === normPathSlug ||
+                 normPathSlug.endsWith('/' + normSlug) ||
                  normSlug === rawPath.toLowerCase().trim().replace(/[\s_]+/g, '-') ||
                  rawPath.toLowerCase().trim().replace(/[\s_]+/g, '-').endsWith('/' + normSlug) ||
                  p.slug.toLowerCase() === path.toLowerCase() ||
@@ -1088,7 +1144,7 @@ export default function App() {
 
       // Check Articles (Clean URLs like /slug or ?article=slug)
       let articleParam = params.get('article') || params.get('slug');
-      if (!articleParam && path && !path.startsWith('api') && path !== 'admin' && path !== 'login' && path !== 'home' && !['doctors', 'blog', 'farhang', 'glossary', 'herbs', 'qanoon', 'herb-calculator', 'hec', 'calculator'].includes(path)) {
+      if (!articleParam && path && !path.startsWith('api') && path !== 'admin' && path !== 'login' && path !== 'home' && normPath !== secretSlug && normPath !== 'tabeeb-7860' && !['doctors', 'blog', 'farhang', 'glossary', 'herbs', 'qanoon', 'herb-calculator', 'hec', 'calculator'].includes(path)) {
         articleParam = path;
       }
 
@@ -1422,176 +1478,9 @@ export default function App() {
 
   // If currently in Full-Page Admin Mode:
   if (activeTab === 'admin') {
-    // Admin Login Gate
+    // Admin Login Gate - watchdog will redirect unauthenticated visitors
     if (!adminAuthenticated) {
-      return (
-        <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl p-8 w-full max-w-sm shadow-2xl text-right">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <ShieldCheck className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-xl font-bold text-white font-simple">ایڈمن پینل لاگ ان</h2>
-              <p className="text-xs text-slate-400 mt-1 font-simple">صرف مجاز ایڈمنسٹریٹر کے لیے</p>
-            </div>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const uInput = adminUsernameInput.trim();
-              const pInput = adminPasswordInput.trim();
-              const validU = getAdminUsername();
-              const validP = getAdminPassword();
-
-              if (uInput === validU && pInput === validP) {
-                try { sessionStorage.setItem('tabeeb_admin_auth', 'true'); } catch {}
-                setAdminAuthenticated(true);
-                setAdminLoginError('');
-              } else {
-                setAdminLoginError('یوزر نیم یا پاسورڈ غلط ہے۔ دوبارہ کوشش کریں۔');
-              }
-            }} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1.5 font-simple">یوزر نیم (Username):</label>
-                <input
-                  type="text"
-                  value={adminUsernameInput}
-                  onChange={(e) => { setAdminUsernameInput(e.target.value); setAdminLoginError(''); }}
-                  placeholder="یوزر نیم درج کریں..."
-                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-left font-mono"
-                  dir="ltr"
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-400 mb-1.5 font-simple">پاسورڈ (Password):</label>
-                <div className="relative">
-                  <input
-                    type={showAdminPassword ? 'text' : 'password'}
-                    value={adminPasswordInput}
-                    onChange={(e) => { setAdminPasswordInput(e.target.value); setAdminLoginError(''); }}
-                    placeholder="پاسورڈ درج کریں..."
-                    className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-left font-mono pr-10"
-                    dir="ltr"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowAdminPassword(!showAdminPassword)}
-                    className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-200"
-                  >
-                    {showAdminPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Forgot Credentials Button */}
-              <div className="flex items-center justify-between text-xs pt-0.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsForgotModalOpen(true);
-                    setForgotResult(null);
-                  }}
-                  className="text-blue-400 hover:text-blue-300 font-bold hover:underline font-simple cursor-pointer transition-colors flex items-center gap-1.5"
-                >
-                  <Key className="w-3.5 h-3.5" />
-                  <span>یوزر نیم یا پاسورڈ بھول گئے؟ (Forgot?)</span>
-                </button>
-              </div>
-
-              {adminLoginError && (
-                <p className="text-xs text-red-400 font-bold font-simple bg-red-900/20 border border-red-800/40 rounded-xl px-3 py-2">{adminLoginError}</p>
-              )}
-              <button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-3 rounded-xl text-sm transition-all shadow-md font-simple cursor-pointer">
-                ایڈمن لاگ ان
-              </button>
-              <button type="button" onClick={() => { handleNavigateToTab('home'); setAdminUsernameInput(''); setAdminPasswordInput(''); setAdminLoginError(''); }} className="w-full text-slate-500 hover:text-slate-300 text-xs font-simple py-1 transition-colors cursor-pointer">
-                ویب سائٹ پر واپس جائیں
-              </button>
-            </form>
-
-            {/* Forgot Credentials Modal */}
-            {isForgotModalOpen && (
-              <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-                <div className="bg-slate-900 border border-slate-700 rounded-3xl p-6 w-full max-w-md shadow-2xl text-right space-y-5 animate-in fade-in zoom-in duration-200">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center">
-                        <Mail className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-base font-bold text-white font-simple">ایڈمن لاگ ان ریکوری</h3>
-                        <p className="text-[11px] text-slate-400">یوزر نیم اور پاسورڈ بذریعہ ای میل حاصل کریں</p>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsForgotModalOpen(false)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-
-                  <div className="space-y-3.5 text-xs leading-relaxed text-slate-300">
-                    <p>
-                      اگر آپ اپنا ایڈمن یوزر نیم یا پاسورڈ بھول گئے ہیں تو نیچے بٹن پر کلک کریں۔ سسٹم خودکار طور پر آپ کی <strong>رجسٹرڈ ریکوری ای میلز</strong> پر لاگ ان تفصیلات فوری ارسال کر دے گا۔
-                    </p>
-
-                    <div className="p-3.5 bg-slate-950 rounded-2xl border border-slate-800 space-y-1.5">
-                      <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
-                        <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                        <span>محفوظ ریکوری سروس (Privacy Protected)</span>
-                      </div>
-                      <p className="text-[11px] text-slate-400 leading-normal">
-                        سیکیورٹی کی خاطر ای میل پتہ یہاں مخفی رکھا گیا ہے۔ معلومات صرف ایڈمن ڈیش بورڈ میں درج کردہ تصدیق شدہ ای میل پتوں پر خفیہ طور پر بھیجی جائیں گی۔
-                      </p>
-                    </div>
-
-                    {forgotResult && (
-                      <div className={`p-3.5 rounded-xl border text-xs font-simple space-y-1 ${forgotResult.type === 'success' ? 'bg-emerald-950/50 border-emerald-600/60 text-emerald-200' : 'bg-blue-950/50 border-blue-600/60 text-blue-200'}`}>
-                        <div className="flex items-center gap-2 font-bold">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                          <span>ای میل کامیابی سے ارسال کر دی گئی!</span>
-                        </div>
-                        <p className="text-[11px] opacity-90">{forgotResult.message}</p>
-                        <p className="text-[10px] text-slate-400 mt-1">براہِ کرم اپنا ای میل ان باکس (یا اسپام فولڈر) چیک فرمائیں۔</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-2 border-t border-slate-800">
-                    <button
-                      type="button"
-                      onClick={handleSendRecoveryEmail}
-                      disabled={forgotLoading}
-                      className="w-full flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-md font-simple cursor-pointer"
-                    >
-                      {forgotLoading ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 animate-spin" />
-                          <span>ارسال کیا جا رہا ہے...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Mail className="w-4 h-4" />
-                          <span>رجسٹرڈ ای میل پر معلومات بھیجیں</span>
-                        </>
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setIsForgotModalOpen(false)}
-                      className="w-full sm:w-auto px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all border border-slate-700 font-simple cursor-pointer"
-                    >
-                      بند کریں
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      );
+      return null;
     }
 
     return (
@@ -1611,12 +1500,11 @@ export default function App() {
         }}
         onBackToWebsite={() => {
           handleNavigateToTab('home');
+          if (typeof window !== 'undefined') {
+            window.history.replaceState(null, '', '/');
+          }
         }}
-        onAdminLogout={() => {
-          try { sessionStorage.removeItem('tabeeb_admin_auth'); } catch {}
-          setAdminAuthenticated(false);
-          handleNavigateToTab('home');
-        }}
+        onAdminLogout={handleAdminLogout}
       />
     );
   }
@@ -2394,6 +2282,14 @@ export default function App() {
         theme={theme}
       />
 
+
+      {/* Admin Login Modal (Secret Slug & 2FA Protected) */}
+      <AdminLoginModal
+        isOpen={isAdminLoginOpen}
+        onClose={handleCloseAdminLogin}
+        onLoginSuccess={handleAdminLoginSuccess}
+        siteSettings={siteSettings}
+      />
 
       {/* Global Footer */}
       <Footer onSelectPage={(slug) => { const p = pagesList.find(item => item.slug === slug); if (p) { setSelectedPage(p); setActiveTab('page'); window.scrollTo({top:0, behavior:'smooth'}); } }} 

@@ -104,11 +104,29 @@ import {
   Laptop,
   Tablet,
   Radio,
-  ArrowUpRight
+  ArrowUpRight,
+  LogOut
 } from 'lucide-react';
 import { ARTICLES, DOCTORS, CATEGORIES, SPECIALTIES } from '../data/mockData';
-import { fetchCategoriesApi, saveCategoriesApi, saveArticlesApi, saveSettingsApi, saveDoctorsApi, uploadImageApi, fetchLivePages, savePagesApi, fetchLiveGlossary, saveGlossaryApi , fetchAnalyticsApi } from '../api';
+import { 
+  fetchCategoriesApi, 
+  saveCategoriesApi, 
+  saveArticlesApi, 
+  saveSettingsApi, 
+  saveDoctorsApi, 
+  uploadImageApi, 
+  fetchLivePages, 
+  savePagesApi, 
+  fetchLiveGlossary, 
+  saveGlossaryApi, 
+  fetchAnalyticsApi,
+  get2faSetupApi,
+  changeCredentialsApi,
+  revokeDevicesApi,
+  logoutAdminApi
+} from '../api';
 import { BOOKS_DATA } from './PdfBooksLibrary';
+import AdminSecurityTab from './AdminSecurityTab';
 
 // Helper to generate clean, high-contrast HTML for PDF Books library page
 export const generatePdfBooksPageHtml = (books = []) => {
@@ -252,6 +270,8 @@ export const buildHierarchicalCategoryTree = (categories) => {
 
 export default function AdminCMS({ 
   onBackToWebsite, 
+  onAdminLogout,
+  onLogout,
   initialTab = 'dashboard', 
   siteSettings, 
   setSiteSettings, 
@@ -266,6 +286,29 @@ export default function AdminCMS({
   setGlossaryList: propSetGlossaryList
 }) {
   const [adminTab, setAdminTab] = useState(initialTab);
+
+  const handleLogout = async () => {
+    try {
+      await logoutAdminApi();
+    } catch (e) {}
+    try {
+      sessionStorage.removeItem('tabeeb_admin_token');
+      sessionStorage.removeItem('tabeeb_admin_auth');
+    } catch (e) {}
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', '/');
+    }
+    if (onAdminLogout) onAdminLogout();
+    else if (onLogout) onLogout();
+    else if (onBackToWebsite) onBackToWebsite();
+  };
+
+  const handleBackToWebsite = () => {
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', '/');
+    }
+    if (onBackToWebsite) onBackToWebsite();
+  };
 
   // Real-Time Visitor & Page Views Analytics State
   const [analyticsData, setAnalyticsData] = useState(null);
@@ -2521,11 +2564,21 @@ export default function AdminCMS({
 
             <div className="flex items-center gap-3">
               <button
-                onClick={onBackToWebsite}
-                className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-slate-200/90 font-simple shadow-xs"
+                type="button"
+                onClick={handleBackToWebsite}
+                className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-slate-200/90 font-simple shadow-xs cursor-pointer"
               >
                 <ArrowRight className="w-4 h-4 text-blue-600" />
                 <span>ویب سائٹ پر واپس جائیں</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 active:scale-95 px-4 py-2.5 rounded-xl text-xs font-bold transition-all font-simple shadow-xs cursor-pointer"
+                title="ایڈمن سیشن ختم کریں اور لاگ آؤٹ ہوں"
+              >
+                <LogOut className="w-4 h-4 text-red-600" />
+                <span>لاگ آؤٹ</span>
               </button>
             </div>
 
@@ -2608,6 +2661,9 @@ export default function AdminCMS({
                   <button onClick={() => setAdminTab('settings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'settings' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
                     <Settings className="w-4 h-4 text-slate-400" /> <span>ویب سائٹ سیٹنگز</span>
                   </button>
+                  <button onClick={() => { setAdminTab('security'); setSettingsSubTab('security'); }} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'security' ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-300 shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                    <ShieldCheck className={`w-4 h-4 ${adminTab === 'security' ? 'text-emerald-700' : 'text-emerald-600'}`} /> <span>🛡️ ایڈمن سیکیورٹی و 2FA</span>
+                  </button>
                   <button onClick={() => setAdminTab('migration')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'migration' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
                     <Database className="w-4 h-4 text-slate-400" /> <span>مائیگریشن ٹول</span>
                   </button>
@@ -2637,6 +2693,18 @@ export default function AdminCMS({
                   {doctorsList.filter(d => d && (d.isApproved !== false && d.status !== 'pending')).length}
                 </strong>
               </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl text-xs font-bold transition-all border border-red-200 cursor-pointer shadow-2xs"
+                title="ایڈمن سیشن ختم کریں اور لاگ آؤٹ ہوں"
+              >
+                <LogOut className="w-4 h-4 text-red-600" />
+                <span>ایڈمن لاگ آؤٹ (Logout)</span>
+              </button>
             </div>
 
           </aside>
@@ -9523,6 +9591,19 @@ export default function AdminCMS({
           {/* ========================================================= */}
           {/* VIEW 4: COMPREHENSIVE WEBSITE SETTINGS (LOGO, HEADER, FOOTER) */}
           {/* ========================================================= */}
+          {/* ========================================================= */}
+          {/* VIEW: DEDICATED ADMIN SECURITY & 2FA PANEL */}
+          {/* ========================================================= */}
+          {adminTab === 'security' && (
+            <AdminSecurityTab 
+              settingsForm={settingsForm}
+              setSettingsForm={setSettingsForm}
+              siteSettings={siteSettings}
+              setSiteSettings={setSiteSettings}
+              showNotification={showNotification}
+            />
+          )}
+
           {adminTab === 'settings' && (
             <div className="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl">
               
@@ -9555,7 +9636,7 @@ export default function AdminCMS({
                   { id: 'homepage', label: 'ہوم پیج بلاکس', icon: Home },
                   { id: 'sidebar', label: 'سائیڈ بار و اشتہارات', icon: Layout },
                   { id: 'media', label: 'ڈیفالٹ میڈیا', icon: ImageIcon },
-                  { id: 'security', label: 'سیکیورٹی و پاس ورڈ', icon: Lock },
+                  { id: 'security', label: '🛡️ ایڈمن سیکیورٹی و 2FA', icon: ShieldCheck },
                   { id: 'footer', label: 'فوٹر و سوشل لنکس', icon: Share2 },
                 ].map((tab) => {
                   const TabIcon = tab.icon;
@@ -10365,172 +10446,15 @@ export default function AdminCMS({
                   </div>
                 )}
 
-                {/* 5. SECURITY & ADMIN PASSWORD */}
+                {/* 5. SECURITY & ADMIN 2FA */}
                 {settingsSubTab === 'security' && (
-                  <div className="space-y-6 animate-in fade-in-50">
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6">
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-red-600 flex items-center justify-center text-white shadow-lg shadow-red-900/20">
-                            <Lock className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-bold text-white font-h2">ایڈمن لاگ ان پاس ورڈ تبدیل کریں</h3>
-                            <p className="text-xs text-slate-400">اپنے ایڈمن پینل کی حفاظت کے لیے ایک مضبوط اور محفوظ پاس ورڈ رکھیں</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {passwordStatusMsg.text && (
-                        <div className={`p-4 rounded-2xl border text-xs font-bold leading-relaxed animate-in fade-in-50 ${
-                          passwordStatusMsg.type === 'success'
-                            ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300'
-                            : 'bg-red-950/60 border-red-500/50 text-red-300'
-                        }`}>
-                          {passwordStatusMsg.text}
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1.5">موجودہ پاس ورڈ (Current Password) *</label>
-                          <div className="relative">
-                            <input
-                              type={showCurrentPass ? 'text' : 'password'}
-                              value={credentialsForm.currentPassword}
-                              onChange={e => setCredentialsForm({ ...credentialsForm, currentPassword: e.target.value })}
-                              placeholder="موجودہ پاس ورڈ درج کریں..."
-                              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-sans focus:border-blue-500 outline-none text-left dir-ltr pr-10 font-mono"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowCurrentPass(!showCurrentPass)}
-                              className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200"
-                            >
-                              {showCurrentPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1.5">ایڈمن یوزر نیم (Admin Username) *</label>
-                          <input
-                            type="text"
-                            value={credentialsForm.username}
-                            onChange={e => setCredentialsForm({ ...credentialsForm, username: e.target.value })}
-                            placeholder="یوزر نیم درج کریں..."
-                            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-sans focus:border-blue-500 outline-none text-left dir-ltr font-mono"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1.5">نیا پاس ورڈ (New Password)</label>
-                          <div className="relative">
-                            <input
-                              type={showNewPass ? 'text' : 'password'}
-                              value={credentialsForm.newPassword}
-                              onChange={e => setCredentialsForm({ ...credentialsForm, newPassword: e.target.value })}
-                              placeholder="نیا پاس ورڈ (کم از کم 6 حروف)..."
-                              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-sans focus:border-blue-500 outline-none text-left dir-ltr pr-10 font-mono"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowNewPass(!showNewPass)}
-                              className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200"
-                            >
-                              {showNewPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="block text-xs font-bold text-slate-400 mb-1.5">نئے پاس ورڈ کی تصدیق (Confirm)</label>
-                          <input
-                            type={showNewPass ? 'text' : 'password'}
-                            value={credentialsForm.confirmPassword}
-                            onChange={e => setCredentialsForm({ ...credentialsForm, confirmPassword: e.target.value })}
-                            placeholder="نیا پاس ورڈ دوبارہ درج کریں..."
-                            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-xs font-sans focus:border-blue-500 outline-none text-left dir-ltr font-mono"
-                          />
-                        </div>
-
-                        <div className="sm:col-span-2 lg:col-span-4 flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-                          <p className="text-[11px] text-slate-500 font-sans">
-                            ڈیفالٹ یوزر نیم: <code className="text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">sherazi313</code> اور پاس ورڈ: <code className="text-amber-400 font-bold bg-slate-950 px-2 py-0.5 rounded border border-slate-800">5903911a</code> ہے۔
-                          </p>
-                          
-                          <button
-                            type="button" 
-                            onClick={handleChangeAdminCredentials}
-                            className="w-full sm:w-auto bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-700 hover:to-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 font-simple shrink-0 cursor-pointer"
-                          >
-                            <ShieldCheck className="w-4 h-4" />
-                            <span>کوائف محفوظ کریں (Save Admin Credentials)</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Admin Password Recovery Emails Management Card */}
-                    <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-5">
-                      <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-2xl bg-blue-600/20 text-blue-400 flex items-center justify-center shadow-md">
-                            <Mail className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-bold text-white font-h2">ایڈمن پاس ورڈ ریکوری ای میلز (Password Recovery Emails)</h3>
-                            <p className="text-xs text-slate-400">اگر آپ پاس ورڈ بھول جائیں تو لاگ ان فارگٹ پر کلک کرنے سے ان ای میلز پر معلومات بھیجی جائیں گی</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {recoveryEmailMsg && (
-                        <div className="p-3.5 rounded-xl border border-emerald-500/50 bg-emerald-950/60 text-emerald-300 text-xs font-bold animate-in fade-in-50">
-                          {recoveryEmailMsg}
-                        </div>
-                      )}
-
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-xs font-bold text-slate-300 mb-1.5 font-simple">
-                            ریکوری ای میل ایڈریسز (کوما لگا کر ایک یا زیادہ ای میلز درج کریں):
-                          </label>
-                          <input
-                            type="text"
-                            value={adminRecoveryEmails}
-                            onChange={(e) => setAdminRecoveryEmails(e.target.value)}
-                            placeholder="sherazi313@gmail.com, nukta313@gmail.com"
-                            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white text-xs font-mono focus:border-blue-500 focus:outline-none text-left"
-                            dir="ltr"
-                          />
-                        </div>
-
-                        <div className="p-3.5 bg-slate-950/80 rounded-2xl border border-slate-800 text-xs text-slate-400 space-y-1">
-                          <p className="font-bold text-slate-300">💡 اہم رہنمائی:</p>
-                          <p>
-                            لاگ ان پیج پر سیکورٹی کی خاطر یہ ای میلز عام وزیٹرز کو نظر نہیں آتیں۔ جب بھی آپ فارگٹ بٹن دبائیں گے، سسٹم خودکار طور پر یہاں محفوظ شدہ ای میلز پر نیا و موجودہ یوزر نیم اور پاسورڈ روانہ کر دے گا۔
-                          </p>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-                          <p className="text-[11px] text-slate-400 font-sans">
-                            ڈیفالٹ: <code className="text-blue-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">sherazi313@gmail.com, nukta313@gmail.com</code>
-                          </p>
-
-                          <button
-                            type="button"
-                            onClick={handleSaveRecoveryEmails}
-                            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 font-simple cursor-pointer"
-                          >
-                            <Save className="w-4 h-4" />
-                            <span>ریکوری ای میلز محفوظ کریں (Save Recovery Emails)</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-
-                  </div>
+                  <AdminSecurityTab 
+                    settingsForm={settingsForm}
+                    setSettingsForm={setSettingsForm}
+                    siteSettings={siteSettings}
+                    setSiteSettings={setSiteSettings}
+                    showNotification={showNotification}
+                  />
                 )}
 
                 {/* 6. FOOTER & SOCIAL SETTINGS */}

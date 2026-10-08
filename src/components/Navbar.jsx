@@ -107,15 +107,6 @@ export default function Navbar({
               <Phone className={`w-3 h-3 ${isNavy ? 'text-blue-400' : 'text-emerald-400'}`} />
               <span>ہیلپ لائن: {helplinePhone}</span>
             </a>
-            
-            <button 
-              onClick={onOpenAdmin}
-              className={`flex items-center gap-1 ${isNavy ? 'text-blue-300 bg-blue-950/60' : 'text-emerald-300 bg-emerald-900/60'} hover:text-white transition-colors px-2 py-0.5 rounded text-[11px] font-simple font-bold`}
-              title="ایڈمن کنٹرول پینل"
-            >
-              <Settings className="w-3 h-3" />
-              <span>ایڈمن پینل</span>
-            </button>
           </div>
         </div>
       </div>

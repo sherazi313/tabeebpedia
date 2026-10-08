@@ -35,19 +35,30 @@ function verifyAdminApiRequest() {
     }
 
     $secretSig = getAdminSecretSignature();
+    $authSecret = defined('AUTH_SECRET_KEY') ? AUTH_SECRET_KEY : 'tabeeb_pedia_secure_persistent_secret_key_2026_x87f63d9a1e4b8c2';
+    $usr = 'sherazi313';
+    $settingsFile = __DIR__ . '/../data/settings.json';
+    if (file_exists($settingsFile)) {
+        $c = @file_get_contents($settingsFile);
+        if ($c) {
+            $s = json_decode($c, true);
+            if (!empty($s['adminUsername'])) $usr = $s['adminUsername'];
+        }
+    }
+    $newSig = hash('sha256', $usr . ':tabeeb_secret_salt_2026:' . $authSecret);
 
     // 1. Check Authorization header (Bearer token)
     $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
     if (preg_match('/Bearer\s+(\S+)/i', $authHeader, $matches)) {
         $clientToken = $matches[1];
-        if (hash_equals($secretSig, $clientToken)) {
+        if (hash_equals($secretSig, $clientToken) || hash_equals($newSig, $clientToken)) {
             return true;
         }
     }
 
     // 2. Check X-Admin-Token header
     $xToken = $_SERVER['HTTP_X_ADMIN_TOKEN'] ?? '';
-    if ($xToken && hash_equals($secretSig, $xToken)) {
+    if ($xToken && (hash_equals($secretSig, $xToken) || hash_equals($newSig, $xToken))) {
         return true;
     }
 
