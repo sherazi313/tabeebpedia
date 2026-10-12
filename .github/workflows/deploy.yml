@@ -54,3 +54,11 @@ jobs:
             jamiatatibba/**
             .private/**
             public_html/**
+            data/analytics.json
+            **/data/analytics.json
+            data/admin_2fa_tokens.json
+            **/data/admin_2fa_tokens.json
+            data/admin_trusted_devices.json
+            **/data/admin_trusted_devices.json
+            data/password_resets.json
+            **/data/password_resets.json

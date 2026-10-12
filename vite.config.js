@@ -67,6 +67,92 @@ function parseEmailList(input) {
   return [];
 }
 
+function computeAnalyticsSummary(data) {
+  const today = new Date().toISOString().slice(0, 10);
+  const yDate = new Date();
+  yDate.setDate(yDate.getDate() - 1);
+  const yesterday = yDate.toISOString().slice(0, 10);
+  const currentMonth = today.slice(0, 7);
+  const currentYear = today.slice(0, 4);
+
+  const todayViews = data.daily?.[today]?.views || 0;
+  const todayVisitors = Object.keys(data.daily?.[today]?.visitors || {}).length;
+
+  const yesterdayViews = data.daily?.[yesterday]?.views || 0;
+  const yesterdayVisitors = Object.keys(data.daily?.[yesterday]?.visitors || {}).length;
+
+  let weekViews = 0;
+  const weekVisitorsMap = new Set();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dStr = d.toISOString().slice(0, 10);
+    if (data.daily?.[dStr]) {
+      weekViews += data.daily[dStr].views || 0;
+      Object.keys(data.daily[dStr].visitors || {}).forEach(v => weekVisitorsMap.add(v));
+    }
+  }
+  const weekVisitors = weekVisitorsMap.size;
+
+  let monthViews = 0;
+  const monthVisitorsMap = new Set();
+  Object.keys(data.daily || {}).forEach(d => {
+    if (d.startsWith(currentMonth)) {
+      monthViews += data.daily[d].views || 0;
+      Object.keys(data.daily[d].visitors || {}).forEach(v => monthVisitorsMap.add(v));
+    }
+  });
+  const monthVisitors = monthVisitorsMap.size;
+
+  let yearViews = 0;
+  const yearVisitorsMap = new Set();
+  Object.keys(data.daily || {}).forEach(d => {
+    if (d.startsWith(currentYear)) {
+      yearViews += data.daily[d].views || 0;
+      Object.keys(data.daily[d].visitors || {}).forEach(v => yearVisitorsMap.add(v));
+    }
+  });
+  const yearVisitors = yearVisitorsMap.size;
+
+  const chartDays = [];
+  const monthNamesUrdu = ['جنوری', 'فروری', 'مارچ', 'اپریل', 'مئی', 'جون', 'جولائی', 'اگست', 'ستمبر', 'اکتوبر', 'نومبر', 'دسمبر'];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const dStr = d.toISOString().slice(0, 10);
+    chartDays.push({
+      date: dStr,
+      label: `${d.getDate()} ${monthNamesUrdu[d.getMonth()].slice(0, 3)}`,
+      views: data.daily?.[dStr]?.views || 0,
+      visitors: Object.keys(data.daily?.[dStr]?.visitors || {}).length
+    });
+  }
+
+  const topPages = Object.keys(data.pages || {}).map(p => ({
+    path: p,
+    title: data.pages[p].title || p,
+    views: data.pages[p].views || 0
+  })).sort((a, b) => b.views - a.views).slice(0, 10);
+
+  return {
+    today: { views: todayViews, visitors: todayVisitors },
+    yesterday: { views: yesterdayViews, visitors: yesterdayVisitors },
+    thisWeek: { views: weekViews, visitors: weekVisitors },
+    thisMonth: { views: monthViews, visitors: monthVisitors },
+    thisYear: { views: yearViews, visitors: yearVisitors },
+    allTime: {
+      views: Math.max(data.totalViews || 0, yearViews),
+      visitors: Math.max(Object.keys(data.uniqueVisitors || {}).length, yearVisitors)
+    },
+    activeNow: 1,
+    chartDays,
+    topPages,
+    devices: data.devices || { mobile: 0, desktop: 0, tablet: 0 },
+    recentVisits: data.recentVisits || [],
+    lastUpdated: new Date().toLocaleTimeString('ur-PK')
+  };
+}
+
 function localApiPlugin() {
   return {
     name: 'local-api-plugin',
@@ -423,6 +509,26 @@ function localApiPlugin() {
 
           const dataFile = path.resolve(__dirname, 'public', 'data', `${endpoint}.json`);
 
+          if (endpoint === 'analytics') {
+            let currentData = {
+              totalViews: 0,
+              uniqueVisitors: {},
+              daily: {},
+              pages: {},
+              devices: { mobile: 0, desktop: 0, tablet: 0 },
+              recentVisits: []
+            };
+            if (fs.existsSync(dataFile)) {
+              try {
+                const parsed = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+                if (parsed && typeof parsed === 'object' && parsed.daily) currentData = parsed;
+              } catch (e) {}
+            }
+            res.setHeader('Content-Type', 'application/json; charset=UTF-8');
+            res.end(JSON.stringify(computeAnalyticsSummary(currentData)));
+            return;
+          }
+
           if (req.method === 'GET') {
             if (fs.existsSync(dataFile)) {
               const data = fs.readFileSync(dataFile, 'utf8');
@@ -443,6 +549,70 @@ function localApiPlugin() {
             });
             req.on('end', () => {
               try {
+                if (endpoint === 'analytics') {
+                  let payload = {};
+                  try { payload = JSON.parse(body); } catch (e) {}
+                  let currentData = {
+                    totalViews: 0,
+                    uniqueVisitors: {},
+                    daily: {},
+                    pages: {},
+                    devices: { mobile: 0, desktop: 0, tablet: 0 },
+                    recentVisits: []
+                  };
+                  if (fs.existsSync(dataFile)) {
+                    try {
+                      const parsed = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+                      if (parsed && typeof parsed === 'object' && parsed.daily) currentData = parsed;
+                    } catch (e) {}
+                  }
+
+                  if (payload.action === 'track') {
+                    const today = new Date().toISOString().slice(0, 10);
+                    const vid = payload.visitorId || 'v_anon';
+                    currentData.totalViews = (currentData.totalViews || 0) + 1;
+                    currentData.uniqueVisitors = currentData.uniqueVisitors || {};
+                    currentData.uniqueVisitors[vid] = Date.now();
+                    currentData.daily = currentData.daily || {};
+                    if (!currentData.daily[today]) currentData.daily[today] = { views: 0, visitors: {} };
+                    currentData.daily[today].views = (currentData.daily[today].views || 0) + 1;
+                    currentData.daily[today].visitors = currentData.daily[today].visitors || {};
+                    currentData.daily[today].visitors[vid] = 1;
+
+                    const p = payload.path || '/';
+                    currentData.pages = currentData.pages || {};
+                    if (!currentData.pages[p]) currentData.pages[p] = { views: 0, title: payload.title || p };
+                    currentData.pages[p].views = (currentData.pages[p].views || 0) + 1;
+
+                    const dev = payload.device || 'desktop';
+                    currentData.devices = currentData.devices || { mobile: 0, desktop: 0, tablet: 0 };
+                    currentData.devices[dev] = (currentData.devices[dev] || 0) + 1;
+
+                    currentData.recentVisits = currentData.recentVisits || [];
+                    currentData.recentVisits.unshift({
+                      visitorId: vid.slice(0, 8) + '...',
+                      path: p,
+                      title: payload.title || p,
+                      device: dev,
+                      browser: payload.browser || 'Browser',
+                      time: new Date().toLocaleTimeString('ur-PK'),
+                      timestamp: Date.now()
+                    });
+                    if (currentData.recentVisits.length > 30) currentData.recentVisits = currentData.recentVisits.slice(0, 30);
+
+                    const dir = path.dirname(dataFile);
+                    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+                    fs.writeFileSync(dataFile, JSON.stringify(currentData, null, 2), 'utf8');
+
+                    res.setHeader('Content-Type', 'application/json; charset=UTF-8');
+                    res.end(JSON.stringify({ status: 'success', summary: computeAnalyticsSummary(currentData) }));
+                    return;
+                  }
+
+                  res.setHeader('Content-Type', 'application/json; charset=UTF-8');
+                  res.end(JSON.stringify({ status: 'success' }));
+                  return;
+                }
                 if (endpoint === 'upload') {
                   const parsed = JSON.parse(body);
                   const base64Data = parsed.image || parsed.data;

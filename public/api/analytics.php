@@ -35,7 +35,7 @@ function loadAnalyticsData($dataFile) {
         $content = @file_get_contents($dataFile);
         if ($content) {
             $data = json_decode($content, true);
-            if (is_array($data)) {
+            if (is_array($data) && isset($data['daily']) && is_array($data['daily'])) {
                 return array_merge(getInitialAnalyticsStructure(), $data);
             }
         }

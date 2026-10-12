@@ -154,6 +154,16 @@ export const trackPageView = async ({ path = window.location.pathname, title = d
   } catch (e) {
     // Graceful silent fallback to local analytics
   }
+
+  // 3. Send to Google Analytics 4 (SPA Route Change Tracking)
+  try {
+    if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+      window.gtag('config', 'G-BWLD90QWYJ', {
+        page_path: path || '/',
+        page_title: title || 'طبیب پیڈیا'
+      });
+    }
+  } catch (e) {}
 };
 
 // Send Heartbeat for Live Visitors Tracking
