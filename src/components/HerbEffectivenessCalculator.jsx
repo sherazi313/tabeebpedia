@@ -21,7 +21,10 @@ import {
   BookOpen,
   ArrowRight,
   ShieldCheck,
-  Percent
+  Percent,
+  Settings,
+  Edit3,
+  X
 } from 'lucide-react';
 import HERBS_BASE_DATA from '../data/herbsCalculatorData.json';
 
@@ -37,9 +40,10 @@ export const CATEGORY_EFFECTIVENESS = {
 
 export const ALLOWED_CATEGORIES = Object.keys(CATEGORY_EFFECTIVENESS);
 
-// Classical Prescriptions Presets for 1-click test
-const SAMPLE_PRESCRIPTIONS = [
+// Default Classical Prescriptions Presets for 1-click test
+const DEFAULT_SAMPLE_PRESCRIPTIONS = [
   {
+    id: 'sample_1',
     title: 'حب صابر (ملین عضلاتی غدی)',
     description: 'معدہ، جگر اور آنتوں کی صفائی کے لیے مشہور و آزمودہ کلاسیکل نسخہ',
     items: [
@@ -49,6 +53,7 @@ const SAMPLE_PRESCRIPTIONS = [
     ]
   },
   {
+    id: 'sample_2',
     title: 'تریاق تبخیر و معدہ',
     description: 'گیس، تبخیر اور معدے کے نفخ کے ازالے کے لیے متوازن ہربل مرکب',
     items: [
@@ -58,6 +63,7 @@ const SAMPLE_PRESCRIPTIONS = [
     ]
   },
   {
+    id: 'sample_3',
     title: 'اکسیر جگر (مصفی جگر)',
     description: 'جگر کی سستی دور کرنے اور فاسد مادوں کے اخراج کے لیے',
     items: [
@@ -67,6 +73,7 @@ const SAMPLE_PRESCRIPTIONS = [
     ]
   },
   {
+    id: 'sample_4',
     title: 'تریاق اعصاب و مقوی دماغ',
     description: 'اعصابی کمزوری اور خشکی و گرمی کے ازالے کے لیے مفید مرکب',
     items: [
@@ -77,11 +84,14 @@ const SAMPLE_PRESCRIPTIONS = [
   }
 ];
 
+const PRESETS_STORAGE_KEY = 'tabeeb_hec_sample_prescriptions';
+
 export default function HerbEffectivenessCalculator({ 
   articles = [], 
   onSelectArticle, 
   onBack,
-  theme = 'herbal'
+  theme = 'herbal',
+  siteSettings
 }) {
   const isNavy = theme === 'navy';
 
@@ -124,12 +134,8 @@ export default function HerbEffectivenessCalculator({
   const [copied, setCopied] = useState(false);
   const printRef = useRef(null);
 
-  // Selected herbs in current recipe
-  const [selectedHerbs, setSelectedHerbs] = useState([
-    { id: '1', name: 'سہاگہ بریاں', category: 'گرم خشک', weight: 20, slug: '' },
-    { id: '2', name: 'ملٹھی', category: 'تر گرم', weight: 30, slug: '' },
-    { id: '3', name: 'گوند کیکر', category: 'خشک سرد', weight: 15, slug: '' }
-  ]);
+  // Selected herbs in current recipe (empty by default so user adds their own)
+  const [selectedHerbs, setSelectedHerbs] = useState([]);
 
   // Autocomplete Suggestions
   const suggestions = useMemo(() => {
@@ -201,9 +207,24 @@ export default function HerbEffectivenessCalculator({
     }
   };
 
+  // Presets loaded from siteSettings or localStorage or defaults
+  const presets = useMemo(() => {
+    if (siteSettings?.calculatorPresets && Array.isArray(siteSettings.calculatorPresets) && siteSettings.calculatorPresets.length > 0) {
+      return siteSettings.calculatorPresets;
+    }
+    try {
+      const saved = localStorage.getItem(PRESETS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return DEFAULT_SAMPLE_PRESCRIPTIONS;
+  }, [siteSettings]);
+
   // Load sample prescription
   const handleLoadSample = (sample) => {
-    const newItems = sample.items.map((item, idx) => ({
+    const newItems = (sample.items || []).map((item, idx) => ({
       id: `${Date.now()}_${idx}`,
       name: item.name,
       category: item.categoryFallback || item.category,
@@ -249,7 +270,7 @@ export default function HerbEffectivenessCalculator({
     let compositeTemperament = 'معتدل';
     let qanoonTitle = 'معتدل طبی مزاج';
     let organAction = 'جسم کے تمام اعضاء میں اعتدال و توازن';
-    let colorBadge = 'bg-slate-700 text-slate-100';
+    let colorBadge = 'bg-slate-100 text-slate-700 border-slate-300';
 
     if (grandTotal > 0) {
       // Order by which axis is stronger
@@ -278,17 +299,17 @@ export default function HerbEffectivenessCalculator({
         }
       }
 
-      // Assign theme color
+      // Assign theme color for white/light color scheme
       if (compositeTemperament.includes('گرم') && compositeTemperament.includes('خشک')) {
-        colorBadge = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+        colorBadge = 'bg-amber-100 text-amber-800 border-amber-300';
       } else if (compositeTemperament.includes('خشک') && compositeTemperament.includes('سرد')) {
-        colorBadge = 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40';
+        colorBadge = 'bg-cyan-100 text-cyan-800 border-cyan-300';
       } else if (compositeTemperament.includes('گرم') && compositeTemperament.includes('تر')) {
-        colorBadge = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+        colorBadge = 'bg-rose-100 text-rose-800 border-rose-300';
       } else if (compositeTemperament.includes('تر') && compositeTemperament.includes('سرد')) {
-        colorBadge = 'bg-blue-500/20 text-blue-300 border-blue-500/40';
+        colorBadge = 'bg-blue-100 text-blue-800 border-blue-300';
       } else {
-        colorBadge = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+        colorBadge = 'bg-emerald-100 text-emerald-800 border-emerald-300';
       }
     }
 
@@ -340,25 +361,25 @@ export default function HerbEffectivenessCalculator({
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans pb-16">
+    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-16">
       
       {/* Top Banner / Hero */}
-      <div className={`relative overflow-hidden ${isNavy ? 'bg-gradient-to-b from-slate-950 via-slate-900 to-slate-900 border-b border-slate-800' : 'bg-gradient-to-b from-emerald-950 via-slate-900 to-slate-900 border-b border-emerald-900/40'} pt-8 pb-10 px-4 sm:px-6 lg:px-8`}>
+      <div className={`relative overflow-hidden ${isNavy ? 'bg-gradient-to-b from-blue-50/80 via-white to-white border-b border-blue-100' : 'bg-gradient-to-b from-emerald-50/80 via-white to-white border-b border-emerald-100'} pt-8 pb-10 px-4 sm:px-6 lg:px-8`}>
         <div className="max-w-6xl mx-auto">
           
           {/* Breadcrumb / Back button */}
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={onBack}
-              className="flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white bg-slate-800/80 hover:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 transition-all font-simple cursor-pointer"
+              className="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 shadow-xs transition-all font-simple cursor-pointer"
             >
               <ArrowRight className="w-4 h-4" />
               <span>ہوم پیج پر واپس جائیں</span>
             </button>
 
             <div className="flex items-center gap-2">
-              <span className="text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full font-bold flex items-center gap-1.5 font-mono">
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span className={`text-[11px] ${isNavy ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'} border px-3 py-1 rounded-full font-bold flex items-center gap-1.5 font-mono shadow-xs`}>
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
                 <span>HEC Algorithm v1.2</span>
               </span>
             </div>
@@ -366,28 +387,28 @@ export default function HerbEffectivenessCalculator({
 
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="space-y-3 max-w-3xl text-right">
-              <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-3.5 py-1 rounded-full text-xs font-simple text-amber-300">
-                <FlaskConical className="w-4 h-4 text-emerald-400" />
+              <div className={`inline-flex items-center gap-2 ${isNavy ? 'bg-blue-50 border-blue-200 text-blue-800' : 'bg-emerald-50 border-emerald-200 text-emerald-800'} border px-3.5 py-1 rounded-full text-xs font-simple`}>
+                <FlaskConical className={`w-4 h-4 ${isNavy ? 'text-blue-600' : 'text-emerald-600'}`} />
                 <span>جڑی بوٹیوں و نسخہ جات کا ڈیجیٹل مزاج کیلکولیٹر</span>
               </div>
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight font-h1">
-                ??? ?????? ?? ???? ???? ?????????
+              <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight font-h1">
+                جڑی بوٹیوں کا نسخہ مزاج کیلکولیٹر
               </h1>
-              <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-nastaliq">
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-nastaliq">
                 قانون مفرد اعضاء اور طب یونانی کے مستند ریاضیاتی فارمولے کے مطابق کسی بھی نسخے یا جڑی بوٹیوں کے مرکب کا دقیق سائنسی مزاج، حرارت، برودت، یبوست اور رطوبت کا فیصد تناسب معلوم کریں۔
               </p>
             </div>
 
             {/* Quick Stat or Author pill */}
-            <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 sm:p-5 text-right space-y-2 shrink-0 backdrop-blur-md">
-              <div className="flex items-center gap-2 text-xs text-slate-400 font-simple">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-5 text-right space-y-2 shrink-0 shadow-sm">
+              <div className="flex items-center gap-2 text-xs text-slate-600 font-simple">
+                <ShieldCheck className={`w-4 h-4 ${isNavy ? 'text-blue-600' : 'text-emerald-600'}`} />
                 <span>اصول: 70% اول صفت، 30% ثانی صفت</span>
               </div>
-              <div className="text-xs text-slate-300 font-mono">
-                ڈیٹا بیس: <strong className="text-emerald-400">{allAvailableHerbs.length}</strong> مستند مفردات
+              <div className="text-xs text-slate-700 font-mono">
+                ڈیٹا بیس: <strong className={isNavy ? 'text-blue-600' : 'text-emerald-600'}>{allAvailableHerbs.length}</strong> مستند مفردات
               </div>
-              <div className="text-[11px] text-slate-500 font-sans">
+              <div className="text-[11px] text-slate-400 font-sans">
                 تحقیق و فارمولا: حکیم سید عبدالوہاب شاہ
               </div>
             </div>
@@ -400,30 +421,41 @@ export default function HerbEffectivenessCalculator({
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
         
         {/* Sample Prescriptions Bar (Quick Test) */}
-        <div className="bg-slate-950 border border-slate-800/80 rounded-2xl p-4 mb-6 shadow-md">
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 mb-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-amber-400" />
-              <h3 className="text-xs sm:text-sm font-bold text-white font-simple">
+              <BookOpen className="w-4 h-4 text-amber-500" />
+              <h3 className="text-xs sm:text-sm font-bold text-slate-900 font-simple">
                 مشہور کلاسیکل نسخہ جات کے نمونے (ایک کلک سے لوڈ کریں):
               </h3>
             </div>
-            <span className="text-[11px] text-slate-400">فوری ٹیسٹ اور مشاہدے کے لیے کلک کریں</span>
+            <span className="text-[11px] text-slate-500">فوری ٹیسٹ اور مشاہدے کے لیے کلک کریں</span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-            {SAMPLE_PRESCRIPTIONS.map((sample, idx) => (
+            {presets.map((sample, idx) => (
               <button
-                key={idx}
+                key={sample.id || idx}
                 type="button"
                 onClick={() => handleLoadSample(sample)}
-                className="text-right p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/50 transition-all text-xs group cursor-pointer"
+                className={`text-right p-3 rounded-xl bg-slate-50 hover:bg-white border border-slate-200 ${isNavy ? 'hover:border-blue-400' : 'hover:border-emerald-400'} hover:shadow-xs transition-all text-xs group cursor-pointer flex flex-col justify-between`}
               >
-                <div className="font-bold text-slate-200 group-hover:text-emerald-400 font-simple transition-colors">
-                  {sample.title}
+                <div>
+                  <div className={`font-bold text-slate-800 ${isNavy ? 'group-hover:text-blue-700' : 'group-hover:text-emerald-700'} font-simple transition-colors line-clamp-1`}>
+                    {sample.title}
+                  </div>
+                  <div className="text-[11px] text-slate-500 line-clamp-2 mt-1 font-nastaliq leading-relaxed">
+                    {sample.description || `${sample.items?.length || 0} اجزاء`}
+                  </div>
                 </div>
-                <div className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
-                  {sample.description}
+
+                <div className="mt-2.5 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[10px] text-slate-400 w-full">
+                  <span className="font-mono text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">
+                    {sample.items?.length || 0} اجزاء
+                  </span>
+                  <span className="group-hover:text-slate-600 transition-colors">
+                    لوڈ کریں ←
+                  </span>
                 </div>
               </button>
             ))}
@@ -437,23 +469,23 @@ export default function HerbEffectivenessCalculator({
           <div className="lg:col-span-7 space-y-6">
             
             {/* Add Herb Form Card */}
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-emerald-600/20 text-emerald-400 rounded-xl">
+                  <div className={`p-2 ${isNavy ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'} rounded-xl`}>
                     <Plus className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-white font-simple">
+                    <h2 className="text-base font-bold text-slate-900 font-simple">
                       نسخے میں نئی جڑی بوٹی شامل کریں
                     </h2>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-slate-500">
                       نام لکھ کر سرچ کریں یا کیٹگری اور وزن درج کریں
                     </p>
                   </div>
                 </div>
 
-                <span className="text-xs bg-slate-900 border border-slate-800 text-slate-400 px-2.5 py-1 rounded-lg font-mono">
+                <span className="text-xs bg-slate-100 border border-slate-200 text-slate-600 px-2.5 py-1 rounded-lg font-mono">
                   {selectedHerbs.length} اجزاء
                 </span>
               </div>
@@ -462,7 +494,7 @@ export default function HerbEffectivenessCalculator({
                 
                 {/* Herb Search & Autocomplete */}
                 <div className="relative">
-                  <label className="block text-xs font-bold text-slate-300 mb-1 font-simple text-right">
+                  <label className="block text-xs font-bold text-slate-700 mb-1 font-simple text-right">
                     جڑی بوٹی کا نام (Search / Type Herb Name) *
                   </label>
                   <div className="relative">
@@ -475,31 +507,31 @@ export default function HerbEffectivenessCalculator({
                       }}
                       onFocus={() => setShowSuggestions(true)}
                       placeholder="مثلاً: سنامکی، ملٹھی، زنجبیل، رائی، سہاگہ، دارچینی..."
-                      className="w-full bg-slate-900 border border-slate-700 rounded-2xl pr-10 pl-4 py-3 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 font-h2 text-right"
+                      className={`w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 rounded-2xl pr-10 pl-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none ${isNavy ? 'focus:border-blue-500' : 'focus:border-emerald-500'} font-h2 text-right transition-colors`}
                     />
                     <Search className="w-5 h-5 text-slate-400 absolute right-3.5 top-3.5" />
                   </div>
 
                   {/* Autocomplete Dropdown */}
                   {showSuggestions && suggestions.length > 0 && (
-                    <div className="absolute top-full right-0 left-0 mt-1 bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden divide-y divide-slate-800 max-h-64 overflow-y-auto">
+                    <div className="absolute top-full right-0 left-0 mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 overflow-hidden divide-y divide-slate-100 max-h-64 overflow-y-auto">
                       {suggestions.map((h) => (
                         <div
                           key={h.id || h.title}
                           onClick={() => handleSelectSuggestion(h)}
-                          className="p-3 hover:bg-slate-800 flex items-center justify-between cursor-pointer transition-colors text-right"
+                          className="p-3 hover:bg-slate-50 flex items-center justify-between cursor-pointer transition-colors text-right"
                         >
                           <div className="flex items-center gap-2">
-                            <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded font-mono">
+                            <span className={`text-xs ${isNavy ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'} border px-2 py-0.5 rounded font-mono`}>
                               {h.category}
                             </span>
                             {h.qanoonCategory && (
-                              <span className="text-[10px] text-slate-400 font-simple">
+                              <span className="text-[10px] text-slate-500 font-simple">
                                 ({h.qanoonCategory})
                               </span>
                             )}
                           </div>
-                          <span className="text-sm font-bold text-white font-simple">
+                          <span className="text-sm font-bold text-slate-900 font-simple">
                             {h.title}
                           </span>
                         </div>
@@ -513,13 +545,13 @@ export default function HerbEffectivenessCalculator({
                   
                   {/* Category Select */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1 font-simple text-right">
+                    <label className="block text-xs font-bold text-slate-700 mb-1 font-simple text-right">
                       مزاج / تاثیر کی کیٹگری (Category) *
                     </label>
                     <select
                       value={selectedCategory}
                       onChange={(e) => setSelectedCategory(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-emerald-500 font-simple cursor-pointer text-right"
+                      className={`w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 rounded-2xl px-4 py-3 text-xs text-slate-800 focus:outline-none ${isNavy ? 'focus:border-blue-500' : 'focus:border-emerald-500'} font-simple cursor-pointer text-right transition-colors`}
                     >
                       <option value="خشک گرم">خشک گرم (عضلاتی غدی - 70% خشک، 30% گرم)</option>
                       <option value="گرم خشک">گرم خشک (غدی عضلاتی - 70% گرم، 30% خشک)</option>
@@ -533,11 +565,11 @@ export default function HerbEffectivenessCalculator({
                   {/* Weight Input */}
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-1 text-[11px] text-slate-400">
+                      <div className="flex items-center gap-1 text-[11px] text-slate-500">
                         <button
                           type="button"
                           onClick={() => setWeightUnit('g')}
-                          className={`px-1.5 py-0.2 rounded ${weightUnit === 'g' ? 'bg-emerald-600 text-white font-bold' : 'hover:text-white'}`}
+                          className={`px-1.5 py-0.2 rounded transition-colors ${weightUnit === 'g' ? (isNavy ? 'bg-blue-600 text-white font-bold' : 'bg-emerald-600 text-white font-bold') : 'hover:text-slate-900'}`}
                         >
                           گرام (g)
                         </button>
@@ -545,13 +577,13 @@ export default function HerbEffectivenessCalculator({
                         <button
                           type="button"
                           onClick={() => setWeightUnit('tola')}
-                          className={`px-1.5 py-0.2 rounded ${weightUnit === 'tola' ? 'bg-emerald-600 text-white font-bold' : 'hover:text-white'}`}
+                          className={`px-1.5 py-0.2 rounded transition-colors ${weightUnit === 'tola' ? (isNavy ? 'bg-blue-600 text-white font-bold' : 'bg-emerald-600 text-white font-bold') : 'hover:text-slate-900'}`}
                         >
                           تولہ
                         </button>
                       </div>
 
-                      <label className="text-xs font-bold text-slate-300 font-simple">
+                      <label className="text-xs font-bold text-slate-700 font-simple">
                         وزن مقدار ({weightUnit === 'tola' ? 'تولہ' : 'گرام'}) *
                       </label>
                     </div>
@@ -565,7 +597,7 @@ export default function HerbEffectivenessCalculator({
                         value={selectedWeight}
                         onChange={(e) => setSelectedWeight(e.target.value)}
                         placeholder="10"
-                        className="w-full bg-slate-900 border border-slate-700 rounded-2xl px-4 py-3 text-emerald-400 font-bold text-sm focus:outline-none focus:border-emerald-500 font-mono text-center"
+                        className={`w-full bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 rounded-2xl px-4 py-3 ${isNavy ? 'text-blue-700 focus:border-blue-500' : 'text-emerald-700 focus:border-emerald-500'} font-bold text-sm focus:outline-none font-mono text-center transition-colors`}
                       />
                     </div>
                   </div>
@@ -573,7 +605,7 @@ export default function HerbEffectivenessCalculator({
                 </div>
 
                 {/* Quick Presets for weight */}
-                <div className="flex items-center justify-between text-xs text-slate-400 pt-1">
+                <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
                   <div className="flex items-center gap-1.5">
                     <span className="text-[11px] text-slate-500 font-simple">فوری وزن:</span>
                     {[5, 10, 20, 50].map(w => (
@@ -581,7 +613,7 @@ export default function HerbEffectivenessCalculator({
                         key={w}
                         type="button"
                         onClick={() => setSelectedWeight(w)}
-                        className="px-2 py-0.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-lg text-[10px] font-mono transition-colors"
+                        className="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 rounded-lg text-[10px] font-mono transition-colors cursor-pointer"
                       >
                         +{w}g
                       </button>
@@ -589,7 +621,7 @@ export default function HerbEffectivenessCalculator({
                     <button
                       type="button"
                       onClick={() => setSelectedWeight(12)}
-                      className="px-2 py-0.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-amber-300 rounded-lg text-[10px] font-simple transition-colors"
+                      className="px-2 py-0.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 rounded-lg text-[10px] font-simple transition-colors cursor-pointer"
                       title="1 تولہ = 12 گرام"
                     >
                       1 تولہ
@@ -598,7 +630,7 @@ export default function HerbEffectivenessCalculator({
 
                   <button
                     type="submit"
-                    className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white rounded-2xl text-xs font-bold shadow-lg shadow-emerald-900/30 transition-all font-simple cursor-pointer"
+                    className={`flex items-center gap-2 px-6 py-2.5 ${isNavy ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/20'} active:scale-95 text-white rounded-2xl text-xs font-bold shadow-lg transition-all font-simple cursor-pointer`}
                   >
                     <Plus className="w-4 h-4" />
                     <span>نسخہ میں شامل کریں</span>
@@ -609,11 +641,11 @@ export default function HerbEffectivenessCalculator({
             </div>
 
             {/* Selected Ingredients List / Table */}
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-xl space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <Scale className="w-5 h-5 text-amber-400" />
-                  <h3 className="text-base font-bold text-white font-simple">
+                  <Scale className="w-5 h-5 text-amber-500" />
+                  <h3 className="text-base font-bold text-slate-900 font-simple">
                     شامل اجزاء و اوزان کی فہرست
                   </h3>
                 </div>
@@ -623,22 +655,24 @@ export default function HerbEffectivenessCalculator({
                     <button
                       type="button"
                       onClick={handleClearAll}
-                      className="flex items-center gap-1 text-[11px] text-red-400 hover:text-red-300 bg-red-950/40 hover:bg-red-950/70 border border-red-900/50 px-2.5 py-1 rounded-xl transition-colors font-simple cursor-pointer"
+                      className="flex items-center gap-1 text-[11px] text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 px-2.5 py-1 rounded-xl transition-colors font-simple cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>صاف کریں</span>
                     </button>
                   )}
-                  <span className="text-xs text-slate-400 font-mono">
-                    کل وزن: <strong className="text-emerald-400 font-bold">{calculationResults.totalWeight.toFixed(1)}g</strong>
+                  <span className="text-xs text-slate-600 font-mono">
+                    کل وزن: <strong className={`${isNavy ? 'text-blue-700' : 'text-emerald-700'} font-bold`}>{calculationResults.totalWeight.toFixed(1)}g</strong>
                   </span>
                 </div>
               </div>
 
               {selectedHerbs.length === 0 ? (
                 <div className="p-8 text-center space-y-3">
-                  <FlaskConical className="w-12 h-12 text-slate-700 mx-auto" />
-                  <p className="text-sm font-bold text-slate-400 font-simple">
+                  <div className="w-16 h-16 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                    <FlaskConical className="w-8 h-8" />
+                  </div>
+                  <p className="text-sm font-bold text-slate-700 font-simple">
                     ابھی تک کوئی جڑی بوٹی شامل نہیں کی گئی
                   </p>
                   <p className="text-xs text-slate-500 font-nastaliq max-w-sm mx-auto">
@@ -646,30 +680,30 @@ export default function HerbEffectivenessCalculator({
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-800/80">
+                <div className="divide-y divide-slate-100">
                   {selectedHerbs.map((herb, idx) => {
                     const eff = CATEGORY_EFFECTIVENESS[herb.category];
                     return (
                       <div 
                         key={herb.id} 
-                        className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-900/40 px-2 rounded-xl transition-colors"
+                        className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50 px-2 rounded-xl transition-colors"
                       >
                         {/* Herb Info */}
                         <div className="flex items-center gap-3">
-                          <span className="w-6 h-6 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-xs font-mono text-slate-400 shrink-0">
+                          <span className="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xs font-mono text-slate-600 shrink-0">
                             {idx + 1}
                           </span>
 
                           <div className="text-right">
                             <div className="flex items-center gap-2">
-                              <h4 className="text-sm font-bold text-white font-h2">
+                              <h4 className="text-sm font-bold text-slate-900 font-h2">
                                 {herb.name}
                               </h4>
                               {herb.slug && onSelectArticle && (
                                 <button
                                   type="button"
                                   onClick={() => onSelectArticle({ slug: herb.slug, title: herb.name })}
-                                  className="text-slate-400 hover:text-emerald-400 transition-colors"
+                                  className={`text-slate-400 ${isNavy ? 'hover:text-blue-600' : 'hover:text-emerald-600'} transition-colors cursor-pointer`}
                                   title="جڑی بوٹی کا تفصیلی مضمون دیکھیں"
                                 >
                                   <ExternalLink className="w-3.5 h-3.5" />
@@ -678,7 +712,7 @@ export default function HerbEffectivenessCalculator({
                             </div>
                             
                             <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.2 rounded font-simple">
+                              <span className="text-[10px] bg-slate-100 text-slate-700 border border-slate-200 px-2 py-0.2 rounded font-simple">
                                 {herb.category}
                               </span>
                               {eff?.qanoon && (
@@ -692,22 +726,22 @@ export default function HerbEffectivenessCalculator({
 
                         {/* Weight & Remove Action */}
                         <div className="flex items-center gap-3 self-end sm:self-center">
-                          <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1">
+                          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1">
                             <input
                               type="number"
                               min="0.01"
                               step="any"
                               value={herb.weight}
                               onChange={(e) => handleUpdateWeight(herb.id, e.target.value)}
-                              className="w-14 bg-transparent text-emerald-400 font-bold text-xs text-center outline-none font-mono"
+                              className={`w-14 bg-transparent ${isNavy ? 'text-blue-700' : 'text-emerald-700'} font-bold text-xs text-center outline-none font-mono`}
                             />
-                            <span className="text-[11px] text-slate-400 font-mono">g</span>
+                            <span className="text-[11px] text-slate-500 font-mono">g</span>
                           </div>
 
                           <button
                             type="button"
                             onClick={() => handleRemoveHerb(herb.id)}
-                            className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors cursor-pointer"
                             title="حذف کریں"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -726,11 +760,11 @@ export default function HerbEffectivenessCalculator({
           <div className="lg:col-span-5 space-y-6">
             
             {/* Main Result Card */}
-            <div className="bg-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-6 shadow-2xl space-y-5 text-right relative overflow-hidden">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm space-y-5 text-right relative overflow-hidden">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div className="flex items-center gap-2">
-                  <Calculator className="w-5 h-5 text-emerald-400" />
-                  <h3 className="text-base font-bold text-white font-simple">
+                  <Calculator className={`w-5 h-5 ${isNavy ? 'text-blue-600' : 'text-emerald-600'}`} />
+                  <h3 className="text-base font-bold text-slate-900 font-simple">
                     مرکب کا حتمی مزاج و تجزیہ
                   </h3>
                 </div>
@@ -739,30 +773,30 @@ export default function HerbEffectivenessCalculator({
                   <button
                     type="button"
                     onClick={handleCopyPrescription}
-                    className="p-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs border border-slate-800 transition-colors"
+                    className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 rounded-xl text-xs border border-slate-200 transition-colors cursor-pointer"
                     title="نسخہ کلپ بورڈ پر کاپی کریں"
                   >
-                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                    {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
                   </button>
 
                   <button
                     type="button"
                     onClick={handlePrint}
-                    className="p-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs border border-slate-800 transition-colors"
+                    className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 rounded-xl text-xs border border-slate-200 transition-colors cursor-pointer"
                     title="پرنٹ کریں"
                   >
-                    <Printer className="w-4 h-4 text-blue-400" />
+                    <Printer className="w-4 h-4 text-blue-600" />
                   </button>
                 </div>
               </div>
 
               {/* Dominant Result Banner */}
-              <div className="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-5 text-center space-y-2 relative shadow-inner">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest font-sans">
+              <div className="bg-gradient-to-br from-slate-50 to-emerald-50/30 border border-slate-200 rounded-2xl p-5 text-center space-y-2 relative shadow-xs">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest font-sans">
                   COMPOSITE TEMPERAMENT
                 </span>
                 
-                <div className="text-2xl sm:text-3xl font-extrabold text-white font-h1 tracking-tight">
+                <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-h1 tracking-tight">
                   {calculationResults.compositeTemperament}
                 </div>
 
@@ -772,31 +806,31 @@ export default function HerbEffectivenessCalculator({
                   </span>
                 </div>
 
-                <p className="text-xs text-slate-400 font-nastaliq leading-relaxed pt-1 max-w-sm mx-auto">
+                <p className="text-xs text-slate-600 font-nastaliq leading-relaxed pt-1 max-w-sm mx-auto">
                   {calculationResults.organAction}
                 </p>
               </div>
 
               {/* 4 Qualities Breakdown Cards (حرارت، یبوست، برودت، رطوبت) */}
               <div className="space-y-3 pt-1">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-sans border-b border-slate-800/80 pb-1.5">
+                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider font-sans border-b border-slate-100 pb-1.5">
                   چاروں کیفیات کا فی صد تناسب و مقدار
                 </h4>
 
                 {/* 1. Warm / حرارت */}
-                <div className="bg-slate-900/80 border border-rose-950/60 rounded-2xl p-3.5 space-y-2">
+                <div className="bg-rose-50/50 border border-rose-100 rounded-2xl p-3.5 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 font-bold text-rose-300 font-mono">
+                    <div className="flex items-center gap-1.5 font-bold text-rose-700 font-mono">
                       <span>{calculationResults.warmPercent.toFixed(1)}%</span>
-                      <span className="text-[10px] text-slate-400">({calculationResults.warmTotal.toFixed(1)}g)</span>
+                      <span className="text-[10px] text-slate-500">({calculationResults.warmTotal.toFixed(1)}g)</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 font-bold text-rose-400 font-simple">
+                    <div className="flex items-center gap-1.5 font-bold text-rose-700 font-simple">
                       <span>حرارت (گرم)</span>
-                      <Flame className="w-4 h-4" />
+                      <Flame className="w-4 h-4 text-rose-600" />
                     </div>
                   </div>
-                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-rose-100/70 h-2.5 rounded-full overflow-hidden">
                     <div 
                       className="bg-gradient-to-r from-amber-500 to-rose-500 h-full rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(100, calculationResults.warmPercent)}%` }}
@@ -805,19 +839,19 @@ export default function HerbEffectivenessCalculator({
                 </div>
 
                 {/* 2. Dry / یبوست */}
-                <div className="bg-slate-900/80 border border-amber-950/60 rounded-2xl p-3.5 space-y-2">
+                <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-3.5 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 font-bold text-amber-300 font-mono">
+                    <div className="flex items-center gap-1.5 font-bold text-amber-800 font-mono">
                       <span>{calculationResults.dryPercent.toFixed(1)}%</span>
-                      <span className="text-[10px] text-slate-400">({calculationResults.dryTotal.toFixed(1)}g)</span>
+                      <span className="text-[10px] text-slate-500">({calculationResults.dryTotal.toFixed(1)}g)</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 font-bold text-amber-400 font-simple">
+                    <div className="flex items-center gap-1.5 font-bold text-amber-800 font-simple">
                       <span>یبوست (خشک)</span>
-                      <span className="text-amber-400 text-sm">🍂</span>
+                      <span className="text-amber-600 text-sm">🍂</span>
                     </div>
                   </div>
-                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-amber-100/70 h-2.5 rounded-full overflow-hidden">
                     <div 
                       className="bg-gradient-to-r from-yellow-500 to-amber-500 h-full rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(100, calculationResults.dryPercent)}%` }}
@@ -826,19 +860,19 @@ export default function HerbEffectivenessCalculator({
                 </div>
 
                 {/* 3. Cold / برودت */}
-                <div className="bg-slate-900/80 border border-cyan-950/60 rounded-2xl p-3.5 space-y-2">
+                <div className="bg-cyan-50/50 border border-cyan-100 rounded-2xl p-3.5 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 font-bold text-cyan-300 font-mono">
+                    <div className="flex items-center gap-1.5 font-bold text-cyan-800 font-mono">
                       <span>{calculationResults.coldPercent.toFixed(1)}%</span>
-                      <span className="text-[10px] text-slate-400">({calculationResults.coldTotal.toFixed(1)}g)</span>
+                      <span className="text-[10px] text-slate-500">({calculationResults.coldTotal.toFixed(1)}g)</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 font-bold text-cyan-400 font-simple">
+                    <div className="flex items-center gap-1.5 font-bold text-cyan-800 font-simple">
                       <span>برودت (سرد)</span>
-                      <Snowflake className="w-4 h-4" />
+                      <Snowflake className="w-4 h-4 text-cyan-600" />
                     </div>
                   </div>
-                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-cyan-100/70 h-2.5 rounded-full overflow-hidden">
                     <div 
                       className="bg-gradient-to-r from-blue-500 to-cyan-400 h-full rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(100, calculationResults.coldPercent)}%` }}
@@ -847,21 +881,21 @@ export default function HerbEffectivenessCalculator({
                 </div>
 
                 {/* 4. Wet / رطوبت */}
-                <div className="bg-slate-900/80 border border-emerald-950/60 rounded-2xl p-3.5 space-y-2">
+                <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-3.5 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 font-bold text-emerald-300 font-mono">
+                    <div className="flex items-center gap-1.5 font-bold text-emerald-800 font-mono">
                       <span>{calculationResults.wetPercent.toFixed(1)}%</span>
-                      <span className="text-[10px] text-slate-400">({calculationResults.wetTotal.toFixed(1)}g)</span>
+                      <span className="text-[10px] text-slate-500">({calculationResults.wetTotal.toFixed(1)}g)</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 font-bold text-emerald-400 font-simple">
+                    <div className="flex items-center gap-1.5 font-bold text-emerald-800 font-simple">
                       <span>رطوبت (تر)</span>
-                      <Droplets className="w-4 h-4" />
+                      <Droplets className="w-4 h-4 text-emerald-600" />
                     </div>
                   </div>
-                  <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-emerald-100/70 h-2.5 rounded-full overflow-hidden">
                     <div 
-                      className="bg-gradient-to-r from-teal-500 to-emerald-400 h-full rounded-full transition-all duration-500"
+                      className="bg-gradient-to-r from-teal-500 to-emerald-500 h-full rounded-full transition-all duration-500"
                       style={{ width: `${Math.min(100, calculationResults.wetPercent)}%` }}
                     />
                   </div>
@@ -870,19 +904,19 @@ export default function HerbEffectivenessCalculator({
               </div>
 
               {/* Total Summary Footer */}
-              <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center justify-between text-xs">
-                <span className="font-bold text-white font-mono">
+              <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-900 font-mono">
                   {calculationResults.totalWeight.toFixed(1)} گرام ({(calculationResults.totalWeight / 12).toFixed(2)} تولہ)
                 </span>
-                <span className="text-slate-400 font-simple">مجموعی خالص وزن:</span>
+                <span className="text-slate-600 font-simple">مجموعی خالص وزن:</span>
               </div>
 
             </div>
 
             {/* Scientific Explanation Info Box */}
-            <div className="bg-slate-950/80 border border-slate-800/80 rounded-3xl p-5 text-right space-y-2.5 text-xs text-slate-400 leading-relaxed font-nastaliq">
-              <div className="flex items-center gap-2 text-white font-bold font-simple">
-                <Info className="w-4 h-4 text-emerald-400" />
+            <div className="bg-white border border-slate-200 rounded-3xl p-5 text-right space-y-2.5 text-xs text-slate-600 leading-relaxed font-nastaliq shadow-sm">
+              <div className="flex items-center gap-2 text-slate-900 font-bold font-simple">
+                <Info className={`w-4 h-4 ${isNavy ? 'text-blue-600' : 'text-emerald-600'}`} />
                 <span>HEC الگورتھم کس طرح کام کرتا ہے؟</span>
               </div>
               <p>

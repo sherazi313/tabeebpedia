@@ -2259,6 +2259,7 @@ export default function App() {
               handleNavigateToTab('home');
             }}
             theme={theme}
+            siteSettings={siteSettings}
           />
         )}
 

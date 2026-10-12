@@ -8,6 +8,7 @@ import {
   Database, 
   FileText, 
   UserCheck, 
+  Calculator, 
   CheckCircle2, 
   Sparkles, 
   ShieldCheck, 
@@ -1040,6 +1041,171 @@ export default function AdminCMS({
     } catch (err) {
       setRecoveryEmailMsg('ای میلز محفوظ کرنے میں خرابی پیش آئی۔');
     }
+  };
+
+  // Calculator Presets Management State
+  const defaultCalculatorPresets = [
+    {
+      id: 'sample_1',
+      title: 'حب صابر (ملین عضلاتی غدی)',
+      description: 'معدہ، جگر اور آنتوں کی صفائی کے لیے مشہور و آزمودہ کلاسیکل نسخہ',
+      items: [
+        { name: 'رائی', category: 'خشک گرم', weight: 40 },
+        { name: 'گندھک آملہ سار', category: 'گرم خشک', weight: 30 },
+        { name: 'صبر زرد', category: 'خشک سرد', weight: 10 }
+      ]
+    },
+    {
+      id: 'sample_2',
+      title: 'تریاق تبخیر و معدہ',
+      description: 'گیس، تبخیر اور معدے کے نفخ کے ازالے کے لیے متوازن ہربل مرکب',
+      items: [
+        { name: 'سہاگہ بریاں', category: 'گرم خشک', weight: 10 },
+        { name: 'ملٹھی', category: 'تر گرم', weight: 15 },
+        { name: 'گوند کیکر', category: 'خشک سرد', weight: 10 }
+      ]
+    },
+    {
+      id: 'sample_3',
+      title: 'اکسیر جگر (مصفی جگر)',
+      description: 'جگر کی سستی دور کرنے اور فاسد مادوں کے اخراج کے لیے',
+      items: [
+        { name: 'نوشادر', category: 'گرم تر', weight: 30 },
+        { name: 'قلمی شورہ', category: 'سرد تر', categoryFallback: 'تر سرد', weight: 20 },
+        { name: 'ریوند خطائی', category: 'گرم خشک', weight: 20 }
+      ]
+    },
+    {
+      id: 'sample_4',
+      title: 'تریاق اعصاب و مقوی دماغ',
+      description: 'اعصابی کمزوری اور خشکی و گرمی کے ازالے کے لیے مفید مرکب',
+      items: [
+        { name: 'اسگند ناگوری', category: 'تر گرم', weight: 25 },
+        { name: 'مغز بادام', category: 'تر گرم', weight: 35 },
+        { name: 'الائچی خورد', category: 'گرم تر', weight: 10 }
+      ]
+    }
+  ];
+
+  const [calculatorPresetsList, setCalculatorPresetsList] = useState(() => {
+    if (siteSettings?.calculatorPresets && Array.isArray(siteSettings.calculatorPresets)) {
+      return siteSettings.calculatorPresets;
+    }
+    try {
+      const stored = localStorage.getItem('tabeeb_hec_sample_prescriptions');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return defaultCalculatorPresets;
+  });
+
+  const [presetModalOpen, setPresetModalOpen] = useState(false);
+  const [editingPreset, setEditingPreset] = useState(null);
+  const [presetFormTitle, setPresetFormTitle] = useState('');
+  const [presetFormDesc, setPresetFormDesc] = useState('');
+  const [presetFormItems, setPresetFormItems] = useState([
+    { name: '', category: 'گرم خشک', weight: 10 }
+  ]);
+
+  const saveCalculatorPresetsToDb = async (updated) => {
+    setCalculatorPresetsList(updated);
+    try {
+      localStorage.setItem('tabeeb_hec_sample_prescriptions', JSON.stringify(updated));
+    } catch (e) {}
+    const newSettings = {
+      ...(siteSettings || {}),
+      calculatorPresets: updated
+    };
+    if (setSiteSettings) {
+      setSiteSettings(newSettings);
+    }
+    await saveSettingsApi(newSettings);
+  };
+
+  const handleOpenNewPresetModal = () => {
+    setEditingPreset(null);
+    setPresetFormTitle('');
+    setPresetFormDesc('');
+    setPresetFormItems([{ name: '', category: 'گرم خشک', weight: 10 }]);
+    setPresetModalOpen(true);
+  };
+
+  const handleOpenEditPresetModal = (preset) => {
+    setEditingPreset(preset);
+    setPresetFormTitle(preset.title || '');
+    setPresetFormDesc(preset.description || '');
+    setPresetFormItems(
+      Array.isArray(preset.items) && preset.items.length > 0
+        ? preset.items.map(it => ({ ...it }))
+        : [{ name: '', category: 'گرم خشک', weight: 10 }]
+    );
+    setPresetModalOpen(true);
+  };
+
+  const handleDeletePresetAdmin = async (presetId) => {
+    if (window.confirm('کیا آپ واقعی یہ نسخہ ڈیلیٹ کرنا چاہتے ہیں؟')) {
+      const updated = calculatorPresetsList.filter(p => p.id !== presetId);
+      await saveCalculatorPresetsToDb(updated);
+      showNotification('نسخہ کامیابی سے ڈیلیٹ ہو گیا!');
+    }
+  };
+
+  const handleResetPresetsAdmin = async () => {
+    if (window.confirm('کیا آپ تمام نسخے اصل فیکٹری حالت پر بحال کرنا چاہتے ہیں؟')) {
+      await saveCalculatorPresetsToDb(defaultCalculatorPresets);
+      showNotification('تمام نسخے اصل حالت پر بحال ہو گئے!');
+    }
+  };
+
+  const handleSavePresetFormSubmit = async (e) => {
+    e.preventDefault();
+    if (!presetFormTitle.trim()) {
+      alert('براہ کرم نسخے کا نام درج کریں۔');
+      return;
+    }
+    const cleanItems = presetFormItems
+      .filter(it => it.name && it.name.trim())
+      .map(it => ({
+        name: it.name.trim(),
+        category: it.category || 'گرم خشک',
+        weight: parseFloat(it.weight) || 10
+      }));
+
+    if (cleanItems.length === 0) {
+      alert('براہ کرم نسخے میں کم از کم ایک جڑی بوٹی درج کریں۔');
+      return;
+    }
+
+    let updated;
+    if (editingPreset) {
+      updated = calculatorPresetsList.map(p => {
+        if (p.id === editingPreset.id) {
+          return {
+            ...p,
+            title: presetFormTitle.trim(),
+            description: presetFormDesc.trim(),
+            items: cleanItems
+          };
+        }
+        return p;
+      });
+      showNotification('نسخہ کامیابی کے ساتھ اپ ڈیٹ ہو گیا!');
+    } else {
+      const newP = {
+        id: `preset_${Date.now()}`,
+        title: presetFormTitle.trim(),
+        description: presetFormDesc.trim(),
+        items: cleanItems
+      };
+      updated = [newP, ...calculatorPresetsList];
+      showNotification('نیا نسخہ کامیابی کے ساتھ شامل ہو گیا!');
+    }
+
+    await saveCalculatorPresetsToDb(updated);
+    setPresetModalOpen(false);
+    setEditingPreset(null);
   };
 
   const handleChangeAdminCredentials = (e) => {
@@ -2666,6 +2832,9 @@ export default function AdminCMS({
                 <div className="space-y-1">
                   <button onClick={() => setAdminTab('doctors')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'doctors' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
                     <UserCheck className="w-4 h-4 text-slate-400" /> <span>اطباء و کلینکس</span>
+                  </button>
+                  <button onClick={() => setAdminTab('calculator-presets')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'calculator-presets' ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                    <Calculator className="w-4 h-4 text-emerald-600" /> <span>کیلکولیٹر نسخہ جات</span>
                   </button>
                   <button onClick={() => setAdminTab('settings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'settings' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
                     <Settings className="w-4 h-4 text-slate-400" /> <span>ویب سائٹ سیٹنگز</span>
@@ -10593,6 +10762,121 @@ export default function AdminCMS({
             </div>
           )}
 
+          {/* ========================================================= */}
+          {/* VIEW 6: CALCULATOR PRESET PRESCRIPTIONS MANAGEMENT */}
+          {/* ========================================================= */}
+          {adminTab === 'calculator-presets' && (
+            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xs text-right">
+              
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-simple flex items-center gap-2.5">
+                    <Calculator className="w-6 h-6 text-emerald-600" />
+                    <span>کیلکولیٹر نسخہ جات مینیجر (Calculator Presets)</span>
+                  </h2>
+                  <p className="text-xs text-slate-500 mt-1 font-nastaliq">
+                    ہربل مزاج کیلکولیٹر کے اوپر ظاہر ہونے والے کلاسک نسخوں کے نمونے یہاں سے تبدیل، ایڈٹ، ڈیلیٹ یا نئے شامل کریں
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleOpenNewPresetModal}
+                    className="flex items-center gap-1.5 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-all font-simple cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>نیا نسخہ بنائیں</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleResetPresetsAdmin}
+                    className="flex items-center gap-1.5 px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-simple transition-colors cursor-pointer"
+                    title="تمام نسخے اصل فیکٹری حالت پر بحال کریں"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>فیکٹری ری سیٹ</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Presets Cards Grid */}
+              {calculatorPresetsList.length === 0 ? (
+                <div className="py-12 text-center space-y-3 bg-slate-50 border border-slate-200 rounded-3xl">
+                  <Calculator className="w-12 h-12 text-slate-300 mx-auto" />
+                  <p className="text-sm font-bold text-slate-600 font-simple">کوئی نسخہ موجود نہیں ہے</p>
+                  <p className="text-xs text-slate-400">نیا نسخہ شامل کرنے کے لیے اوپر دیے گئے بٹن پر کلک کریں۔</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {calculatorPresetsList.map((preset, index) => (
+                    <div
+                      key={preset.id || index}
+                      className="p-5 rounded-2xl border border-slate-200 bg-slate-50/60 hover:bg-white hover:border-emerald-300 transition-all shadow-xs space-y-3"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1">
+                          <h4 className="font-bold text-base text-slate-900 font-simple">
+                            {preset.title}
+                          </h4>
+                          <p className="text-xs text-slate-500 font-nastaliq leading-relaxed line-clamp-2">
+                            {preset.description || 'کوئی تفصیل درج نہیں ہے۔'}
+                          </p>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditPresetModal(preset)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 border border-blue-200 rounded-xl transition-colors cursor-pointer"
+                            title="ایڈٹ کریں"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePresetAdmin(preset.id || index)}
+                            className="p-2 text-red-600 hover:bg-red-50 border border-red-200 rounded-xl transition-colors cursor-pointer"
+                            title="ڈیلیٹ کریں"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Ingredients Pills */}
+                      <div className="pt-2 border-t border-slate-200/60 space-y-2">
+                        <div className="text-[11px] font-bold text-slate-400 font-mono">
+                          شامل اجزاء ({preset.items?.length || 0}):
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(preset.items || []).map((it, i) => (
+                            <span
+                              key={i}
+                              className="text-xs bg-white border border-slate-200 px-2.5 py-1 rounded-lg text-slate-700 font-simple flex items-center gap-1.5 shadow-2xs"
+                            >
+                              <strong className="text-slate-900 font-bold">{it.name}</strong>
+                              <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1 rounded font-mono">
+                                {it.weight}g
+                              </span>
+                              <span className="text-[10px] text-slate-400">
+                                ({it.category})
+                              </span>
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+            </div>
+          )}
+
         </main>
 
       </div>
@@ -10958,6 +11242,160 @@ export default function AdminCMS({
                 ٹھیک ہے
               </button>
             </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 5: CALCULATOR PRESET CREATE & EDIT */}
+      {presetModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden text-right">
+            
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => setPresetModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-bold text-slate-900 font-simple">
+                  {editingPreset ? 'نسخہ تبدیل / ایڈٹ کریں' : 'نیا کلاسیکل نمونہ نسخہ بنائیں'}
+                </h3>
+                <Calculator className="w-5 h-5 text-emerald-600" />
+              </div>
+            </div>
+
+            {/* Modal Body Form */}
+            <form onSubmit={handleSavePresetFormSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
+              {/* Preset Title */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
+                  نسخے کا نام / عنوان *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={presetFormTitle}
+                  onChange={(e) => setPresetFormTitle(e.target.value)}
+                  placeholder="مثلاً: حب ملین، تریاق تبخیر، وغیرہ"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-emerald-500 font-h2 text-right"
+                />
+              </div>
+
+              {/* Preset Description */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
+                  مختصر تفصیل یا فوائد
+                </label>
+                <input
+                  type="text"
+                  value={presetFormDesc}
+                  onChange={(e) => setPresetFormDesc(e.target.value)}
+                  placeholder="مثلاً: معدے اور جگر کی صفائی کے لیے مشہور نسخہ"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl px-4 py-2 text-xs text-slate-800 focus:outline-none focus:border-emerald-500 font-simple text-right"
+                />
+              </div>
+
+              {/* Ingredients List in Preset */}
+              <div className="pt-2">
+                <div className="flex items-center justify-between mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setPresetFormItems(prev => [...prev, { name: '', category: 'گرم خشک', weight: 10 }])}
+                    className="flex items-center gap-1 text-xs text-emerald-700 hover:text-emerald-800 font-bold bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl border border-emerald-200 transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>جزو شامل کریں</span>
+                  </button>
+
+                  <label className="text-xs font-bold text-slate-700 font-simple">
+                    شامل اجزاء و اوزان
+                  </label>
+                </div>
+
+                <div className="space-y-2.5 max-h-60 overflow-y-auto p-1">
+                  {presetFormItems.map((item, index) => (
+                    <div key={index} className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-2.5 rounded-2xl">
+                      {/* Delete item */}
+                      <button
+                        type="button"
+                        onClick={() => setPresetFormItems(prev => prev.filter((_, i) => i !== index))}
+                        disabled={presetFormItems.length === 1}
+                        className="p-1.5 text-slate-400 hover:text-red-600 disabled:opacity-30 rounded-lg transition-colors cursor-pointer shrink-0"
+                        title="ہٹائیں"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+
+                      {/* Weight */}
+                      <div className="w-24 shrink-0">
+                        <input
+                          type="number"
+                          min="0.1"
+                          step="any"
+                          required
+                          value={item.weight}
+                          onChange={(e) => setPresetFormItems(prev => prev.map((it, i) => i === index ? { ...it, weight: e.target.value } : it))}
+                          placeholder="وزن"
+                          className="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-center font-mono font-bold text-emerald-700 focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+
+                      {/* Category */}
+                      <div className="flex-1 min-w-[120px]">
+                        <select
+                          value={item.category}
+                          onChange={(e) => setPresetFormItems(prev => prev.map((it, i) => i === index ? { ...it, category: e.target.value } : it))}
+                          className="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-slate-800 font-simple text-right focus:outline-none focus:border-emerald-500"
+                        >
+                          <option value="خشک گرم">خشک گرم (70% خشک، 30% گرم)</option>
+                          <option value="گرم خشک">گرم خشک (70% گرم، 30% خشک)</option>
+                          <option value="گرم تر">گرم تر (70% گرم، 30% تر)</option>
+                          <option value="تر گرم">تر گرم (70% تر، 30% گرم)</option>
+                          <option value="تر سرد">تر سرد (70% تر، 30% سرد)</option>
+                          <option value="خشک سرد">خشک سرد (70% خشک، 30% سرد)</option>
+                        </select>
+                      </div>
+
+                      {/* Herb Name */}
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          required
+                          value={item.name}
+                          onChange={(e) => setPresetFormItems(prev => prev.map((it, i) => i === index ? { ...it, name: e.target.value } : it))}
+                          placeholder="جڑی بوٹی کا نام"
+                          className="w-full bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-right font-simple text-slate-900 focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Modal Footer Buttons */}
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setPresetModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+                >
+                  منسوخ کریں
+                </button>
+
+                <button
+                  type="submit"
+                  className="px-6 py-2 text-xs font-bold text-white rounded-xl bg-emerald-600 hover:bg-emerald-700 shadow-md transition-all cursor-pointer"
+                >
+                  {editingPreset ? 'تبدیلیاں محفوظ کریں' : 'نیا نسخہ محفوظ کریں'}
+                </button>
+              </div>
+            </form>
 
           </div>
         </div>
