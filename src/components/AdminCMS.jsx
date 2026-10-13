@@ -959,6 +959,7 @@ export default function AdminCMS({
 
   // Modals & Menus
   const [showBoxMenu, setShowBoxMenu] = useState(false);
+  const [showPageBoxMenu, setShowPageBoxMenu] = useState(false);
   const [showTableMenu, setShowTableMenu] = useState(false);
   const [showSpecialChars, setShowSpecialChars] = useState(false);
   const [showMediaModal, setShowMediaModal] = useState(false);
@@ -2075,11 +2076,18 @@ export default function AdminCMS({
 
   // Visual WYSIWYG Command Executor
   const execCmd = (command, value = null) => {
-    if (editorMode !== 'visual') return;
+    const isPage = adminTab === 'new-page';
+    const currentMode = isPage ? pageEditorMode : editorMode;
+    if (currentMode !== 'visual') return;
     restoreSelection();
     document.execCommand(command, false, value);
-    if (visualEditorRef.current) {
-      setArticleForm(prev => ({ ...prev, content: visualEditorRef.current.innerHTML }));
+    const el = getActiveEditorElement();
+    if (el) {
+      if (isPage) {
+        setPageForm(prev => ({ ...prev, content: el.innerHTML }));
+      } else {
+        setArticleForm(prev => ({ ...prev, content: el.innerHTML }));
+      }
     }
     saveCurrentSelection();
     setTimeout(updateActiveFormats, 50);
@@ -2229,23 +2237,63 @@ export default function AdminCMS({
 
   // Apply specific inline style (fontSize, fontFamily) to the user's selected text or active block element
   const applyInlineStyle = (styleProp, styleVal) => {
-    if (editorMode !== 'visual' || !visualEditorRef.current) return;
+    const isPage = adminTab === 'new-page';
+    const currentMode = isPage ? pageEditorMode : editorMode;
+    if (currentMode !== 'visual') return;
+
+    const activeEl = getActiveEditorElement();
+    if (!activeEl) return;
+
     restoreSelection();
     
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return;
     
     const range = selection.getRangeAt(0);
+
+    const syncContent = () => {
+      if (isPage) {
+        setPageForm(prev => ({ ...prev, content: activeEl.innerHTML }));
+      } else {
+        setArticleForm(prev => ({ ...prev, content: activeEl.innerHTML }));
+      }
+    };
+
+    const cssPropName = styleProp === 'fontFamily' ? 'font-family' : 'font-size';
+
+    // Helper to remove conflicting child style properties so the new style takes precedence
+    const clearDescendantStyles = (root) => {
+      if (!root) return;
+      if (root.nodeType === 1 && root.style) {
+        root.style.removeProperty(cssPropName);
+      }
+      if (root.querySelectorAll) {
+        const els = root.querySelectorAll('*');
+        els.forEach(el => {
+          if (el.style) el.style.removeProperty(cssPropName);
+        });
+      }
+    };
+
     if (range.collapsed) {
       // If cursor is inside a block element without dragging selection, apply style to the enclosing element
       let node = selection.anchorNode;
-      while (node && node !== visualEditorRef.current) {
-        if (node.nodeType === 1 && ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'LI', 'BLOCKQUOTE', 'DIV', 'SPAN'].includes(node.tagName)) {
-          node.style[styleProp] = styleVal;
-          if (visualEditorRef.current) {
-            setArticleForm(prev => ({ ...prev, content: visualEditorRef.current.innerHTML }));
+      while (node && node !== activeEl) {
+        if (node.nodeType === 1) {
+          const tag = node.tagName.toUpperCase();
+          if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'LI', 'BLOCKQUOTE', 'DIV', 'SPAN'].includes(tag)) {
+            node.style[styleProp] = styleVal;
+            clearDescendantStyles(node);
+            if (tag === 'DIV') {
+              const children = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, span');
+              children.forEach(ch => {
+                ch.style[styleProp] = styleVal;
+              });
+            }
+            syncContent();
+            saveCurrentSelection();
+            return;
           }
-          return;
         }
         node = node.parentNode;
       }
@@ -2253,22 +2301,47 @@ export default function AdminCMS({
     }
 
     try {
-      const fragment = range.extractContents();
-      const span = document.createElement('span');
-      span.style[styleProp] = styleVal;
-      span.appendChild(fragment);
-      range.insertNode(span);
+      const common = range.commonAncestorContainer;
+      const commonEl = common.nodeType === 1 ? common : common.parentNode;
 
-      // Re-select the modified span
-      const newRange = document.createRange();
-      newRange.selectNodeContents(span);
-      selection.removeAllRanges();
-      selection.addRange(newRange);
-      savedSelectionRef.current = newRange.cloneRange();
-
-      if (visualEditorRef.current) {
-        setArticleForm(prev => ({ ...prev, content: visualEditorRef.current.innerHTML }));
+      // If selection is the entire content of an existing SPAN, update that SPAN directly
+      if (commonEl && commonEl.tagName === 'SPAN' && commonEl !== activeEl && range.toString().trim() === commonEl.textContent.trim()) {
+        commonEl.style[styleProp] = styleVal;
+        clearDescendantStyles(commonEl);
+        syncContent();
+        saveCurrentSelection();
+        return;
       }
+
+      const fragment = range.extractContents();
+      const hasBlocks = fragment.querySelector && fragment.querySelector('h1, h2, h3, h4, h5, h6, p, li, div, blockquote') !== null;
+
+      if (hasBlocks) {
+        // Multi-block selection (e.g. across paragraphs or lists in a box)
+        const blocks = fragment.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, div, blockquote');
+        blocks.forEach(b => {
+          b.style[styleProp] = styleVal;
+          clearDescendantStyles(b);
+        });
+        clearDescendantStyles(fragment);
+        range.insertNode(fragment);
+      } else {
+        // Inline selection
+        clearDescendantStyles(fragment);
+        const span = document.createElement('span');
+        span.style[styleProp] = styleVal;
+        span.appendChild(fragment);
+        range.insertNode(span);
+
+        // Re-select the modified span
+        const newRange = document.createRange();
+        newRange.selectNodeContents(span);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+        savedSelectionRef.current = newRange.cloneRange();
+      }
+
+      syncContent();
     } catch (err) {
       console.error('Error applying inline style:', err);
     }
@@ -2277,6 +2350,7 @@ export default function AdminCMS({
   // Apply Font Family to selected text
   const applyFontFamily = (font) => {
     setEditorFont(font);
+    setPageEditorFont(font);
     let fontVal = '"Noto Nastaliq Urdu", serif';
     if (font === 'tajawal') fontVal = '"Tajawal", sans-serif';
     if (font === 'cairo') fontVal = '"Cairo", sans-serif';
@@ -2293,18 +2367,20 @@ export default function AdminCMS({
   // Apply Font Size to selected text
   const applyFontSize = (size) => {
     setEditorFontSize(size);
+    setPageEditorFontSize(size);
     applyInlineStyle('fontSize', size);
     showNotification(`منتخب متن کا سائز: ${size}`);
   };
 
   // Text Direction Handler (RTL / LTR)
   const setDirection = (dir) => {
-    if (visualEditorRef.current) {
-      visualEditorRef.current.focus();
+    const activeEl = getActiveEditorElement();
+    if (activeEl) {
+      activeEl.focus();
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
         let node = selection.anchorNode;
-        while (node && node !== visualEditorRef.current) {
+        while (node && node !== activeEl) {
           if (node.nodeType === 1) {
             node.setAttribute('dir', dir);
             node.style.textAlign = dir === 'rtl' ? 'right' : 'left';
@@ -2324,54 +2400,107 @@ export default function AdminCMS({
     setShowSpecialChars(false);
   };
 
-  // Insert Custom Callout Box / Highlight Cards at exact cursor position
+  // Insert Custom Callout Box / Highlight Cards at exact cursor position or wrapping selected text
   const insertBox = (type) => {
     setShowBoxMenu(false);
+    setShowPageBoxMenu(false);
     restoreSelection();
 
-    let boxHTML = '';
-    
-    if (type === 'green') {
-      boxHTML = `
-        <div class="my-6 p-5 rounded-2xl bg-emerald-50 border-r-4 border-emerald-600 text-emerald-950 shadow-xs" style="direction: rtl; text-align: right;">
-          <h4 class="font-bold text-base text-emerald-900 mb-2 font-simple">🌿 کلونجی اور ہربل فوائد کا خلاصہ:</h4>
-          <ul class="list-disc pr-6 space-y-1 text-slate-800 font-normal">
-            <li><strong>معدے اور پیٹ کی گیس:</strong> تبخیر، ریاح اور پیٹ کے پھولنے میں فوری آرام دیتی ہے۔</li>
-            <li><strong>قوت مدافعت میں اضافہ:</strong> جسم کو موسمی وائرل اور انفیکشنز سے محفوظ رکھتی ہے۔</li>
-            <li><strong>کولیسٹرول و شریانیں:</strong> خون کی نالیوں میں جمی چکنائی اور فاسد مادوں کو خارج کرتی ہے۔</li>
-          </ul>
-        </div>
-        <p><br></p>
-      `;
-    } else if (type === 'blue') {
-      boxHTML = `
-        <div class="my-6 p-5 rounded-2xl bg-blue-50 border-r-4 border-blue-600 text-blue-950 shadow-xs" style="direction: rtl; text-align: right;">
-          <h4 class="font-bold text-base text-blue-900 mb-2 font-simple">💊 طبی نسخہ و مقدارِ خوراک (Prescription):</h4>
+    const activeEl = getActiveEditorElement();
+    if (!activeEl) return;
+
+    // Check if user has selected text
+    let targetRange = null;
+    const selection = window.getSelection();
+
+    if (savedSelectionRef.current && !savedSelectionRef.current.collapsed) {
+      targetRange = savedSelectionRef.current;
+    } else if (selection && selection.rangeCount > 0 && !selection.getRangeAt(0).collapsed) {
+      targetRange = selection.getRangeAt(0);
+    }
+
+    let selectedHtml = '';
+    let hasSelection = false;
+
+    if (targetRange && !targetRange.collapsed) {
+      const tempContainer = document.createElement('div');
+      tempContainer.appendChild(targetRange.cloneContents());
+      const plainText = tempContainer.textContent || tempContainer.innerText || '';
+      if (plainText.trim().length > 0) {
+        hasSelection = true;
+        selectedHtml = tempContainer.innerHTML.trim();
+      }
+    }
+
+    let boxConfig = {
+      containerClass: 'bg-emerald-50 border-r-4 border-emerald-600 text-emerald-950',
+      titleColorClass: 'text-emerald-900',
+      defaultTitle: '🌿 ہربل فوائد و خلاصہ:',
+      defaultContent: `
+        <ul class="list-disc pr-6 space-y-1 text-slate-800 font-normal">
+          <li><strong>معدے اور پیٹ کی گیس:</strong> تبخیر، ریاح اور پیٹ کے پھولنے میں فوری آرام دیتی ہے۔</li>
+          <li><strong>قوت مدافعت میں اضافہ:</strong> جسم کو موسمی وائرل اور انفیکشنز سے محفوظ رکھتی ہے۔</li>
+          <li><strong>کولیسٹرول و شریانیں:</strong> خون کی نالیوں میں جمی چکنائی اور فاسد مادوں کو خارج کرتی ہے۔</li>
+        </ul>
+      `
+    };
+
+    if (type === 'blue') {
+      boxConfig = {
+        containerClass: 'bg-blue-50 border-r-4 border-blue-600 text-blue-950',
+        titleColorClass: 'text-blue-900',
+        defaultTitle: '💊 طبی نسخہ و مقدارِ خوراک (Prescription):',
+        defaultContent: `
           <p class="text-slate-800 leading-relaxed mb-2"><strong>اجزاء:</strong> سونف 50 گرام، ملٹھی 50 گرام، ریوند خطائی 50 گرام۔</p>
           <p class="text-slate-800 leading-relaxed"><strong>ترکیب و خوراک:</strong> تمام ادویہ کا باریک سفوف بنا لیں۔ روزانہ صبح اور شام کھانے کے آدھے گھنٹے بعد آدھا چمچ ہمراہ نیم گرم پانی استعمال کریں۔</p>
-        </div>
-        <p><br></p>
-      `;
+        `
+      };
     } else if (type === 'amber') {
-      boxHTML = `
-        <div class="my-6 p-5 rounded-2xl bg-amber-50 border-r-4 border-amber-600 text-amber-950 shadow-xs" style="direction: rtl; text-align: right;">
-          <h4 class="font-bold text-base text-amber-900 mb-1 font-simple">⚠️ پرہیز و احتیاطی تدابیر (Diet Precautions):</h4>
+      boxConfig = {
+        containerClass: 'bg-amber-50 border-r-4 border-amber-600 text-amber-950',
+        titleColorClass: 'text-amber-900',
+        defaultTitle: '⚠️ پرہیز و احتیاطی تدابیر (Diet Precautions):',
+        defaultContent: `
           <p class="text-slate-800 leading-relaxed">گرم مصالحہ جات، برائلر مرغی، بازاری تلی ہوئی اشیاء اور کولڈ ڈرنکس سے مکمل پرہیز کریں۔ تازہ سلاد اور پانی کا استعمال زیادہ کریں۔</p>
-        </div>
-        <p><br></p>
-      `;
+        `
+      };
     } else if (type === 'red') {
-      boxHTML = `
-        <div class="my-6 p-5 rounded-2xl bg-red-50 border-r-4 border-red-600 text-red-950 shadow-xs" style="direction: rtl; text-align: right;">
-          <h4 class="font-bold text-base text-red-900 mb-1 font-simple">🛑 طبی انتباہ (Medical Warning):</h4>
+      boxConfig = {
+        containerClass: 'bg-rose-50 border-r-4 border-rose-600 text-rose-950',
+        titleColorClass: 'text-rose-900',
+        defaultTitle: '🛑 طبی انتباہ (Medical Warning):',
+        defaultContent: `
           <p class="text-slate-800 leading-relaxed">حاملہ خواتین اور ہائی بلڈ پریشر کے مریض معالج یا مستند حکیم کے مشورے کے بغیر یہ نسخہ ہرگز استعمال نہ کریں۔</p>
-        </div>
-        <p><br></p>
+        `
+      };
+    }
+
+    let innerContent = '';
+    if (hasSelection) {
+      // Put ONLY the user's selected text inside the box - no unwanted sample headings!
+      const hasBlockTags = /<(?:p|ul|ol|div|blockquote|h[1-6])[^>]*>/i.test(selectedHtml);
+      if (hasBlockTags) {
+        innerContent = `<div class="space-y-1 leading-relaxed" style="font-family: inherit; font-size: inherit;">${selectedHtml}</div>`;
+      } else {
+        innerContent = `<p class="leading-relaxed" style="font-family: inherit; font-size: inherit;">${selectedHtml}</p>`;
+      }
+    } else {
+      // Only when NO text is selected, provide the complete sample template
+      innerContent = `
+        <h4 class="font-bold text-base ${boxConfig.titleColorClass} mb-2 font-simple" style="font-family: inherit;">${boxConfig.defaultTitle}</h4>
+        ${boxConfig.defaultContent}
       `;
     }
 
+    const boxHTML = `
+      <div class="my-6 p-5 rounded-2xl ${boxConfig.containerClass} shadow-xs" style="direction: rtl; text-align: right;">
+        ${innerContent}
+      </div>
+      <p><br></p>
+    `;
+
     execCmd('insertHTML', boxHTML);
-    showNotification('کارڈ کرسر کی جگہ پر شامل ہو گیا');
+    showNotification(hasSelection ? 'منتخب متن کامیابی سے کارڈ باکس میں شامل ہو گیا' : 'کارڈ کرسر کی جگہ پر شامل ہو گیا');
   };
 
   // Insert Tables at exact cursor position
@@ -3385,7 +3514,6 @@ export default function AdminCMS({
                         <select
                           value={editorFont}
                           onMouseDown={() => saveCurrentSelection()}
-                          onFocus={() => saveCurrentSelection()}
                           onChange={(e) => applyFontFamily(e.target.value)}
                           className="bg-transparent border-0 text-xs text-slate-800 focus:outline-none cursor-pointer pr-0.5 font-simple font-bold"
                           title="فونٹ کا انداز تبدیل کریں"
@@ -3407,7 +3535,6 @@ export default function AdminCMS({
                         <select
                           value={editorFontSize}
                           onMouseDown={() => saveCurrentSelection()}
-                          onFocus={() => saveCurrentSelection()}
                           onChange={(e) => applyFontSize(e.target.value)}
                           className="bg-transparent border-0 text-xs text-slate-800 focus:outline-none cursor-pointer pr-0.5 font-sans font-bold"
                           title="فونٹ سائز تبدیل کریں"
@@ -3753,7 +3880,10 @@ export default function AdminCMS({
                       <div className="relative">
                         <button
                           type="button"
-                          onMouseDown={() => saveCurrentSelection()}
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            saveCurrentSelection();
+                          }}
                           onClick={() => {
                             saveCurrentSelection();
                             setShowBoxMenu(!showBoxMenu);
@@ -3774,6 +3904,7 @@ export default function AdminCMS({
                             
                             <button
                               type="button"
+                              onMouseDown={(e) => e.preventDefault()}
                               onClick={() => insertBox('green')}
                               className="w-full text-right p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-800 flex items-center justify-between text-xs font-bold transition-colors"
                             >
@@ -3786,6 +3917,7 @@ export default function AdminCMS({
 
                             <button
                               type="button"
+                              onMouseDown={(e) => e.preventDefault()}
                               onClick={() => insertBox('blue')}
                               className="w-full text-right p-1.5 rounded-lg hover:bg-blue-50 text-blue-800 flex items-center gap-1.5 text-xs font-bold transition-colors"
                             >
@@ -3795,6 +3927,7 @@ export default function AdminCMS({
 
                             <button
                               type="button"
+                              onMouseDown={(e) => e.preventDefault()}
                               onClick={() => insertBox('amber')}
                               className="w-full text-right p-1.5 rounded-lg hover:bg-amber-50 text-amber-800 flex items-center gap-1.5 text-xs font-bold transition-colors"
                             >
@@ -3804,6 +3937,7 @@ export default function AdminCMS({
 
                             <button
                               type="button"
+                              onMouseDown={(e) => e.preventDefault()}
                               onClick={() => insertBox('red')}
                               className="w-full text-right p-1.5 rounded-lg hover:bg-rose-50 text-rose-800 flex items-center gap-1.5 text-xs font-bold transition-colors"
                             >
@@ -6507,23 +6641,57 @@ export default function AdminCMS({
                     {pageEditorMode === 'visual' && (
                       <div className="bg-slate-100/95 border-b border-slate-200 p-2.5 flex flex-wrap items-center gap-1.5 text-slate-700 sticky top-0 z-20 backdrop-blur-sm">
                         
-                        {/* Font Family */}
-                        <select
-                          value={pageEditorFont}
-                          onChange={(e) => {
-                            setPageEditorFont(e.target.value);
-                            if (pageVisualEditorRef.current) {
-                              pageVisualEditorRef.current.className = `w-full max-w-4xl bg-white text-slate-900 shadow-2xl rounded-2xl p-8 sm:p-12 min-h-[550px] outline-none leading-loose text-right article-rendered-content border border-slate-200 ${
-                                e.target.value === 'nastaliq' ? 'font-nastaliq text-xl' : e.target.value === 'simple' ? 'font-simple text-lg' : 'font-sans text-base'
-                              }`;
-                            }
-                          }}
-                          className="bg-white border border-slate-300 text-slate-800 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none cursor-pointer font-bold shadow-xs"
-                        >
-                          <option value="nastaliq">خطِ نستعلیق (Urdu Nastaliq)</option>
-                          <option value="simple">سادہ اردو (Simple Urdu)</option>
-                          <option value="sans">English / Sans</option>
-                        </select>
+                        {/* Font Family Dropdown */}
+                        <div className="flex items-center gap-0.5 bg-white px-1.5 py-0.5 rounded-lg border border-slate-300 shadow-xs">
+                          <Type className="w-3 h-3 text-blue-600 shrink-0" />
+                          <select
+                            value={pageEditorFont}
+                            onMouseDown={() => saveCurrentSelection()}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setPageEditorFont(val);
+                              applyFontFamily(val);
+                            }}
+                            className="bg-transparent border-0 text-xs text-slate-800 focus:outline-none cursor-pointer pr-0.5 font-simple font-bold"
+                            title="فونٹ کا انداز تبدیل کریں"
+                          >
+                            <option value="nastaliq">خطِ نستعلیق (Noto Nastaliq)</option>
+                            <option value="almarai">المری سادہ (Almarai)</option>
+                            <option value="tajawal">تجوال (Tajawal)</option>
+                            <option value="cairo">قاہرہ (Cairo)</option>
+                            <option value="segoe">Segoe UI</option>
+                            <option value="georgia">Georgia</option>
+                            <option value="arial">Arial</option>
+                            <option value="times">Times New Roman</option>
+                          </select>
+                        </div>
+
+                        {/* Font Size Dropdown */}
+                        <div className="flex items-center gap-0.5 bg-white px-1.5 py-0.5 rounded-lg border border-slate-300 shadow-xs">
+                          <span className="text-[10px] text-slate-500 font-sans">سائز:</span>
+                          <select
+                            value={pageEditorFontSize}
+                            onMouseDown={() => saveCurrentSelection()}
+                            onChange={(e) => {
+                              const sz = e.target.value;
+                              setPageEditorFontSize(sz);
+                              applyFontSize(sz);
+                            }}
+                            className="bg-transparent border-0 text-xs text-slate-800 focus:outline-none cursor-pointer pr-0.5 font-sans font-bold"
+                            title="فونٹ سائز تبدیل کریں"
+                          >
+                            <option value="12px">12px</option>
+                            <option value="14px">14px</option>
+                            <option value="16px">16px (معیاری)</option>
+                            <option value="18px">18px</option>
+                            <option value="20px">20px</option>
+                            <option value="24px">24px</option>
+                            <option value="28px">28px</option>
+                            <option value="32px">32px</option>
+                            <option value="36px">36px</option>
+                            <option value="48px">48px</option>
+                          </select>
+                        </div>
 
                         {/* Headings */}
                         <select
@@ -6733,6 +6901,78 @@ export default function AdminCMS({
                         >
                           <Minus className="w-4 h-4" />
                         </button>
+
+                        {/* 1-Click Callout Box Dropdown for Page */}
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              saveCurrentSelection();
+                            }}
+                            onClick={() => {
+                              saveCurrentSelection();
+                              setShowPageBoxMenu(!showPageBoxMenu);
+                            }}
+                            className="px-2 py-1 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-md flex items-center gap-1 text-[11px] font-bold shadow-xs font-simple"
+                            title="خوبصورت باکس / نسخہ کارڈ لگائیں"
+                          >
+                            <BoxSelect className="w-3.5 h-3.5" />
+                            <span>باکس کارڈ</span>
+                            <ChevronDown className="w-2.5 h-2.5" />
+                          </button>
+
+                          {showPageBoxMenu && (
+                            <div className="absolute top-full right-0 mt-1 w-60 bg-white border border-slate-200 rounded-xl p-1.5 shadow-xl z-50 space-y-1 text-right font-simple">
+                              <div className="text-[10px] text-slate-500 font-bold px-2 py-0.5 border-b border-slate-200 font-sans">
+                                باکس کا ڈیزائن منتخب کریں:
+                              </div>
+                              
+                              <button
+                                type="button"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => insertBox('green')}
+                                className="w-full text-right p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-800 flex items-center justify-between text-xs font-bold transition-colors"
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                                  <span>سبز ہربل و فوائد باکس</span>
+                                </div>
+                                <Check className="w-3 h-3 text-emerald-600" />
+                              </button>
+
+                              <button
+                                type="button"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => insertBox('blue')}
+                                className="w-full text-right p-1.5 rounded-lg hover:bg-blue-50 text-blue-800 flex items-center gap-1.5 text-xs font-bold transition-colors"
+                              >
+                                <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                                <span>نیلا نسخہ و مقدار باکس</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => insertBox('amber')}
+                                className="w-full text-right p-1.5 rounded-lg hover:bg-amber-50 text-amber-800 flex items-center gap-1.5 text-xs font-bold transition-colors"
+                              >
+                                <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                                <span>پیلا پرہیز و احتیاط باکس</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => insertBox('red')}
+                                className="w-full text-right p-1.5 rounded-lg hover:bg-rose-50 text-rose-800 flex items-center gap-1.5 text-xs font-bold transition-colors"
+                              >
+                                <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                                <span>سرخ طبی انتباہ باکس</span>
+                              </button>
+                            </div>
+                          )}
+                        </div>
 
                         {/* Mode Buttons on right */}
                         <div className="mr-auto flex items-center gap-1 bg-slate-200/80 p-1 rounded-lg border border-slate-300">
