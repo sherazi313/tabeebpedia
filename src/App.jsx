@@ -339,6 +339,15 @@ const DEFAULT_PAGES = [
         </p>
       </div>
     `
+  },
+  {
+    id: 'pdf-books',
+    title: 'طبی کتب خانہ (PDF Books)',
+    slug: 'pdf-books',
+    author: 'طبیب پیڈیا کتب خانہ ریسرچ ٹیم',
+    date: '2026/01/01',
+    status: 'published',
+    content: ''
   }
 ];
 
@@ -393,6 +402,8 @@ export default function App() {
       if (path === 'herbs' || params.get('tab') === 'herbs') return 'herbs';
       if (path === 'qanoon' || params.get('tab') === 'qanoon') return 'qanoon';
       if (path === 'herb-calculator' || path === 'hec' || path === 'calculator' || path === 'mizaj-calculator' || params.get('tab') === 'herb-calculator' || params.get('tab') === 'hec') return 'herb-calculator';
+      if (path === 'pdf-books' || path === 'books' || params.get('tab') === 'pdf-books' || params.get('tab') === 'books') return 'page';
+      if (params.get('portal') === 'doctor-dashboard' || path === 'doctor-dashboard') return 'doctor-dashboard';
       
       // اگر path خالی ہے (یعنی صرف / ہے) اور localStorage میں کوئی tab محفوظ ہے تو وہ کھولیں
       if (!path && !params.get('tab')) {
@@ -425,7 +436,26 @@ export default function App() {
     } catch (e) {}
     return DEFAULT_PAGES;
   });
-  const [selectedPage, setSelectedPage] = useState(null);
+  const [selectedPage, setSelectedPage] = useState(() => {
+    try {
+      const rawPath = window.location.pathname.substring(1).replace(/\/$/, '');
+      let path = '';
+      try { path = decodeURIComponent(rawPath).toLowerCase().trim(); } catch { path = rawPath.toLowerCase().trim(); }
+      const params = new URLSearchParams(window.location.search);
+      if (path === 'pdf-books' || path === 'books' || params.get('tab') === 'pdf-books' || params.get('tab') === 'books') {
+        return {
+          id: 'pdf-books',
+          title: 'طبی کتب خانہ (PDF Books)',
+          slug: 'pdf-books',
+          author: 'طبیب پیڈیا کتب خانہ ریسرچ ٹیم',
+          date: '2026/01/01',
+          status: 'published',
+          content: ''
+        };
+      }
+    } catch(e) {}
+    return null;
+  });
 
   // فرہنگِ اطباء (Glossary) State
   const [glossaryList, setGlossaryList] = useState(() => {
@@ -773,7 +803,30 @@ export default function App() {
   }, [activeTab]);
 
   // Doctor Auth Modal state
-  const [doctorAuthModalOpen, setDoctorAuthModalOpen] = useState(false);
+  const [doctorAuthModalOpen, setDoctorAuthModalOpen] = useState(() => {
+    try {
+      const rawPath = window.location.pathname.substring(1).replace(/\/$/, '');
+      let path = '';
+      try { path = decodeURIComponent(rawPath).toLowerCase().trim(); } catch { path = rawPath.toLowerCase().trim(); }
+      const params = new URLSearchParams(window.location.search);
+      const auth = params.get('auth') || params.get('portal');
+      const tab = params.get('tab');
+      return (
+        auth === 'doctor' || 
+        auth === 'login' || 
+        auth === 'signup' || 
+        auth === 'register' || 
+        tab === 'login' || 
+        tab === 'signup' || 
+        tab === 'register' || 
+        tab === 'doctor-login' || 
+        path === 'authentication' || 
+        path === 'doctor-login' || 
+        path === 'doctor-signup'
+      );
+    } catch(e) {}
+    return false;
+  });
 
   const [articlesLoadedFromDb, setArticlesLoadedFromDb] = useState(false);
 
@@ -800,7 +853,20 @@ export default function App() {
   }, []);
   // -------------------------
   
-  const [doctorAuthModalInitialMode, setDoctorAuthModalInitialMode] = useState('login');
+  const [doctorAuthModalInitialMode, setDoctorAuthModalInitialMode] = useState(() => {
+    try {
+      const rawPath = window.location.pathname.substring(1).replace(/\/$/, '');
+      let path = '';
+      try { path = decodeURIComponent(rawPath).toLowerCase().trim(); } catch { path = rawPath.toLowerCase().trim(); }
+      const params = new URLSearchParams(window.location.search);
+      const auth = params.get('auth') || params.get('portal');
+      const tab = params.get('tab');
+      if (auth === 'signup' || auth === 'register' || tab === 'signup' || tab === 'register' || path === 'doctor-signup' || path === 'register') {
+        return 'signup';
+      }
+    } catch(e) {}
+    return 'login';
+  });
 
   const isNavy = theme === 'navy';
 
@@ -1029,8 +1095,81 @@ export default function App() {
         return;
       }
 
-      // Check Public Admin Route (/admin, /login, /dashboard) -> redirect unauthenticated to '/'
-      if (normPath === 'admin' || normPath === 'login' || normPath === 'dashboard' || params.get('tab') === 'admin') {
+      // Check Doctor Portal & Authentication Modal (Login / Signup)
+      const authParam = params.get('auth') || params.get('portal');
+      const tabParam = params.get('tab');
+      
+      const isSignupIntent = 
+        authParam === 'signup' || 
+        authParam === 'register' || 
+        tabParam === 'signup' || 
+        tabParam === 'register' || 
+        tabParam === 'join' || 
+        normPath === 'doctor-signup' || 
+        normPath === 'register' || 
+        normPath === 'join';
+
+      const isLoginIntent = 
+        authParam === 'login' || 
+        authParam === 'doctor' || 
+        tabParam === 'login' || 
+        tabParam === 'doctor-login' || 
+        normPath === 'authentication' || 
+        normPath === 'doctor-login';
+
+      if (isSignupIntent) {
+        setDoctorAuthModalInitialMode('signup');
+        setDoctorAuthModalOpen(true);
+        if (normPath === 'register' || normPath === 'join' || normPath === 'doctor-signup') {
+          setActiveTab('home');
+        }
+        return;
+      }
+
+      if (isLoginIntent) {
+        if (loggedInDoctor) {
+          setActiveTab('doctor-dashboard');
+        } else {
+          setDoctorAuthModalInitialMode('login');
+          setDoctorAuthModalOpen(true);
+        }
+        if (normPath === 'authentication' || normPath === 'doctor-login') {
+          setActiveTab('home');
+        }
+        return;
+      }
+
+      if (params.get('portal') === 'doctor-dashboard' || params.get('tab') === 'doctor-dashboard' || normPath === 'doctor-dashboard') {
+        if (loggedInDoctor) {
+          setActiveTab('doctor-dashboard');
+        } else {
+          setDoctorAuthModalInitialMode('login');
+          setDoctorAuthModalOpen(true);
+        }
+        return;
+      }
+
+      // Check PDF Books Library (/pdf-books or ?tab=pdf-books)
+      if (normPath === 'pdf-books' || normPath === 'books' || tabParam === 'pdf-books' || tabParam === 'books') {
+        setSelectedPage({
+          id: 'pdf-books',
+          title: 'طبی کتب خانہ (PDF Books)',
+          slug: 'pdf-books',
+          author: 'طبیب پیڈیا کتب خانہ ریسرچ ٹیم',
+          date: '2026/01/01',
+          status: 'published',
+          content: ''
+        });
+        setActiveTab('page');
+        setSelectedArticle(null);
+        setSelectedDoctor(null);
+        setSelectedGlossaryTerm(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      // Check Public Admin Route (/admin, /dashboard) -> redirect unauthenticated to '/'
+      if (normPath === 'admin' || normPath === 'dashboard' || params.get('tab') === 'admin') {
         if (isAuth) {
           setActiveTab('admin');
           try { localStorage.setItem('tabeeb_active_tab', 'admin'); } catch(e) {}
@@ -1041,18 +1180,6 @@ export default function App() {
           setActiveTab('home');
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        return;
-      }
-
-      // Check Doctor Portal
-      const portalParam = params.get('portal') || params.get('tab');
-      if (portalParam === 'doctor' || portalParam === 'doctor-dashboard' || path === 'doctor-dashboard') {
-        if (loggedInDoctor) {
-          setActiveTab('doctor-dashboard');
-        } else {
-          setDoctorAuthModalInitialMode('login');
-          setDoctorAuthModalOpen(true);
-        }
         return;
       }
 
@@ -1719,7 +1846,7 @@ export default function App() {
               <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4">
                 <div>
                   <span className={`text-xs font-bold ${isNavy ? 'text-blue-700' : 'text-emerald-700'} uppercase font-sans`}>تخصصات و امراض</span>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1 font-h2">{siteSettings?.articleBlockTitle || "تازہ ترین طبی تحقیقات و مضامین"}</h2>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1 font-h2">{siteSettings?.specialtyBlockTitle || "امراض و شعبہ جات کے مطابق معالج تلاش کریں"}</h2>
                 </div>
                 <button
                   onClick={() => handleNavigateToTab('doctors')}
@@ -1869,6 +1996,109 @@ export default function App() {
               </section>
             )}
 
+            {/* Latest Articles from the Blog */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-right">
+              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4">
+                <div>
+                  <span className={`text-xs font-bold ${isNavy ? 'text-blue-700' : 'text-emerald-700'} uppercase font-sans`}>بلاگ و طبی مضامین</span>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1 font-h2">
+                    تازہ ترین طبی تحقیقات و مضامین
+                  </h2>
+                </div>
+                <button
+                  onClick={() => handleNavigateToTab('blog')}
+                  className={`text-xs sm:text-sm font-bold ${isNavy ? 'text-blue-700 hover:text-blue-900' : 'text-emerald-700 hover:text-emerald-900'} flex items-center gap-1 group font-h2`}
+                >
+                  <span>تمام مضامین دیکھیں</span>
+                  <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                </button>
+              </div>
+
+              <div className={`grid ${artGridClass} gap-6`}>
+                {homeArticles.slice(0, artLimit).map((article) => {
+                  const allCats = Array.isArray(article.categories) ? article.categories : (article.category ? [article.category] : []);
+                  const isAlphabetLetter = (c) => typeof c === 'string' && /^\s*(\([^\)]+\)|[A-Za-z])\s*$/.test(c);
+                  const isMizaj = (c) => typeof c === 'string' && /عضلاتی|غدی|اعصابی|سرد|گرم|خشک|تر|معتدل|مزاج/.test(c);
+                  
+                  const mizajCats = allCats.filter(c => isMizaj(c));
+                  const otherCats = allCats.filter(c => !isMizaj(c) && !isAlphabetLetter(c));
+                  const topBadge = mizajCats.length > 0 ? mizajCats[0] : (otherCats[0] || article.categoryName || article.category || 'طبی مضمون');
+
+                  return (
+                    <div
+                      key={article.id}
+                      onClick={() => handleSelectArticle(article)}
+                      className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="relative h-44 overflow-hidden">
+                          <img src={article.featuredImage || siteSettings?.defaultArticleImage || "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80"} alt={article.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                          <div className={`absolute top-3 right-3 bg-white/95 backdrop-blur-xs ${isNavy ? 'text-blue-900 border-blue-200' : 'text-emerald-900 border-emerald-200'} border text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-xs font-sans max-w-[85%] truncate`}>
+                            {topBadge}
+                          </div>
+                        </div>
+
+                        <div className="p-5 space-y-2.5">
+                          <h3 className={`text-base font-bold text-slate-900 ${isNavy ? 'group-hover:text-blue-700' : 'group-hover:text-emerald-700'} transition-colors line-clamp-2 leading-snug font-h2`}>
+                            {article.title}
+                          </h3>
+                          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                            {article.excerpt}
+                          </p>
+
+                          {/* Categories & Mizaj Badges */}
+                          {(mizajCats.length > 0 || otherCats.length > 0) && (
+                            <div className="pt-2 flex flex-wrap items-center gap-1.5 border-t border-slate-100">
+                              {/* Mizaj Badges (Highlighted) */}
+                              {mizajCats.map((mizaj, idx) => (
+                                <span
+                                  key={`mizaj-${idx}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSelectCategoryFromArticle(mizaj);
+                                  }}
+                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-900 border border-amber-300/80 hover:bg-amber-500/20 transition-all font-sans cursor-pointer shadow-2xs"
+                                  title={`مزاج: ${mizaj}`}
+                                >
+                                  <span className="text-[10px] text-amber-700 font-normal">مزاج:</span>
+                                  <span className="font-bold">{mizaj}</span>
+                                </span>
+                              ))}
+
+                              {/* General Descriptive Categories */}
+                              {otherCats.slice(0, 2).map((cat, idx) => (
+                                <span
+                                  key={`cat-${idx}`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSelectCategoryFromArticle(cat);
+                                  }}
+                                  className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 transition-all cursor-pointer font-sans"
+                                >
+                                  {cat}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <span className="text-[11px] text-slate-600 font-medium">{article.author}</span>
+                        <span className={`font-bold ${isNavy ? 'text-blue-700' : 'text-emerald-700'} flex items-center gap-1 font-h2`}>
+                          <span>پڑھیں</span>
+                          <ChevronLeft className="w-3.5 h-3.5" />
+                        </span>
+                      </div>
+
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+
             {/* Featured Doctors Banner */}
             <section className={`${isNavy ? 'bg-[#0b1d3a] text-white border-y border-slate-800' : 'bg-emerald-950 text-white'} py-16 transition-colors duration-500`}>
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-right">
@@ -2011,109 +2241,6 @@ export default function App() {
                     </li>
                   </ul>
                 </div>
-              </div>
-            </section>
-
-            {/* Latest Articles from the Blog */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-right">
-              <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4">
-                <div>
-                  <span className={`text-xs font-bold ${isNavy ? 'text-blue-700' : 'text-emerald-700'} uppercase font-sans`}>بلاگ و طبی مضامین</span>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1 font-h2">
-                    تازہ ترین طبی تحقیقات و مضامین
-                  </h2>
-                </div>
-                <button
-                  onClick={() => handleNavigateToTab('blog')}
-                  className={`text-xs sm:text-sm font-bold ${isNavy ? 'text-blue-700 hover:text-blue-900' : 'text-emerald-700 hover:text-emerald-900'} flex items-center gap-1 group font-h2`}
-                >
-                  <span>تمام مضامین دیکھیں</span>
-                  <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                </button>
-              </div>
-
-              <div className={`grid ${artGridClass} gap-6`}>
-                {homeArticles.slice(0, artLimit).map((article) => {
-                  const allCats = Array.isArray(article.categories) ? article.categories : (article.category ? [article.category] : []);
-                  const isAlphabetLetter = (c) => typeof c === 'string' && /^\s*(\([^\)]+\)|[A-Za-z])\s*$/.test(c);
-                  const isMizaj = (c) => typeof c === 'string' && /عضلاتی|غدی|اعصابی|سرد|گرم|خشک|تر|معتدل|مزاج/.test(c);
-                  
-                  const mizajCats = allCats.filter(c => isMizaj(c));
-                  const otherCats = allCats.filter(c => !isMizaj(c) && !isAlphabetLetter(c));
-                  const topBadge = mizajCats.length > 0 ? mizajCats[0] : (otherCats[0] || article.categoryName || article.category || 'طبی مضمون');
-
-                  return (
-                    <div
-                      key={article.id}
-                      onClick={() => handleSelectArticle(article)}
-                      className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 cursor-pointer group flex flex-col justify-between"
-                    >
-                      <div>
-                        <div className="relative h-44 overflow-hidden">
-                          <img src={article.featuredImage || siteSettings?.defaultArticleImage || "https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80"} alt={article.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                          <div className={`absolute top-3 right-3 bg-white/95 backdrop-blur-xs ${isNavy ? 'text-blue-900 border-blue-200' : 'text-emerald-900 border-emerald-200'} border text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-xs font-sans max-w-[85%] truncate`}>
-                            {topBadge}
-                          </div>
-                        </div>
-
-                        <div className="p-5 space-y-2.5">
-                          <h3 className={`text-base font-bold text-slate-900 ${isNavy ? 'group-hover:text-blue-700' : 'group-hover:text-emerald-700'} transition-colors line-clamp-2 leading-snug font-h2`}>
-                            {article.title}
-                          </h3>
-                          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-                            {article.excerpt}
-                          </p>
-
-                          {/* Categories & Mizaj Badges */}
-                          {(mizajCats.length > 0 || otherCats.length > 0) && (
-                            <div className="pt-2 flex flex-wrap items-center gap-1.5 border-t border-slate-100">
-                              {/* Mizaj Badges (Highlighted) */}
-                              {mizajCats.map((mizaj, idx) => (
-                                <span
-                                  key={`mizaj-${idx}`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleSelectCategoryFromArticle(mizaj);
-                                  }}
-                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-amber-500/10 text-amber-900 border border-amber-300/80 hover:bg-amber-500/20 transition-all font-sans cursor-pointer shadow-2xs"
-                                  title={`مزاج: ${mizaj}`}
-                                >
-                                  <span className="text-[10px] text-amber-700 font-normal">مزاج:</span>
-                                  <span className="font-bold">{mizaj}</span>
-                                </span>
-                              ))}
-
-                              {/* General Descriptive Categories */}
-                              {otherCats.slice(0, 2).map((cat, idx) => (
-                                <span
-                                  key={`cat-${idx}`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleSelectCategoryFromArticle(cat);
-                                  }}
-                                  className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200/80 transition-all cursor-pointer font-sans"
-                                >
-                                  {cat}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
-                        <span className="text-[11px] text-slate-600 font-medium">{article.author}</span>
-                        <span className={`font-bold ${isNavy ? 'text-blue-700' : 'text-emerald-700'} flex items-center gap-1 font-h2`}>
-                          <span>پڑھیں</span>
-                          <ChevronLeft className="w-3.5 h-3.5" />
-                        </span>
-                      </div>
-
-                    </div>
-                  );
-                })}
               </div>
             </section>
 

@@ -337,7 +337,7 @@ export default function HeroSearch({
         )}
 
         {/* Bottom Highlights & Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-8 border-t border-white/10 max-w-4xl mx-auto text-right">
+        <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-8 border-t border-white/10 max-w-3xl mx-auto text-right">
           <div className="bg-white/5 backdrop-blur-xs p-3 rounded-2xl border border-white/10">
             <div className="text-2xl sm:text-3xl font-bold font-sans text-amber-300">
               {allDoctors.filter(d => d && d.isApproved !== false && d.status !== 'pending').length || allDoctors.length}
@@ -349,10 +349,6 @@ export default function HeroSearch({
               {allArticles.length}
             </div>
             <div className="text-xs text-slate-200 mt-1">مستند طبی مضامین</div>
-          </div>
-          <div className="bg-white/5 backdrop-blur-xs p-3 rounded-2xl border border-white/10">
-            <div className="text-2xl sm:text-3xl font-bold font-sans text-teal-300">100%</div>
-            <div className="text-xs text-slate-200 mt-1">مفت طبی رہنمائی</div>
           </div>
           <div className="bg-white/5 backdrop-blur-xs p-3 rounded-2xl border border-white/10">
             <div className={`text-2xl sm:text-3xl font-bold font-sans ${isNavy ? 'text-blue-300' : 'text-emerald-300'}`}>24/7</div>

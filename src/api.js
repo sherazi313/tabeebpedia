@@ -194,6 +194,27 @@ export const saveGlossaryApi = async (glossary) => {
   }
 };
 
+export const fetchLiveMedia = async () => {
+  let data = await apiFetch(`/api/media.php?v=${Date.now()}`);
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    data = await apiFetch(`/data/media.json?v=${Date.now()}`);
+  }
+  return Array.isArray(data) ? data : [];
+};
+
+export const saveMediaApi = async (media) => {
+  try {
+    let res = await fetch('/api/media.php', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(media)
+    });
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
+};
+
 // ==========================================
 // ENTERPRISE ADMIN AUTH & 2FA API
 // ==========================================

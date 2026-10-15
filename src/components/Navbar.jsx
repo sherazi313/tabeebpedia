@@ -73,7 +73,7 @@ export default function Navbar({
             </span>
           </div>
           
-          <div className="flex items-center gap-3 text-xs font-sans mr-auto sm:mr-0">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs font-sans mr-auto sm:mr-0">
             {/* Color Scheme Switcher */}
             <div className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded-lg">
               <Palette className="w-3 h-3 text-amber-300" />
