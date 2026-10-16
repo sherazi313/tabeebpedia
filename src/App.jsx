@@ -1802,15 +1802,24 @@ export default function App() {
               onSelectSpecialty={handleSpecialtyClick}
               onSelectCity={handleCityClick}
               onNavigateToDirectory={() => handleNavigateToTab('doctors')}
+              onNavigateToArticles={() => handleNavigateToTab('blog')}
+              onNavigateToHerbs={() => handleNavigateToTab('herbs')}
               theme={theme}
             />
 
             {/* Herb Effectiveness Calculator (HEC) Home Spotlight Banner */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className={`p-6 sm:p-8 rounded-3xl ${isNavy ? 'bg-gradient-to-r from-slate-950 via-blue-950 to-slate-900 border-blue-900/60' : 'bg-gradient-to-r from-emerald-950 via-teal-950 to-slate-900 border-emerald-800/60'} border shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 text-right`}>
-                <div className="flex items-start gap-4">
-                  <div className="p-3.5 bg-amber-500/20 text-amber-300 rounded-2xl border border-amber-500/30 shrink-0">
-                    <Calculator className="w-8 h-8 text-amber-300 animate-pulse" />
+                <div className="flex items-center sm:items-start gap-4">
+                  <div className="relative shrink-0">
+                    <img 
+                      src="/images/hero/hec-mizaj-scale.jpg" 
+                      alt="HEC سائنسی مزاج کیلکولیٹر"
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-amber-400/40 shadow-lg shadow-black/30"
+                    />
+                    <div className="absolute -bottom-1 -left-1 p-1 bg-amber-500 text-slate-950 rounded-full shadow-md">
+                      <Calculator className="w-3.5 h-3.5 stroke-[2.5]" />
+                    </div>
                   </div>
                   <div className="space-y-1.5">
                     <div className="flex flex-wrap items-center gap-2">

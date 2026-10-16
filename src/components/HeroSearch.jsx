@@ -14,7 +14,9 @@ import {
   Flame,
   Activity,
   Droplets,
-  Clock
+  Clock,
+  CheckCircle2,
+  MessageCircle
 } from 'lucide-react';
 import { CITIES, SPECIALTIES, DOCTORS, ARTICLES, HERBS_DATA } from '../data/mockData';
 
@@ -24,6 +26,8 @@ export default function HeroSearch({
   onSelectSpecialty, 
   onSelectCity, 
   onNavigateToDirectory, 
+  onNavigateToArticles,
+  onNavigateToHerbs,
   theme, 
   articlesList,
   doctorsList,
@@ -39,6 +43,34 @@ export default function HeroSearch({
   const isNavy = theme === 'navy';
   const allArticles = articlesList || ARTICLES;
   const allDoctors = doctorsList || DOCTORS;
+
+  const SIX_MIZAJ_CATEGORIES = [
+    'اعصابی عضلاتی',
+    'عضلاتی اعصابی',
+    'عضلاتی غدی',
+    'غدی عضلاتی',
+    'غدی اعصابی',
+    'اعصابی غدی'
+  ];
+
+  const matchedHerbs = (allArticles || []).filter(art => {
+    if (!art) return false;
+    const cats = Array.isArray(art.categories) 
+      ? art.categories 
+      : (art.category ? [art.category] : []);
+    
+    return cats.some(c => {
+      if (!c || typeof c !== 'string') return false;
+      const cleanCat = c.replace(/\s+/g, ' ').trim();
+      return SIX_MIZAJ_CATEGORIES.some(m => cleanCat.includes(m));
+    });
+  });
+
+  const mizajHerbsCount = matchedHerbs.length > 0 ? matchedHerbs.length : 377;
+
+  const rawWa = (siteSettings?.whatsappNumber || '03470005578').replace(/[^0-9]/g, '');
+  const waNumber = rawWa.startsWith('0') ? '92' + rawWa.substring(1) : (rawWa.startsWith('92') ? rawWa : '92' + rawWa);
+  const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent('السلام علیکم! مجھے طبیب پیڈیا کے پلیٹ فارم سے طبی رہنمائی درکار ہے۔')}`;
 
   const heroTitle = siteSettings?.heroTitle || 'مستند اطباء اور حکماء سے آن لائن رہنمائی اور فوری رابطہ';
   const titleParts = heroTitle.includes('سے') 
@@ -336,24 +368,120 @@ export default function HeroSearch({
           </div>
         )}
 
-        {/* Bottom Highlights & Stats */}
-        <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-8 border-t border-white/10 max-w-3xl mx-auto text-right">
-          <div className="bg-white/5 backdrop-blur-xs p-3 rounded-2xl border border-white/10">
-            <div className="text-2xl sm:text-3xl font-bold font-sans text-amber-300">
-              {allDoctors.filter(d => d && d.isApproved !== false && d.status !== 'pending').length || allDoctors.length}
+        {/* Bottom Highlights & Stats with Large Prominent Thematic Imagery */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6 pt-8 border-t border-white/10 max-w-5xl mx-auto text-right">
+          
+          {/* Card 1: Verified Doctors */}
+          <div 
+            onClick={() => onNavigateToDirectory && onNavigateToDirectory()}
+            className="group relative bg-white/10 hover:bg-white/15 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-white/20 hover:border-amber-400/60 transition-all duration-300 hover:-translate-y-2 shadow-xl shadow-black/30 hover:shadow-2xl cursor-pointer flex flex-col justify-between overflow-hidden text-right"
+          >
+            <div className="relative w-full h-44 sm:h-48 rounded-2xl overflow-hidden border border-white/20 shadow-inner group-hover:shadow-lg transition-shadow">
+              <img 
+                src="/images/hero/hero-stat-doctors.jpg" 
+                alt="مصدقہ اطباء و حکماء"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent pointer-events-none" />
+              
+              <div className="absolute top-2.5 right-2.5 bg-slate-900/85 backdrop-blur-md text-amber-300 border border-amber-400/40 px-2.5 py-1 rounded-full text-[11px] font-bold font-sans flex items-center gap-1.5 shadow">
+                <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                <span>مصدقہ معالجین</span>
+              </div>
+
+              <div className="absolute bottom-2.5 right-3 text-3xl sm:text-4xl font-black font-sans text-amber-300 tracking-tight leading-none drop-shadow-lg">
+                {allDoctors.filter(d => d && d.isApproved !== false && d.status !== 'pending').length || allDoctors.length}+
+              </div>
             </div>
-            <div className="text-xs text-slate-200 mt-1">مصدقہ اطباء و حکماء</div>
-          </div>
-          <div className="bg-white/5 backdrop-blur-xs p-3 rounded-2xl border border-white/10">
-            <div className={`text-2xl sm:text-3xl font-bold font-sans ${isNavy ? 'text-blue-300' : 'text-emerald-300'}`}>
-              {allArticles.length}
+
+            <div className="pt-3.5 space-y-1 text-right">
+              <h3 className="text-base sm:text-lg font-bold text-white font-heading">
+                مصدقہ اطباء و حکماء
+              </h3>
+              <div className="flex items-center justify-between text-xs text-amber-200/90 font-simple">
+                <span>مطب و آن لائن رہنمائی</span>
+                <span className="font-bold text-amber-300 flex items-center gap-1 group-hover:-translate-x-1 transition-transform">
+                  <span>ڈائریکٹری دیکھیں</span>
+                  <span>←</span>
+                </span>
+              </div>
             </div>
-            <div className="text-xs text-slate-200 mt-1">مستند طبی مضامین</div>
           </div>
-          <div className="bg-white/5 backdrop-blur-xs p-3 rounded-2xl border border-white/10">
-            <div className={`text-2xl sm:text-3xl font-bold font-sans ${isNavy ? 'text-blue-300' : 'text-emerald-300'}`}>24/7</div>
-            <div className="text-xs text-slate-200 mt-1">واٹس ایپ کنیکٹ</div>
+
+          {/* Card 2: Articles */}
+          <div 
+            onClick={() => onNavigateToArticles ? onNavigateToArticles() : onNavigateToDirectory && onNavigateToDirectory()}
+            className={`group relative bg-white/10 hover:bg-white/15 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-white/20 ${isNavy ? 'hover:border-blue-400/60' : 'hover:border-emerald-400/60'} transition-all duration-300 hover:-translate-y-2 shadow-xl shadow-black/30 hover:shadow-2xl cursor-pointer flex flex-col justify-between overflow-hidden text-right`}
+          >
+            <div className="relative w-full h-44 sm:h-48 rounded-2xl overflow-hidden border border-white/20 shadow-inner group-hover:shadow-lg transition-shadow">
+              <img 
+                src="/images/hero/hero-stat-articles.jpg" 
+                alt="مستند طبی مضامین"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent pointer-events-none" />
+              
+              <div className={`absolute top-2.5 right-2.5 bg-slate-900/85 backdrop-blur-md ${isNavy ? 'text-blue-300 border-blue-400/40' : 'text-emerald-300 border-emerald-400/40'} border px-2.5 py-1 rounded-full text-[11px] font-bold font-sans flex items-center gap-1.5 shadow`}>
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>طبی انسائیکلوپیڈیا</span>
+              </div>
+
+              <div className={`absolute bottom-2.5 right-3 text-3xl sm:text-4xl font-black font-sans ${isNavy ? 'text-blue-300' : 'text-emerald-300'} tracking-tight leading-none drop-shadow-lg`}>
+                {allArticles.length || 490}+
+              </div>
+            </div>
+
+            <div className="pt-3.5 space-y-1 text-right">
+              <h3 className="text-base sm:text-lg font-bold text-white font-heading">
+                مستند طبی مضامین
+              </h3>
+              <div className={`flex items-center justify-between text-xs ${isNavy ? 'text-blue-200/90' : 'text-emerald-200/90'} font-simple`}>
+                <span>تحقیقات، خواص و نسخہ جات</span>
+                <span className={`font-bold ${isNavy ? 'text-blue-300' : 'text-emerald-300'} flex items-center gap-1 group-hover:-translate-x-1 transition-transform`}>
+                  <span>مضامین پڑھیں</span>
+                  <span>←</span>
+                </span>
+              </div>
+            </div>
           </div>
+
+          {/* Card 3: Herbs Encyclopedia */}
+          <div 
+            onClick={() => onNavigateToHerbs ? onNavigateToHerbs() : onNavigateToDirectory && onNavigateToDirectory()}
+            className="group relative bg-white/10 hover:bg-white/15 backdrop-blur-md p-4 sm:p-5 rounded-3xl border border-white/20 hover:border-emerald-400/60 transition-all duration-300 hover:-translate-y-2 shadow-xl shadow-black/30 hover:shadow-2xl cursor-pointer flex flex-col justify-between overflow-hidden text-right"
+          >
+            <div className="relative w-full h-44 sm:h-48 rounded-2xl overflow-hidden border border-white/20 shadow-inner group-hover:shadow-lg transition-shadow">
+              <img 
+                src="/images/hero/hero-stat-herbs.jpg" 
+                alt="مفرد جڑی بوٹیاں"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent pointer-events-none" />
+              
+              <div className="absolute top-2.5 right-2.5 bg-slate-900/85 backdrop-blur-md text-emerald-300 border border-emerald-400/40 px-2.5 py-1 rounded-full text-[11px] font-bold font-sans flex items-center gap-1.5 shadow">
+                <Leaf className="w-3.5 h-3.5 text-emerald-400" />
+                <span>نباتاتی خزانہ</span>
+              </div>
+
+              <div className="absolute bottom-2.5 right-3 text-3xl sm:text-4xl font-black font-sans text-emerald-300 tracking-tight leading-none drop-shadow-lg">
+                {mizajHerbsCount}+
+              </div>
+            </div>
+
+            <div className="pt-3.5 space-y-1 text-right">
+              <h3 className="text-base sm:text-lg font-bold text-white font-heading">
+                مفرد جڑی بوٹیاں
+              </h3>
+              <div className="flex items-center justify-between text-xs text-emerald-200/90 font-simple">
+                <span>چھ مزاجوں کی نادر جڑی بوٹیاں</span>
+                <span className="font-bold text-emerald-300 flex items-center gap-1 group-hover:-translate-x-1 transition-transform">
+                  <span>انسائیکلوپیڈیا دیکھیں</span>
+                  <span>←</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
         </div>
 
       </div>
