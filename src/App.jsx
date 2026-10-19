@@ -740,8 +740,18 @@ export default function App() {
   // Scroll-to-top
   const [showScrollTop, setShowScrollTop] = useState(false);
   useEffect(() => {
-    const onScroll = () => setShowScrollTop(window.scrollY > 400);
-    window.addEventListener('scroll', onScroll);
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const shouldShow = window.scrollY > 400;
+          setShowScrollTop(prev => (prev !== shouldShow ? shouldShow : prev));
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
@@ -880,21 +890,23 @@ export default function App() {
     } catch (e) {}
   }, [citiesList]);
 
-  // Sync articles directly to permanent database API
-  useEffect(() => {
-    if (articlesLoadedFromDb && Array.isArray(articlesList)) {
-      saveArticlesApi(articlesList);
-    }
-  }, [articlesList, articlesLoadedFromDb]);
-
+  // Sync articles to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY_DOCTORS, JSON.stringify(doctorsList));
-      if (doctorsLoadedFromDb && Array.isArray(doctorsList) && doctorsList.length > 0) {
-        saveDoctorsApi(doctorsList);
+      if (Array.isArray(articlesList) && articlesList.length > 0) {
+        localStorage.setItem(STORAGE_KEY_ARTICLES, JSON.stringify(articlesList));
       }
     } catch (e) {}
-  }, [doctorsList, doctorsLoadedFromDb]);
+  }, [articlesList]);
+
+  // Sync doctors to localStorage
+  useEffect(() => {
+    try {
+      if (Array.isArray(doctorsList) && doctorsList.length > 0) {
+        localStorage.setItem(STORAGE_KEY_DOCTORS, JSON.stringify(doctorsList));
+      }
+    } catch (e) {}
+  }, [doctorsList]);
 
   useEffect(() => {
     try {
@@ -1027,10 +1039,14 @@ export default function App() {
     if (!newDoc) return;
     setDoctorsList(prev => {
       const exists = prev.some(d => d && (d.id === newDoc.id || (d.email && d.email.toLowerCase() === newDoc.email.toLowerCase())));
-      if (exists) {
-        return prev.map(d => (d && (d.id === newDoc.id || d.email === newDoc.email) ? newDoc : d));
-      }
-      return [newDoc, ...prev];
+      const nextDocs = exists
+        ? prev.map(d => (d && (d.id === newDoc.id || d.email === newDoc.email) ? newDoc : d))
+        : [newDoc, ...prev];
+      try {
+        localStorage.setItem(STORAGE_KEY_DOCTORS, JSON.stringify(nextDocs));
+        saveDoctorsApi(nextDocs);
+      } catch (e) {}
+      return nextDocs;
     });
   };
 
@@ -1050,7 +1066,14 @@ export default function App() {
 
   const handleUpdateDoctorProfile = (updatedDoctor) => {
     setLoggedInDoctor(updatedDoctor);
-    setDoctorsList(doctorsList.map(d => (d.id === updatedDoctor.id ? updatedDoctor : d)));
+    setDoctorsList(prev => {
+      const nextDocs = prev.map(d => (d.id === updatedDoctor.id ? updatedDoctor : d));
+      try {
+        localStorage.setItem(STORAGE_KEY_DOCTORS, JSON.stringify(nextDocs));
+        saveDoctorsApi(nextDocs);
+      } catch (e) {}
+      return nextDocs;
+    });
   };
 
   // Refs to always have latest data in handleUrlNavigation without re-running effect
@@ -2390,7 +2413,14 @@ export default function App() {
             onSelectGlossaryTerm={handleSelectGlossaryTerm}
             onSelectPage={handleSelectPage}
             onUpdateArticle={(updated) => {
-              setArticlesList(prev => prev.map(a => a.id === updated.id ? updated : a));
+              setArticlesList(prev => {
+                const nextArticles = prev.map(a => a.id === updated.id ? updated : a);
+                try {
+                  localStorage.setItem(STORAGE_KEY_ARTICLES, JSON.stringify(nextArticles));
+                  saveArticlesApi(nextArticles);
+                } catch (e) {}
+                return nextArticles;
+              });
             }}
             onBack={() => handleNavigateToTab('blog')}
             onSelectArticle={handleSelectArticle}
@@ -2554,9 +2584,14 @@ export default function App() {
       {/* Scroll to Top Button */}
       {showScrollTop && (
         <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
           className={`fixed bottom-6 right-6 z-50 w-12 h-12 ${isNavy ? 'bg-blue-600 hover:bg-blue-700' : 'bg-emerald-600 hover:bg-emerald-700'} text-white rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 animate-in fade-in zoom-in`}
           title="اوپر جائیں"
+          aria-label="اوپر جائیں"
         >
           <ArrowLeft className="w-5 h-5 rotate-90" />
         </button>

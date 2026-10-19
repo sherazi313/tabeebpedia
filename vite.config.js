@@ -671,13 +671,6 @@ function localApiPlugin() {
                   fs.writeFileSync(distDataFile, body, 'utf8');
                 }
 
-                if (endpoint === 'doctors') {
-                  const srcDocsFile = path.resolve(__dirname, 'src', 'data', 'doctorsData.json');
-                  const srcDir = path.dirname(srcDocsFile);
-                  if (!fs.existsSync(srcDir)) fs.mkdirSync(srcDir, { recursive: true });
-                  fs.writeFileSync(srcDocsFile, body, 'utf8');
-                }
-
                 res.setHeader('Content-Type', 'application/json; charset=UTF-8');
                 res.end(JSON.stringify({ status: 'success', message: `${endpoint} saved to file database` }));
               } catch (err) {
@@ -698,6 +691,14 @@ export default defineConfig({
   plugins: [react(), localApiPlugin()],
   server: {
     port: 3000,
-    open: true
+    open: true,
+    watch: {
+      ignored: [
+        '**/public/data/**',
+        '**/src/data/**',
+        '**/dist/**',
+        '**/*.json'
+      ]
+    }
   }
 });

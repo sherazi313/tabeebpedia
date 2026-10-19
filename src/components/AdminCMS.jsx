@@ -692,7 +692,6 @@ export default function AdminCMS({
       try {
         localStorage.setItem('tabeeb_pages', JSON.stringify(pagesList));
       } catch (e) {}
-      savePagesApi(pagesList);
     }
   }, [pagesList]);
 
@@ -1484,12 +1483,19 @@ export default function AdminCMS({
       content: generatedHtml
     }));
 
-    setPagesList(prev => prev.map(p => {
-      if (p.slug === 'pdf-books' || String(p.id) === '8339') {
-        return { ...p, content: generatedHtml };
-      }
-      return p;
-    }));
+    setPagesList(prev => {
+      const nextPages = prev.map(p => {
+        if (p.slug === 'pdf-books' || String(p.id) === '8339') {
+          return { ...p, content: generatedHtml };
+        }
+        return p;
+      });
+      try {
+        localStorage.setItem('tabeeb_pages', JSON.stringify(nextPages));
+        savePagesApi(nextPages);
+      } catch (e) {}
+      return nextPages;
+    });
   };
 
   const handleOpenAddBook = () => {
@@ -1651,13 +1657,20 @@ export default function AdminCMS({
       content: finalContent
     };
 
+    let nextPages = [];
     if (pagesList.some(p => p.id === updatedPage.id)) {
-      setPagesList(prev => prev.map(p => p.id === updatedPage.id ? updatedPage : p));
+      nextPages = pagesList.map(p => p.id === updatedPage.id ? updatedPage : p);
+      setPagesList(nextPages);
       showNotification('صفحہ کامیابی کے ساتھ اپڈیٹ ہو گیا!');
     } else {
-      setPagesList(prev => [...prev, updatedPage]);
+      nextPages = [...pagesList, updatedPage];
+      setPagesList(nextPages);
       showNotification('نیا صفحہ کامیابی کے ساتھ شائع ہو گیا!');
     }
+    try {
+      localStorage.setItem('tabeeb_pages', JSON.stringify(nextPages));
+      savePagesApi(nextPages);
+    } catch (e) {}
     setAdminTab('pages');
   };
 
@@ -7798,7 +7811,12 @@ export default function AdminCMS({
                             <span onClick={() => handleEditPage(page)} className="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline">Edit</span>
                             <span onClick={() => {
                               if (window.confirm('کیا آپ واقعی یہ صفحہ ڈیلیٹ کرنا چاہتے ہیں؟')) {
-                                setPagesList(prev => prev.filter(p => p.id !== page.id));
+                                const nextPages = pagesList.filter(p => p.id !== page.id);
+                                setPagesList(nextPages);
+                                try {
+                                  localStorage.setItem('tabeeb_pages', JSON.stringify(nextPages));
+                                  savePagesApi(nextPages);
+                                } catch (e) {}
                                 showNotification('صفحہ ڈیلیٹ کر دیا گیا');
                               }
                             }} className="text-red-600 hover:text-red-800 cursor-pointer hover:underline">Trash</span>
