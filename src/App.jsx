@@ -154,7 +154,8 @@ const getInitialSettings = () => {
   return {
     siteName: 'طبیب پیڈیا',
     tagline: 'جامع ہربل و طبی انسائیکلوپیڈیا',
-    logoUrl: '',
+    logoUrl: '/logo1.png',
+    faviconUrl: '/logo1.png',
     helplinePhone: '0347-0005578',
     whatsappNumber: '03470005578',
     headOffice: 'اسلام آباد، پاکستان',
@@ -1634,7 +1635,7 @@ export default function App() {
 
   // Dynamic Favicon Updater Hook
   useEffect(() => {
-    const faviconHref = siteSettings?.faviconUrl || '/leaf.svg';
+    const faviconHref = siteSettings?.faviconUrl || '/logo1.png';
     if (faviconHref) {
       const oldIcons = document.querySelectorAll("link[rel*='icon']");
       oldIcons.forEach(el => el.remove());
