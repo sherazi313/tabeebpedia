@@ -107,7 +107,8 @@ import {
   Tablet,
   Radio,
   ArrowUpRight,
-  LogOut
+  LogOut,
+  Video
 } from 'lucide-react';
 import { ARTICLES, DOCTORS, CATEGORIES, SPECIALTIES } from '../data/mockData';
 import { 
@@ -1453,6 +1454,110 @@ export default function AdminCMS({
   const [bookCategoryFilter, setBookCategoryFilter] = useState('all');
   const [pdfEditorSubTab, setPdfEditorSubTab] = useState('studio'); // 'studio', 'html'
 
+  // Rich WYSIWYG Editor State for Book Description
+  const [bookDescEditorMode, setBookDescEditorMode] = useState('visual'); // 'visual', 'code'
+  const [bookDescFont, setBookDescFont] = useState('nastaliq'); // 'nastaliq', 'simple', 'sans'
+  const [bookDescFontSize, setBookDescFontSize] = useState('18px');
+  const [showBookDescBoxMenu, setShowBookDescBoxMenu] = useState(false);
+  const [showBookDescSymbols, setShowBookDescSymbols] = useState(false);
+  const [showBookDescTextColorPicker, setShowBookDescTextColorPicker] = useState(false);
+  const [showBookDescBgColorPicker, setShowBookDescBgColorPicker] = useState(false);
+  const bookDescVisualEditorRef = useRef(null);
+
+  // Sync visual editor content on modal open or mode change
+  useEffect(() => {
+    if (showBookModal && bookDescEditorMode === 'visual') {
+      const timer = setTimeout(() => {
+        if (bookDescVisualEditorRef.current) {
+          bookDescVisualEditorRef.current.innerHTML = bookModalForm.description || '';
+        }
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [showBookModal, bookDescEditorMode]);
+
+  const execBookDescCmd = (command, value = null) => {
+    if (bookDescVisualEditorRef.current) {
+      bookDescVisualEditorRef.current.focus();
+    }
+    document.execCommand(command, false, value);
+    if (bookDescVisualEditorRef.current) {
+      setBookModalForm(prev => ({ ...prev, description: bookDescVisualEditorRef.current.innerHTML }));
+    }
+  };
+
+  const handleInsertBookDescVideo = () => {
+    const input = prompt('یوٹیوب، فیس بک یا کسی بھی ویڈیو کا URL یا <iframe> ایمبڈ کوڈ درج کریں:\nمثال: https://www.youtube.com/watch?v=... یا <iframe src="..."></iframe>');
+    if (!input || !input.trim()) return;
+    const trimmed = input.trim();
+    let videoEmbedHtml = '';
+
+    if (trimmed.includes('<iframe')) {
+      videoEmbedHtml = `<div class="my-4 aspect-video rounded-2xl overflow-hidden shadow-lg border border-slate-200 bg-black">${trimmed}</div><p><br/></p>`;
+    } else if (trimmed.includes('youtube.com/watch') || trimmed.includes('youtu.be/')) {
+      let vidId = '';
+      if (trimmed.includes('v=')) {
+        vidId = trimmed.split('v=')[1]?.split('&')[0];
+      } else if (trimmed.includes('youtu.be/')) {
+        vidId = trimmed.split('youtu.be/')[1]?.split('?')[0];
+      }
+      if (vidId) {
+        videoEmbedHtml = `<div class="my-4 aspect-video rounded-2xl overflow-hidden shadow-lg border border-slate-200 bg-black"><iframe src="https://www.youtube.com/embed/${vidId}" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div><p><br/></p>`;
+      }
+    } else if (trimmed.includes('vimeo.com/')) {
+      const vimeoId = trimmed.split('vimeo.com/')[1]?.split('?')[0];
+      if (vimeoId) {
+        videoEmbedHtml = `<div class="my-4 aspect-video rounded-2xl overflow-hidden shadow-lg border border-slate-200 bg-black"><iframe src="https://player.vimeo.com/video/${vimeoId}" class="w-full h-full border-0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div><p><br/></p>`;
+      }
+    } else {
+      videoEmbedHtml = `<div class="my-4 aspect-video rounded-2xl overflow-hidden shadow-lg border border-slate-200 bg-black"><iframe src="${trimmed}" class="w-full h-full border-0" allowfullscreen></iframe></div><p><br/></p>`;
+    }
+
+    if (videoEmbedHtml) {
+      if (bookDescEditorMode === 'code') {
+        setBookModalForm(prev => ({
+          ...prev,
+          description: (prev.description || '') + '\n' + videoEmbedHtml
+        }));
+      } else {
+        execBookDescCmd('insertHTML', videoEmbedHtml);
+      }
+    }
+  };
+
+  const handleBookDescInlineImage = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = await uploadImageApi(file);
+    if (url) {
+      const imgHtml = `<div class="my-4 text-center"><img src="${url}" class="rounded-2xl max-w-full inline-block shadow-md border border-slate-200" alt="Book Image" /></div><p><br/></p>`;
+      if (bookDescEditorMode === 'code') {
+        setBookModalForm(prev => ({
+          ...prev,
+          description: (prev.description || '') + '\n' + imgHtml
+        }));
+      } else {
+        execBookDescCmd('insertHTML', imgHtml);
+      }
+      showNotification('تصویر تفصیل میں کامیابی سے شامل ہو گئی!');
+    }
+  };
+
+  const insertBookDescBox = (theme) => {
+    let boxHtml = '';
+    if (theme === 'green') {
+      boxHtml = `<div style="background-color: #ecfdf5; border-right: 4px solid #10b981; padding: 14px 18px; border-radius: 12px; margin: 16px 0; color: #065f46;"><strong style="font-size: 15px; display: block; margin-bottom: 6px;">🌿 اہم فوائد و طبی خلاصہ:</strong>یہاں کتاب کا اہم نکتہ یا فوائد درج کریں۔</div><p><br/></p>`;
+    } else if (theme === 'blue') {
+      boxHtml = `<div style="background-color: #eff6ff; border-right: 4px solid #3b82f6; padding: 14px 18px; border-radius: 12px; margin: 16px 0; color: #1e40af;"><strong style="font-size: 15px; display: block; margin-bottom: 6px;">📘 اہم ابواب و خصوصیات:</strong>یہاں کتاب کے اہم ابواب یا نسخہ جات کی تفصیل لکھیں۔</div><p><br/></p>`;
+    } else if (theme === 'amber') {
+      boxHtml = `<div style="background-color: #fffbeb; border-right: 4px solid #f59e0b; padding: 14px 18px; border-radius: 12px; margin: 16px 0; color: #92400e;"><strong style="font-size: 15px; display: block; margin-bottom: 6px;">⚠️ احتیاطی تدابیر و رہنمائی:</strong>یہاں مطالعہ یا استعمال کے متعلق احتیاط لکھیں۔</div><p><br/></p>`;
+    } else {
+      boxHtml = `<div style="background-color: #fef2f2; border-right: 4px solid #ef4444; padding: 14px 18px; border-radius: 12px; margin: 16px 0; color: #991b1b;"><strong style="font-size: 15px; display: block; margin-bottom: 6px;">⛔ اہم تنبیہ:</strong>یہاں کتاب کے حوالے سے ضروری وضاحت یا تنبیہ درج فرمائیں۔</div><p><br/></p>`;
+    }
+    execBookDescCmd('insertHTML', boxHtml);
+    setShowBookDescBoxMenu(false);
+  };
+
   // Load latest live books from API or /data/pdf-books.json
   useEffect(() => {
     const fetchBooks = async () => {
@@ -1500,6 +1605,7 @@ export default function AdminCMS({
 
   const handleOpenAddBook = () => {
     setEditingBookIndex(null);
+    setBookDescEditorMode('visual');
     setBookModalForm({
       title: '',
       author: 'حکیم سید عبدالوہاب شاہ شیرازی',
@@ -1512,15 +1618,22 @@ export default function AdminCMS({
       downloadUrl: '',
       embedUrl: ''
     });
+    if (bookDescVisualEditorRef.current) {
+      bookDescVisualEditorRef.current.innerHTML = '';
+    }
     setShowBookModal(true);
   };
 
   const handleOpenEditBook = (book, index) => {
     setEditingBookIndex(index);
+    setBookDescEditorMode('visual');
     setBookModalForm({
       ...book,
       image: book.image || '/images/books/tib-e-pakistani-urdu.jpg'
     });
+    if (bookDescVisualEditorRef.current) {
+      bookDescVisualEditorRef.current.innerHTML = book.description || '';
+    }
     setShowBookModal(true);
   };
 
@@ -1534,14 +1647,24 @@ export default function AdminCMS({
       return;
     }
 
+    let finalDesc = bookModalForm.description || '';
+    if (bookDescEditorMode === 'visual' && bookDescVisualEditorRef.current) {
+      finalDesc = bookDescVisualEditorRef.current.innerHTML;
+    }
+
+    const finalBookData = {
+      ...bookModalForm,
+      description: finalDesc
+    };
+
     let updated = [];
     if (editingBookIndex !== null && editingBookIndex >= 0) {
-      updated = pdfBooksList.map((b, idx) => idx === editingBookIndex ? { ...b, ...bookModalForm } : b);
+      updated = pdfBooksList.map((b, idx) => idx === editingBookIndex ? { ...b, ...finalBookData } : b);
       showNotification(`کتاب "${bookModalForm.title}" کامیابی کے ساتھ اپڈیٹ ہو گئی!`);
     } else {
       const newBook = {
         id: Date.now(),
-        ...bookModalForm
+        ...finalBookData
       };
       updated = [newBook, ...pdfBooksList];
       showNotification(`نئی کتاب "${bookModalForm.title}" کامیابی کے ساتھ شامل کر دی گئی!`);
@@ -7424,7 +7547,7 @@ export default function AdminCMS({
                   {/* Add / Edit Book Modal */}
                   {showBookModal && (
                     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in-50">
-                      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-right font-sans">
+                      <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-right font-sans">
                         
                         {/* Modal Header */}
                         <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
@@ -7625,18 +7748,403 @@ export default function AdminCMS({
                             </div>
                           </div>
 
-                          {/* Description */}
-                          <div>
-                            <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
-                              کتاب کا مختصر تعارف / تفصیل (Description)
-                            </label>
-                            <textarea
-                              rows="3"
-                              value={bookModalForm.description}
-                              onChange={(e) => setBookModalForm({ ...bookModalForm, description: e.target.value })}
-                              placeholder="کتاب کے اہم موضوعات، ابواب یا خصوصیات کا تعارف..."
-                              className="w-full bg-white border border-slate-300 rounded-xl p-3 text-slate-800 text-xs focus:border-emerald-600 outline-none leading-relaxed font-nastaliq shadow-xs"
-                            />
+                          {/* Rich WYSIWYG Description Editor */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <label className="block text-xs font-bold text-slate-700 font-simple">
+                                کتاب کا تفصیلی تعارف، ابواب، ویڈیوز و خصوصیات (Book Description & Rich Content)
+                              </label>
+                              <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                                <button
+                                  type="button"
+                                  onClick={() => setBookDescEditorMode('visual')}
+                                  className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${bookDescEditorMode === 'visual' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                                >
+                                  Visual (ویژول)
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (bookDescVisualEditorRef.current) {
+                                      setBookModalForm(prev => ({ ...prev, description: bookDescVisualEditorRef.current.innerHTML }));
+                                    }
+                                    setBookDescEditorMode('code');
+                                  }}
+                                  className={`px-2.5 py-1 rounded text-[11px] font-bold transition-all cursor-pointer ${bookDescEditorMode === 'code' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+                                >
+                                  HTML Code (کوڈ)
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Toolbar (available in Visual mode) */}
+                            {bookDescEditorMode === 'visual' && (
+                              <div className="bg-slate-100 border border-slate-200 rounded-2xl p-2 flex flex-wrap items-center gap-1 text-slate-700">
+                                
+                                {/* 1. Font Family */}
+                                <select
+                                  value={bookDescFont}
+                                  onChange={(e) => setBookDescFont(e.target.value)}
+                                  className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-700 outline-none shadow-xs"
+                                  title="فونٹ کا انداز"
+                                >
+                                  <option value="nastaliq">جمیل نوری نستعلیق</option>
+                                  <option value="simple">سادہ اردو فونٹ</option>
+                                  <option value="sans">ماڈرن فونٹ (Sans)</option>
+                                </select>
+
+                                {/* 2. Headings / Block */}
+                                <select
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val) execBookDescCmd('formatBlock', val);
+                                    e.target.value = '';
+                                  }}
+                                  defaultValue=""
+                                  className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-700 outline-none shadow-xs"
+                                  title="سرخی کا سائز"
+                                >
+                                  <option value="" disabled>سرخی (Heading)</option>
+                                  <option value="<h2>">سرخی 2 (H2)</option>
+                                  <option value="<h3>">سرخی 3 (H3)</option>
+                                  <option value="<h4>">سرخی 4 (H4)</option>
+                                  <option value="<p>">عام پیراگراف (P)</option>
+                                </select>
+
+                                {/* 3. Font Size */}
+                                <select
+                                  value={bookDescFontSize}
+                                  onChange={(e) => setBookDescFontSize(e.target.value)}
+                                  className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs font-bold text-slate-700 outline-none shadow-xs"
+                                  title="ٹیکسٹ کا سائز"
+                                >
+                                  <option value="15px">15px چھوٹا</option>
+                                  <option value="17px">17px عام</option>
+                                  <option value="18px">18px موزوں</option>
+                                  <option value="20px">20px درمیانہ</option>
+                                  <option value="24px">24px بڑا</option>
+                                  <option value="28px">28px بہت بڑا</option>
+                                </select>
+
+                                <div className="h-4 w-px bg-slate-300 mx-0.5" />
+
+                                {/* 4. Basic Formatting */}
+                                <button
+                                  type="button"
+                                  onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('bold'); }}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700 cursor-pointer"
+                                  title="بولڈ (Ctrl+B)"
+                                >
+                                  <Bold className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('italic'); }}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700 cursor-pointer"
+                                  title="اٹالک (Ctrl+I)"
+                                >
+                                  <Italic className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('underline'); }}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700 cursor-pointer"
+                                  title="انڈر لائن (Ctrl+U)"
+                                >
+                                  <Underline className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('strikeThrough'); }}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700 cursor-pointer"
+                                  title="سٹرائیک تھرو"
+                                >
+                                  <Strikethrough className="w-4 h-4" />
+                                </button>
+
+                                <div className="h-4 w-px bg-slate-300 mx-0.5" />
+
+                                {/* 5. Text & Highlight Colors */}
+                                <div className="flex items-center gap-1 bg-white border border-slate-300 px-1.5 py-0.5 rounded-lg shadow-xs" title="تحریر کا رنگ (Text Color)">
+                                  <Type className="w-3.5 h-3.5 text-slate-700" />
+                                  <input
+                                    type="color"
+                                    defaultValue="#0f172a"
+                                    onChange={(e) => execBookDescCmd('foreColor', e.target.value)}
+                                    className="w-4 h-4 bg-transparent border-0 cursor-pointer rounded"
+                                  />
+                                </div>
+
+                                <div className="flex items-center gap-1 bg-white border border-slate-300 px-1.5 py-0.5 rounded-lg shadow-xs" title="ہائی لائٹر رنگ (Highlight Color)">
+                                  <Highlighter className="w-3.5 h-3.5 text-amber-500" />
+                                  <input
+                                    type="color"
+                                    defaultValue="#fef08a"
+                                    onChange={(e) => execBookDescCmd('hiliteColor', e.target.value)}
+                                    className="w-4 h-4 bg-transparent border-0 cursor-pointer rounded"
+                                  />
+                                </div>
+
+                                {/* Instant Color Quick Swatches */}
+                                <div className="hidden sm:flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-slate-300 shadow-xs">
+                                  <button type="button" onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('foreColor', '#0f172a'); }} className="w-3.5 h-3.5 rounded-full bg-slate-900 hover:scale-125 transition-transform" title="سیاہ رنگ" />
+                                  <button type="button" onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('foreColor', '#059669'); }} className="w-3.5 h-3.5 rounded-full bg-emerald-600 hover:scale-125 transition-transform" title="سبز رنگ" />
+                                  <button type="button" onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('foreColor', '#2563eb'); }} className="w-3.5 h-3.5 rounded-full bg-blue-600 hover:scale-125 transition-transform" title="نیلا رنگ" />
+                                  <button type="button" onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('foreColor', '#dc2626'); }} className="w-3.5 h-3.5 rounded-full bg-red-600 hover:scale-125 transition-transform" title="سرخ رنگ" />
+                                </div>
+
+                                <div className="h-4 w-px bg-slate-300 mx-0.5" />
+
+                                {/* 6. Alignment */}
+                                <button
+                                  type="button"
+                                  onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('justifyRight'); }}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700 cursor-pointer"
+                                  title="دائیں سیدھ"
+                                >
+                                  <AlignRight className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('justifyCenter'); }}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700 cursor-pointer"
+                                  title="درمیان سیدھ"
+                                >
+                                  <AlignCenter className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('justifyLeft'); }}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700 cursor-pointer"
+                                  title="بائیں سیدھ"
+                                >
+                                  <AlignLeft className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('justifyFull'); }}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700 cursor-pointer"
+                                  title="مکمل سیدھ (Justify)"
+                                >
+                                  <AlignJustify className="w-4 h-4" />
+                                </button>
+
+                                <div className="h-4 w-px bg-slate-300 mx-0.5" />
+
+                                {/* 7. Lists */}
+                                <button
+                                  type="button"
+                                  onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('insertUnorderedList'); }}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700 cursor-pointer"
+                                  title="بلٹ لسٹ"
+                                >
+                                  <List className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('insertOrderedList'); }}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700 cursor-pointer"
+                                  title="نمبر والی لسٹ"
+                                >
+                                  <ListOrdered className="w-4 h-4" />
+                                </button>
+
+                                <div className="h-4 w-px bg-slate-300 mx-0.5" />
+
+                                {/* 8. Links */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const url = prompt('ویب لنک درج کریں (URL):', 'https://');
+                                    if (url) execBookDescCmd('createLink', url);
+                                  }}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-blue-600 cursor-pointer"
+                                  title="لنک لگائیں"
+                                >
+                                  <LinkIcon className="w-4 h-4" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => execBookDescCmd('unlink')}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-500 cursor-pointer"
+                                  title="لنک ختم کریں"
+                                >
+                                  <Unlink className="w-4 h-4" />
+                                </button>
+
+                                <div className="h-4 w-px bg-slate-300 mx-0.5" />
+
+                                {/* 9. Upload image from Computer directly into description */}
+                                <label className="p-1.5 bg-white hover:bg-emerald-50 text-emerald-700 rounded-lg border border-slate-300 shadow-xs cursor-pointer flex items-center gap-1 font-simple text-xs font-bold" title="کمپیوٹر سے تفصیل میں تصویر شامل کریں">
+                                  <ImageIcon className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>+ تصویر</span>
+                                  <input type="file" accept="image/*" onChange={handleBookDescInlineImage} className="hidden" />
+                                </label>
+
+                                {/* 10. Video / Embed Button */}
+                                <button
+                                  type="button"
+                                  onClick={handleInsertBookDescVideo}
+                                  className="p-1.5 bg-white hover:bg-blue-50 text-blue-700 rounded-lg border border-slate-300 shadow-xs flex items-center gap-1 font-simple text-xs font-bold transition-colors cursor-pointer"
+                                  title="یوٹیوب ویڈیو یا ایمبڈ iframe کوڈ شامل کریں"
+                                >
+                                  <Video className="w-3.5 h-3.5 text-blue-600" />
+                                  <span>ویڈیو / ایمبڈ</span>
+                                </button>
+
+                                {/* 11. 1-Click Callout Box Dropdown */}
+                                <div className="relative">
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowBookDescBoxMenu(!showBookDescBoxMenu)}
+                                    className="px-2 py-1 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-lg flex items-center gap-1 text-xs font-bold shadow-xs font-simple cursor-pointer"
+                                    title="خوبصورت باکس کارڈ لگائیں"
+                                  >
+                                    <BoxSelect className="w-3.5 h-3.5" />
+                                    <span>باکس کارڈ</span>
+                                    <ChevronDown className="w-2.5 h-2.5" />
+                                  </button>
+
+                                  {showBookDescBoxMenu && (
+                                    <div className="absolute top-full right-0 mt-1 w-64 bg-white border border-slate-200 rounded-xl p-2 shadow-xl z-50 space-y-1 text-right font-simple">
+                                      <div className="text-[10px] text-slate-500 font-bold px-2 py-0.5 border-b border-slate-200">
+                                        باکس کا ڈیزائن منتخب کریں:
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => insertBookDescBox('green')}
+                                        className="w-full text-right p-1.5 rounded-lg hover:bg-emerald-50 text-emerald-800 flex items-center gap-2 text-xs font-bold transition-colors cursor-pointer"
+                                      >
+                                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                                        <span>سبز فوائد و خلاصہ باکس</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => insertBookDescBox('blue')}
+                                        className="w-full text-right p-1.5 rounded-lg hover:bg-blue-50 text-blue-800 flex items-center gap-2 text-xs font-bold transition-colors cursor-pointer"
+                                      >
+                                        <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                                        <span>نیلا اہم ابواب باکس</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => insertBookDescBox('amber')}
+                                        className="w-full text-right p-1.5 rounded-lg hover:bg-amber-50 text-amber-800 flex items-center gap-2 text-xs font-bold transition-colors cursor-pointer"
+                                      >
+                                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                                        <span>پیلا احتیاط و رہنمائی باکس</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => insertBookDescBox('red')}
+                                        className="w-full text-right p-1.5 rounded-lg hover:bg-rose-50 text-rose-800 flex items-center gap-2 text-xs font-bold transition-colors cursor-pointer"
+                                      >
+                                        <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                                        <span>سرخ انتباہ و تنبیہ باکس</span>
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* 12. Special Characters / Islamic Symbols (Ω) */}
+                                <div className="relative">
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowBookDescSymbols(!showBookDescSymbols)}
+                                    className="p-1.5 bg-white hover:bg-slate-200 border border-slate-300 rounded-lg text-blue-700 font-bold text-xs shadow-xs cursor-pointer"
+                                    title="خاص علامات و اسلامی القابات (Ω)"
+                                  >
+                                    Ω علامات
+                                  </button>
+
+                                  {showBookDescSymbols && (
+                                    <div className="absolute top-full right-0 mt-1 w-72 bg-white border border-slate-200 rounded-xl p-2.5 shadow-xl z-50 text-right space-y-1.5 font-simple">
+                                      <div className="flex items-center justify-between border-b border-slate-200 pb-1">
+                                        <span className="text-xs font-bold text-slate-800">اسلامی القابات و خاص علامات</span>
+                                        <button type="button" onClick={() => setShowBookDescSymbols(false)} className="text-slate-400 hover:text-slate-700 cursor-pointer">
+                                          <X className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                      <div className="grid grid-cols-6 gap-1 max-h-48 overflow-y-auto p-0.5">
+                                        {SPECIAL_SYMBOLS.map((sym, i) => (
+                                          <button
+                                            key={i}
+                                            type="button"
+                                            onClick={() => {
+                                              execBookDescCmd('insertText', sym.label);
+                                              setShowBookDescSymbols(false);
+                                            }}
+                                            className="p-1.5 text-center bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-800 rounded-md text-xs transition-colors cursor-pointer"
+                                            title={sym.desc}
+                                          >
+                                            {sym.label}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onMouseDown={(e) => { e.preventDefault(); execBookDescCmd('insertHorizontalRule'); }}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-slate-700 cursor-pointer"
+                                  title="افقی لکیر (Horizontal Divider)"
+                                >
+                                  <Minus className="w-4 h-4" />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => execBookDescCmd('removeFormat')}
+                                  className="p-1.5 hover:bg-slate-200 rounded-lg text-amber-600 cursor-pointer"
+                                  title="فارمیٹنگ ختم کریں"
+                                >
+                                  <Eraser className="w-4 h-4" />
+                                </button>
+
+                              </div>
+                            )}
+
+                            {/* Visual Contenteditable Canvas */}
+                            {bookDescEditorMode === 'visual' ? (
+                              <div className="bg-slate-50 p-2 sm:p-3 rounded-2xl border border-slate-200">
+                                <div
+                                  ref={bookDescVisualEditorRef}
+                                  contentEditable
+                                  onInput={() => {
+                                    if (bookDescVisualEditorRef.current) {
+                                      setBookModalForm(prev => ({ ...prev, description: bookDescVisualEditorRef.current.innerHTML }));
+                                    }
+                                  }}
+                                  className={`w-full bg-white text-slate-900 border border-slate-300 rounded-xl p-4 sm:p-6 min-h-[280px] max-h-[460px] overflow-y-auto outline-none leading-relaxed text-right article-rendered-content shadow-xs focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all ${
+                                    bookDescFont === 'nastaliq' ? 'font-nastaliq' : bookDescFont === 'simple' ? 'font-simple' : 'font-sans'
+                                  }`}
+                                  style={{ fontSize: bookDescFontSize, minHeight: '280px' }}
+                                />
+                              </div>
+                            ) : (
+                              /* HTML Code Editor Mode */
+                              <div className="bg-slate-950 rounded-2xl p-3 border border-slate-800 space-y-2">
+                                <div className="flex items-center justify-between text-xs text-slate-400 border-b border-slate-800 pb-2">
+                                  <span className="font-mono">HTML سورس کوڈ ایڈیٹر</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setBookDescEditorMode('visual')}
+                                    className="text-emerald-400 hover:text-emerald-300 font-bold underline cursor-pointer"
+                                  >
+                                    ویژول موڈ پر جائیں
+                                  </button>
+                                </div>
+                                <textarea
+                                  rows="12"
+                                  value={bookModalForm.description || ''}
+                                  onChange={(e) => setBookModalForm({ ...bookModalForm, description: e.target.value })}
+                                  placeholder="HTML سورس کوڈ، یوٹیوب <iframe> ایمبڈ کوڈ یا مواد درج فرمائیں..."
+                                  className="w-full bg-slate-950 text-emerald-400 font-mono text-xs p-3 rounded-xl border border-slate-800 outline-none focus:border-emerald-500 text-left dir-ltr leading-relaxed"
+                                />
+                              </div>
+                            )}
                           </div>
 
                         </div>

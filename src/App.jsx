@@ -507,6 +507,7 @@ export default function App() {
     else if (tab === 'herbs') targetUrl = '/herbs';
     else if (tab === 'qanoon') targetUrl = '/qanoon';
     else if (tab === 'herb-calculator') targetUrl = '/herb-calculator';
+    else if (tab === 'pulse-calculator') targetUrl = '/pulse-calculator';
     else if (tab === 'admin') {
       const currentSlug = (siteSettings?.adminSecretSlug || getStoredAdminSecretSlug()).toLowerCase().trim();
       targetUrl = `/${currentSlug}`;
@@ -517,7 +518,7 @@ export default function App() {
     if (pushState) {
       try {
         if (window.location.pathname !== targetUrl) {
-          window.history.pushState({}, '', targetUrl);
+          window.history.pushState({ type: 'tab', tab }, '', targetUrl);
         }
       } catch(e) {}
     }
@@ -556,7 +557,12 @@ export default function App() {
       setSelectedDoctor(null);
       setSelectedGlossaryTerm(null);
       setActiveTab('page');
-      window.history.pushState({}, '', `/${p.slug || p.id}`);
+      try {
+        const url = `/${p.slug || p.id}`;
+        if (window.location.pathname !== url) {
+          window.history.pushState({ type: 'page', slug: p.slug, id: p.id }, '', url);
+        }
+      } catch(e) {}
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -986,38 +992,46 @@ export default function App() {
   // Navigation handlers
   const handleSelectDoctor = (doctor) => {
     const current = (doctor && doctorsList.find(d => d.id === doctor.id || d.slug === doctor.slug)) || doctor;
+    if (!current) return;
     setSelectedDoctor(current);
     setSelectedArticle(null);
     setSelectedPage(null);
+    setSelectedGlossaryTerm(null);
     setActiveTab('doctor-detail');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     try {
-      window.history.pushState({}, '', `/doctor/${current.slug || current.id}`);
+      const url = `/doctor/${current.slug || current.id}`;
+      if (window.location.pathname !== url) {
+        window.history.pushState({ type: 'doctor', id: current.id, slug: current.slug }, '', url);
+      }
     } catch(e) {}
   };
 
   const handleSelectArticle = (article) => {
     const current = (article && articlesList.find(a => a.id === article.id || a.slug === article.slug)) || article;
+    if (!current) return;
     setSelectedArticle(current);
     setSelectedPage(null);
     setSelectedDoctor(null);
+    setSelectedGlossaryTerm(null);
     setActiveTab('article-detail');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     try {
-      window.history.pushState({}, '', `/${current.slug || current.id}`);
+      const url = `/${current.slug || current.id}`;
+      if (window.location.pathname !== url) {
+        window.history.pushState({ type: 'article', id: current.id, slug: current.slug }, '', url);
+      }
     } catch(e) {}
   };
 
   const handleSpecialtyClick = (specId) => {
     setSelectedSpecialty(specId);
-    setActiveTab('doctors');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    handleNavigateToTab('doctors');
   };
 
   const handleCityClick = (cityId) => {
     setSelectedCity(cityId);
-    setActiveTab('doctors');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    handleNavigateToTab('doctors');
   };
 
   // Doctor Auth & Dashboard Handlers
@@ -1197,6 +1211,27 @@ export default function App() {
         return;
       }
 
+      // Check Root Home Path (/ or /home or ?tab=home)
+      const hasSpecificRouteQuery = 
+        params.get('article') || 
+        params.get('slug') || 
+        params.get('doctor') || 
+        params.get('hakeem') || 
+        params.get('farhang') || 
+        params.get('glossary') || 
+        (tabParam && tabParam !== 'home');
+
+      if ((!path || normPath === 'home' || normPath === '') && !hasSpecificRouteQuery) {
+        setActiveTab('home');
+        setSelectedArticle(null);
+        setSelectedDoctor(null);
+        setSelectedPage(null);
+        setSelectedGlossaryTerm(null);
+        try { localStorage.setItem('tabeeb_active_tab', 'home'); } catch(e) {}
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
       // Check Public Admin Route (/admin, /dashboard) -> redirect unauthenticated to '/'
       if (normPath === 'admin' || normPath === 'dashboard' || params.get('tab') === 'admin') {
         if (isAuth) {
@@ -1207,46 +1242,63 @@ export default function App() {
             window.history.replaceState(null, '', '/');
           }
           setActiveTab('home');
+          setSelectedArticle(null);
+          setSelectedDoctor(null);
+          setSelectedPage(null);
+          setSelectedGlossaryTerm(null);
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
 
-      // Check Main Hubs/Tabs (/doctors, /blog, /herbs, /qanoon)
-      if (path === 'doctors' || params.get('tab') === 'doctors') {
+      // Check Main Hubs/Tabs (/doctors, /blog, /herbs, /qanoon, /farhang, calculators)
+      if (normPath === 'doctors' || tabParam === 'doctors') {
         setActiveTab('doctors');
         setSelectedArticle(null);
         setSelectedDoctor(null);
         setSelectedPage(null);
+        setSelectedGlossaryTerm(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
-      if (path === 'blog' || params.get('tab') === 'blog') {
+      if (normPath === 'blog' || tabParam === 'blog') {
         setActiveTab('blog');
         setSelectedArticle(null);
         setSelectedDoctor(null);
         setSelectedPage(null);
+        setSelectedGlossaryTerm(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
-      if (path === 'herbs' || params.get('tab') === 'herbs') {
+      if (normPath === 'herbs' || tabParam === 'herbs') {
         setActiveTab('herbs');
         setSelectedArticle(null);
         setSelectedDoctor(null);
         setSelectedPage(null);
+        setSelectedGlossaryTerm(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
-      if (path === 'qanoon' || params.get('tab') === 'qanoon') {
+      if (normPath === 'qanoon' || tabParam === 'qanoon') {
         setActiveTab('qanoon');
         setSelectedArticle(null);
         setSelectedDoctor(null);
         setSelectedPage(null);
+        setSelectedGlossaryTerm(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
-      if (path === 'herb-calculator' || path === 'hec' || path === 'calculator' || path === 'mizaj-calculator' || params.get('tab') === 'herb-calculator' || params.get('tab') === 'hec') {
+      if (['herb-calculator', 'hec', 'calculator', 'mizaj-calculator'].includes(normPath) || ['herb-calculator', 'hec'].includes(tabParam)) {
         setActiveTab('herb-calculator');
+        setSelectedArticle(null);
+        setSelectedDoctor(null);
+        setSelectedPage(null);
+        setSelectedGlossaryTerm(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      if (['pulse-calculator', 'pulse', 'nabz'].includes(normPath) || tabParam === 'pulse-calculator') {
+        setActiveTab('pulse-calculator');
         setSelectedArticle(null);
         setSelectedDoctor(null);
         setSelectedPage(null);
@@ -1256,7 +1308,7 @@ export default function App() {
       }
 
       // Check Farhang Directory Hub
-      if (path === 'farhang' || path === 'glossary' || params.get('tab') === 'farhang' || params.get('tab') === 'glossary') {
+      if (normPath === 'farhang' || normPath === 'glossary' || tabParam === 'farhang' || tabParam === 'glossary') {
         setActiveTab('farhang');
         setSelectedArticle(null);
         setSelectedDoctor(null);
@@ -1281,11 +1333,7 @@ export default function App() {
           g.term === glossaryParam || 
           String(g.id) === glossaryParam
         );
-        if (foundTerm) {
-          setSelectedGlossaryTerm(foundTerm);
-        } else {
-          setSelectedGlossaryTerm({ slug: glossaryParam, term: decodedTermParam });
-        }
+        setSelectedGlossaryTerm(foundTerm || { slug: glossaryParam, term: decodedTermParam });
         setSelectedArticle(null);
         setSelectedDoctor(null);
         setSelectedPage(null);
@@ -1329,7 +1377,7 @@ export default function App() {
 
       // Check Articles (Clean URLs like /slug or ?article=slug)
       let articleParam = params.get('article') || params.get('slug');
-      if (!articleParam && path && !path.startsWith('api') && path !== 'admin' && path !== 'login' && path !== 'home' && normPath !== secretSlug && normPath !== 'tabeeb-7860' && !['doctors', 'blog', 'farhang', 'glossary', 'herbs', 'qanoon', 'herb-calculator', 'hec', 'calculator'].includes(path)) {
+      if (!articleParam && path && !path.startsWith('api') && path !== 'admin' && path !== 'login' && path !== 'home' && normPath !== secretSlug && normPath !== 'tabeeb-7860' && !['doctors', 'blog', 'farhang', 'glossary', 'herbs', 'qanoon', 'herb-calculator', 'hec', 'calculator', 'pulse-calculator', 'pulse', 'nabz'].includes(normPath)) {
         articleParam = path;
       }
 
@@ -1347,6 +1395,7 @@ export default function App() {
           setSelectedArticle(found);
           setSelectedPage(null);
           setSelectedDoctor(null);
+          setSelectedGlossaryTerm(null);
           setActiveTab('article-detail');
           window.scrollTo({ top: 0, behavior: 'smooth' });
           return;
@@ -1365,16 +1414,20 @@ export default function App() {
           setSelectedDoctor(foundDoc);
           setSelectedArticle(null);
           setSelectedPage(null);
+          setSelectedGlossaryTerm(null);
           setActiveTab('doctor-detail');
           window.scrollTo({ top: 0, behavior: 'smooth' });
           return;
         }
       }
 
-      // If on root path '/', clear active tab from admin if not in admin URL
-      if (!path) {
-        try { localStorage.setItem('tabeeb_active_tab', 'home'); } catch(e) {}
-      }
+      // Fallback: If nothing matched, gracefully reset to Home
+      setActiveTab('home');
+      setSelectedArticle(null);
+      setSelectedDoctor(null);
+      setSelectedPage(null);
+      setSelectedGlossaryTerm(null);
+      try { localStorage.setItem('tabeeb_active_tab', 'home'); } catch(e) {}
     };
     handleUrlNavigation();
     window.addEventListener('popstate', handleUrlNavigation);

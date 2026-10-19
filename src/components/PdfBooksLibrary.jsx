@@ -10,9 +10,14 @@ import {
   User, 
   Globe, 
   FileText, 
-  X,
-  ExternalLink,
-  BookMarked
+  X, 
+  ExternalLink, 
+  BookMarked,
+  Share2,
+  Copy,
+  Check,
+  ArrowRight,
+  ArrowLeft
 } from 'lucide-react';
 
 export const BOOKS_DATA = [
@@ -334,6 +339,63 @@ export default function PdfBooksLibrary({ books: propBooks }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeReaderBook, setActiveReaderBook] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  const [selectedBook, setSelectedBook] = useState(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const bParam = params.get('book');
+      if (bParam) {
+        const found = BOOKS_DATA.find(b => String(b.id) === bParam || b.title === bParam || (b.slug && b.slug === bParam));
+        if (found) return found;
+      }
+    } catch(e) {}
+    return null;
+  });
+
+  // Keep selectedBook synced with URL / browser Back-Forward buttons
+  useEffect(() => {
+    const syncUrlBook = () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const bParam = params.get('book');
+        if (bParam) {
+          const found = books.find(b => String(b.id) === bParam || b.title === bParam || (b.slug && b.slug === bParam));
+          if (found) {
+            setSelectedBook(found);
+            return;
+          }
+        }
+        setSelectedBook(null);
+      } catch(e) {}
+    };
+
+    window.addEventListener('popstate', syncUrlBook);
+    return () => window.removeEventListener('popstate', syncUrlBook);
+  }, [books]);
+
+  const handleSelectBook = (book) => {
+    if (!book) return;
+    setSelectedBook(book);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      const url = `?tab=pdf-books&book=${book.id}`;
+      if (window.location.search !== url) {
+        window.history.pushState({ type: 'book', id: book.id }, '', url);
+      }
+    } catch(e) {}
+  };
+
+  const handleBackToLibrary = () => {
+    setSelectedBook(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      const url = '/pdf-books';
+      if (window.location.pathname !== url || window.location.search) {
+        window.history.pushState({ type: 'page', slug: 'pdf-books' }, '', url);
+      }
+    } catch(e) {}
+  };
 
   const categories = [
     { id: 'all', name: 'تمام کتب' },
@@ -359,6 +421,381 @@ export default function PdfBooksLibrary({ books: propBooks }) {
     });
   }, [books, selectedCategory, searchQuery]);
 
+  const relatedBooks = useMemo(() => {
+    if (!selectedBook) return [];
+    return books
+      .filter(b => b.id !== selectedBook.id && (b.category === selectedBook.category || b.categoryEn === selectedBook.categoryEn))
+      .slice(0, 4);
+  }, [books, selectedBook]);
+
+  const renderDescriptionHtml = (desc) => {
+    if (!desc) return '<p>اس کتاب کے لیے فی الوقت تفصیلی تعارف دستیاب نہیں ہے۔</p>';
+    if (/<[a-z][\s\S]*>/i.test(desc)) {
+      return desc;
+    }
+    return desc.split('\n\n').map(p => `<p class="mb-4 leading-relaxed">${p.replace(/\n/g, '<br/>')}</p>`).join('');
+  };
+
+  const handleCopyLink = () => {
+    try {
+      navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch(e) {}
+  };
+
+  // IF A SPECIFIC BOOK IS SELECTED -> RENDER COMPLETE BOOK DETAIL PAGE
+  if (selectedBook) {
+    return (
+      <div className="space-y-8 text-right font-sans animate-fade-in">
+        {/* Navigation Breadcrumb Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200/90 rounded-2xl p-4 sm:px-6 shadow-xs">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 font-simple">
+            <button
+              type="button"
+              onClick={handleBackToLibrary}
+              className="text-emerald-700 hover:text-emerald-900 font-bold hover:underline cursor-pointer flex items-center gap-1"
+            >
+              <BookOpen className="w-4 h-4 text-emerald-600" />
+              <span>کتب خانہ</span>
+            </button>
+            <span className="text-slate-300">/</span>
+            <span className="text-slate-500">{selectedBook.category}</span>
+            <span className="text-slate-300">/</span>
+            <span className="text-slate-900 font-bold truncate max-w-[200px] sm:max-w-md">{selectedBook.title}</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleBackToLibrary}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200 cursor-pointer font-simple shadow-xs"
+          >
+            <ArrowRight className="w-4 h-4" />
+            <span>واپس تمام کتب پر جائیں</span>
+          </button>
+        </div>
+
+        {/* Main Book Detail Card */}
+        <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-10 shadow-xs">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            {/* Right: Book Showcase Cover (In RTL) */}
+            <div className="lg:col-span-4 flex flex-col items-center justify-center space-y-5">
+              <div className="relative w-56 sm:w-64 aspect-[3/4.2] rounded-2xl overflow-hidden shadow-2xl border-2 border-slate-200 bg-slate-100 group">
+                <img
+                  src={selectedBook.image}
+                  alt={selectedBook.title}
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/images/books/tib-e-pakistani-urdu.jpg';
+                  }}
+                  className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                />
+                {/* 3D Book Spine Effect */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-white/20 pointer-events-none" />
+                <div className="absolute top-0 right-0 bottom-0 w-3.5 bg-gradient-to-r from-black/35 via-black/10 to-transparent pointer-events-none" />
+                
+                {/* Format ribbon */}
+                <div className="absolute top-3 right-3 bg-emerald-600/95 backdrop-blur-xs text-white text-xs font-bold px-3 py-1 rounded-full shadow-md font-simple">
+                  PDF ایڈیشن
+                </div>
+              </div>
+
+              {/* Action Buttons Under Cover */}
+              <div className="w-full max-w-xs space-y-2.5">
+                <a
+                  href={selectedBook.downloadUrl}
+                  download
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full py-3.5 px-5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all font-simple cursor-pointer text-sm"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>پی ڈی ایف ڈاؤن لوڈ کریں (Free Download)</span>
+                </a>
+
+                {selectedBook.embedUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveReaderBook(selectedBook)}
+                    className="w-full py-3 px-5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-2xl font-bold flex items-center justify-center gap-2 border border-slate-200 transition-colors font-simple cursor-pointer text-xs"
+                  >
+                    <Eye className="w-4 h-4 text-emerald-600" />
+                    <span>آن لائن مکمل اسکرین میں پڑھیں</span>
+                  </button>
+                )}
+
+                {/* Social Share & Copy Link */}
+                <div className="flex items-center gap-2 pt-2">
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(`طبیب پیڈیا کتب خانہ: کتاب "${selectedBook.title}" مصنف ${selectedBook.author} مفت پی ڈی ایف مطالعہ و ڈاؤن لوڈ کریں۔\n${window.location.href}`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors font-simple"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>واٹس ایپ شیئر</span>
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors font-simple cursor-pointer"
+                    title="کتاب کا لنک کاپی کریں"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copied ? 'کاپی ہو گیا' : 'لنک کاپی'}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Left: Book Meta & Rich Description (In RTL) */}
+            <div className="lg:col-span-8 space-y-6">
+              
+              {/* Category & Language Badges */}
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="bg-emerald-100 text-emerald-900 border border-emerald-300 px-3 py-1 rounded-full text-xs font-bold font-simple">
+                  {selectedBook.category}
+                </span>
+                <span className="bg-indigo-50 text-indigo-800 border border-indigo-200 px-3 py-1 rounded-full text-xs font-bold font-mono">
+                  {selectedBook.language}
+                </span>
+                <span className="bg-slate-100 text-slate-700 border border-slate-200 px-3 py-1 rounded-full text-xs font-bold font-simple">
+                  {selectedBook.pages}
+                </span>
+                <span className="bg-amber-50 text-amber-800 border border-amber-200 px-3 py-1 rounded-full text-xs font-bold font-simple">
+                  مفت علمی مطالعہ (Open Access)
+                </span>
+              </div>
+
+              {/* Book Title */}
+              <div>
+                <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-900 leading-tight font-h1">
+                  {selectedBook.title}
+                </h1>
+                
+                <p className="mt-3 text-sm sm:text-base text-emerald-800 font-bold flex items-center gap-2 font-simple">
+                  <User className="w-4 h-4 text-emerald-600" />
+                  <span>مصنف / محقق: <strong className="text-slate-900">{selectedBook.author}</strong></span>
+                </p>
+              </div>
+
+              {/* Fast Metadata Summary Table */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50/80 border border-slate-200 rounded-2xl p-4 text-xs font-simple">
+                <div>
+                  <span className="text-slate-400 block mb-0.5">شعبہ علم:</span>
+                  <strong className="text-slate-800">{selectedBook.category}</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400 block mb-0.5">زبان:</span>
+                  <strong className="text-slate-800">{selectedBook.language}</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400 block mb-0.5">ضخامت / نوعیت:</span>
+                  <strong className="text-slate-800">{selectedBook.pages}</strong>
+                </div>
+                <div>
+                  <span className="text-slate-400 block mb-0.5">فارمیٹ:</span>
+                  <strong className="text-emerald-700">Digital PDF Document</strong>
+                </div>
+              </div>
+
+              {/* Rich Description Section */}
+              <div className="space-y-4 pt-2 border-t border-slate-100">
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 font-h2">
+                  <FileText className="w-5 h-5 text-emerald-600" />
+                  <span>کتاب کا تعارف، اہم ابواب و تفصیلی خلاصہ</span>
+                </h3>
+
+                <div
+                  className="article-rendered-content text-slate-800 leading-relaxed font-nastaliq text-base sm:text-lg bg-white rounded-2xl p-4 sm:p-6 border border-slate-100 shadow-2xs"
+                  dangerouslySetInnerHTML={{ __html: renderDescriptionHtml(selectedBook.description) }}
+                />
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        {/* Inline PDF Embedded Viewer Frame (if embedUrl is provided) */}
+        {selectedBook.embedUrl && (
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2 font-h2">
+                  <Eye className="w-5 h-5 text-emerald-600" />
+                  <span>آن لائن کتاب کا مطالعہ فرمائیں (Live Document Viewer)</span>
+                </h3>
+                <p className="text-xs text-slate-500 font-simple mt-0.5">
+                  کتاب کے صفحات پلٹنے، زوم کرنے اور مطالعہ کرنے کے لیے نیچے دیا گیا ویور استعمال کریں۔
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveReaderBook(selectedBook)}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors font-simple cursor-pointer"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-600" />
+                  <span>مکمل اسکرین پر کھولیں</span>
+                </button>
+
+                <a
+                  href={selectedBook.downloadUrl}
+                  download
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors font-simple"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>ڈاؤن لوڈ PDF</span>
+                </a>
+              </div>
+            </div>
+
+            <div className="w-full h-[600px] sm:h-[720px] rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 shadow-inner">
+              <iframe
+                src={selectedBook.embedUrl}
+                title={selectedBook.title}
+                className="w-full h-full border-0"
+                allow="fullscreen"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Related Books in Same Category */}
+        {relatedBooks.length > 0 && (
+          <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 font-h2">
+                  اسی شعبے کی مزید منتخب کتب ({selectedBook.category})
+                </h3>
+                <p className="text-xs text-slate-500 font-simple">
+                  طبیب پیڈیا لائبریری سے ملتی جلتی دیگر مستند کتب کا مطالعہ کریں
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleBackToLibrary}
+                className="text-xs font-bold text-emerald-700 hover:text-emerald-900 font-simple hover:underline cursor-pointer"
+              >
+                تمام کتب دیکھیں ({books.length})
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              {relatedBooks.map((relBook) => (
+                <div
+                  key={relBook.id}
+                  onClick={() => handleSelectBook(relBook)}
+                  className="group bg-slate-50 hover:bg-white rounded-2xl p-4 border border-slate-200/80 hover:border-emerald-500 hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-16 h-22 rounded-lg overflow-hidden bg-slate-200 shrink-0 shadow-xs border border-slate-200">
+                      <img
+                        src={relBook.image}
+                        alt={relBook.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        onError={(e) => { e.target.onerror = null; e.target.src = '/images/books/tib-e-pakistani-urdu.jpg'; }}
+                      />
+                    </div>
+                    <div className="flex-1 space-y-1">
+                      <h4 className="text-xs font-bold text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 font-h2 leading-snug">
+                        {relBook.title}
+                      </h4>
+                      <p className="text-[11px] text-slate-500 truncate font-simple">{relBook.author}</p>
+                      <span className="inline-block text-[10px] text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded font-simple">
+                        {relBook.pages}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Legal Notice */}
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-right space-y-1.5 text-xs text-slate-600">
+          <h4 className="font-bold text-slate-800 flex items-center gap-2 font-simple">
+            <FileText className="w-4 h-4 text-emerald-600" />
+            <span>علمی نوٹ برائے قارئین و محققین:</span>
+          </h4>
+          <p className="leading-relaxed font-nastaliq">
+            طبیب پیڈیا کتب خانے میں شائع شدہ تمام کتب خالصتاً تعلیمی، تدریسی اور تحقیقی مقاصد (Educational Fair Use) کے لیے قارئین و اطباء کی علمی سہولت کی خاطر اکٹھی کی گئی ہیں۔ اگر کسی تصنیف کے جملہ حقوقِ اشاعت آپ کے نام محفوظ ہیں اور آپ اسے ہٹوانا چاہتے ہیں، تو ہمارے صفحۂ رابطہ پر مطلع فرمائیں۔
+          </p>
+        </div>
+
+        {/* Online Embedded Reader Modal if opened from modal button */}
+        {activeReaderBook && (
+          <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-fade-in">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl h-[85vh] flex flex-col overflow-hidden border border-slate-300">
+              <div className="bg-slate-900 text-white p-4 px-6 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setActiveReaderBook(null)}
+                    className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                    title="بند کریں"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                  <div className="text-right">
+                    <h4 className="text-sm sm:text-base font-bold text-white font-simple truncate max-w-xs sm:max-w-md">
+                      {activeReaderBook.title}
+                    </h4>
+                    <p className="text-[11px] text-slate-400 font-simple">
+                      مصنف: {activeReaderBook.author}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <a
+                    href={activeReaderBook.downloadUrl}
+                    download
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors font-simple"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>ڈاؤن لوڈ</span>
+                  </a>
+                  <a
+                    href={activeReaderBook.embedUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
+                    title="نئی ونڈو میں کھولیں"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex-1 bg-slate-100 relative">
+                <iframe
+                  src={activeReaderBook.embedUrl}
+                  title={activeReaderBook.title}
+                  className="w-full h-full border-0"
+                  allow="fullscreen"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
+    );
+  }
+
+  // DEFAULT VIEW: COMPLETE LIBRARY GRID VIEW
   return (
     <div className="space-y-8 text-right font-sans">
       
@@ -498,7 +935,8 @@ export default function PdfBooksLibrary({ books: propBooks }) {
           {filteredBooks.map((book) => (
             <div
               key={book.id || book.title}
-              className="bg-white rounded-3xl border border-slate-200/90 hover:border-emerald-500/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+              className="bg-white rounded-3xl border border-slate-200/90 hover:border-emerald-500/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden group cursor-pointer"
+              onClick={() => handleSelectBook(book)}
             >
               {/* TOP: Real Book Cover Display with 3D spine and shadow */}
               <div className="relative bg-gradient-to-b from-slate-100 via-slate-50 to-white p-5 pb-3 flex items-center justify-center border-b border-slate-100 group/cover">
@@ -550,22 +988,23 @@ export default function PdfBooksLibrary({ books: propBooks }) {
                 </div>
 
                 <p className="text-xs text-slate-600 font-nastaliq leading-relaxed line-clamp-3">
-                  {book.description}
+                  {book.description ? book.description.replace(/<[^>]+>/g, ' ') : ''}
                 </p>
 
                 <div className="pt-2 flex items-center justify-between text-[11px] text-slate-400 font-simple border-t border-slate-100">
                   <span className="bg-slate-100 px-2 py-0.5 rounded-md text-slate-600 font-bold">
                     {book.pages}
                   </span>
-                  <span className="text-emerald-700 font-bold">
-                    PDF نسخہ
+                  <span className="text-emerald-700 font-bold flex items-center gap-1">
+                    <span>تفصیلات و مطالعہ</span>
+                    <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
                   </span>
                 </div>
 
               </div>
 
               {/* BOTTOM: Action Buttons */}
-              <div className="p-4 pt-0 flex items-center gap-2">
+              <div className="p-4 pt-0 flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                 <a
                   href={book.downloadUrl}
                   download
@@ -588,15 +1027,14 @@ export default function PdfBooksLibrary({ books: propBooks }) {
                     <span>مطالعہ</span>
                   </button>
                 ) : (
-                  <a
-                    href={book.downloadUrl}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => handleSelectBook(book)}
                     className="py-2.5 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 text-xs font-bold rounded-xl flex items-center justify-center gap-1 transition-colors font-simple cursor-pointer"
-                    title="اوپن کریں"
+                    title="کتاب کی تفصیلات دیکھیں"
                   >
-                    <ExternalLink className="w-4 h-4 text-slate-600" />
-                  </a>
+                    <BookOpen className="w-4 h-4 text-slate-600" />
+                  </button>
                 )}
               </div>
 
