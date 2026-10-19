@@ -290,7 +290,9 @@ export default function AdminCMS({
   pagesList: propPagesList,
   setPagesList: propSetPagesList,
   glossaryList: propGlossaryList,
-  setGlossaryList: propSetGlossaryList
+  setGlossaryList: propSetGlossaryList,
+  pdfBooksList: propPdfBooksList,
+  setPdfBooksList: propSetPdfBooksList
 }) {
   const [adminTab, setAdminTab] = useState(initialTab);
 
@@ -1374,7 +1376,17 @@ export default function AdminCMS({
     featuredDoctorBlockSubtitle: 'پاکستان بھر کے منتخب اور مستند اطباء و ماہرین طب یونانی',
     featuredDoctorBlockColumns: '4',
     featuredDoctorBlockRows: '1',
-    featuredDoctorBlockSort: 'latest'
+    featuredDoctorBlockSort: 'latest',
+    articleBlockTitle: 'تازہ ترین طبی تحقیقات و مضامین',
+    articleBlockColumns: '4',
+    articleBlockRows: '3',
+    articleBlockSort: 'latest',
+    pdfBooksBlockEnabled: true,
+    pdfBooksBlockTitle: 'طبی پی ڈی ایف کتب خانہ (PDF Books)',
+    pdfBooksBlockSubtitle: 'طب یونانی، قانون مفرد اعضاء اور ہربل میڈیسن کی مستند و نایاب کتب کا ذخیرہ',
+    pdfBooksBlockColumns: '4',
+    pdfBooksBlockRows: '1',
+    pdfBooksBlockSort: 'latest'
   });
 
   const visualEditorRef = useRef(null);
@@ -1426,6 +1438,9 @@ export default function AdminCMS({
 
   // Dedicated PDF Books Management Studio State
   const [pdfBooksList, setPdfBooksList] = useState(() => {
+    if (propPdfBooksList && Array.isArray(propPdfBooksList) && propPdfBooksList.length > 0) {
+      return propPdfBooksList;
+    }
     try {
       const local = localStorage.getItem('tabeeb_pdf_books');
       if (local) {
@@ -1436,10 +1451,17 @@ export default function AdminCMS({
     return BOOKS_DATA;
   });
 
+  useEffect(() => {
+    if (propPdfBooksList && Array.isArray(propPdfBooksList) && propPdfBooksList.length > 0) {
+      setPdfBooksList(propPdfBooksList);
+    }
+  }, [propPdfBooksList]);
+
   const [editingBookIndex, setEditingBookIndex] = useState(null);
   const [showBookModal, setShowBookModal] = useState(false);
   const [bookModalForm, setBookModalForm] = useState({
     title: '',
+    slug: '',
     author: 'حکیم سید عبدالوہاب شاہ شیرازی',
     category: 'قانون مفرد اعضاء',
     categoryEn: 'qanoon',
@@ -1575,6 +1597,9 @@ export default function AdminCMS({
 
   const handleSavePdfBooksList = async (newList) => {
     setPdfBooksList(newList);
+    if (propSetPdfBooksList) {
+      propSetPdfBooksList(newList);
+    }
     try {
       localStorage.setItem('tabeeb_pdf_books', JSON.stringify(newList));
     } catch(e) {}
@@ -1608,6 +1633,7 @@ export default function AdminCMS({
     setBookDescEditorMode('visual');
     setBookModalForm({
       title: '',
+      slug: '',
       author: 'حکیم سید عبدالوہاب شاہ شیرازی',
       category: 'قانون مفرد اعضاء',
       categoryEn: 'qanoon',
@@ -1629,6 +1655,7 @@ export default function AdminCMS({
     setBookDescEditorMode('visual');
     setBookModalForm({
       ...book,
+      slug: book.slug || generateSlugFromTitle(book.title) || String(book.id),
       image: book.image || '/images/books/tib-e-pakistani-urdu.jpg'
     });
     if (bookDescVisualEditorRef.current) {
@@ -1652,18 +1679,29 @@ export default function AdminCMS({
       finalDesc = bookDescVisualEditorRef.current.innerHTML;
     }
 
+    const finalSlug = (bookModalForm.slug || '').trim() || generateSlugFromTitle(bookModalForm.title) || String(Date.now());
+
     const finalBookData = {
       ...bookModalForm,
+      slug: finalSlug,
       description: finalDesc
     };
 
     let updated = [];
     if (editingBookIndex !== null && editingBookIndex >= 0) {
-      updated = pdfBooksList.map((b, idx) => idx === editingBookIndex ? { ...b, ...finalBookData } : b);
+      updated = pdfBooksList.map((b, idx) => idx === editingBookIndex ? { 
+        ...b, 
+        ...finalBookData,
+        updatedAt: Date.now()
+      } : b);
       showNotification(`کتاب "${bookModalForm.title}" کامیابی کے ساتھ اپڈیٹ ہو گئی!`);
     } else {
+      const now = Date.now();
       const newBook = {
-        id: Date.now(),
+        id: now,
+        createdAt: new Date().toISOString(),
+        publishedAt: now,
+        date: new Date().toISOString().split('T')[0],
         ...finalBookData
       };
       updated = [newBook, ...pdfBooksList];
@@ -7586,10 +7624,50 @@ export default function AdminCMS({
                               type="text"
                               required
                               value={bookModalForm.title}
-                              onChange={(e) => setBookModalForm({ ...bookModalForm, title: e.target.value })}
+                              onChange={(e) => {
+                                const newTitle = e.target.value;
+                                setBookModalForm(prev => {
+                                  const isAutoSlug = !prev.slug || prev.slug === generateSlugFromTitle(prev.title);
+                                  return {
+                                    ...prev,
+                                    title: newTitle,
+                                    slug: isAutoSlug ? generateSlugFromTitle(newTitle) : prev.slug
+                                  };
+                                });
+                              }}
                               placeholder="مثلاً: کلیات تحقیقات صابر ملتانی"
                               className="w-full bg-white border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 text-sm focus:border-emerald-600 outline-none font-h2 shadow-xs"
                             />
+                          </div>
+
+                          {/* Book Slug / Custom URL */}
+                          <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <label className="block text-xs font-bold text-slate-700 font-simple">
+                                کتاب کا مستقل سلگ / کسٹم یو آر ایل (Book Slug & Custom URL) *
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => setBookModalForm(prev => ({ ...prev, slug: generateSlugFromTitle(prev.title) }))}
+                                className="text-[11px] text-emerald-700 hover:text-emerald-900 font-bold underline font-simple cursor-pointer"
+                                title="عنوان کے مطابق نیا سلگ بنائیں"
+                              >
+                                عنوان کے مطابق ری سیٹ کریں
+                              </button>
+                            </div>
+                            <div className="flex items-center bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs shadow-xs focus-within:border-emerald-600 focus-within:ring-2 focus-within:ring-emerald-500/20">
+                              <span className="text-slate-400 font-mono select-none pl-1 text-[11px] dir-ltr text-left">/book/</span>
+                              <input
+                                type="text"
+                                value={bookModalForm.slug || ''}
+                                onChange={(e) => setBookModalForm({ ...bookModalForm, slug: generateSlugFromTitle(e.target.value) || e.target.value.trim().toLowerCase().replace(/[\s\-_]+/g, '-') })}
+                                placeholder="tib-e-pakistani-urdu یا اپنی مرضی کا سلگ"
+                                className="w-full bg-transparent text-slate-900 outline-none text-left dir-ltr font-mono text-xs"
+                              />
+                            </div>
+                            <p className="text-[11px] text-slate-500 font-simple">
+                              مستقل شیئرنگ لنک: <span className="font-mono text-emerald-700 dir-ltr text-left font-bold">{typeof window !== 'undefined' ? window.location.origin : 'https://tabeebpedia.com'}/book/{bookModalForm.slug || generateSlugFromTitle(bookModalForm.title) || 'slug'}</span>
+                            </p>
                           </div>
 
                           {/* Author & Category in 2 columns */}
@@ -11183,6 +11261,9 @@ export default function AdminCMS({
                             onChange={e => setSettingsForm({...settingsForm, featuredDoctorBlockRows: e.target.value})} 
                             className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none shadow-xs" 
                           />
+                          <p className="text-[11px] text-amber-700 font-bold mt-1">
+                            ہوم پر ظاہر ہونے والے کُل اطباء: {(parseInt(settingsForm.featuredDoctorBlockColumns || '4', 10) || 4) * (parseInt(settingsForm.featuredDoctorBlockRows || '1', 10) || 1)}
+                          </p>
                         </div>
 
                         <div className="md:col-span-2">
@@ -11347,6 +11428,9 @@ export default function AdminCMS({
                         <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">لائنوں کی تعداد</label>
                           <input type="number" min="1" max="10" value={settingsForm.doctorBlockRows || '2'} onChange={e => setSettingsForm({...settingsForm, doctorBlockRows: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" />
+                          <p className="text-[11px] text-blue-700 font-bold mt-1">
+                            ہوم پر ظاہر ہونے والے کُل اطباء: {(parseInt(settingsForm.doctorBlockColumns || '4', 10) || 4) * (parseInt(settingsForm.doctorBlockRows || '2', 10) || 2)}
+                          </p>
                         </div>
                         <div className="md:col-span-2">
                           <label className="block text-xs font-bold text-slate-700 mb-1">ترتیب (کون پہلے نظر آئے؟)</label>
@@ -11395,12 +11479,98 @@ export default function AdminCMS({
                         <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">لائنوں کی تعداد</label>
                           <input type="number" min="1" max="10" value={settingsForm.articleBlockRows || '3'} onChange={e => setSettingsForm({...settingsForm, articleBlockRows: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs" />
+                          <p className="text-[11px] text-blue-700 font-bold mt-1">
+                            ہوم پر ظاہر ہونے والے کُل مضامین: {(parseInt(settingsForm.articleBlockColumns || '4', 10) || 4) * (parseInt(settingsForm.articleBlockRows || '3', 10) || 3)}
+                          </p>
                         </div>
                         <div className="md:col-span-2">
                           <label className="block text-xs font-bold text-slate-700 mb-1">ترتیب (کون پہلے نظر آئے؟)</label>
                           <select value={settingsForm.articleBlockSort || 'latest'} onChange={e => setSettingsForm({...settingsForm, articleBlockSort: e.target.value})} className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none shadow-xs">
                             <option value="latest">تازہ ترین مضامین پہلے (Latest)</option>
                             <option value="oldest">پرانے مضامین پہلے</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* PDF Books Block */}
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-3xl p-6 space-y-4 shadow-xs">
+                      <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="w-5 h-5 text-emerald-600" />
+                          <h3 className="text-base font-bold text-slate-900 font-h2">پی ڈی ایف کتب کا بلاک (PDF Books Library Grid)</h3>
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                          <input 
+                            type="checkbox" 
+                            checked={settingsForm.pdfBooksBlockEnabled !== false} 
+                            onChange={e => setSettingsForm({...settingsForm, pdfBooksBlockEnabled: e.target.checked})}
+                            className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500" 
+                          />
+                          <span>ہوم پیج پر کتب بلاک دکھائیں</span>
+                        </label>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">بلاک کا عنوان (Title)</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.pdfBooksBlockTitle || 'طبی پی ڈی ایف کتب خانہ (PDF Books)'} 
+                            onChange={e => setSettingsForm({...settingsForm, pdfBooksBlockTitle: e.target.value})} 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none shadow-xs font-bold" 
+                          />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">بلاک کا سب ٹائٹل / تفصیل</label>
+                          <input 
+                            type="text" 
+                            value={settingsForm.pdfBooksBlockSubtitle || 'طب یونانی، قانون مفرد اعضاء اور ہربل میڈیسن کی نایاب و مستند کتب کا ذخیرہ'} 
+                            onChange={e => setSettingsForm({...settingsForm, pdfBooksBlockSubtitle: e.target.value})} 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none shadow-xs" 
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">کالمز کی تعداد (1 سے 4)</label>
+                          <select 
+                            value={settingsForm.pdfBooksBlockColumns || '4'} 
+                            onChange={e => setSettingsForm({...settingsForm, pdfBooksBlockColumns: e.target.value})} 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none shadow-xs"
+                          >
+                            <option value="1">1 کالم</option>
+                            <option value="2">2 کالم</option>
+                            <option value="3">3 کالم</option>
+                            <option value="4">4 کالم (تجویز کردہ)</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">لائنوں کی تعداد (Rows)</label>
+                          <input 
+                            type="number" 
+                            min="1" 
+                            max="10" 
+                            value={settingsForm.pdfBooksBlockRows || '1'} 
+                            onChange={e => setSettingsForm({...settingsForm, pdfBooksBlockRows: e.target.value})} 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none shadow-xs" 
+                          />
+                          <p className="text-[11px] text-emerald-700 font-bold mt-1">
+                            ہوم پر ظاہر ہونے والی کُل کتب: {(parseInt(settingsForm.pdfBooksBlockColumns || '4', 10) || 4) * (parseInt(settingsForm.pdfBooksBlockRows || '1', 10) || 1)}
+                          </p>
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">ترتیب (کون سی کتب پہلے نظر آئیں؟)</label>
+                          <select 
+                            value={settingsForm.pdfBooksBlockSort || 'latest'} 
+                            onChange={e => setSettingsForm({...settingsForm, pdfBooksBlockSort: e.target.value})} 
+                            className="w-full bg-white border border-slate-300 text-slate-800 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 outline-none shadow-xs"
+                          >
+                            <option value="latest">تازہ ترین شامل کردہ کتب پہلے (Latest First)</option>
+                            <option value="oldest">پرانی کتب پہلے (Oldest First)</option>
+                            <option value="title">حروفِ تہجی کے لحاظ سے (Alphabetical)</option>
                           </select>
                         </div>
                       </div>

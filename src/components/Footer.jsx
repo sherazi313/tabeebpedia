@@ -27,7 +27,7 @@ export default function Footer({ onNavigate, siteSettings, onSelectPage }) {
           
           {/* Brand + Contact + Social */}
           <div className="lg:col-span-2 space-y-5">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => onNavigate('home')}>
+            <a href="/" className="flex items-center gap-3 cursor-pointer" onClick={(e) => { e.preventDefault(); onNavigate('home'); }}>
               {(siteSettings?.logoUrl || '/logo3.png') ? (
                 <img src={siteSettings?.logoUrl || '/logo3.png'} alt={brandName} className="h-10 sm:h-12 w-auto max-w-[200px] object-contain rounded-2xl bg-white/10 p-1" />
               ) : (
@@ -39,7 +39,7 @@ export default function Footer({ onNavigate, siteSettings, onSelectPage }) {
                 <span className="text-2xl font-bold text-white tracking-tight">{brandName}</span>
                 <span className="text-[10px] text-emerald-400 block font-sans">{siteSettings?.tagline || 'TabeebPedia.com'}</span>
               </div>
-            </div>
+            </a>
 
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm">{aboutText}</p>
 
@@ -86,12 +86,12 @@ export default function Footer({ onNavigate, siteSettings, onSelectPage }) {
           <div className="space-y-3 text-xs">
             <h4 className="text-white font-bold text-sm border-r-2 border-emerald-500 pr-2">اہم لنکس</h4>
             <ul className="space-y-2 text-slate-400">
-              <li><button onClick={() => onNavigate('home')} className="hover:text-emerald-400 transition-colors">صفحۂ اول</button></li>
-              <li><button onClick={() => onNavigate('doctors')} className="hover:text-emerald-400 transition-colors">اطباء و حکماء ڈائریکٹری</button></li>
-              <li><button onClick={() => onNavigate('blog')} className="hover:text-emerald-400 transition-colors">طبی مضامین و ریسرچ</button></li>
-              <li><button onClick={() => onNavigate('farhang')} className="hover:text-emerald-300 font-bold transition-colors">فرہنگِ اطباء (طبی اصطلاحات)</button></li>
-              <li><button onClick={() => onSelectPage ? onSelectPage('pdf-books') : onNavigate('pdf-books')} className="hover:text-emerald-300 font-bold transition-colors">پی ڈی ایف کتب (PDF Books)</button></li>
-              <li><button onClick={() => onNavigate('herb-calculator')} className="hover:text-amber-300 font-bold transition-colors">مزاج کیلکولیٹر (HEC)</button></li>
+              <li><a href="/" onClick={(e) => { e.preventDefault(); onNavigate('home'); }} className="hover:text-emerald-400 transition-colors block">صفحۂ اول</a></li>
+              <li><a href="/doctors" onClick={(e) => { e.preventDefault(); onNavigate('doctors'); }} className="hover:text-emerald-400 transition-colors block">اطباء و حکماء ڈائریکٹری</a></li>
+              <li><a href="/blog" onClick={(e) => { e.preventDefault(); onNavigate('blog'); }} className="hover:text-emerald-400 transition-colors block">طبی مضامین و ریسرچ</a></li>
+              <li><a href="/farhang" onClick={(e) => { e.preventDefault(); onNavigate('farhang'); }} className="hover:text-emerald-300 font-bold transition-colors block">فرہنگِ اطباء (طبی اصطلاحات)</a></li>
+              <li><a href="/pdf-books" onClick={(e) => { e.preventDefault(); onSelectPage ? onSelectPage('pdf-books') : onNavigate('pdf-books'); }} className="hover:text-emerald-300 font-bold transition-colors block">پی ڈی ایف کتب (PDF Books)</a></li>
+              <li><a href="/herb-calculator" onClick={(e) => { e.preventDefault(); onNavigate('herb-calculator'); }} className="hover:text-amber-300 font-bold transition-colors block">مزاج کیلکولیٹر (HEC)</a></li>
               <li>
                 <a 
                   href="https://www.himalayanpansar.com" 
@@ -102,11 +102,11 @@ export default function Footer({ onNavigate, siteSettings, onSelectPage }) {
                   <span>آن لائن پنسار سٹور (Himalayan Pansar) ↗</span>
                 </a>
               </li>
-              <li><button onClick={() => onSelectPage ? onSelectPage('about-us') : onNavigate('about-us')} className="hover:text-emerald-400 transition-colors">ہمارے بارے میں (About Us)</button></li>
-              <li><button onClick={() => onSelectPage ? onSelectPage('contact') : onNavigate('contact')} className="hover:text-emerald-400 transition-colors">رابطہ کریں (Contact Us)</button></li>
-              <li><button onClick={() => onSelectPage ? onSelectPage('privacy-policy') : onNavigate('privacy-policy')} className="hover:text-emerald-400 transition-colors">پرائیویسی پالیسی (Privacy Policy)</button></li>
-              <li><button onClick={() => onSelectPage ? onSelectPage('disclaimer') : onNavigate('disclaimer')} className="hover:text-emerald-400 transition-colors">میڈیکل ڈس کلیمر (Medical Disclaimer)</button></li>
-              <li><button onClick={() => onSelectPage ? onSelectPage('terms') : onNavigate('terms')} className="hover:text-emerald-400 transition-colors">شرائط و ضوابط (Terms of Service)</button></li>
+              <li><a href="/about-us" onClick={(e) => { e.preventDefault(); onSelectPage ? onSelectPage('about-us') : onNavigate('about-us'); }} className="hover:text-emerald-400 transition-colors block">ہمارے بارے میں (About Us)</a></li>
+              <li><a href="/contact" onClick={(e) => { e.preventDefault(); onSelectPage ? onSelectPage('contact') : onNavigate('contact'); }} className="hover:text-emerald-400 transition-colors block">رابطہ کریں (Contact Us)</a></li>
+              <li><a href="/privacy-policy" onClick={(e) => { e.preventDefault(); onSelectPage ? onSelectPage('privacy-policy') : onNavigate('privacy-policy'); }} className="hover:text-emerald-400 transition-colors block">پرائیویسی پالیسی (Privacy Policy)</a></li>
+              <li><a href="/disclaimer" onClick={(e) => { e.preventDefault(); onSelectPage ? onSelectPage('disclaimer') : onNavigate('disclaimer'); }} className="hover:text-emerald-400 transition-colors block">میڈیکل ڈس کلیمر (Medical Disclaimer)</a></li>
+              <li><a href="/terms" onClick={(e) => { e.preventDefault(); onSelectPage ? onSelectPage('terms') : onNavigate('terms'); }} className="hover:text-emerald-400 transition-colors block">شرائط و ضوابط (Terms of Service)</a></li>
             </ul>
           </div>
 
@@ -116,7 +116,7 @@ export default function Footer({ onNavigate, siteSettings, onSelectPage }) {
             <ul className="space-y-2 text-slate-400">
               {SPECIALTIES.slice(1, 6).map(spec => (
                 <li key={spec.id}>
-                  <button onClick={() => onNavigate('doctors')} className="hover:text-emerald-400 transition-colors">{spec.name}</button>
+                  <a href={`/doctors?specialty=${encodeURIComponent(spec.name)}`} onClick={(e) => { e.preventDefault(); onNavigate('doctors'); }} className="hover:text-emerald-400 transition-colors block">{spec.name}</a>
                 </li>
               ))}
             </ul>
@@ -128,7 +128,7 @@ export default function Footer({ onNavigate, siteSettings, onSelectPage }) {
             <ul className="space-y-2 text-slate-400">
               {CITIES.slice(1, 6).map(city => (
                 <li key={city.id}>
-                  <button onClick={() => onNavigate('doctors')} className="hover:text-emerald-400 transition-colors">اطباء {city.name}</button>
+                  <a href={`/doctors?city=${encodeURIComponent(city.name)}`} onClick={(e) => { e.preventDefault(); onNavigate('doctors'); }} className="hover:text-emerald-400 transition-colors block">اطباء {city.name}</a>
                 </li>
               ))}
             </ul>

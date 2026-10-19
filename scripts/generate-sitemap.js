@@ -54,10 +54,13 @@ export function generateSitemap() {
     { loc: `${BASE_URL}/`, lastmod: today, changefreq: 'daily', priority: '1.0' },
     { loc: `${BASE_URL}/doctors`, lastmod: today, changefreq: 'daily', priority: '0.9' },
     { loc: `${BASE_URL}/blog`, lastmod: today, changefreq: 'daily', priority: '0.9' },
+    { loc: `${BASE_URL}/pdf-books`, lastmod: today, changefreq: 'daily', priority: '0.9' },
+    { loc: `${BASE_URL}/farhang`, lastmod: today, changefreq: 'daily', priority: '0.9' },
+    { loc: `${BASE_URL}/herb-calculator`, lastmod: today, changefreq: 'daily', priority: '0.9' },
     { loc: `${BASE_URL}/herbs`, lastmod: today, changefreq: 'weekly', priority: '0.8' },
     { loc: `${BASE_URL}/qanoon`, lastmod: today, changefreq: 'weekly', priority: '0.8' },
-    { loc: `${BASE_URL}/herb-calculator`, lastmod: today, changefreq: 'daily', priority: '0.9' },
-    { loc: `${BASE_URL}/farhang`, lastmod: today, changefreq: 'daily', priority: '0.9' },
+    { loc: `${BASE_URL}/contact`, lastmod: today, changefreq: 'monthly', priority: '0.7' },
+    { loc: `${BASE_URL}/about-us`, lastmod: today, changefreq: 'monthly', priority: '0.7' },
   ];
 
   const allUrls = [...staticUrls];
@@ -194,6 +197,35 @@ export function generateSitemap() {
     }
   }
 
+  // 3c. Dynamic PDF Books from public/data/pdf-books.json
+  const booksFile = path.join(rootDir, 'public', 'data', 'pdf-books.json');
+  let bookCount = 0;
+  if (fs.existsSync(booksFile)) {
+    try {
+      const booksData = JSON.parse(fs.readFileSync(booksFile, 'utf8'));
+      if (Array.isArray(booksData)) {
+        booksData.forEach((book) => {
+          if (!book) return;
+          const slug = book.slug || (book.title ? book.title.trim().replace(/[\s\t\n]+/g, '-').replace(/[^\p{L}\p{N}\-_]/gu, '') : book.id);
+          if (!slug) return;
+
+          const encodedSlug = encodeUrlPath(slug);
+          const bookUrl = `${BASE_URL}/book/${encodedSlug}`;
+
+          allUrls.push({
+            loc: bookUrl,
+            lastmod: today,
+            changefreq: 'monthly',
+            priority: '0.8'
+          });
+          bookCount++;
+        });
+      }
+    } catch (err) {
+      console.error('❌ Error reading pdf-books data for sitemap:', err.message);
+    }
+  }
+
   // 4. Construct Sitemaps XML
   const xmlHeader = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -222,6 +254,7 @@ export function generateSitemap() {
   console.log(`   - Dynamic pages: ${pageCount}`);
   console.log(`   - Published articles: ${articleCount}`);
   console.log(`   - Doctors & Hakeems: ${doctorCount}`);
+  console.log(`   - PDF Books: ${bookCount}`);
 
   // Also write to dist/sitemap.xml if dist directory exists
   const distDir = path.join(rootDir, 'dist');

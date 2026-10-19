@@ -23,6 +23,7 @@ import {
 export const BOOKS_DATA = [
   {
     id: 1,
+    slug: 'tib-e-pakistani-urdu',
     title: 'طب پاکستانی اردو',
     author: 'حکیم سید عبدالوہاب شاہ شیرازی',
     category: 'قانون مفرد اعضاء',
@@ -36,6 +37,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 2,
+    slug: 'dawa-shakal-jaribotian',
     title: 'دوا کی شکل اور جڑی بوٹیوں کے اثرات',
     author: 'حکیم سید عبدالوہاب شاہ شیرازی',
     category: 'ادویات و فارماکوپیا',
@@ -49,6 +51,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 3,
+    slug: 'tib-e-pakistani-english',
     title: 'Tib e Pakistani English',
     author: 'Hakim Syed Abdul Wahab Shah',
     category: 'تراجم طب پاکستانی',
@@ -62,6 +65,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 4,
+    slug: 'tib-e-pakistani-hindi',
     title: 'तिब्ब-ए-पाकिस्तानी Tibb-e-Pakistani in Hindi',
     author: 'हकीम सय्यद अब्दुल वहाब शाह',
     category: 'تراجم طب پاکستانی',
@@ -75,6 +79,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 5,
+    slug: 'tib-e-pakistani-arabic',
     title: 'الطب الباكستاني عربک',
     author: 'الحكيم السيد عبد الوهاب شاه',
     category: 'تراجم طب پاکستانی',
@@ -88,6 +93,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 6,
+    slug: 'tib-e-pakistani-persian',
     title: 'طب پاکستانی فارسی',
     author: 'حکیم سید عبدالوہاب شاہ شیرازی',
     category: 'تراجم طب پاکستانی',
@@ -101,6 +107,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 7,
+    slug: 'tib-e-pakistani-chinese',
     title: '巴基斯坦医学 Tibb-e-Pakistani in Chinese',
     author: 'Hakim Syed Abdul Wahab Shah',
     category: 'تراجم طب پاکستانی',
@@ -114,6 +121,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 8,
+    slug: 'kulyat-sabir-multani-1',
     title: 'کلیات تحقیقات صابر ملتانی (حصہ اول)',
     author: 'حکیم انقلاب دوست محمد صابر ملتانی',
     category: 'قانون مفرد اعضاء',
@@ -127,6 +135,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 9,
+    slug: 'kulyat-sabir-multani-2',
     title: 'کلیات تحقیقات صابر ملتانی (حصہ دوم)',
     author: 'حکیم انقلاب دوست محمد صابر ملتانی',
     category: 'قانون مفرد اعضاء',
@@ -140,6 +149,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 10,
+    slug: 'chheh-nabz-kul-amraz',
     title: 'چھ نبض کل امراض',
     author: 'حکیم صابر ملتانی / اطباء کونسل',
     category: 'تشخیص و لیبارٹری',
@@ -153,6 +163,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 11,
+    slug: 'dawaon-ko-mehfooz-rakhna',
     title: 'دواؤں کو محفوظ رکھنے کے طریقے',
     author: 'محققینِ طب و فارمیسی',
     category: 'ادویات و فارماکوپیا',
@@ -166,6 +177,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 12,
+    slug: 'keto-diet',
     title: 'کیٹو ڈائٹ (Keto Diet Guide)',
     author: 'ڈاکٹر خالد جمیل',
     category: 'صحت و مطب',
@@ -179,6 +191,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 13,
+    slug: 'jabi-pharmacopoeia',
     title: 'جیبی فارماکوپیا (Pocket Pharmacopoeia)',
     author: 'اطباء بورڈ پاکستان',
     category: 'ادویات و فارماکوپیا',
@@ -192,6 +205,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 14,
+    slug: 'lab-test-guide',
     title: 'لیبارٹری ٹیسٹ گائیڈ',
     author: 'ڈاکٹر محمد مستنصر',
     category: 'تشخیص و لیبارٹری',
@@ -205,6 +219,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 15,
+    slug: 'lab-tests-paramedics',
     title: 'لیبارٹری ٹیسٹس فار پیرامیڈیکس',
     author: 'طبی ماہرین و محققین',
     category: 'تشخیص و لیبارٹری',
@@ -218,6 +233,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 16,
+    slug: 'pharmacopoeia-qanoon',
     title: 'فارماکوپیا قانون مفرد اعضاء',
     author: 'حکیم انقلاب دوست محمد صابر ملتانی',
     category: 'قانون مفرد اعضاء',
@@ -231,6 +247,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 17,
+    slug: 'color-therapy',
     title: 'کلر تھراپی (Color Therapy)',
     author: 'ماہرین قدرتی علاج',
     category: 'صحت و مطب',
@@ -244,6 +261,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 18,
+    slug: 'blood-group-diet',
     title: 'تحقیقات انسانی بلڈ گروپ و غذا',
     author: 'حکیم محمد عمر ملکپوری',
     category: 'تشخیص و لیبارٹری',
@@ -257,6 +275,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 19,
+    slug: 'mubadiyat-e-tibb',
     title: 'مبادیاتِ طب صابر ملتانی',
     author: 'حکیم دوست محمد صابر ملتانی',
     category: 'قانون مفرد اعضاء',
@@ -270,6 +289,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 20,
+    slug: 'mera-matab',
     title: 'میرا مطب (کلینیکل تجربات)',
     author: 'حکیم محمد احمد سلیمی (صدر نیشنل کونسل فار طب)',
     category: 'صحت و مطب',
@@ -283,6 +303,7 @@ export const BOOKS_DATA = [
   },
   {
     id: 21,
+    slug: 'msds-matab',
     title: 'MSDS Matab (یونانی مطب کے لازمی معیارات)',
     author: 'پنجاب ہیلتھ کیئر کمیشن (PHC)',
     category: 'صحت و مطب',
@@ -295,6 +316,59 @@ export const BOOKS_DATA = [
     embedUrl: 'https://archive.org/embed/msds-matab-ed-2-180221-rp.cdr'
   }
 ];
+
+// Helper: Generate URL friendly clean slug from title
+export const generateSlugFromTitle = (title) => {
+  if (!title) return '';
+  return title
+    .trim()
+    .toLowerCase()
+    .replace(/[\s\-_]+/g, '-')
+    .replace(/[^\w\u0600-\u06FF\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+};
+
+// Helper: Generate book slug
+export const generateBookSlug = (book) => {
+  if (!book) return '';
+  if (book.slug && String(book.slug).trim()) {
+    return String(book.slug).trim().toLowerCase().replace(/[\s\-_]+/g, '-');
+  }
+  return generateSlugFromTitle(book.title) || String(book.id);
+};
+
+// Helper: Extract book param from URL path (/book/:slug, /pdf-books/:slug) or query (?book=slug)
+export const getUrlBookParam = () => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const bQuery = params.get('book');
+    if (bQuery) return bQuery;
+
+    const rawPath = window.location.pathname.replace(/\/$/, '');
+    let pathname = '';
+    try { pathname = decodeURIComponent(rawPath).toLowerCase(); } catch(e) { pathname = rawPath.toLowerCase(); }
+
+    const match = pathname.match(/^\/(?:book|pdf-books|books)\/([^\/]+)$/i);
+    if (match && match[1]) {
+      return match[1];
+    }
+  } catch(e) {}
+  return null;
+};
+
+// Helper: Match book by param (ID, slug, or title)
+export const findBookByParam = (list, param) => {
+  if (!param || !Array.isArray(list)) return null;
+  const decoded = decodeURIComponent(String(param)).trim().toLowerCase();
+  return list.find(b => {
+    if (!b) return false;
+    const bId = String(b.id).toLowerCase();
+    const bSlug = (b.slug || generateBookSlug(b)).toLowerCase();
+    const bTitle = (b.title || '').trim().toLowerCase();
+    return bId === decoded || bSlug === decoded || bTitle === decoded;
+  }) || null;
+};
 
 export default function PdfBooksLibrary({ books: propBooks }) {
   const [internalBooks, setInternalBooks] = useState(() => {
@@ -341,47 +415,60 @@ export default function PdfBooksLibrary({ books: propBooks }) {
   const [activeReaderBook, setActiveReaderBook] = useState(null);
   const [copied, setCopied] = useState(false);
 
+  // Initial Selected Book resolution from URL
   const [selectedBook, setSelectedBook] = useState(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const bParam = params.get('book');
-      if (bParam) {
-        const found = BOOKS_DATA.find(b => String(b.id) === bParam || b.title === bParam || (b.slug && b.slug === bParam));
-        if (found) return found;
-      }
-    } catch(e) {}
+    const bookParam = getUrlBookParam();
+    if (bookParam) {
+      let bookList = BOOKS_DATA;
+      try {
+        const saved = localStorage.getItem('tabeeb_pdf_books');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) bookList = parsed;
+        }
+      } catch(e) {}
+      const found = findBookByParam(bookList, bookParam);
+      if (found) return found;
+    }
     return null;
   });
 
-  // Keep selectedBook synced with URL / browser Back-Forward buttons
+  // Keep selectedBook synced with URL / browser Back-Forward buttons and live books
   useEffect(() => {
     const syncUrlBook = () => {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const bParam = params.get('book');
-        if (bParam) {
-          const found = books.find(b => String(b.id) === bParam || b.title === bParam || (b.slug && b.slug === bParam));
-          if (found) {
-            setSelectedBook(found);
-            return;
-          }
+      const bookParam = getUrlBookParam();
+      if (bookParam) {
+        const found = findBookByParam(books, bookParam) || findBookByParam(BOOKS_DATA, bookParam);
+        if (found) {
+          setSelectedBook(found);
+          return;
         }
-        setSelectedBook(null);
-      } catch(e) {}
+      }
+      setSelectedBook(null);
     };
 
+    syncUrlBook();
     window.addEventListener('popstate', syncUrlBook);
     return () => window.removeEventListener('popstate', syncUrlBook);
   }, [books]);
+
+  // Clean Share URL generator
+  const getShareUrl = (book) => {
+    if (!book) return '';
+    const slug = book.slug || generateBookSlug(book);
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'https://tabeebpedia.com';
+    return `${origin}/book/${encodeURIComponent(slug)}`;
+  };
 
   const handleSelectBook = (book) => {
     if (!book) return;
     setSelectedBook(book);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     try {
-      const url = `?tab=pdf-books&book=${book.id}`;
-      if (window.location.search !== url) {
-        window.history.pushState({ type: 'book', id: book.id }, '', url);
+      const slug = book.slug || generateBookSlug(book);
+      const url = `/book/${encodeURIComponent(slug)}`;
+      if (window.location.pathname !== url) {
+        window.history.pushState({ type: 'book', id: book.id, slug }, '', url);
       }
     } catch(e) {}
   };
@@ -394,6 +481,15 @@ export default function PdfBooksLibrary({ books: propBooks }) {
       if (window.location.pathname !== url || window.location.search) {
         window.history.pushState({ type: 'page', slug: 'pdf-books' }, '', url);
       }
+    } catch(e) {}
+  };
+
+  const handleCopyLink = () => {
+    try {
+      const url = getShareUrl(selectedBook);
+      navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
     } catch(e) {}
   };
 
@@ -436,13 +532,6 @@ export default function PdfBooksLibrary({ books: propBooks }) {
     return desc.split('\n\n').map(p => `<p class="mb-4 leading-relaxed">${p.replace(/\n/g, '<br/>')}</p>`).join('');
   };
 
-  const handleCopyLink = () => {
-    try {
-      navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    } catch(e) {}
-  };
 
   // IF A SPECIFIC BOOK IS SELECTED -> RENDER COMPLETE BOOK DETAIL PAGE
   if (selectedBook) {
@@ -528,7 +617,7 @@ export default function PdfBooksLibrary({ books: propBooks }) {
                 {/* Social Share & Copy Link */}
                 <div className="flex items-center gap-2 pt-2">
                   <a
-                    href={`https://wa.me/?text=${encodeURIComponent(`طبیب پیڈیا کتب خانہ: کتاب "${selectedBook.title}" مصنف ${selectedBook.author} مفت پی ڈی ایف مطالعہ و ڈاؤن لوڈ کریں۔\n${window.location.href}`)}`}
+                    href={`https://wa.me/?text=${encodeURIComponent(`طبیب پیڈیا کتب خانہ: کتاب "${selectedBook.title}" مصنف ${selectedBook.author} مفت پی ڈی ایف مطالعہ و ڈاؤن لوڈ کریں۔\n${getShareUrl(selectedBook)}`)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="flex-1 py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors font-simple"

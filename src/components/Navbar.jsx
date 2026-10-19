@@ -51,6 +51,23 @@ export default function Navbar({
     { id: 'store', label: 'ہمالین پنسار', icon: ShoppingBag, isExternal: true, url: 'https://www.himalayanpansar.com' }
   ];
 
+  const getNavUrl = (item) => {
+    if (item.url) return item.url;
+    if (item.isPage) return `/${item.id}`;
+    if (item.id === 'home') return '/';
+    return `/${item.id}`;
+  };
+
+  const handleNavClick = (e, item) => {
+    if (item.isExternal) return;
+    e.preventDefault();
+    if (item.isPage && onSelectPage) {
+      onSelectPage(item.id);
+    } else {
+      setActiveTab(item.id);
+    }
+  };
+
   const isNavy = theme === 'navy';
   const brandName = siteSettings?.siteName || 'طبیب پیڈیا';
   const helplinePhone = siteSettings?.helplinePhone || '0300-1234567';
@@ -116,8 +133,12 @@ export default function Navbar({
         <div className="flex items-center justify-between h-20">
           
           {/* Brand Logo */}
-          <div 
-            onClick={() => setActiveTab('home')}
+          <a 
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab('home');
+            }}
             className="flex items-center gap-3 cursor-pointer group select-none"
           >
             {(siteSettings?.logoUrl || '/logo3.png') ? (
@@ -139,7 +160,7 @@ export default function Navbar({
                   </span>
                 </div>
               )}
-            </div>
+          </a>
             
             {/* Desktop Navigation Links */}
           <nav className="hidden lg:flex items-center gap-1">
@@ -181,19 +202,14 @@ export default function Navbar({
                       </button>
                       <div className="absolute top-full right-0 mt-1 w-48 bg-white border border-slate-100 shadow-xl rounded-2xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                         {item.children.map(child => (
-                          <button
+                          <a
                             key={child.id}
-                            onClick={() => {
-                              if (child.isPage && onSelectPage) {
-                                onSelectPage(child.id);
-                              } else {
-                                setActiveTab(child.id);
-                              }
-                            }}
-                            className={`w-full text-right px-4 py-2 text-sm font-semibold transition-colors ${activeTab === child.id ? (isNavy ? 'text-blue-700 bg-blue-50' : 'text-emerald-700 bg-emerald-50') : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}
+                            href={getNavUrl(child)}
+                            onClick={(e) => handleNavClick(e, child)}
+                            className={`block w-full text-right px-4 py-2 text-sm font-semibold transition-colors ${activeTab === child.id ? (isNavy ? 'text-blue-700 bg-blue-50' : 'text-emerald-700 bg-emerald-50') : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'}`}
                           >
                             {child.label}
-                          </button>
+                          </a>
                         ))}
                       </div>
                     </div>
@@ -201,15 +217,10 @@ export default function Navbar({
                 }
 
                 return (
-                  <button
+                  <a
                     key={item.id}
-                    onClick={() => {
-                      if (item.isPage && onSelectPage) {
-                        onSelectPage(item.id);
-                      } else {
-                        setActiveTab(item.id);
-                      }
-                    }}
+                    href={getNavUrl(item)}
+                    onClick={(e) => handleNavClick(e, item)}
                     className={`relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold transition-all ${
                       isActive
                         ? isNavy 
@@ -223,7 +234,7 @@ export default function Navbar({
                     {isActive && (
                       <span className={`absolute bottom-0 left-3 right-3 h-0.5 ${isNavy ? 'bg-blue-600' : 'bg-emerald-600'} rounded-full`} />
                     )}
-                  </button>
+                  </a>
                 );
               })}
             </nav>
@@ -324,20 +335,17 @@ export default function Navbar({
                       </div>
                       <div className="flex flex-col pr-12 pb-2 pt-1">
                         {item.children.map(child => (
-                          <button
+                          <a
                             key={child.id}
-                            onClick={() => {
-                              if (child.isPage && onSelectPage) {
-                                onSelectPage(child.id);
-                              } else {
-                                setActiveTab(child.id);
-                              }
+                            href={getNavUrl(child)}
+                            onClick={(e) => {
+                              handleNavClick(e, child);
                               setMobileMenuOpen(false);
                             }}
                             className={`flex justify-end items-center px-4 py-2 rounded-lg text-sm transition-all ${activeTab === child.id ? (isNavy ? 'text-blue-700 font-bold' : 'text-emerald-700 font-bold') : 'text-slate-600 hover:text-slate-900'}`}
                           >
                             {child.label}
-                          </button>
+                          </a>
                         ))}
                       </div>
                     </div>
@@ -345,14 +353,11 @@ export default function Navbar({
                 }
 
                 return (
-                  <button
+                  <a
                     key={item.id}
-                    onClick={() => {
-                      if (item.isPage && onSelectPage) {
-                        onSelectPage(item.id);
-                      } else {
-                        setActiveTab(item.id);
-                      }
+                    href={getNavUrl(item)}
+                    onClick={(e) => {
+                      handleNavClick(e, item);
                       setMobileMenuOpen(false);
                     }}
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium transition-all ${
@@ -367,7 +372,7 @@ export default function Navbar({
                       <Icon className={`w-5 h-5 ${isActive ? (isNavy ? 'text-blue-600' : 'text-emerald-600') : 'text-slate-400'}`} />
                       <span>{item.label}</span>
                     </div>
-                  </button>
+                  </a>
                 );
               })}
             </div>

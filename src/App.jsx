@@ -21,7 +21,8 @@ import PulseDiagnosis from './components/PulseDiagnosis';
 import GlossaryDirectory from './components/GlossaryDirectory';
 import GlossaryTermView from './components/GlossaryTermView';
 import glossaryInitialData from './data/glossaryData.json';
-import { fetchLiveDoctors, fetchLiveArticles, fetchSettingsApi, fetchCategoriesApi, saveArticlesApi, saveDoctorsApi, fetchLivePages, savePagesApi, fetchLiveGlossary, saveGlossaryApi, trackPageView, sendAnalyticsHeartbeat } from './api';
+import { fetchLiveDoctors, fetchLiveArticles, fetchSettingsApi, fetchCategoriesApi, saveArticlesApi, saveDoctorsApi, fetchLivePages, savePagesApi, fetchLiveGlossary, saveGlossaryApi, fetchLivePdfBooks, trackPageView, sendAnalyticsHeartbeat } from './api';
+import { BOOKS_DATA } from './components/PdfBooksLibrary';
 
 import { 
   SPECIALTIES, 
@@ -53,7 +54,9 @@ import {
   Mail,
   Key,
   RefreshCw,
-  X
+  X,
+  Download,
+  BookMarked
 } from 'lucide-react';
 
 const STORAGE_KEY_ARTICLES = 'tabeeb_articles_data_v1';
@@ -179,7 +182,13 @@ const getInitialSettings = () => {
     featuredDoctorBlockSubtitle: 'پاکستان بھر کے منتخب اور مستند اطباء و ماہرین طب یونانی',
     featuredDoctorBlockColumns: '4',
     featuredDoctorBlockRows: '1',
-    featuredDoctorBlockSort: 'latest'
+    featuredDoctorBlockSort: 'latest',
+    pdfBooksBlockEnabled: true,
+    pdfBooksBlockTitle: 'طبی پی ڈی ایف کتب خانہ (PDF Books)',
+    pdfBooksBlockSubtitle: 'طب یونانی، قانون مفرد اعضاء اور ہربل میڈیسن کی مستند کتب کا ذخیرہ',
+    pdfBooksBlockColumns: '4',
+    pdfBooksBlockRows: '1',
+    pdfBooksBlockSort: 'latest'
   };
 };
 
@@ -403,7 +412,16 @@ export default function App() {
       if (path === 'herbs' || params.get('tab') === 'herbs') return 'herbs';
       if (path === 'qanoon' || params.get('tab') === 'qanoon') return 'qanoon';
       if (path === 'herb-calculator' || path === 'hec' || path === 'calculator' || path === 'mizaj-calculator' || params.get('tab') === 'herb-calculator' || params.get('tab') === 'hec') return 'herb-calculator';
-      if (path === 'pdf-books' || path === 'books' || params.get('tab') === 'pdf-books' || params.get('tab') === 'books') return 'page';
+      if (
+        path === 'pdf-books' || 
+        path === 'books' || 
+        path.startsWith('pdf-books/') || 
+        path.startsWith('books/') || 
+        path.startsWith('book/') || 
+        params.get('tab') === 'pdf-books' || 
+        params.get('tab') === 'books' || 
+        Boolean(params.get('book'))
+      ) return 'page';
       if (params.get('portal') === 'doctor-dashboard' || path === 'doctor-dashboard') return 'doctor-dashboard';
       
       // اگر path خالی ہے (یعنی صرف / ہے) اور localStorage میں کوئی tab محفوظ ہے تو وہ کھولیں
@@ -443,7 +461,16 @@ export default function App() {
       let path = '';
       try { path = decodeURIComponent(rawPath).toLowerCase().trim(); } catch { path = rawPath.toLowerCase().trim(); }
       const params = new URLSearchParams(window.location.search);
-      if (path === 'pdf-books' || path === 'books' || params.get('tab') === 'pdf-books' || params.get('tab') === 'books') {
+      if (
+        path === 'pdf-books' || 
+        path === 'books' || 
+        path.startsWith('pdf-books/') || 
+        path.startsWith('books/') || 
+        path.startsWith('book/') || 
+        params.get('tab') === 'pdf-books' || 
+        params.get('tab') === 'books' || 
+        Boolean(params.get('book'))
+      ) {
         return {
           id: 'pdf-books',
           title: 'طبی کتب خانہ (PDF Books)',
@@ -492,6 +519,64 @@ export default function App() {
   const [selectedTag, setSelectedTag] = useState(null);
   const [blogSearchQuery, setBlogSearchQuery] = useState('');
   const [siteSettings, setSiteSettings] = useState(getInitialSettings);
+
+  const [pdfBooksList, setPdfBooksList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tabeeb_pdf_books');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return BOOKS_DATA;
+  });
+
+  useEffect(() => {
+    fetchLivePdfBooks().then(data => {
+      if (Array.isArray(data) && data.length > 0) {
+        setPdfBooksList(data);
+      }
+    }).catch(() => {});
+
+    const syncBooks = () => {
+      try {
+        const saved = localStorage.getItem('tabeeb_pdf_books');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setPdfBooksList(parsed);
+          }
+        }
+      } catch (e) {}
+    };
+
+    window.addEventListener('storage', syncBooks);
+    window.addEventListener('focus', syncBooks);
+    return () => {
+      window.removeEventListener('storage', syncBooks);
+      window.removeEventListener('focus', syncBooks);
+    };
+  }, []);
+
+  const handleSelectBookFromHome = (book) => {
+    if (!book) return;
+    const slug = book.slug || (book.title ? book.title.trim().replace(/[\s\t\n]+/g, '-').replace(/[^\p{L}\p{N}\-_]/gu, '') : book.id);
+    const url = `/book/${encodeURIComponent(slug)}`;
+    if (typeof window !== 'undefined') {
+      window.history.pushState({ type: 'book', id: book.id, slug }, '', url);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    setSelectedPage({
+      id: 'pdf-books',
+      title: 'طبی کتب خانہ (PDF Books)',
+      slug: 'pdf-books',
+      author: 'طبیب پیڈیا کتب خانہ ریسرچ ٹیم',
+      date: '2026/01/01',
+      status: 'published',
+      content: ''
+    });
+    setActiveTab('page');
+  };
 
   const handleNavigateToTab = (tab, pushState = true) => {
     setActiveTab(tab);
@@ -1192,8 +1277,18 @@ export default function App() {
         return;
       }
 
-      // Check PDF Books Library (/pdf-books or ?tab=pdf-books)
-      if (normPath === 'pdf-books' || normPath === 'books' || tabParam === 'pdf-books' || tabParam === 'books') {
+      // Check PDF Books Library (/pdf-books, /book/:slug, /pdf-books/:slug, or ?book=slug)
+      const isBookRoute = 
+        normPath === 'pdf-books' || 
+        normPath === 'books' || 
+        normPath.startsWith('pdf-books/') || 
+        normPath.startsWith('books/') || 
+        normPath.startsWith('book/') || 
+        tabParam === 'pdf-books' || 
+        tabParam === 'books' || 
+        Boolean(params.get('book'));
+
+      if (isBookRoute) {
         setSelectedPage({
           id: 'pdf-books',
           title: 'طبی کتب خانہ (PDF Books)',
@@ -1219,6 +1314,7 @@ export default function App() {
         params.get('hakeem') || 
         params.get('farhang') || 
         params.get('glossary') || 
+        params.get('book') || 
         (tabParam && tabParam !== 'home');
 
       if ((!path || normPath === 'home' || normPath === '') && !hasSpecificRouteQuery) {
@@ -1760,12 +1856,21 @@ export default function App() {
         setPagesList={setPagesList}
         glossaryList={glossaryList}
         setGlossaryList={setGlossaryList}
+        pdfBooksList={pdfBooksList}
+        setPdfBooksList={setPdfBooksList}
         siteSettings={siteSettings}
         setSiteSettings={setSiteSettings}
         onViewArticle={(article) => {
           handleSelectArticle(article);
         }}
         onBackToWebsite={() => {
+          try {
+            const saved = localStorage.getItem('tabeeb_pdf_books');
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed) && parsed.length > 0) setPdfBooksList(parsed);
+            }
+          } catch(e) {}
           handleNavigateToTab('home');
           if (typeof window !== 'undefined') {
             window.history.replaceState(null, '', '/');
@@ -1902,6 +2007,24 @@ export default function App() {
       });
     }
     const artLimit = (parseInt(artCols) || 4) * (parseInt(siteSettings?.articleBlockRows || '3') || 3);
+
+    // 4. PDF Books Block
+    const bookCols = siteSettings?.pdfBooksBlockColumns || '4';
+    const bookGridClass = bookCols === '1' ? 'grid-cols-1' : bookCols === '2' ? 'grid-cols-1 sm:grid-cols-2' : bookCols === '3' ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
+    const bookRows = parseInt(siteSettings?.pdfBooksBlockRows || '1', 10) || 1;
+    const bookLimit = (parseInt(bookCols, 10) || 4) * bookRows;
+    const bookSort = siteSettings?.pdfBooksBlockSort || 'latest';
+    const booksBlockEnabled = siteSettings?.pdfBooksBlockEnabled !== false;
+
+    let homeBooks = [...pdfBooksList];
+    if (bookSort === 'oldest') {
+      homeBooks = [...pdfBooksList].reverse();
+    } else if (bookSort === 'title') {
+      homeBooks = [...pdfBooksList].sort((a, b) => (a.title || '').localeCompare(b.title || '', 'ur'));
+    } else {
+      // Default: Latest First (ڈیش بورڈ لسٹ کے مطابق تازہ ترین کتب سب سے پہلے اوپر)
+      homeBooks = [...pdfBooksList];
+    }
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f8fafc] text-slate-800 antialiased selection:bg-blue-600 selection:text-white">
@@ -2397,6 +2520,138 @@ export default function App() {
                 </div>
               </div>
             </section>
+
+            {/* PDF Books Section (طبی پی ڈی ایف کتب خانہ) */}
+            {booksBlockEnabled && homeBooks.length > 0 && (
+              <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 text-right">
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-4">
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-sans bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-2xs">
+                      <BookOpen className="w-3.5 h-3.5 text-emerald-700" />
+                      <span>مفت علمی و نایاب کتب</span>
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-2 font-h2">
+                      {siteSettings?.pdfBooksBlockTitle || "طبی پی ڈی ایف کتب خانہ (PDF Books)"}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                      {siteSettings?.pdfBooksBlockSubtitle || "طب یونانی، قانون مفرد اعضاء اور ہربل میڈیسن کی مستند کتب کا ذخیرہ"}
+                    </p>
+                  </div>
+                  <a
+                    href="/pdf-books"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleNavigateToTab('page');
+                      setSelectedPage({
+                        id: 'pdf-books',
+                        title: 'طبی کتب خانہ (PDF Books)',
+                        slug: 'pdf-books',
+                        author: 'طبیب پیڈیا کتب خانہ ریسرچ ٹیم',
+                        date: '2026/01/01',
+                        status: 'published',
+                        content: ''
+                      });
+                      if (typeof window !== 'undefined') {
+                        window.history.pushState({ type: 'page', slug: 'pdf-books' }, '', '/pdf-books');
+                      }
+                    }}
+                    className={`text-xs sm:text-sm font-bold ${isNavy ? 'text-blue-700 hover:text-blue-900' : 'text-emerald-700 hover:text-emerald-900'} flex items-center gap-1 group font-h2 cursor-pointer`}
+                  >
+                    <span>تمام کتب دیکھیں ({homeBooks.length})</span>
+                    <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                  </a>
+                </div>
+
+                <div className={`grid ${bookGridClass} gap-6`}>
+                  {homeBooks.slice(0, bookLimit).map((book) => {
+                    const bookSlug = book.slug || (book.title ? book.title.trim().replace(/[\s\t\n]+/g, '-').replace(/[^\p{L}\p{N}\-_]/gu, '') : book.id);
+                    return (
+                      <div
+                        key={`home-book-${book.id}`}
+                        onClick={() => handleSelectBookFromHome(book)}
+                        className="bg-white rounded-3xl border border-slate-200/90 overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300 cursor-pointer group flex flex-col justify-between relative hover:-translate-y-1"
+                      >
+                        <div>
+                          {/* Book Showcase Cover */}
+                          <div className="relative aspect-[3/4] bg-slate-100 overflow-hidden border-b border-slate-100">
+                            <img
+                              src={book.image || '/images/books/tib-e-pakistani-urdu.jpg'}
+                              alt={book.title}
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = '/images/books/tib-e-pakistani-urdu.jpg';
+                              }}
+                              className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                            />
+                            {/* Realistic Book Spine Shade */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+                            <div className="absolute top-0 right-0 bottom-0 w-3 bg-gradient-to-r from-black/30 to-transparent pointer-events-none" />
+
+                            {/* Top Badge: Category */}
+                            <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-xs text-emerald-900 border border-emerald-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-xs font-sans max-w-[85%] truncate">
+                              {book.category || 'قانون مفرد اعضاء'}
+                            </div>
+
+                            {/* Format tag */}
+                            <div className="absolute bottom-3 right-3 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs font-sans">
+                              PDF ایڈیشن
+                            </div>
+                          </div>
+
+                          {/* Content */}
+                          <div className="p-5 space-y-2.5 text-right">
+                            <h3 className={`text-base font-bold text-slate-900 ${isNavy ? 'group-hover:text-blue-700' : 'group-hover:text-emerald-700'} transition-colors line-clamp-1 font-h2 leading-snug`}>
+                              {book.title}
+                            </h3>
+                            
+                            <p className="text-xs text-slate-500 font-medium line-clamp-1 flex items-center gap-1.5">
+                              <span className="text-slate-400">مصنف:</span>
+                              <span className="text-slate-700 font-bold">{book.author}</span>
+                            </p>
+
+                            {book.description && (
+                              <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed font-nastaliq pt-1">
+                                {book.description.replace(/<[^>]+>/g, ' ')}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Action Bar */}
+                        <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSelectBookFromHome(book);
+                            }}
+                            className={`font-bold ${isNavy ? 'text-blue-700 hover:text-blue-900' : 'text-emerald-700 hover:text-emerald-900'} flex items-center gap-1 font-h2`}
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>آن لائن پڑھیں</span>
+                          </button>
+
+                          {book.downloadUrl && (
+                            <a
+                              href={book.downloadUrl}
+                              download
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-2xs font-simple"
+                              title="براہ راست پی ڈی ایف ڈاؤن لوڈ کریں"
+                            >
+                              <Download className="w-3 h-3" />
+                              <span>ڈاؤن لوڈ</span>
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
 
             </div>
         )}
