@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { fetchLivePdfBooks } from '../api';
 import { 
   BookOpen, 
   Download, 
@@ -290,7 +291,46 @@ export const BOOKS_DATA = [
   }
 ];
 
-export default function PdfBooksLibrary({ books = BOOKS_DATA }) {
+export default function PdfBooksLibrary({ books: propBooks }) {
+  const [internalBooks, setInternalBooks] = useState(() => {
+    try {
+      const saved = localStorage.getItem('tabeeb_pdf_books');
+      if (saved && saved !== 'undefined') {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch(e) {}
+    return BOOKS_DATA;
+  });
+
+  const books = propBooks || internalBooks;
+
+  useEffect(() => {
+    const loadLiveBooks = async () => {
+      try {
+        const live = await fetchLivePdfBooks();
+        if (Array.isArray(live) && live.length > 0) {
+          setInternalBooks(live);
+          try { localStorage.setItem('tabeeb_pdf_books', JSON.stringify(live)); } catch(e) {}
+        }
+      } catch(e) {}
+    };
+    loadLiveBooks();
+
+    const handleStorageChange = (e) => {
+      if (e.key === 'tabeeb_pdf_books' && e.newValue) {
+        try {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setInternalBooks(parsed);
+          }
+        } catch(err) {}
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeReaderBook, setActiveReaderBook] = useState(null);

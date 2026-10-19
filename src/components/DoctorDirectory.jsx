@@ -111,10 +111,29 @@ export default function DoctorDirectory({
 
     return matchCity && matchSpecialty && matchTreatment && matchSearch && matchExperience && matchFee;
   }).sort((a, b) => {
-    if (sortBy === 'rating') return (b?.rating || 0) - (a?.rating || 0);
+    const getDocScore = (doc) => {
+      if (!doc) return 0;
+      const dStr = doc.createdAt || doc.registeredAt || doc.date || doc.appliedDate;
+      let ts = 0;
+      if (dStr) {
+        const parsed = new Date(typeof dStr === 'string' ? dStr.replace(/\//g, '-') : dStr).getTime();
+        if (!isNaN(parsed)) ts = parsed;
+      }
+      const numId = parseInt(doc.id, 10) || 0;
+      if (numId > 1000000000000) return Math.max(ts, numId);
+      if (ts > 0) return ts;
+      return numId;
+    };
+
+    if (sortBy === 'latest') return getDocScore(b) - getDocScore(a);
+    if (sortBy === 'rating') {
+      const diff = (b?.rating || 0) - (a?.rating || 0);
+      if (diff !== 0) return diff;
+      return getDocScore(b) - getDocScore(a);
+    }
     if (sortBy === 'experience') return (b?.experience || 0) - (a?.experience || 0);
     if (sortBy === 'fee-low') return (a?.fee || 0) - (b?.fee || 0);
-    return 0;
+    return getDocScore(b) - getDocScore(a);
   });
 
   const resetFilters = () => {
@@ -321,6 +340,7 @@ export default function DoctorDirectory({
                   onChange={(e) => setSortBy(e.target.value)}
                   className="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-xs text-slate-700 font-bold focus:outline-none cursor-pointer"
                 >
+                  <option value="latest">نیا معالج پہلے (Latest First)</option>
                   <option value="rating">اعلی درجہ بندی (Rating)</option>
                   <option value="experience">زیادہ تجربہ</option>
                   <option value="fee-low">کم فیس</option>

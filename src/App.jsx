@@ -21,7 +21,7 @@ import PulseDiagnosis from './components/PulseDiagnosis';
 import GlossaryDirectory from './components/GlossaryDirectory';
 import GlossaryTermView from './components/GlossaryTermView';
 import glossaryInitialData from './data/glossaryData.json';
-import { fetchLiveDoctors, fetchLiveArticles, fetchSettingsApi, fetchCategoriesApi, saveArticlesApi, fetchLivePages, savePagesApi, fetchLiveGlossary, saveGlossaryApi, trackPageView, sendAnalyticsHeartbeat } from './api';
+import { fetchLiveDoctors, fetchLiveArticles, fetchSettingsApi, fetchCategoriesApi, saveArticlesApi, saveDoctorsApi, fetchLivePages, savePagesApi, fetchLiveGlossary, saveGlossaryApi, trackPageView, sendAnalyticsHeartbeat } from './api';
 
 import { 
   SPECIALTIES, 
@@ -830,6 +830,7 @@ export default function App() {
   });
 
   const [articlesLoadedFromDb, setArticlesLoadedFromDb] = useState(false);
+  const [doctorsLoadedFromDb, setDoctorsLoadedFromDb] = useState(false);
 
   // --- LIVE DATABASE SYNC ---
   useEffect(() => {
@@ -848,6 +849,7 @@ export default function App() {
         console.error("Live sync failed", e);
       } finally {
         setArticlesLoadedFromDb(true);
+        setDoctorsLoadedFromDb(true);
       }
     };
     syncData();
@@ -888,8 +890,11 @@ export default function App() {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY_DOCTORS, JSON.stringify(doctorsList));
+      if (doctorsLoadedFromDb && Array.isArray(doctorsList) && doctorsList.length > 0) {
+        saveDoctorsApi(doctorsList);
+      }
     } catch (e) {}
-  }, [doctorsList]);
+  }, [doctorsList, doctorsLoadedFromDb]);
 
   useEffect(() => {
     try {
@@ -1722,6 +1727,21 @@ export default function App() {
   }
 
   
+    // Helper to calculate chronological timestamp score for doctors
+    const getDoctorScore = (doc) => {
+      if (!doc) return 0;
+      const dStr = doc.createdAt || doc.registeredAt || doc.date || doc.appliedDate;
+      let ts = 0;
+      if (dStr) {
+        const parsed = new Date(typeof dStr === 'string' ? dStr.replace(/\//g, '-') : dStr).getTime();
+        if (!isNaN(parsed)) ts = parsed;
+      }
+      const numId = parseInt(doc.id, 10) || 0;
+      if (numId > 1000000000000) return Math.max(ts, numId);
+      if (ts > 0) return ts;
+      return numId;
+    };
+
     // 1. Featured Doctors Block
     const featEnabled = siteSettings?.featuredDoctorBlockEnabled !== false;
     const featCols = siteSettings?.featuredDoctorBlockColumns || '4';
@@ -1736,9 +1756,18 @@ export default function App() {
         return ao - bo;
       });
     } else if (siteSettings?.featuredDoctorBlockSort === 'oldest') {
-      featuredDocs = [...featuredDocs].sort((a, b) => (parseInt(a.id) || 0) - (parseInt(b.id) || 0));
+      featuredDocs = [...featuredDocs].sort((a, b) => {
+        const diff = getDoctorScore(a) - getDoctorScore(b);
+        if (diff !== 0) return diff;
+        return (parseInt(a.id, 10) || 0) - (parseInt(b.id, 10) || 0);
+      });
     } else {
-      featuredDocs = [...featuredDocs].sort((a, b) => (parseInt(b.id) || 0) - (parseInt(a.id) || 0));
+      // Default: Latest Registered/Approved Featured Doctors First
+      featuredDocs = [...featuredDocs].sort((a, b) => {
+        const diff = getDoctorScore(b) - getDoctorScore(a);
+        if (diff !== 0) return diff;
+        return (parseInt(b.id, 10) || 0) - (parseInt(a.id, 10) || 0);
+      });
     }
     const featLimit = (parseInt(featCols) || 4) * (parseInt(siteSettings?.featuredDoctorBlockRows || '1') || 1);
 
@@ -1747,16 +1776,55 @@ export default function App() {
     const docGridClass = docCols === '1' ? 'grid-cols-1' : docCols === '2' ? 'grid-cols-1 sm:grid-cols-2' : docCols === '3' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4';
     let homeDocs = doctorsList.filter(d => d && d.isApproved !== false && d.status !== 'pending');
     if (siteSettings?.doctorBlockSort === 'oldest') {
-      homeDocs = [...homeDocs].sort((a, b) => (parseInt(a.id) || 0) - (parseInt(b.id) || 0));
+      homeDocs = [...homeDocs].sort((a, b) => {
+        const diff = getDoctorScore(a) - getDoctorScore(b);
+        if (diff !== 0) return diff;
+        return (parseInt(a.id, 10) || 0) - (parseInt(b.id, 10) || 0);
+      });
     } else {
-      homeDocs = [...homeDocs].sort((a, b) => (parseInt(b.id) || 0) - (parseInt(a.id) || 0));
+      // Default: Latest Registered/Approved Doctors First (WordPress-style)
+      homeDocs = [...homeDocs].sort((a, b) => {
+        const diff = getDoctorScore(b) - getDoctorScore(a);
+        if (diff !== 0) return diff;
+        return (parseInt(b.id, 10) || 0) - (parseInt(a.id, 10) || 0);
+      });
     }
     const docLimit = (parseInt(docCols) || 4) * (parseInt(siteSettings?.doctorBlockRows || '2') || 2);
     
+    // 3. Latest Articles Block (WordPress-style Latest First)
     const artCols = siteSettings?.articleBlockColumns || '4';
     const artGridClass = artCols === '1' ? 'grid-cols-1' : artCols === '2' ? 'grid-cols-1 sm:grid-cols-2' : artCols === '3' ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
-    let homeArticles = [...articlesList];
-    if (siteSettings?.articleBlockSort !== 'oldest') homeArticles = homeArticles.reverse();
+    
+    // Helper to extract timestamp / chronological score from article
+    const getArticleScore = (a) => {
+      if (!a) return 0;
+      const dStr = a.publishedAt || a.date || a.createdAt;
+      let ts = 0;
+      if (dStr) {
+        const parsed = new Date(typeof dStr === 'string' ? dStr.replace(/\//g, '-') : dStr).getTime();
+        if (!isNaN(parsed)) ts = parsed;
+      }
+      const numId = parseInt(a.id, 10) || 0;
+      if (numId > 1000000000000) return Math.max(ts, numId);
+      if (ts > 0) return ts;
+      return numId;
+    };
+
+    let homeArticles = articlesList.filter(a => a && a.status !== 'draft' && a.status !== 'trash' && a.status !== 'private');
+    if (siteSettings?.articleBlockSort === 'oldest') {
+      homeArticles = [...homeArticles].sort((a, b) => {
+        const diff = getArticleScore(a) - getArticleScore(b);
+        if (diff !== 0) return diff;
+        return (parseInt(a.id, 10) || 0) - (parseInt(b.id, 10) || 0);
+      });
+    } else {
+      // Default: WordPress-style Latest First (newest articles at the top)
+      homeArticles = [...homeArticles].sort((a, b) => {
+        const diff = getArticleScore(b) - getArticleScore(a);
+        if (diff !== 0) return diff;
+        return (parseInt(b.id, 10) || 0) - (parseInt(a.id, 10) || 0);
+      });
+    }
     const artLimit = (parseInt(artCols) || 4) * (parseInt(siteSettings?.articleBlockRows || '3') || 3);
 
   return (

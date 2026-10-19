@@ -118,6 +118,27 @@ export const savePagesApi = async (pages) => {
   }
 };
 
+export const fetchLivePdfBooks = async () => {
+  let data = await apiFetch(`/api/pdf-books.php?v=${Date.now()}`);
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    data = await apiFetch(`/data/pdf-books.json?v=${Date.now()}`);
+  }
+  return Array.isArray(data) ? data : [];
+};
+
+export const savePdfBooksApi = async (books) => {
+  try {
+    let res = await fetch('/api/pdf-books.php', {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(books)
+    });
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
+};
+
 export const fetchSettingsApi = async () => {
   let data = await apiFetch(`/api/settings.php?v=${Date.now()}`);
   if (!data || typeof data !== 'object') {

@@ -35,7 +35,30 @@ export default function BlogSection({
   const selectedTag = propSelectedTag !== undefined ? propSelectedTag : internalSelectedTag;
   const setSelectedTag = propSetSelectedTag || setInternalSelectedTag;
 
-  const allArticles = articlesList || ARTICLES;
+  const allArticles = React.useMemo(() => {
+    const raw = (articlesList && articlesList.length > 0) ? articlesList : ARTICLES;
+    const list = raw.filter(a => a && a.status !== 'draft' && a.status !== 'trash' && a.status !== 'private');
+    
+    const getScore = (item) => {
+      if (!item) return 0;
+      const dStr = item.publishedAt || item.date || item.createdAt;
+      let ts = 0;
+      if (dStr) {
+        const parsed = new Date(typeof dStr === 'string' ? dStr.replace(/\//g, '-') : dStr).getTime();
+        if (!isNaN(parsed)) ts = parsed;
+      }
+      const numId = parseInt(item.id, 10) || 0;
+      if (numId > 1000000000000) return Math.max(ts, numId);
+      if (ts > 0) return ts;
+      return numId;
+    };
+
+    return [...list].sort((a, b) => {
+      const diff = getScore(b) - getScore(a);
+      if (diff !== 0) return diff;
+      return (parseInt(b.id, 10) || 0) - (parseInt(a.id, 10) || 0);
+    });
+  }, [articlesList]);
 
   // Filter Articles
   const filteredArticles = allArticles.filter(article => {

@@ -128,7 +128,16 @@ export default function GlobalSearchModal({
       });
 
       // PDF Books
-      BOOKS_DATA.forEach(book => {
+      let liveBooks = BOOKS_DATA;
+      try {
+        const savedBooks = localStorage.getItem('tabeeb_pdf_books');
+        if (savedBooks) {
+          const parsed = JSON.parse(savedBooks);
+          if (Array.isArray(parsed) && parsed.length > 0) liveBooks = parsed;
+        }
+      } catch(e) {}
+
+      liveBooks.forEach(book => {
         if (!book) return;
         const title = (book.title || '').toLowerCase();
         const author = (book.author || '').toLowerCase();
@@ -434,7 +443,16 @@ export default function GlobalSearchModal({
                     <BookOpen className="w-4 h-4 text-purple-600" />
                     <div>
                       <span className="font-bold block">پی ڈی ایف کتب</span>
-                      <span className="text-[10px] text-purple-700/80">{BOOKS_DATA.length} نایاب کتب</span>
+                      <span className="text-[10px] text-purple-700/80">{(() => {
+                        try {
+                          const s = localStorage.getItem('tabeeb_pdf_books');
+                          if (s) {
+                            const p = JSON.parse(s);
+                            if (Array.isArray(p) && p.length > 0) return p.length;
+                          }
+                        } catch(e) {}
+                        return BOOKS_DATA.length;
+                      })()} نایاب کتب</span>
                     </div>
                   </div>
 

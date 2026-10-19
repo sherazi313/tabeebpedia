@@ -92,6 +92,7 @@ import {
   Building2,
   Plus,
   Loader2,
+  ArrowUpDown,
   Download,
   ArrowUp,
   ArrowDown,
@@ -122,6 +123,8 @@ import {
   saveGlossaryApi, 
   fetchLiveMedia,
   saveMediaApi,
+  fetchLivePdfBooks,
+  savePdfBooksApi,
   fetchAnalyticsApi,
   get2faSetupApi,
   changeCredentialsApi,
@@ -589,7 +592,8 @@ export default function AdminCMS({
   const [mediaPage, setMediaPage] = useState(1);
   const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [copiedMediaId, setCopiedMediaId] = useState(null);
-  const mediaPerPage = 36;
+  const [mediaPerPage, setMediaPerPage] = useState(50);
+  const [mediaSort, setMediaSort] = useState('latest'); // 'latest', 'oldest', 'name_asc', 'name_desc'
 
   // Pages State
   const [internalPagesList, setInternalPagesList] = useState(() => {
@@ -1450,28 +1454,15 @@ export default function AdminCMS({
   const [bookCategoryFilter, setBookCategoryFilter] = useState('all');
   const [pdfEditorSubTab, setPdfEditorSubTab] = useState('studio'); // 'studio', 'html'
 
-  // Load latest live books from /api/pdf-books or /data/pdf-books.json
+  // Load latest live books from API or /data/pdf-books.json
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const res = await fetch('/api/pdf-books');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            setPdfBooksList(data);
-            try { localStorage.setItem('tabeeb_pdf_books', JSON.stringify(data)); } catch(e) {}
-            return;
-          }
-        }
-      } catch(e) {}
-      try {
-        const res2 = await fetch('/data/pdf-books.json');
-        if (res2.ok) {
-          const data2 = await res2.json();
-          if (Array.isArray(data2) && data2.length > 0) {
-            setPdfBooksList(data2);
-            try { localStorage.setItem('tabeeb_pdf_books', JSON.stringify(data2)); } catch(e) {}
-          }
+        const live = await fetchLivePdfBooks();
+        if (Array.isArray(live) && live.length > 0) {
+          setPdfBooksList(live);
+          try { localStorage.setItem('tabeeb_pdf_books', JSON.stringify(live)); } catch(e) {}
+          return;
         }
       } catch(e) {}
     };
@@ -1484,11 +1475,7 @@ export default function AdminCMS({
       localStorage.setItem('tabeeb_pdf_books', JSON.stringify(newList));
     } catch(e) {}
     try {
-      await fetch('/api/pdf-books', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newList)
-      });
+      await savePdfBooksApi(newList);
     } catch(e) {}
 
     const generatedHtml = generatePdfBooksPageHtml(newList);
@@ -2009,8 +1996,10 @@ export default function AdminCMS({
         return a;
       });
       setArticlesList(updatedList);
+      saveArticlesApi(updatedList);
       showNotification('مضمون کی تمام تبدیلیاں کامیابی سے محفوظ ہو گئیں!');
     } else {
+      const todayStr = new Date().toISOString().split('T')[0];
       const newArticle = {
         id: Date.now(),
         ...articleForm,
@@ -2019,13 +2008,17 @@ export default function AdminCMS({
         categoryName,
         categories: finalCategories,
         readingTime: `${stats.readingTime} منٹ`,
-        publishedAt: new Date().toISOString().split('T')[0],
+        date: articleForm.date || todayStr,
+        publishedAt: articleForm.publishedAt || articleForm.date || todayStr,
+        createdAt: new Date().toISOString(),
+        status: articleForm.status || 'published',
         views: 1,
         authorImage: '/images/author-photo.jpg',
         tags: typeof articleForm.tags === 'string' ? articleForm.tags.split(',').map(t => t.trim()).filter(Boolean) : articleForm.tags,
       };
       updatedList = [newArticle, ...articlesList];
       setArticlesList(updatedList);
+      saveArticlesApi(updatedList);
       showNotification('نیا مضمون کامیابی کے ساتھ پبلش ہو گیا!');
     }
 
@@ -6135,13 +6128,46 @@ export default function AdminCMS({
           {/* VIEW: MEDIA LIBRARY */}
           {/* ========================================================= */}
           {adminTab === 'media' && (() => {
+            const parseMediaDate = (item) => {
+              if (!item) return 0;
+              if (typeof item.id === 'string' && item.id.startsWith('media-up-')) {
+                const parts = item.id.split('-');
+                const ts = parseInt(parts[2], 10);
+                if (!isNaN(ts)) return ts;
+              }
+              if (item.date) {
+                const parsed = new Date(item.date.replace(/\//g, '-')).getTime();
+                if (!isNaN(parsed)) return parsed;
+              }
+              return 0;
+            };
+
             const filteredMedia = mediaList
               .filter(item => {
                 if (mediaFilter === 'attached') return !!item.attachedTo;
                 if (mediaFilter === 'unattached') return !item.attachedTo;
                 return true;
               })
-              .filter(item => !mediaSearch || (item.name && item.name.toLowerCase().includes(mediaSearch.toLowerCase())) || (item.attachedTo && item.attachedTo.toLowerCase().includes(mediaSearch.toLowerCase())));
+              .filter(item => !mediaSearch || (item.name && item.name.toLowerCase().includes(mediaSearch.toLowerCase())) || (item.attachedTo && item.attachedTo.toLowerCase().includes(mediaSearch.toLowerCase())))
+              .sort((a, b) => {
+                if (mediaSort === 'latest') {
+                  const dateDiff = parseMediaDate(b) - parseMediaDate(a);
+                  if (dateDiff !== 0) return dateDiff;
+                  return (b.id || '').localeCompare(a.id || '', undefined, { numeric: true });
+                }
+                if (mediaSort === 'oldest') {
+                  const dateDiff = parseMediaDate(a) - parseMediaDate(b);
+                  if (dateDiff !== 0) return dateDiff;
+                  return (a.id || '').localeCompare(b.id || '', undefined, { numeric: true });
+                }
+                if (mediaSort === 'name_asc') {
+                  return (a.name || '').localeCompare(b.name || '', 'ur');
+                }
+                if (mediaSort === 'name_desc') {
+                  return (b.name || '').localeCompare(a.name || '', 'ur');
+                }
+                return 0;
+              });
 
             const totalPages = Math.ceil(filteredMedia.length / mediaPerPage) || 1;
             const safeCurrentPage = Math.min(Math.max(1, mediaPage), totalPages);
@@ -6225,10 +6251,10 @@ export default function AdminCMS({
                   </div>
                 </div>
 
-                {/* Media Controls Bar */}
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs text-slate-600 font-bold font-simple">فلٹر:</span>
+                {/* Media Controls Bar with Filters, Sort & Per-Page */}
+                <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    {/* Status Tabs */}
                     <div className="flex gap-1.5 bg-white p-1 rounded-xl border border-slate-200 text-xs font-bold shadow-xs">
                       <button
                         onClick={() => { setMediaFilter('all'); setMediaPage(1); }}
@@ -6240,18 +6266,51 @@ export default function AdminCMS({
                         onClick={() => { setMediaFilter('attached'); setMediaPage(1); }}
                         className={`px-3 py-1.5 rounded-lg transition-colors font-simple ${mediaFilter === 'attached' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
                       >
-                        منسلک / زیر استعمال ({mediaList.filter(m => m.attachedTo).length})
+                        منسلک ({mediaList.filter(m => m.attachedTo).length})
                       </button>
                       <button
                         onClick={() => { setMediaFilter('unattached'); setMediaPage(1); }}
                         className={`px-3 py-1.5 rounded-lg transition-colors font-simple ${mediaFilter === 'unattached' ? 'bg-amber-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
                       >
-                        صرف اپلوڈ / غیر منسلک ({mediaList.filter(m => !m.attachedTo).length})
+                        صرف اپلوڈ ({mediaList.filter(m => !m.attachedTo).length})
                       </button>
+                    </div>
+
+                    {/* Sorting Selector (Latest First default) */}
+                    <div className="flex items-center gap-1.5 bg-white px-3 py-1 rounded-xl border border-slate-200 shadow-xs">
+                      <ArrowUpDown className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                      <span className="text-xs text-slate-500 font-bold font-simple">ترتیب:</span>
+                      <select
+                        value={mediaSort}
+                        onChange={e => { setMediaSort(e.target.value); setMediaPage(1); }}
+                        className="bg-transparent border-0 text-xs text-slate-800 font-bold focus:ring-0 focus:outline-none cursor-pointer font-simple py-0.5"
+                      >
+                        <option value="latest">جدید ترین پہلے (Latest First)</option>
+                        <option value="oldest">قدیم ترین پہلے (Oldest First)</option>
+                        <option value="name_asc">نام: الف تا ے (A-Z)</option>
+                        <option value="name_desc">نام: ے تا الف (Z-A)</option>
+                      </select>
+                    </div>
+
+                    {/* Per-Page Selector (50, 100, 200) */}
+                    <div className="flex items-center gap-1.5 bg-white px-3 py-1 rounded-xl border border-slate-200 shadow-xs">
+                      <SlidersHorizontal className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                      <span className="text-xs text-slate-500 font-bold font-simple">تعداد فی صفحہ:</span>
+                      <select
+                        value={mediaPerPage}
+                        onChange={e => { setMediaPerPage(Number(e.target.value)); setMediaPage(1); }}
+                        className="bg-transparent border-0 text-xs text-slate-800 font-bold focus:ring-0 focus:outline-none cursor-pointer font-mono py-0.5"
+                      >
+                        <option value={36}>36 تصاویر</option>
+                        <option value={50}>50 تصاویر</option>
+                        <option value={100}>100 تصاویر</option>
+                        <option value={200}>200 تصاویر</option>
+                      </select>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 w-full sm:w-72">
+                  {/* Search box */}
+                  <div className="flex items-center gap-2 w-full lg:w-72">
                     <div className="relative w-full">
                       <Search className="w-3.5 h-3.5 text-slate-400 absolute right-3 top-3" />
                       <input
@@ -6278,9 +6337,9 @@ export default function AdminCMS({
                 {filteredMedia.length > 0 && (
                   <div className="flex items-center justify-between text-xs text-slate-500 px-1 font-simple">
                     <span>
-                      دکھائے جا رہے ہیں {(safeCurrentPage - 1) * mediaPerPage + 1} تا {Math.min(safeCurrentPage * mediaPerPage, filteredMedia.length)} از {filteredMedia.length} تصاویر
+                      دکھائے جا رہے ہیں {(safeCurrentPage - 1) * mediaPerPage + 1} تا {Math.min(safeCurrentPage * mediaPerPage, filteredMedia.length)} از {filteredMedia.length} تصاویر ({mediaSort === 'latest' ? 'جدید ترین پہلے' : mediaSort === 'oldest' ? 'قدیم ترین پہلے' : 'بلحاظِ نام'})
                     </span>
-                    <span>صفحہ {safeCurrentPage} از {totalPages}</span>
+                    <span>صفحہ {safeCurrentPage} از {totalPages} (ہر صفحے پر {mediaPerPage})</span>
                   </div>
                 )}
 
@@ -8212,9 +8271,9 @@ export default function AdminCMS({
             const pendingDoctors = doctorsList.filter(d => d && (d.isApproved === false || d.status === 'pending'));
             const approvedDoctors = doctorsList.filter(d => d && (d.isApproved !== false && d.status !== 'pending'));
 
-            const handleApproveDoctor = (doctorId) => {
+            const handleApproveDoctor = async (doctorId) => {
               const docToApprove = doctorsList.find(d => d.id === doctorId);
-              setDoctorsList(prev => prev.map(d => {
+              const updated = doctorsList.map(d => {
                 if (d.id === doctorId) {
                   return {
                     ...d,
@@ -8224,7 +8283,12 @@ export default function AdminCMS({
                   };
                 }
                 return d;
-              }));
+              });
+              setDoctorsList(updated);
+              await saveDoctorsApi(updated);
+              try {
+                localStorage.setItem('tabeeb_doctors_data_v1', JSON.stringify(updated));
+              } catch (e) {}
               showNotification(`طبیب ${docToApprove?.name || ''} کی رجسٹریشن منظور کر لی گئی ہے اور ویب سائٹ پر پبلش ہو چکی ہے!`);
             };
 
