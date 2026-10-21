@@ -1302,12 +1302,11 @@ export default function DoctorDashboard({
                 <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple">
                   طبیب کا تفصیلی تعارف و فلسفہ علاج (About & Bio):
                 </label>
-                <textarea
-                  rows={4}
-                  value={formData.about}
-                  onChange={(e) => setFormData({ ...formData, about: e.target.value })}
+                <RichTextEditor
+                  value={formData.about || ''}
+                  onChange={(val) => setFormData({ ...formData, about: val })}
                   placeholder="اپنے تجربے، مطب کی تاریخ اور طریقہ علاج کی تفصیل تحریر فرمائیں..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"
+                  minHeight="220px"
                 />
               </div>
 

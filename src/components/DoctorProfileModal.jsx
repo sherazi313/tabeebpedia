@@ -34,6 +34,25 @@ import {
   AlertCircle
 } from 'lucide-react';
 
+// Helper to render doctor bio (HTML if formatted, clean paragraphs if text)
+function renderDoctorBioHtml(bio, doctorName) {
+  if (!bio) return '';
+  let str = String(bio);
+
+  const hasHtml = /<[a-z][\s\S]*>/i.test(str);
+  if (!hasHtml) {
+    return str.split('\n').filter(Boolean).map(p => `<p class="mb-3 leading-relaxed">${p.trim()}</p>`).join('');
+  }
+
+  // Remove dangerous scripts / iframes / on-attributes
+  str = str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  str = str.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+  str = str.replace(/on\w+="[^"]*"/g, '');
+  str = str.replace(/on\w+='[^']*'/g, '');
+
+  return str;
+}
+
 // Helper to clean any raw HTML or formatting tags from doctor bio
 function formatDoctorBio(bio, doctorName) {
   if (!bio) return '';
@@ -471,12 +490,13 @@ export default function DoctorProfileModal({
                       <span className="text-xs text-slate-500 font-sans font-normal">About Doctor</span>
                     </h3>
                     
-                    <div className="text-sm text-slate-700 leading-relaxed font-body whitespace-pre-line space-y-3 bg-slate-50/80 p-5 rounded-2xl border border-slate-200/70">
-                      {formatDoctorBio(doctor.about, doctor.name) || (
-                        <p>
-                          طبیب {doctor.name} پاکستان کے معتبر اور مستند اطباء میں شمار ہوتے ہیں۔ آپ نبض شناسی، قانون مفرد اعضاء اور طب یونانی کے اصولوں کے تحت مریض کے مزاج کی درست تشخیص فرما کر قدرتی جڑی بوٹیوں اور غذائی پرہیز سے شافی علاج تجویز فرماتے ہیں۔
-                        </p>
-                      )}
+                    <div className="text-sm text-slate-700 leading-relaxed font-body bg-slate-50/80 p-5 rounded-2xl border border-slate-200/70">
+                      <div
+                        className="rich-doctor-bio space-y-2 leading-relaxed"
+                        dangerouslySetInnerHTML={{
+                          __html: renderDoctorBioHtml(doctor.about, doctor.name) || `<p>طبیب ${doctor.name} پاکستان کے معتبر اور مستند اطباء میں شمار ہوتے ہیں۔ آپ نبض شناسی، قانون مفرد اعضاء اور طب یونانی کے اصولوں کے تحت مریض کے مزاج کی درست تشخیص فرما کر قدرتی جڑی بوٹیوں اور غذائی پرہیز سے شافی علاج تجویز فرماتے ہیں۔</p>`
+                        }}
+                      />
                     </div>
                   </div>
 

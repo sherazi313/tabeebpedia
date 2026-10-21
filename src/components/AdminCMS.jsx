@@ -135,6 +135,7 @@ import {
 } from '../api';
 import { BOOKS_DATA } from './PdfBooksLibrary';
 import AdminSecurityTab from './AdminSecurityTab';
+import RichTextEditor from './RichTextEditor';
 
 // Helper to generate clean, high-contrast HTML for PDF Books library page
 export const generatePdfBooksPageHtml = (books = []) => {
@@ -10347,12 +10348,11 @@ export default function AdminCMS({
                               </label>
                               <span className="text-[11px] text-slate-500">پیراگراف یا لسٹ کی صورت میں لکھیں</span>
                             </div>
-                            <textarea 
+                            <RichTextEditor 
                               value={doctorForm.about || ''} 
-                              onChange={(e) => setDoctorForm({...doctorForm, about: e.target.value})}
+                              onChange={(val) => setDoctorForm({...doctorForm, about: val})}
                               placeholder="معالج کے تعارف، طریقہ علاج اور تجربات کے بارے میں تفصیلی معلومات..."
-                              rows={9}
-                              className="w-full bg-white border border-slate-300 rounded-2xl p-4 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none leading-relaxed text-sm shadow-xs"
+                              minHeight="260px"
                             />
                           </div>
 
