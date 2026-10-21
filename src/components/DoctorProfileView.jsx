@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { saveDoctorsApi } from '../api';
 import { 
   ArrowRight,
   MapPin, 
@@ -34,69 +35,29 @@ import {
 } from 'lucide-react';
 
 // Helper to clean any raw HTML or formatting tags from doctor bio
-function formatDoctorBio(bio, doctorName) {
+function renderDoctorBioHtml(bio, doctorName) {
   if (!bio) return '';
   let str = String(bio);
 
-  // Remove shortcodes like [caption ...] ... [/caption]
-  str = str.replace(/\[caption[^\]]*\]([\s\S]*?)\[\/caption\]/gi, '$1');
-  str = str.replace(/\[[^\]]+\]/g, '');
-
-  // Remove images
-  str = str.replace(/<img[^>]*>/gi, '');
-
-  // Remove duplicate heading with doctor name
-  if (doctorName) {
-    const cleanDocName = doctorName.replace(/[^\w\u0600-\u06FF]/g, '').toLowerCase();
-    str = str.replace(/<h[1-6][^>]*>([\s\S]*?)<\/h[1-6]>/gi, (m, headingText) => {
-      const cleanHeading = headingText.replace(/[^\w\u0600-\u06FF]/g, '').toLowerCase();
-      if (cleanHeading.includes(cleanDocName) || cleanDocName.includes(cleanHeading)) {
-        return '';
-      }
-      return '\n' + headingText.trim() + '\n';
-    });
+  // If bio contains html tags (from RichTextEditor)
+  const hasHtml = /<[a-z][\s\S]*>/i.test(str);
+  if (!hasHtml) {
+    // Format plain text into clean paragraphs
+    return str.split('\n').filter(Boolean).map(p => `<p class="mb-3 leading-relaxed">${p.trim()}</p>`).join('');
   }
 
-  // Clean tags: replace <li> with bullet
-  str = str.replace(/<li[^>]*>/gi, '• ');
-  str = str.replace(/<\/li>/gi, '\n');
+  // Remove dangerous scripts / iframes / on-attributes
+  str = str.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  str = str.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+  str = str.replace(/on\w+="[^"]*"/g, '');
+  str = str.replace(/on\w+='[^']*'/g, '');
 
-  // Replace <br>, <p>, <div> with line breaks
-  str = str.replace(/<br\s*[\/]?>/gi, '\n');
-  str = str.replace(/<\/p>/gi, '\n\n');
-  str = str.replace(/<\/div>/gi, '\n');
-
-  // Strip all remaining HTML tags
-  str = str.replace(/<[^>]*>/g, '');
-
-  // Decode common HTML entities
-  str = str.replace(/&nbsp;/gi, ' ')
-           .replace(/&amp;/gi, '&')
-           .replace(/&quot;/gi, '"')
-           .replace(/&#8211;/g, '–')
-           .replace(/&#8217;/g, "'")
-           .replace(/&lt;/gi, '<')
-           .replace(/&gt;/gi, '>');
-
-  // Clean up excessive whitespace and newlines
-  let lines = str.split('\n')
-           .map(line => line.trim())
-           .filter((line, idx, arr) => line || (idx > 0 && arr[idx - 1]));
-
-  if (lines.length > 1) {
-    const first = lines[0].trim();
-    if (first.length < 45 && (first.startsWith('حکیم ') || first.startsWith('ڈاکٹر ') || first.toLowerCase().startsWith('dr') || first.toLowerCase().startsWith('hakeem') || first === doctorName)) {
-      if (lines.slice(1).join(' ').trim().length > 15) {
-        lines.shift();
-      }
-    }
-  }
-
-  return lines.join('\n').trim();
+  return str;
 }
 
 export default function DoctorProfileView({ 
-  doctor, 
+  doctor,
+  onUpdateDoctor, 
   onBack,
   onNavigateHome,
   onNavigateDoctors,
@@ -194,8 +155,8 @@ export default function DoctorProfileView({
   const clinicFee = Number(doctor.fee) || 500;
   const onlineFee = Number(doctor.onlineFee) || (clinicFee + 300);
   const waitTime = doctor.waitTime || '15 منٹ سے کم';
-  const satisfactionScore = doctor.satisfactionScore || (doctor.rating ? Math.min(99, Math.round((doctor.rating / 5) * 100)) : 96);
-  const totalReviewsCount = (doctor.reviewsCount || 120) + localReviews.length;
+  const satisfactionScore = totalReviewsCount > 0 ? Math.min(100, Math.round(((doctor.rating || 5) / 5) * 100)) : 0;
+  const totalReviewsCount = allReviews.length;
 
   // Conditions Treated List (with fallbacks if empty)
   const conditionsTreated = useMemo(() => {
@@ -274,38 +235,13 @@ export default function DoctorProfileView({
     ];
   }, [doctor, clinicFee, onlineFee]);
 
-  // Sample default reviews
-  const defaultReviews = [
-    {
-      id: 101,
-      patientName: 'محمد عثمان طارق',
-      date: '10 ستمبر 2026',
-      rating: 5,
-      disease: 'معدے کی تیزابیت اور دائمی قبض',
-      verified: true,
-      comment: 'بہت ہی شفیق اور بااخلاق معالج ہیں۔ نبض دیکھ کر ہی ساری کیفیت بتا دی۔ ایک ماہ کے علاج سے معدے کی جلن اور گیس مکمل ٹھیک ہو گئی۔ جزاک اللہ خیراً۔'
-    },
-    {
-      id: 102,
-      patientName: 'طاہرہ بیگم',
-      date: '28 اگست 2026',
-      rating: 5,
-      disease: 'جوڑوں کا درد اور یورک ایسڈ',
-      verified: true,
-      comment: 'میری والدہ کو گھٹنوں کے درد کی وجہ سے چلنے پھرنے میں شدید تکلیف تھی۔ حکیم صاحب کے بتائے ہوئے قہوہ اور ہربل تیل سے اب وہ بغیر سہارے نماز پڑھ رہی ہیں۔'
-    },
-    {
-      id: 103,
-      patientName: 'وقار احمد چوہدری',
-      date: '15 اگست 2026',
-      rating: 5,
-      disease: 'یرقان اور جگر کی گرمی',
-      verified: true,
-      comment: 'آن لائن ویڈیو کال پر بہت تفصیل سے بات سنی اور ادویات اگلے ہی دن کوریئر سے مل گئیں۔ بہت مطمئن ہوں۔'
-    }
-  ];
-
-  const allReviews = [...localReviews, ...defaultReviews];
+  // Real patient reviews only (no fake reviews)
+  const allReviews = useMemo(() => {
+    const docReviews = Array.isArray(doctor.reviews) ? doctor.reviews : [];
+    const seenIds = new Set(docReviews.map(r => r.id));
+    const uniqueLocal = localReviews.filter(r => !seenIds.has(r.id));
+    return [...uniqueLocal, ...docReviews];
+  }, [doctor.reviews, localReviews]);
 
   // Articles written by this doctor
   const doctorArticles = useMemo(() => {
@@ -324,7 +260,7 @@ export default function DoctorProfileView({
     setAppointmentSent(true);
   };
 
-  // Submit new review
+  // Submit real patient review & save permanently
   const handleAddReview = (e) => {
     e.preventDefault();
     if (!newReview.patientName.trim() || !newReview.comment.trim()) return;
@@ -332,20 +268,47 @@ export default function DoctorProfileView({
     const reviewObj = {
       id: Date.now(),
       patientName: newReview.patientName.trim(),
-      date: 'ابھی حال ہی میں',
-      rating: newReview.rating || 5,
+      date: new Date().toLocaleDateString('ur-PK', { year: 'numeric', month: 'long', day: 'numeric' }),
+      rating: Number(newReview.rating) || 5,
       disease: newReview.disease.trim() || 'طبی مشاورت',
       verified: true,
       comment: newReview.comment.trim()
     };
 
-    setLocalReviews([reviewObj, ...localReviews]);
+    const nextReviews = [reviewObj, ...(doctor.reviews || [])];
+    const avg = parseFloat((nextReviews.reduce((sum, r) => sum + Number(r.rating || 5), 0) / nextReviews.length).toFixed(1));
+    const updatedDoctor = {
+      ...doctor,
+      reviews: nextReviews,
+      reviewsCount: nextReviews.length,
+      rating: avg
+    };
+
+    setLocalReviews(prev => [reviewObj, ...prev]);
     setReviewSubmitted(true);
     setNewReview({ patientName: '', rating: 5, comment: '', disease: '' });
+
+    // Persist to localStorage and API
+    try {
+      const saved = localStorage.getItem('tabeeb_doctors_data_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const next = parsed.map(d => d.id === doctor.id ? updatedDoctor : d);
+          localStorage.setItem('tabeeb_doctors_data_v1', JSON.stringify(next));
+          saveDoctorsApi(next);
+        }
+      }
+    } catch(err) {}
+
+    if (onUpdateDoctor) {
+      onUpdateDoctor(updatedDoctor);
+    }
+
     setTimeout(() => {
       setShowReviewForm(false);
       setReviewSubmitted(false);
-    }, 2000);
+    }, 2500);
   };
 
   // Copy doctor profile link
@@ -522,7 +485,7 @@ export default function DoctorProfileView({
                 <div className="bg-slate-50 hover:bg-slate-100/90 border border-slate-200 rounded-2xl p-3 text-center transition-colors">
                   <div className="flex items-center justify-center gap-1 font-bold text-sm sm:text-base text-slate-900 font-sans">
                     <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    <span>{doctor.rating || 4.9}</span>
+                    <span>{(doctor.rating !== undefined && doctor.rating !== null && Number(doctor.rating) > 0) ? doctor.rating : '0.0'}</span>
                   </div>
                   <span className="text-[11px] text-slate-500 block mt-0.5 font-sans">
                     {totalReviewsCount} تصدیق شدہ آراء
@@ -584,11 +547,7 @@ export default function DoctorProfileView({
                 </h3>
                 
                 <div className="text-sm text-slate-700 leading-relaxed font-body whitespace-pre-line space-y-3 bg-slate-50/80 p-5 rounded-2xl border border-slate-200/70">
-                  {formatDoctorBio(doctor.about, doctor.name) || (
-                    <p>
-                      طبیب {doctor.name} پاکستان کے معتبر اور مستند اطباء میں شمار ہوتے ہیں۔ آپ نبض شناسی، قانون مفرد اعضاء اور طب یونانی کے اصولوں کے تحت مریض کے مزاج کی درست تشخیص فرما کر قدرتی جڑی بوٹیوں اور غذائی پرہیز سے شافی علاج تجویز فرماتے ہیں۔
-                    </p>
-                  )}
+                  <div className="rich-doctor-bio" dangerouslySetInnerHTML={{ __html: renderDoctorBioHtml(doctor.about, doctor.name) || `<p class="leading-relaxed">طبیب ${doctor.name} پاکستان کے معتبر اور مستند اطباء میں شمار ہوتے ہیں۔ آپ نبض شناسی، قانون مفرد اعضاء اور طب یونانی کے اصولوں کے تحت مریض کے مزاج کی درست تشخیص فرما کر قدرتی جڑی بوٹیوں اور غذائی پرہیز سے شافی علاج تجویز فرماتے ہیں۔</p>` }} />
                 </div>
               </div>
 
@@ -953,7 +912,23 @@ export default function DoctorProfileView({
 
               {/* Reviews List (Oladoc Verified Patient Reviews) */}
               <div className="space-y-3 pt-2">
-                {allReviews.map(rev => (
+                {allReviews.length === 0 ? (
+                  <div className="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-300 p-6 space-y-2">
+                    <Star className="w-8 h-8 text-slate-300 mx-auto" />
+                    <h4 className="font-bold text-slate-800 text-sm font-simple">ابھی کوئی مریض ریویو موجود نہیں ہے</h4>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      اس معالج سے علاج کروانے کے بعد سب سے پہلے اپنا قیمتی تاثرات اور تجربہ یہاں شیئر کریں۔
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setShowReviewForm(true)}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs font-simple inline-flex items-center gap-1.5"
+                    >
+                      <Star className="w-3.5 h-3.5 fill-white" />
+                      <span>پہلا ریویو درج کریں</span>
+                    </button>
+                  </div>
+                ) : allReviews.map(rev => (
                   <div key={rev.id} className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">

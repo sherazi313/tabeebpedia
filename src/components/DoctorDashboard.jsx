@@ -37,6 +37,8 @@ import {
 } from 'lucide-react';
 import { CITIES, SPECIALTIES, TREATMENT_TYPES } from '../data/mockData';
 import CityCombobox from './CityCombobox';
+import RichTextEditor from './RichTextEditor';
+import { compressImage, addMediaItemToLibrary } from '../utils/imageCompressor';
 import { uploadImageApi } from '../api';
 
 export default function DoctorDashboard({ 
@@ -66,8 +68,9 @@ export default function DoctorDashboard({
     password: doctor?.password || 'password123',
     title: doctor?.title || 'ماہر نباض، موروثی معالج طب یونانی',
     qualifications: doctor?.qualifications || 'فاضل طب والجراحت (FTJ)',
-    councilRegNo: doctor?.councilRegNo || 'NCT-78642',
-    experience: doctor?.experience || 10,
+    councilRegNo: doctor?.councilRegNo || '',
+    experience: (doctor?.experience !== undefined && doctor?.experience !== null) ? Number(doctor.experience) : 0,
+    education: (doctor?.education && Array.isArray(doctor.education)) ? [...doctor.education] : (doctor?.qualifications ? [{ degree: doctor.qualifications, institute: 'نیشنل کونسل فار طب منظور شدہ ادارہ', year: '' }] : []),
     fee: doctor?.fee || 500,
     city: doctor?.city || 'lahore',
     cityName: doctor?.cityName || (safeCitiesList.find(c => c && c.id === doctor?.city)?.name) || doctor?.city || 'لاہور',
@@ -88,6 +91,43 @@ export default function DoctorDashboard({
     memberships: (doctor?.memberships && Array.isArray(doctor.memberships) && doctor.memberships.length > 0) ? doctor.memberships : ['قومی کونسل برائے طب (NCT)'],
     conditions: (doctor?.conditions && Array.isArray(doctor.conditions) && doctor.conditions.length > 0) ? doctor.conditions : ['معدے کی تیزابیت و السر', 'جوڑوں کا درد اور عرق النساء', 'دائمی قبض و آئی بی ایس'],
   });
+
+  // Degrees & Education state helper
+  const [newDegreeTitle, setNewDegreeTitle] = useState('');
+  const [newDegreeInstitute, setNewDegreeInstitute] = useState('');
+  const [newDegreeYear, setNewDegreeYear] = useState('');
+
+  const handleAddDegree = (degreeToAdd = null) => {
+    const dTitle = (degreeToAdd || newDegreeTitle).trim();
+    if (!dTitle) return;
+    const newEduItem = {
+      degree: dTitle,
+      institute: newDegreeInstitute.trim() || 'نیشنل کونسل فار طب منظور شدہ ادارہ',
+      year: newDegreeYear.trim() || new Date().getFullYear().toString()
+    };
+    const updatedEdu = [...(formData.education || []), newEduItem];
+    const qualString = updatedEdu.map(e => e.degree).join('، ');
+    setFormData(prev => ({
+      ...prev,
+      education: updatedEdu,
+      qualifications: qualString
+    }));
+    setNewDegreeTitle('');
+    setNewDegreeInstitute('');
+    setNewDegreeYear('');
+    showNotification('ڈگری کامیابی سے شامل ہو گئی');
+  };
+
+  const handleRemoveDegree = (indexToRemove) => {
+    const updatedEdu = (formData.education || []).filter((_, idx) => idx !== indexToRemove);
+    const qualString = updatedEdu.map(e => e.degree).join('، ');
+    setFormData(prev => ({
+      ...prev,
+      education: updatedEdu,
+      qualifications: qualString
+    }));
+    showNotification('ڈگری ہٹا دی گئی');
+  };
 
   // Services input helper
   const [newServiceInput, setNewServiceInput] = useState('');
@@ -132,19 +172,32 @@ export default function DoctorDashboard({
 
   const isNavy = theme === 'navy';
 
-  // Handle Photo Upload
+  // Handle Photo Upload with Auto-compression (>= 1MB) & Media Library Sync
   const handleImageUpload = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
       try {
-        const url = await uploadImageApi(file);
-        if (url) {
-          setFormData(prev => ({ ...prev, image: url }));
-          showNotification('پروفائل تصویر کامیابی سے اپلوڈ ہو گئی');
+        const res = await compressImage(file, { maxDimension: 1280, quality: 0.82 });
+        const finalUrl = (await uploadImageApi(res.file)) || res.dataUrl;
+        if (finalUrl) {
+          setFormData(prev => ({ ...prev, image: finalUrl }));
+          
+          await addMediaItemToLibrary({
+            url: finalUrl,
+            name: file.name,
+            attachedTo: `طبیب: ${formData.name || doctor?.name || 'طبیب'}`,
+            doctorId: doctor?.id
+          });
+
+          if (res.wasCompressed) {
+            showNotification(`پروفائل تصویر کا سائز کم کر کے (${Math.round(res.compressedSize / 1024)} KB) میڈیا لائبریری میں شامل کر دیا گیا`);
+          } else {
+            showNotification('پروفائل تصویر کامیابی سے اپلوڈ اور میڈیا لائبریری میں شامل ہو گئی');
+          }
         }
       } catch (err) {
         console.error(err);
-        showNotification('پروفائل تصویر اپلوڈ کرنے میں مسئلہ آیا');
+        showNotification('پروفائل تصویر اپلوڈ کرنے میں مسئلہ آیا: ' + (err.message || ''));
       }
     }
   };
@@ -269,7 +322,7 @@ export default function DoctorDashboard({
     }));
   };
 
-  // Handle Gallery Upload from File (Mobile/PC)
+  // Handle Gallery Upload with Auto-compression (>= 1MB) & Media Library Sync
   const handleGalleryFileUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
@@ -277,15 +330,24 @@ export default function DoctorDashboard({
     try {
       const uploadedUrls = [];
       for (const file of files) {
-        const url = await uploadImageApi(file);
-        if (url) uploadedUrls.push(url);
+        const res = await compressImage(file, { maxDimension: 1280, quality: 0.82 });
+        const finalUrl = (await uploadImageApi(res.file)) || res.dataUrl;
+        if (finalUrl) {
+          uploadedUrls.push(finalUrl);
+          await addMediaItemToLibrary({
+            url: finalUrl,
+            name: file.name,
+            attachedTo: `مطب/اسناد: ${formData.name || doctor?.name || 'طبیب'}`,
+            doctorId: doctor?.id
+          });
+        }
       }
       if (uploadedUrls.length > 0) {
         setFormData(prev => ({
           ...prev,
           gallery: [...(prev.gallery || []), ...uploadedUrls]
         }));
-        showNotification(`${uploadedUrls.length} تصویر/تصاویر کامیابی سے شامل ہو گئیں`);
+        showNotification(`${uploadedUrls.length} تصاویر کامیابی سے کمپریس ہو کر میڈیا لائبریری میں شامل ہو گئیں`);
       }
     } catch (err) {
       console.error(err);
@@ -575,10 +637,10 @@ export default function DoctorDashboard({
             <div>
               <span className="text-xs text-slate-500 font-sans font-bold block">مریضوں کا اعتماد و ریٹنگ</span>
               <div className="flex items-center gap-1 text-2xl font-bold text-amber-500 font-sans mt-1">
-                <span>{doctor.rating || 5.0}</span>
+                <span>{(doctor?.rating !== undefined && doctor?.rating !== null && Number(doctor.rating) > 0) ? doctor.rating : '0.0'}</span>
                 <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
               </div>
-              <span className="text-[10px] text-slate-400 font-sans">({doctor.reviewsCount || 45} مصدقہ آراء)</span>
+              <span className="text-[10px] text-slate-400 font-sans">({(doctor?.reviewsCount || (doctor?.reviews?.length || 0))} مصدقہ آراء)</span>
             </div>
             <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
               <Star className="w-6 h-6" />
@@ -731,14 +793,16 @@ export default function DoctorDashboard({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple">
-                    کونسل رجسٹریشن نمبر:
+                  <label className="block text-xs font-bold text-slate-700 mb-1.5 font-simple flex items-center justify-between">
+                    <span>نیشنل کونسل فار طب رجسٹریشن نمبر (NCT Registration Number):</span>
+                    <span className="text-[10px] text-slate-400 font-sans">قومی کونسل برائے طب</span>
                   </label>
                   <input
                     type="text"
                     value={formData.councilRegNo}
                     onChange={(e) => setFormData({ ...formData, councilRegNo: e.target.value })}
-                    placeholder="NCT-12345"
+                    placeholder="مثال: NCT-12345"
+                    dir="ltr"
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans"
                   />
                 </div>
@@ -1393,6 +1457,59 @@ export default function DoctorDashboard({
         {/* TAB 2: PATIENT INQUIRIES & CONSULTATION REQUESTS */}
         {/* ========================================================= */}
         {activeTab === 'inquiries' && (
+          <div className="space-y-6">
+            {/* Genuine Patient Reviews View-only for Doctor */}
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 font-h2 flex items-center gap-2">
+                    <Star className="w-5 h-5 fill-amber-400 text-amber-500" />
+                    <span>مریضوں کے مصدقہ ریویوز و تاثرات (Patient Reviews)</span>
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    طبیب پیڈیا پروفائل پر مریضوں کے دیے گئے براہ راست ریویوز (یہ ریویوز مریض خود درج کرتے ہیں):
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs bg-amber-50 text-amber-900 border border-amber-200 px-3 py-1 rounded-full font-bold font-sans">
+                    ریٹنگ: {doctor.rating || 0} / 5
+                  </span>
+                  <span className="text-xs bg-slate-100 text-slate-700 px-3 py-1 rounded-full font-bold font-sans">
+                    کل ریویوز: {(doctor.reviews || []).length}
+                  </span>
+                </div>
+              </div>
+
+              {(doctor.reviews && doctor.reviews.length > 0) ? (
+                <div className="space-y-3">
+                  {doctor.reviews.map((rev, rIdx) => (
+                    <div key={rev.id || rIdx} className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-xs text-slate-900 font-simple">{rev.patientName}</span>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-sans">مصدقہ مریض</span>
+                          {rev.disease && <span className="text-[10px] text-slate-500 font-sans">({rev.disease})</span>}
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-sans">{rev.date}</span>
+                      </div>
+                      <p className="text-xs text-slate-700 leading-relaxed font-body whitespace-pre-line">{rev.comment}</p>
+                      <div className="flex items-center gap-1 pt-1">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className={`w-3.5 h-3.5 ${i < (rev.rating || 5) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-300 space-y-2">
+                  <Star className="w-8 h-8 text-slate-300 mx-auto" />
+                  <p className="text-xs text-slate-600 font-bold font-simple">ابھی تک آپ کی پروفائل پر کوئی مریض ریویو موجود نہیں ہے</p>
+                  <p className="text-[11px] text-slate-400">جب مریض آپ کی پبلک پروفائل پر ریویو دیں گے، وہ یہاں خودکار طور پر ظاہر ہوں گے۔</p>
+                </div>
+              )}
+            </div>
+
           <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-xs space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
               <div>
@@ -1445,7 +1562,8 @@ export default function DoctorDashboard({
               ))}
             </div>
           </div>
-        )}
+        </div>
+      )}
 
         {/* ========================================================= */}
         {/* TAB 3: DOCTOR'S ARTICLES & PUBLICATIONS */}

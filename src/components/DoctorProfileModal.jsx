@@ -132,8 +132,8 @@ export default function DoctorProfileModal({
   const clinicFee = Number(doctor.fee) || 500;
   const onlineFee = Number(doctor.onlineFee) || (clinicFee + 300);
   const waitTime = doctor.waitTime || '15 منٹ سے کم';
-  const satisfactionScore = doctor.satisfactionScore || (doctor.rating ? Math.min(99, Math.round((doctor.rating / 5) * 100)) : 96);
-  const totalReviewsCount = (doctor.reviewsCount || 120) + localReviews.length;
+  const satisfactionScore = totalReviewsCount > 0 ? Math.min(100, Math.round(((doctor.rating || 5) / 5) * 100)) : 0;
+  const totalReviewsCount = allReviews.length;
 
   // Conditions Treated List (with fallbacks if empty)
   const conditionsTreated = useMemo(() => {
@@ -212,38 +212,13 @@ export default function DoctorProfileModal({
     ];
   }, [doctor, clinicFee, onlineFee]);
 
-  // Sample default reviews
-  const defaultReviews = [
-    {
-      id: 101,
-      patientName: 'محمد عثمان طارق',
-      date: '10 ستمبر 2026',
-      rating: 5,
-      disease: 'معدے کی تیزابیت اور دائمی قبض',
-      verified: true,
-      comment: 'بہت ہی شفیق اور بااخلاق معالج ہیں۔ نبض دیکھ کر ہی ساری کیفیت بتا دی۔ ایک ماہ کے علاج سے معدے کی جلن اور گیس مکمل ٹھیک ہو گئی۔ جزاک اللہ خیراً۔'
-    },
-    {
-      id: 102,
-      patientName: 'طاہرہ بیگم',
-      date: '28 اگست 2026',
-      rating: 5,
-      disease: 'جوڑوں کا درد اور یورک ایسڈ',
-      verified: true,
-      comment: 'میری والدہ کو گھٹنوں کے درد کی وجہ سے چلنے پھرنے میں شدید تکلیف تھی۔ حکیم صاحب کے بتائے ہوئے قہوہ اور ہربل تیل سے اب وہ بغیر سہارے نماز پڑھ رہی ہیں۔'
-    },
-    {
-      id: 103,
-      patientName: 'وقار احمد چوہدری',
-      date: '15 اگست 2026',
-      rating: 5,
-      disease: 'یرقان اور جگر کی گرمی',
-      verified: true,
-      comment: 'آن لائن ویڈیو کال پر بہت تفصیل سے بات سنی اور ادویات اگلے ہی دن کوریئر سے مل گئیں۔ بہت مطمئن ہوں۔'
-    }
-  ];
-
-  const allReviews = [...localReviews, ...defaultReviews];
+  // Real patient reviews only (no fake reviews)
+  const allReviews = useMemo(() => {
+    const docReviews = Array.isArray(doctor.reviews) ? doctor.reviews : [];
+    const seenIds = new Set(docReviews.map(r => r.id));
+    const uniqueLocal = localReviews.filter(r => !seenIds.has(r.id));
+    return [...uniqueLocal, ...docReviews];
+  }, [doctor.reviews, localReviews]);
 
   // Articles written by this doctor
   const doctorArticles = useMemo(() => {
@@ -436,7 +411,7 @@ export default function DoctorProfileModal({
                   <div className="bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-2xl p-2.5 text-center transition-colors">
                     <div className="flex items-center justify-center gap-1 font-bold text-xs sm:text-sm text-slate-900 font-sans">
                       <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      <span>{doctor.rating || 4.9}</span>
+                      <span>{(doctor.rating !== undefined && doctor.rating !== null && Number(doctor.rating) > 0) ? doctor.rating : '0.0'}</span>
                     </div>
                     <span className="text-[11px] text-slate-500 block mt-0.5 font-sans">
                       {totalReviewsCount} تصدیق شدہ آراء

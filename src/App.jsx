@@ -2782,6 +2782,7 @@ export default function App() {
         {activeTab === 'doctor-detail' && selectedDoctor && (
           <DoctorProfileView
             doctor={selectedDoctor}
+            onUpdateDoctor={handleUpdateDoctorProfile}
             onBack={() => {
               handleNavigateToTab('doctors');
             }}

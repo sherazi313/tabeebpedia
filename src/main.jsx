@@ -19,11 +19,21 @@ class ErrorBoundary extends React.Component {
 
   handleReset = () => {
     try {
-      localStorage.clear();
+      // Preserve authentication sessions so user is not forcibly logged out
+      const adminToken = sessionStorage.getItem('tabeeb_admin_token');
+      const adminAuth = sessionStorage.getItem('tabeeb_admin_auth');
+      const doctorAuth = localStorage.getItem('tabeeb_logged_in_doctor_v1');
+      const deviceToken = localStorage.getItem('tabeeb_2fa_device_token');
+
       sessionStorage.clear();
+      
+      if (adminToken) sessionStorage.setItem('tabeeb_admin_token', adminToken);
+      if (adminAuth) sessionStorage.setItem('tabeeb_admin_auth', adminAuth);
+      if (doctorAuth) localStorage.setItem('tabeeb_logged_in_doctor_v1', doctorAuth);
+      if (deviceToken) localStorage.setItem('tabeeb_2fa_device_token', deviceToken);
     } catch (e) {}
     this.setState({ hasError: false, error: null });
-    window.location.href = window.location.pathname;
+    window.location.reload();
   };
 
   render() {

@@ -434,15 +434,22 @@ export default function DoctorDirectory({
 
                         {/* Experience, Rating, City Pills */}
                         <div className="flex flex-wrap items-center gap-3 text-xs font-sans text-slate-600">
-                          <div className="flex items-center gap-1 bg-amber-50 text-amber-900 px-2 py-0.5 rounded-md border border-amber-200">
-                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-                            <span className="font-bold">{doctor.rating}</span>
-                            <span className="text-slate-500 text-[11px]">({doctor.reviewsCount} آراء)</span>
-                          </div>
+                          {(Number(doctor.reviewsCount || 0) > 0 || Number(doctor.rating || 0) > 0) ? (
+                            <div className="flex items-center gap-1 bg-amber-50 text-amber-900 px-2 py-0.5 rounded-md border border-amber-200">
+                              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                              <span className="font-bold">{doctor.rating || 0}</span>
+                              <span className="text-slate-500 text-[11px]">({doctor.reviewsCount || 0} آراء)</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1 bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md border border-slate-200 text-[11px]">
+                              <Star className="w-3.5 h-3.5 text-slate-400" />
+                              <span>0 آراء (نئی پروفائل)</span>
+                            </div>
+                          )}
 
                           <div className="flex items-center gap-1 bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">
                             <Award className={`w-3.5 h-3.5 ${isNavy ? 'text-blue-600' : 'text-emerald-600'}`} />
-                            <span className="font-medium">{doctor.experience} سالہ تجربہ</span>
+                            <span className="font-medium">{Number(doctor.experience || 0) > 0 ? `${doctor.experience} سالہ تجربہ` : 'نئی پریکٹس'}</span>
                           </div>
 
                           <div className={`flex items-center gap-1 ${isNavy ? 'bg-blue-50 text-blue-800' : 'bg-emerald-50 text-emerald-800'} px-2 py-0.5 rounded-md`}>

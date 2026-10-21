@@ -108,7 +108,8 @@ import {
   Radio,
   ArrowUpRight,
   LogOut,
-  Video
+  Video,
+  Star
 } from 'lucide-react';
 import { ARTICLES, DOCTORS, CATEGORIES, SPECIALTIES } from '../data/mockData';
 import { 
@@ -653,6 +654,37 @@ export default function AdminCMS({
           setMediaList(prev => {
             const seen = new Set(prev.map(p => p.url));
             const extracted = [...prev];
+            
+            // Extract profile and gallery photos from doctors
+            (propDoctorsList || []).forEach(doc => {
+              if (doc.image && doc.image !== '/images/default_doctor.webp' && !seen.has(doc.image)) {
+                seen.add(doc.image);
+                extracted.push({
+                  id: 'media-doc-' + (doc.id || Math.random().toString(36).substr(2, 7)),
+                  url: doc.image,
+                  name: doc.name + ' - پروفائل تصویر',
+                  date: new Date().toISOString().split('T')[0].replace(/-/g, '/'),
+                  attachedTo: `طبیب: ${doc.name}`,
+                  doctorId: doc.id
+                });
+              }
+              if (Array.isArray(doc.gallery)) {
+                doc.gallery.forEach((galUrl, gIdx) => {
+                  if (galUrl && !seen.has(galUrl)) {
+                    seen.add(galUrl);
+                    extracted.push({
+                      id: 'media-gal-' + (doc.id || '') + '-' + gIdx,
+                      url: galUrl,
+                      name: `${doc.name} - مطب/اسناد #${gIdx + 1}`,
+                      date: new Date().toISOString().split('T')[0].replace(/-/g, '/'),
+                      attachedTo: `مطب/اسناد: ${doc.name}`,
+                      doctorId: doc.id
+                    });
+                  }
+                });
+              }
+            });
+
             arts.forEach(art => {
               if (art.featuredImage && !seen.has(art.featuredImage)) {
                 seen.add(art.featuredImage);
@@ -707,7 +739,8 @@ export default function AdminCMS({
     const uploadedItems = [];
     for (const file of files) {
       try {
-        const uploadedUrl = await uploadImageApi(file);
+        const comp = await compressImage(file, { maxDimension: 1400, quality: 0.82 });
+        const uploadedUrl = (await uploadImageApi(comp.file)) || comp.dataUrl;
         if (uploadedUrl) {
           uploadedItems.push({
             id: 'media-up-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
@@ -8913,9 +8946,10 @@ export default function AdminCMS({
                 fee: docItem.fee || 500,
                 onlineFee: docItem.onlineFee || (docItem.fee ? docItem.fee + 300 : 800),
                 waitTime: docItem.waitTime || '15 منٹ سے کم',
-                experience: docItem.experience || 12,
-                rating: docItem.rating || 4.9,
-                reviewsCount: docItem.reviewsCount || 120,
+                experience: (docItem.experience !== undefined && docItem.experience !== null) ? docItem.experience : 0,
+                rating: (docItem.rating !== undefined && docItem.rating !== null) ? docItem.rating : 0,
+                reviewsCount: (docItem.reviewsCount !== undefined && docItem.reviewsCount !== null) ? docItem.reviewsCount : (docItem.reviews?.length || 0),
+                reviews: Array.isArray(docItem.reviews) ? JSON.parse(JSON.stringify(docItem.reviews)) : [],
                 phone: docItem.phone || '',
                 whatsapp: docItem.whatsapp || '',
                 email: docItem.email || '',
@@ -9904,7 +9938,8 @@ export default function AdminCMS({
                           { id: 'education', label: `اسناد و تعلیم (${(doctorForm.education || []).length})`, icon: GraduationCap },
                           { id: 'experiences', label: `طبی تجربات (${(doctorForm.experiences || []).length})`, icon: Award },
                           { id: 'awards', label: `اعزازات (${(doctorForm.awards || []).length})`, icon: Award },
-                          { id: 'gallery', label: `فوٹو گیلری (${(doctorForm.gallery || []).length})`, icon: ImageIcon }
+                          { id: 'gallery', label: `فوٹو گیلری (${(doctorForm.gallery || []).length})`, icon: ImageIcon },
+                          { id: 'reviews', label: `مریضوں کے ریویوز (${(doctorForm.reviews || []).length})`, icon: Star }
                         ].map(tab => {
                           const Icon = tab.icon;
                           const isActive = doctorEditTab === tab.id;
@@ -10089,7 +10124,7 @@ export default function AdminCMS({
                                 <label className="block text-slate-700 mb-1 text-xs font-bold">طبی تجربہ سال (Experience in Years)</label>
                                 <input 
                                   type="number" 
-                                  value={doctorForm.experience || ''} 
+                                  value={doctorForm.experience !== undefined ? doctorForm.experience : 0} 
                                   onChange={(e) => setDoctorForm({...doctorForm, experience: Number(e.target.value)})}
                                   className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none font-sans shadow-xs"
                                   dir="ltr"
@@ -10103,7 +10138,7 @@ export default function AdminCMS({
                                   step="0.1"
                                   min="1"
                                   max="5"
-                                  value={doctorForm.rating || 4.9} 
+                                  value={doctorForm.rating !== undefined ? doctorForm.rating : 0} 
                                   onChange={(e) => setDoctorForm({...doctorForm, rating: parseFloat(e.target.value)})}
                                   className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none font-sans shadow-xs"
                                   dir="ltr"
@@ -10114,7 +10149,7 @@ export default function AdminCMS({
                                 <label className="block text-slate-700 mb-1 text-xs font-bold">ریویوز کی تعداد (Reviews Count)</label>
                                 <input 
                                   type="number" 
-                                  value={doctorForm.reviewsCount || 120} 
+                                  value={doctorForm.reviewsCount !== undefined ? doctorForm.reviewsCount : 0} 
                                   onChange={(e) => setDoctorForm({...doctorForm, reviewsCount: parseInt(e.target.value, 10)})}
                                   className="w-full bg-white border border-slate-300 rounded-xl p-2.5 text-slate-800 focus:ring-2 focus:ring-blue-500 outline-none font-sans shadow-xs"
                                   dir="ltr"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
   Stethoscope, 
@@ -20,10 +20,16 @@ import {
   Clock,
   AlertCircle,
   Send,
-  CheckCircle
+  CheckCircle,
+  Camera,
+  UploadCloud,
+  Loader2,
+  Trash2,
+  Image as ImageIcon
 } from 'lucide-react';
 import { CITIES, SPECIALTIES, TREATMENT_TYPES, DOCTORS } from '../data/mockData';
 import CityCombobox from './CityCombobox';
+import { compressImage, addMediaItemToLibrary } from '../utils/imageCompressor';
 
 export default function DoctorAuthModal({ 
   isOpen, 
@@ -80,11 +86,48 @@ export default function DoctorAuthModal({
     languages: ['اردو', 'پنجابی'],
     memberships: ['قومی کونسل برائے طب (NCT)'],
     conditions: ['معدے کی تیزابیت و السر', 'جوڑوں کا درد اور عرق النساء', 'دائمی قبض و آئی بی ایس'],
-    experience: 5,
+    experience: 0,
+    rating: 0,
+    reviewsCount: 0,
+      reviews: [],
+    image: '/images/default_doctor.webp',
     specialties: ['امراض معدہ، گیس و تبخیر'],
     about: 'طب یونانی اور ہربل طریقہ علاج کے ذریعے مریضوں کی خدمت۔',
     agreedToTerms: true
   });
+
+    const [isUploadingSignupPhoto, setIsUploadingSignupPhoto] = useState(false);
+  const [photoCompressionNotice, setPhotoCompressionNotice] = useState('');
+  const signupFileInputRef = useRef(null);
+
+  const handleSignupPhotoUpload = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setIsUploadingSignupPhoto(true);
+    setPhotoCompressionNotice('');
+    try {
+      const res = await compressImage(file, { maxDimension: 1280, quality: 0.82 });
+      setSignupForm(prev => ({ ...prev, image: res.dataUrl }));
+      
+      await addMediaItemToLibrary({
+        url: res.dataUrl,
+        name: file.name,
+        attachedTo: `طبیب رجسٹریشن: ${signupForm.name || 'نیا طبیب'}`
+      });
+
+      if (res.wasCompressed) {
+        setPhotoCompressionNotice(`تصویر کا سائز کم کر کے محفوظ کر لیا گیا (${Math.round(res.compressedSize / 1024)} KB) اور میڈیا لائبریری میں شامل ہو گئی۔`);
+      } else {
+        setPhotoCompressionNotice('تصویر کامیابی سے محفوظ اور میڈیا لائبریری میں شامل ہو گئی۔');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMessage('تصویر اپلوڈ کرنے میں مسئلہ آیا: ' + (err.message || ''));
+    } finally {
+      setIsUploadingSignupPhoto(false);
+      if (signupFileInputRef.current) signupFileInputRef.current.value = '';
+    }
+  };
 
   const safeDoctors = (doctorsList && Array.isArray(doctorsList) && doctorsList.length > 0) ? doctorsList : DOCTORS;
 
@@ -252,10 +295,11 @@ export default function DoctorAuthModal({
       password: signupForm.password || 'password123',
       title: signupForm.title.trim() || 'ماہر نباض و معالج طب یونانی',
       qualifications: signupForm.qualifications.trim() || 'فاضل طب والجراحت (FTJ)',
-      councilRegNo: signupForm.councilRegNo.trim() || 'NCT-' + Math.floor(10000 + Math.random() * 90000),
-      experience: Number(signupForm.experience) || 5,
-      rating: 5.0,
+      councilRegNo: signupForm.councilRegNo.trim(),
+      experience: Number(signupForm.experience) || 0,
+      rating: 0,
       reviewsCount: 0,
+      reviews: [],
       city: finalCityId || 'lahore',
       cityName: finalCityName || 'لاہور',
       specialties: signupForm.specialties.length > 0 ? signupForm.specialties : ['امراض معدہ، گیس و تبخیر'],
@@ -626,6 +670,71 @@ export default function DoctorAuthModal({
               </div>
             </div>
 
+            {/* Profile Picture Upload with Auto-compression & Media Library Integration */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col sm:flex-row items-center gap-4">
+              <div className="relative w-20 h-20 rounded-2xl overflow-hidden border-2 border-emerald-500/40 shadow-xs bg-white shrink-0 flex items-center justify-center">
+                <img
+                  src={signupForm.image || '/images/default_doctor.webp'}
+                  alt="Profile Preview"
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.target.src = '/images/default_doctor.webp'; }}
+                />
+                {isUploadingSignupPhoto && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 space-y-1.5 text-center sm:text-right">
+                <label className="block text-xs font-bold text-slate-800 font-simple">
+                  پروفائل تصویر (Profile Picture):
+                </label>
+                <p className="text-[11px] text-slate-500 leading-tight">
+                  پاسپورٹ سائز یا واضح چہرے والی تصویر منتخب کریں۔ 1MB یا زیادہ سائز کی تصویر سسٹم خودکار طور پر کمپریس کر کے میڈیا لائبریری میں شامل کر دے گا۔
+                </p>
+
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                  <input
+                    type="file"
+                    ref={signupFileInputRef}
+                    onChange={handleSignupPhotoUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    disabled={isUploadingSignupPhoto}
+                    onClick={() => signupFileInputRef.current?.click()}
+                    className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-400 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>تصویر اپلوڈ کریں</span>
+                  </button>
+
+                  {signupForm.image && signupForm.image !== '/images/default_doctor.webp' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSignupForm(prev => ({ ...prev, image: '/images/default_doctor.webp' }));
+                        setPhotoCompressionNotice('');
+                      }}
+                      className="px-2.5 py-1.5 bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-600 rounded-xl text-xs font-bold transition-all border border-slate-200"
+                    >
+                      تصویر ہٹائیں
+                    </button>
+                  )}
+                </div>
+
+                {photoCompressionNotice && (
+                  <p className="text-[11px] text-emerald-700 font-bold font-simple pt-1 flex items-center gap-1">
+                    <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>{photoCompressionNotice}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
@@ -801,30 +910,57 @@ export default function DoctorAuthModal({
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
-                  کونسل رجسٹریشن نمبر / لائسنس:
+                  نیشنل کونسل فار طب (NCT) رجسٹریشن نمبر:
                 </label>
                 <input
                   type="text"
                   value={signupForm.councilRegNo}
                   onChange={(e) => setSignupForm({ ...signupForm, councilRegNo: e.target.value })}
-                  placeholder="مثال: NCT-48920 (اختیاری)"
+                  placeholder="مثال: NCT-12345" dir="ltr"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1 font-simple">
-                  طبی قابلیت / ڈگری:
+              <div className="sm:col-span-2 space-y-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1 font-simple flex items-center justify-between">
+                  <span>ڈگریوں کے نام (Medical / Tibbi Degrees): *</span>
+                  <span className="text-[10px] text-slate-400 font-sans">اسناد و قابلیت</span>
                 </label>
                 <input
                   type="text"
+                  required
                   value={signupForm.qualifications}
                   onChange={(e) => setSignupForm({ ...signupForm, qualifications: e.target.value })}
-                  placeholder="FTJ, BEMS, وغیرہ"
+                  placeholder="مثال: فاضل طب والجراحت (FTJ)، BEMS، DHMS"
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-simple"
                 />
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] text-slate-400 font-simple">فوری ڈگری منتخب کریں:</span>
+                  {[
+                    'فاضل طب والجراحت (FTJ)',
+                    'BEMS (بیچلر آف ایسٹرن میڈیسن)',
+                    'DHMS',
+                    'ایم فل طب و حکمت',
+                    'تخصص فی الطب'
+                  ].map((deg) => (
+                    <button
+                      key={deg}
+                      type="button"
+                      onClick={() => {
+                        const currentParts = signupForm.qualifications ? signupForm.qualifications.split('،').map(s => s.trim()).filter(Boolean) : [];
+                        if (!currentParts.includes(deg)) {
+                          const nextVal = currentParts.length > 0 ? `${signupForm.qualifications}، ${deg}` : deg;
+                          setSignupForm(prev => ({ ...prev, qualifications: nextVal }));
+                        }
+                      }}
+                      className="text-[10px] bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 text-slate-700 px-2 py-0.5 rounded-lg border border-slate-200 transition-colors"
+                    >
+                      + {deg}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>
@@ -833,7 +969,7 @@ export default function DoctorAuthModal({
                 </label>
                 <input
                   type="number"
-                  min={1}
+                  min={0}
                   max={60}
                   value={signupForm.experience}
                   onChange={(e) => setSignupForm({ ...signupForm, experience: Number(e.target.value) })}
