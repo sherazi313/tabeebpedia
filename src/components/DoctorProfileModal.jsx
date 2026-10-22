@@ -147,12 +147,20 @@ export default function DoctorProfileModal({
 
   if (!doctor) return null;
 
+  // Real patient reviews only (no fake reviews)
+  const allReviews = useMemo(() => {
+    const docReviews = Array.isArray(doctor.reviews) ? doctor.reviews : [];
+    const seenIds = new Set(docReviews.map(r => r.id));
+    const uniqueLocal = localReviews.filter(r => !seenIds.has(r.id));
+    return [...uniqueLocal, ...docReviews];
+  }, [doctor.reviews, localReviews]);
+
   // Consultation Fees
   const clinicFee = Number(doctor.fee) || 500;
   const onlineFee = Number(doctor.onlineFee) || (clinicFee + 300);
   const waitTime = doctor.waitTime || '15 منٹ سے کم';
-  const satisfactionScore = totalReviewsCount > 0 ? Math.min(100, Math.round(((doctor.rating || 5) / 5) * 100)) : 0;
   const totalReviewsCount = allReviews.length;
+  const satisfactionScore = totalReviewsCount > 0 ? Math.min(100, Math.round(((doctor.rating || 5) / 5) * 100)) : 0;
 
   // Conditions Treated List (with fallbacks if empty)
   const conditionsTreated = useMemo(() => {
@@ -230,14 +238,6 @@ export default function DoctorProfileModal({
       }
     ];
   }, [doctor, clinicFee, onlineFee]);
-
-  // Real patient reviews only (no fake reviews)
-  const allReviews = useMemo(() => {
-    const docReviews = Array.isArray(doctor.reviews) ? doctor.reviews : [];
-    const seenIds = new Set(docReviews.map(r => r.id));
-    const uniqueLocal = localReviews.filter(r => !seenIds.has(r.id));
-    return [...uniqueLocal, ...docReviews];
-  }, [doctor.reviews, localReviews]);
 
   // Articles written by this doctor
   const doctorArticles = useMemo(() => {
