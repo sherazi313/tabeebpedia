@@ -39,6 +39,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             @mkdir($dataDir, 0755, true);
         }
 
+        // Automatic Historical Backup: create a safety backup before overwriting
+        $backupDir = $dataDir . '/backups';
+        if (!is_dir($backupDir)) {
+            @mkdir($backupDir, 0755, true);
+        }
+        if (file_exists($dataFile) && filesize($dataFile) > 100) {
+            @copy($dataFile, $dataFile . '.bak');
+            @copy($dataFile, $backupDir . '/pdf_books_' . date('Y-m-d') . '.json');
+        }
+
         if (@file_put_contents($dataFile, $input, LOCK_EX) !== false) {
             @chmod($dataFile, 0644);
             echo json_encode(['status' => 'success', 'message' => 'Books saved successfully']);
