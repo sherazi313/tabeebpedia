@@ -62,3 +62,19 @@ jobs:
             **/data/admin_trusted_devices.json
             data/password_resets.json
             **/data/password_resets.json
+            data/doctors.json
+            **/data/doctors.json
+            data/articles.json
+            **/data/articles.json
+            data/settings.json
+            **/data/settings.json
+            data/pdf-books.json
+            **/data/pdf-books.json
+            data/pages.json
+            **/data/pages.json
+            data/glossary.json
+            **/data/glossary.json
+            data/categories.json
+            **/data/categories.json
+            data/media.json
+            **/data/media.json
