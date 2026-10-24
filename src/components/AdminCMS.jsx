@@ -600,6 +600,16 @@ export default function AdminCMS({
   const [mediaPerPage, setMediaPerPage] = useState(50);
   const [mediaSort, setMediaSort] = useState('latest'); // 'latest', 'oldest', 'name_asc', 'name_desc'
 
+  // Articles State (Declared early to prevent TDZ ReferenceErrors)
+  const [internalArticlesList, setInternalArticlesList] = useState(ARTICLES);
+  const articlesList = propArticlesList || internalArticlesList;
+  const setArticlesList = propSetArticlesList || setInternalArticlesList;
+
+  // Doctors State (Declared early to prevent TDZ ReferenceErrors)
+  const [internalDoctorsList, setInternalDoctorsList] = useState([]);
+  const doctorsList = propDoctorsList || internalDoctorsList;
+  const setDoctorsList = propSetDoctorsList || setInternalDoctorsList;
+
   // Pages State
   const [internalPagesList, setInternalPagesList] = useState(() => {
     try {
@@ -869,21 +879,12 @@ export default function AdminCMS({
 
   useEffect(() => { localStorage.setItem('tabeeb_tags', JSON.stringify(tagsList)); }, [tagsList]);
 
-  const [internalArticlesList, setInternalArticlesList] = useState(ARTICLES);
-  const articlesList = propArticlesList || internalArticlesList;
-  const setArticlesList = propSetArticlesList || setInternalArticlesList;
-
   // Sync articles directly to permanent database file / API
   useEffect(() => {
     if (articlesList && articlesList.length > 0) {
       saveArticlesApi(articlesList);
     }
   }, [articlesList]);
-
-  const [internalDoctorsList, setInternalDoctorsList] = useState([]);
-  const doctorsList = propDoctorsList || internalDoctorsList;
-  const setDoctorsList = propSetDoctorsList || setInternalDoctorsList;
-
 
   // Sync settings directly to permanent database file / API
   useEffect(() => {
