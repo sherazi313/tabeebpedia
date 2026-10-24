@@ -869,6 +869,30 @@ export default function AdminCMS({
     }
   };
 
+  // Universal Media Timestamp Parser for Sorting
+  const parseMediaDate = (item) => {
+    if (!item) return 0;
+    if (typeof item.id === 'string') {
+      const match = item.id.match(/media-(?:up|art|art-thumb|doc|gal|modal|pg)?-?(\d{10,13})/);
+      if (match && match[1]) {
+        const ts = parseInt(match[1], 10);
+        if (!isNaN(ts) && ts > 1000000000) return ts;
+      }
+      const parts = item.id.split('-');
+      for (const p of parts) {
+        if (/^\d{10,13}$/.test(p)) {
+          const ts = parseInt(p, 10);
+          if (!isNaN(ts)) return ts;
+        }
+      }
+    }
+    if (item.date) {
+      const parsed = new Date(item.date.replace(/\//g, '-')).getTime();
+      if (!isNaN(parsed)) return parsed;
+    }
+    return 0;
+  };
+
   // Open Attachment Details Modal (WordPress Style)
   const openAttachmentDetails = (mediaItem) => {
     if (!mediaItem) return;
@@ -1252,7 +1276,8 @@ export default function AdminCMS({
   const [mediaModalTarget, setMediaModalTarget] = useState('editor'); // 'editor', 'featured_image', 'page_featured_image'
   const [selectedMediaModalItem, setSelectedMediaModalItem] = useState(null);
   const [mediaModalSearch, setMediaModalSearch] = useState('');
-  const [mediaModalFilter, setMediaModalFilter] = useState('all'); // 'all', 'articles', 'doctors', 'pages'
+  const [mediaModalFilter, setMediaModalFilter] = useState('all'); // 'all', 'attached', 'unattached', 'articles', 'doctors', 'uploads'
+  const [mediaModalSort, setMediaModalSort] = useState('latest'); // 'latest', 'oldest', 'name_asc', 'name_desc'
   const [mediaUrlInput, setMediaUrlInput] = useState('');
   const [mediaAlignment, setMediaAlignment] = useState('center'); // 'center', 'right', 'left', 'full'
   const [mediaCaption, setMediaCaption] = useState('');
@@ -12862,26 +12887,53 @@ export default function AdminCMS({
       {/* MODAL 1: ADD MEDIA & MEDIA LIBRARY SELECTOR (WORDPRESS STYLE) */}
       {/* ========================================================= */}
       {showMediaModal && (() => {
-        const modalDisplayMedia = (mediaList || []).filter(item => {
-          if (!item || !item.url) return false;
-          if (item.url === '/images/default_doctor.webp' || item.url.includes('default_doctor.webp')) return false;
-          if (mediaModalSearch.trim()) {
-            const q = mediaModalSearch.toLowerCase();
-            const n = (item.name || '').toLowerCase();
-            const a = (item.attachedTo || '').toLowerCase();
-            if (!n.includes(q) && !a.includes(q)) return false;
-          }
-          if (mediaModalFilter === 'articles') {
-            return (item.attachedTo && item.attachedTo.includes('مضمون')) || item.articleId || item.source === 'article_image' || item.source === 'article_thumbnail';
-          }
-          if (mediaModalFilter === 'doctors') {
-            return (item.attachedTo && (item.attachedTo.includes('طبیب') || item.attachedTo.includes('مطب'))) || item.doctorId || item.source === 'doctor_profile' || item.source === 'doctor_gallery' || item.source === 'doctor_signup';
-          }
-          if (mediaModalFilter === 'uploads') {
-            return item.source === 'api_upload' || item.source === 'modal_upload' || (typeof item.id === 'string' && item.id.startsWith('media-up-'));
-          }
-          return true;
-        });
+        const modalDisplayMedia = (mediaList || [])
+          .filter(item => {
+            if (!item || !item.url) return false;
+            if (item.url === '/images/default_doctor.webp' || item.url.includes('default_doctor.webp')) return false;
+            if (mediaModalSearch.trim()) {
+              const q = mediaModalSearch.toLowerCase();
+              const n = (item.name || '').toLowerCase();
+              const a = (item.attachedTo || '').toLowerCase();
+              const t = (item.title || '').toLowerCase();
+              if (!n.includes(q) && !a.includes(q) && !t.includes(q)) return false;
+            }
+            if (mediaModalFilter === 'attached') {
+              return !!item.attachedTo;
+            }
+            if (mediaModalFilter === 'unattached') {
+              return !item.attachedTo;
+            }
+            if (mediaModalFilter === 'articles') {
+              return (item.attachedTo && item.attachedTo.includes('مضمون')) || item.articleId || item.source === 'article_image' || item.source === 'article_thumbnail';
+            }
+            if (mediaModalFilter === 'doctors') {
+              return (item.attachedTo && (item.attachedTo.includes('طبیب') || item.attachedTo.includes('مطب'))) || item.doctorId || item.source === 'doctor_profile' || item.source === 'doctor_gallery' || item.source === 'doctor_signup';
+            }
+            if (mediaModalFilter === 'uploads') {
+              return item.source === 'api_upload' || item.source === 'modal_upload' || (typeof item.id === 'string' && item.id.startsWith('media-up-'));
+            }
+            return true;
+          })
+          .sort((a, b) => {
+            if (mediaModalSort === 'latest') {
+              const dateDiff = parseMediaDate(b) - parseMediaDate(a);
+              if (dateDiff !== 0) return dateDiff;
+              return (b.id || '').localeCompare(a.id || '', undefined, { numeric: true });
+            }
+            if (mediaModalSort === 'oldest') {
+              const dateDiff = parseMediaDate(a) - parseMediaDate(b);
+              if (dateDiff !== 0) return dateDiff;
+              return (a.id || '').localeCompare(b.id || '', undefined, { numeric: true });
+            }
+            if (mediaModalSort === 'name_asc') {
+              return (a.title || a.name || '').localeCompare(b.title || b.name || '', 'ur');
+            }
+            if (mediaModalSort === 'name_desc') {
+              return (b.title || b.name || '').localeCompare(a.title || a.name || '', 'ur');
+            }
+            return 0;
+          });
 
         const activeSelectedUrl = selectedMediaModalItem?.url || (mediaTab === 'url' ? mediaUrlInput : null);
 
@@ -12914,7 +12966,7 @@ export default function AdminCMS({
                     setShowMediaModal(false);
                     setSelectedMediaModalItem(null);
                   }}
-                  className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-200/60 transition-colors"
+                  className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-200/60 transition-colors cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -12980,23 +13032,45 @@ export default function AdminCMS({
                 {/* TAB 1: MEDIA LIBRARY GRID */}
                 {mediaTab === 'library' && (
                   <div className="space-y-3.5">
-                    {/* Search & Filter Toolbar */}
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50 p-2.5 rounded-2xl border border-slate-200 text-xs font-simple">
-                      <div className="relative flex-1 w-full">
-                        <Search className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="text"
-                          value={mediaModalSearch}
-                          onChange={(e) => setMediaModalSearch(e.target.value)}
-                          placeholder="میڈیا میں تصویر یا عنوان تلاش کریں..."
-                          className="w-full bg-white border border-slate-200 rounded-xl pr-9 pl-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 shadow-xs"
-                        />
+                    {/* Search & Filter & Sort Toolbar (Exact match with Sidebar Media Library) */}
+                    <div className="flex flex-col gap-2.5 bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs font-simple">
+                      
+                      {/* Top Row: Search & Sorting */}
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+                        <div className="relative flex-1 w-full">
+                          <Search className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
+                          <input
+                            type="text"
+                            value={mediaModalSearch}
+                            onChange={(e) => setMediaModalSearch(e.target.value)}
+                            placeholder="میڈیا میں تصویر یا عنوان تلاش کریں..."
+                            className="w-full bg-white border border-slate-200 rounded-xl pr-9 pl-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 shadow-xs"
+                          />
+                        </div>
+
+                        {/* Sorting Selector */}
+                        <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs shrink-0 w-full sm:w-auto justify-between sm:justify-start">
+                          <ArrowUpDown className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                          <span className="text-xs text-slate-500 font-bold font-simple">ترتیب:</span>
+                          <select
+                            value={mediaModalSort}
+                            onChange={e => setMediaModalSort(e.target.value)}
+                            className="bg-transparent border-0 text-xs text-slate-800 font-bold focus:ring-0 focus:outline-none cursor-pointer font-simple py-0.5"
+                          >
+                            <option value="latest">جدید ترین پہلے (Latest First)</option>
+                            <option value="oldest">قدیم ترین پہلے (Oldest First)</option>
+                            <option value="name_asc">نام: الف تا ے (A-Z)</option>
+                            <option value="name_desc">نام: ے تا الف (Z-A)</option>
+                          </select>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1 shrink-0 w-full sm:w-auto overflow-x-auto">
+
+                      {/* Bottom Row: Filter Tabs (Matching Sidebar Media Library) */}
+                      <div className="flex items-center gap-1 overflow-x-auto pb-0.5 custom-scrollbar">
                         <button
                           type="button"
                           onClick={() => setMediaModalFilter('all')}
-                          className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${
+                          className={`px-3 py-1.5 rounded-xl font-bold transition-colors cursor-pointer shrink-0 ${
                             mediaModalFilter === 'all' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                           }`}
                         >
@@ -13004,32 +13078,42 @@ export default function AdminCMS({
                         </button>
                         <button
                           type="button"
+                          onClick={() => setMediaModalFilter('attached')}
+                          className={`px-3 py-1.5 rounded-xl font-bold transition-colors cursor-pointer shrink-0 ${
+                            mediaModalFilter === 'attached' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                          }`}
+                        >
+                          منسلک ({mediaList.filter(m => m.attachedTo).length})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setMediaModalFilter('unattached')}
+                          className={`px-3 py-1.5 rounded-xl font-bold transition-colors cursor-pointer shrink-0 ${
+                            mediaModalFilter === 'unattached' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                          }`}
+                        >
+                          غیر منسلک ({mediaList.filter(m => !m.attachedTo).length})
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => setMediaModalFilter('articles')}
-                          className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${
+                          className={`px-3 py-1.5 rounded-xl font-bold transition-colors cursor-pointer shrink-0 ${
                             mediaModalFilter === 'articles' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                           }`}
                         >
-                          مضامین
+                          مضامین ({mediaList.filter(m => (m.attachedTo && m.attachedTo.includes('مضمون')) || m.articleId || m.source === 'article_image' || m.source === 'article_thumbnail').length})
                         </button>
                         <button
                           type="button"
                           onClick={() => setMediaModalFilter('doctors')}
-                          className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${
+                          className={`px-3 py-1.5 rounded-xl font-bold transition-colors cursor-pointer shrink-0 ${
                             mediaModalFilter === 'doctors' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                           }`}
                         >
-                          اطباء / کلینک
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setMediaModalFilter('uploads')}
-                          className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${
-                            mediaModalFilter === 'uploads' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                          }`}
-                        >
-                          اپلوڈز
+                          اطباء / کلینک ({mediaList.filter(m => (m.attachedTo && (m.attachedTo.includes('طبیب') || m.attachedTo.includes('مطب'))) || m.doctorId || m.source === 'doctor_profile' || m.source === 'doctor_gallery' || m.source === 'doctor_signup').length})
                         </button>
                       </div>
+
                     </div>
 
                     {/* Media Items Grid */}
