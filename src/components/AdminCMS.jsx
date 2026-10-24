@@ -600,6 +600,19 @@ export default function AdminCMS({
   const [mediaPerPage, setMediaPerPage] = useState(50);
   const [mediaSort, setMediaSort] = useState('latest'); // 'latest', 'oldest', 'name_asc', 'name_desc'
 
+  // WordPress Attachment Details Modal State (Declared early to prevent TDZ)
+  const [activeAttachmentModalItem, setActiveAttachmentModalItem] = useState(null);
+  const [attachmentForm, setAttachmentForm] = useState({
+    title: '',
+    alt: '',
+    caption: '',
+    description: '',
+    name: ''
+  });
+  const [attachmentDimensions, setAttachmentDimensions] = useState({ width: 0, height: 0, size: '' });
+  const [isSavingAttachment, setIsSavingAttachment] = useState(false);
+  const [copiedAttachmentUrl, setCopiedAttachmentUrl] = useState(false);
+
   // Articles State (Declared early to prevent TDZ ReferenceErrors)
   const [internalArticlesList, setInternalArticlesList] = useState(ARTICLES);
   const articlesList = propArticlesList || internalArticlesList;
@@ -853,6 +866,100 @@ export default function AdminCMS({
       });
       setSelectedMediaIds([]);
       showNotification('منتخب تصاویر ڈیلیٹ کر دی گئیں');
+    }
+  };
+
+  // Open Attachment Details Modal (WordPress Style)
+  const openAttachmentDetails = (mediaItem) => {
+    if (!mediaItem) return;
+    setActiveAttachmentModalItem(mediaItem);
+    setAttachmentForm({
+      title: mediaItem.title || mediaItem.name || '',
+      alt: mediaItem.alt || '',
+      caption: mediaItem.caption || '',
+      description: mediaItem.description || '',
+      name: mediaItem.name || ''
+    });
+    setCopiedAttachmentUrl(false);
+
+    // Determine dimensions dynamically from image URL
+    const img = new Image();
+    img.src = mediaItem.url;
+    img.onload = () => {
+      setAttachmentDimensions({
+        width: img.naturalWidth || img.width || 0,
+        height: img.naturalHeight || img.height || 0,
+        size: mediaItem.size || ''
+      });
+    };
+    img.onerror = () => {
+      setAttachmentDimensions({ width: 0, height: 0, size: mediaItem.size || '' });
+    };
+  };
+
+  // Navigate between items in Attachment Details Modal (< and >)
+  const handleNavigateAttachment = (direction) => {
+    if (!activeAttachmentModalItem || !mediaList || mediaList.length === 0) return;
+    const currentIndex = mediaList.findIndex(m => m.id === activeAttachmentModalItem.id);
+    if (currentIndex === -1) return;
+
+    let targetIndex = currentIndex;
+    if (direction === 'prev') {
+      targetIndex = currentIndex > 0 ? currentIndex - 1 : mediaList.length - 1;
+    } else {
+      targetIndex = currentIndex < mediaList.length - 1 ? currentIndex + 1 : 0;
+    }
+
+    const nextItem = mediaList[targetIndex];
+    if (nextItem) {
+      openAttachmentDetails(nextItem);
+    }
+  };
+
+  // Save Attachment Details (Alt, Title, Caption, Description)
+  const handleSaveAttachmentDetails = (e) => {
+    if (e) e.preventDefault();
+    if (!activeAttachmentModalItem) return;
+    setIsSavingAttachment(true);
+
+    const updatedItem = {
+      ...activeAttachmentModalItem,
+      title: (attachmentForm.title || '').trim(),
+      name: (attachmentForm.name || activeAttachmentModalItem.name || '').trim(),
+      alt: (attachmentForm.alt || '').trim(),
+      caption: (attachmentForm.caption || '').trim(),
+      description: (attachmentForm.description || '').trim()
+    };
+
+    setMediaList(prev => {
+      const updated = prev.map(m => m.id === updatedItem.id ? updatedItem : m);
+      saveMediaApi(updated);
+      try {
+        localStorage.setItem('tabeeb_media_library', JSON.stringify(updated.slice(0, 300)));
+      } catch (err) {}
+      return updated;
+    });
+
+    setActiveAttachmentModalItem(updatedItem);
+    setIsSavingAttachment(false);
+    showNotification('تصویر کی تفصیلات (Alt، عنوان، کیپشن) کامیابی سے محفوظ ہو گئیں!');
+  };
+
+  // Download attachment file helper
+  const handleDownloadAttachment = async (url, filename) => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename || 'downloaded-image.jpg';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      window.open(url, '_blank');
     }
   };
 
@@ -6832,12 +6939,13 @@ export default function AdminCMS({
                     return (
                       <div
                         key={media.id}
-                        className={`group relative bg-white border rounded-2xl overflow-hidden transition-all flex flex-col shadow-xs ${
-                          isSelected ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
+                        onClick={() => openAttachmentDetails(media)}
+                        className={`group relative bg-white border rounded-2xl overflow-hidden transition-all flex flex-col shadow-xs cursor-pointer ${
+                          isSelected ? 'border-purple-500 ring-2 ring-purple-500/20' : 'border-slate-200 hover:border-blue-400 hover:shadow-md'
                         }`}
                       >
                         {/* Checkbox */}
-                        <div className="absolute top-2 right-2 z-10">
+                        <div className="absolute top-2 right-2 z-10" onClick={e => e.stopPropagation()}>
                           <input
                             type="checkbox"
                             checked={isSelected}
@@ -6868,7 +6976,10 @@ export default function AdminCMS({
                           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/85 via-slate-900/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-2 gap-1">
                             <button
                               type="button"
-                              onClick={() => handleDeleteSingleMedia(media.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteSingleMedia(media.id);
+                              }}
                               className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow"
                               title="ڈیلیٹ کریں"
                             >
@@ -6877,7 +6988,10 @@ export default function AdminCMS({
                             
                             <button
                               type="button"
-                              onClick={() => handleCopyMediaUrl(media.url, media.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopyMediaUrl(media.url, media.id);
+                              }}
                               className={`p-1.5 rounded-lg transition-colors text-[10px] font-bold shadow flex items-center gap-1 ${
                                 isCopied ? 'bg-emerald-600 text-white' : 'bg-slate-800/90 hover:bg-black text-white'
                               }`}
@@ -6887,21 +7001,25 @@ export default function AdminCMS({
                               <span>{isCopied ? 'کاپی ہوا' : 'لنک'}</span>
                             </button>
 
-                            <a
-                              href={media.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-[10px] font-bold shadow"
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openAttachmentDetails(media);
+                              }}
+                              className="p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-[10px] font-bold shadow flex items-center gap-1"
+                              title="تصویر کی تفصیلات کھولیں (Attachment details)"
                             >
-                              دیکھیں
-                            </a>
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>تفصیلات</span>
+                            </button>
                           </div>
                         </div>
 
                         {/* Details */}
                         <div className="p-2.5 flex-1 flex flex-col justify-between space-y-1.5 text-right">
-                          <p className="text-[11px] font-bold text-slate-800 truncate font-sans" title={media.name}>
-                            {media.name}
+                          <p className="text-[11px] font-bold text-slate-800 truncate font-sans" title={media.title || media.name}>
+                            {media.title || media.name}
                           </p>
                           <div className="space-y-1">
                             {media.attachedTo ? (
@@ -12512,6 +12630,233 @@ export default function AdminCMS({
         </main>
 
       </div>
+
+      {/* ========================================================= */}
+      {/* WORDPRESS ATTACHMENT DETAILS MODAL */}
+      {/* ========================================================= */}
+      {activeAttachmentModalItem && (() => {
+        const item = activeAttachmentModalItem;
+        const fileMime = item.url?.endsWith('.webp') 
+          ? 'image/webp' 
+          : (item.url?.endsWith('.png') ? 'image/png' : (item.url?.endsWith('.gif') ? 'image/gif' : 'image/jpeg'));
+
+        return (
+          <div className="fixed inset-0 z-[60] bg-black/75 backdrop-blur-xs flex items-center justify-center p-2 sm:p-5 animate-in fade-in duration-150">
+            <div className="bg-white rounded-2xl sm:rounded-3xl max-w-6xl w-full h-[92vh] max-h-[850px] flex flex-col shadow-2xl border border-slate-200 overflow-hidden text-right">
+              
+              {/* Top Navigation Header (WordPress Attachment Details Header) */}
+              <div className="flex items-center justify-between border-b border-slate-200 px-5 py-3.5 bg-slate-50 shrink-0 font-sans">
+                <div className="flex items-center gap-2">
+                  <span className="text-base font-bold text-slate-800">Attachment details</span>
+                  <span className="text-xs text-slate-400 font-simple">({item.name || 'تصویر کی تفصیلات'})</span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleNavigateAttachment('prev')}
+                    className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+                    title="پچھلی تصویر (Previous)"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigateAttachment('next')}
+                    className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+                    title="اگلی تصویر (Next)"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveAttachmentModalItem(null)}
+                    className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-colors mr-2 cursor-pointer"
+                    title="بند کریں (Close)"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Main 2-Column Content Area */}
+              <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
+                
+                {/* Left Column: Image Preview */}
+                <div className="flex-1 bg-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 overflow-hidden relative border-b lg:border-b-0 lg:border-l border-slate-200">
+                  <div className="relative max-w-full max-h-[62vh] flex items-center justify-center">
+                    <img
+                      src={item.url}
+                      alt={attachmentForm.alt || item.name}
+                      className="max-h-[58vh] max-w-full object-contain rounded-xl shadow-md border border-slate-300/60 bg-white"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-3 mt-4">
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5 font-simple transition-colors"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5 text-blue-600" />
+                      <span>اصل فائل دیکھیں</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadAttachment(item.url, item.name)}
+                      className="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-xs font-bold rounded-lg shadow-xs flex items-center gap-1.5 font-simple transition-colors cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>ڈاؤن لوڈ کریں</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right Column: Attachment Details & Edit Form */}
+                <form
+                  onSubmit={handleSaveAttachmentDetails}
+                  className="w-full lg:w-[420px] xl:w-[460px] bg-white flex flex-col overflow-hidden shrink-0"
+                >
+                  <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 font-sans text-xs custom-scrollbar">
+                    
+                    {/* Readonly Metadata Section (WordPress Style) */}
+                    <div className="text-[11px] text-slate-500 space-y-1 pb-3 border-b border-slate-200 text-left dir-ltr">
+                      <p><strong>Uploaded on:</strong> {item.date || '—'}</p>
+                      <p><strong>Uploaded by:</strong> {item.uploadedBy || 'Admin (syed abdul wahab shah)'}</p>
+                      <p><strong>Uploaded to:</strong> <span className="text-blue-600 font-simple">{item.attachedTo || 'غیر منسلک'}</span></p>
+                      <p className="truncate" title={item.name}><strong>File name:</strong> {item.name}</p>
+                      <p><strong>File type:</strong> {fileMime}</p>
+                      <p><strong>File size:</strong> {attachmentDimensions.size || (item.size || '214 KB')}</p>
+                      <p><strong>Dimensions:</strong> {attachmentDimensions.width ? `${attachmentDimensions.width} by ${attachmentDimensions.height} pixels` : '1200 by 800 pixels'}</p>
+                    </div>
+
+                    {/* Editable Fields */}
+                    <div className="space-y-3.5 text-right font-simple">
+                      
+                      {/* Alternative Text */}
+                      <div className="space-y-1">
+                        <label className="font-bold text-slate-800 text-xs block">Alternative Text (متبادل متن / Alt)</label>
+                        <textarea
+                          rows={2}
+                          value={attachmentForm.alt}
+                          onChange={(e) => setAttachmentForm({ ...attachmentForm, alt: e.target.value })}
+                          placeholder="متبادل متن درج کریں..."
+                          className="w-full bg-slate-50 border border-slate-300 focus:border-blue-500 rounded-xl p-2.5 text-xs text-slate-900 outline-none transition-colors shadow-xs"
+                        />
+                        <p className="text-[10px] text-slate-400 font-sans text-left dir-ltr">
+                          Learn how to describe the purpose of the image. Leave empty if the image is purely decorative.
+                        </p>
+                      </div>
+
+                      {/* Title */}
+                      <div className="space-y-1">
+                        <label className="font-bold text-slate-800 text-xs block">Title (عنوان / فائل کا نام)</label>
+                        <input
+                          type="text"
+                          value={attachmentForm.title}
+                          onChange={(e) => setAttachmentForm({ ...attachmentForm, title: e.target.value })}
+                          className="w-full bg-slate-50 border border-slate-300 focus:border-blue-500 rounded-xl p-2.5 text-xs text-slate-900 outline-none transition-colors shadow-xs"
+                        />
+                      </div>
+
+                      {/* Caption */}
+                      <div className="space-y-1">
+                        <label className="font-bold text-slate-800 text-xs block">Caption (کیپشن)</label>
+                        <textarea
+                          rows={2}
+                          value={attachmentForm.caption}
+                          onChange={(e) => setAttachmentForm({ ...attachmentForm, caption: e.target.value })}
+                          placeholder="تصویر کے نیچے ظاہر ہونے والا کیپشن..."
+                          className="w-full bg-slate-50 border border-slate-300 focus:border-blue-500 rounded-xl p-2.5 text-xs text-slate-900 outline-none transition-colors shadow-xs"
+                        />
+                      </div>
+
+                      {/* Description */}
+                      <div className="space-y-1">
+                        <label className="font-bold text-slate-800 text-xs block">Description (تفصیل / وضاحت)</label>
+                        <textarea
+                          rows={3}
+                          value={attachmentForm.description}
+                          onChange={(e) => setAttachmentForm({ ...attachmentForm, description: e.target.value })}
+                          placeholder="تصویر کی مکمل تفصیل..."
+                          className="w-full bg-slate-50 border border-slate-300 focus:border-blue-500 rounded-xl p-2.5 text-xs text-slate-900 outline-none transition-colors shadow-xs"
+                        />
+                      </div>
+
+                      {/* File URL */}
+                      <div className="space-y-1 text-left dir-ltr">
+                        <label className="font-bold text-slate-800 text-xs block text-right font-simple">File URL (فائل کا یو آر ایل)</label>
+                        <input
+                          type="text"
+                          readOnly
+                          value={item.url}
+                          className="w-full bg-slate-100 border border-slate-300 rounded-xl p-2 text-xs text-slate-700 font-mono select-all shadow-xs"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(item.url);
+                            setCopiedAttachmentUrl(true);
+                            setTimeout(() => setCopiedAttachmentUrl(false), 2000);
+                          }}
+                          className="mt-1 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                        >
+                          {copiedAttachmentUrl ? 'URL Copied!' : 'Copy URL to clipboard'}
+                        </button>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  {/* Modal Sidebar Footer */}
+                  <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col gap-2 shrink-0 font-simple">
+                    <button
+                      type="submit"
+                      disabled={isSavingAttachment}
+                      className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Save className="w-4 h-4" />
+                      <span>{isSavingAttachment ? 'محفوظ کیا جا رہا ہے...' : 'تبدیلیاں محفوظ کریں (Save Changes)'}</span>
+                    </button>
+
+                    <div className="flex items-center justify-between text-xs pt-1 px-1">
+                      <a
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        View media file
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadAttachment(item.url, item.name)}
+                        className="text-slate-600 hover:underline cursor-pointer"
+                      >
+                        Download file
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleDeleteSingleMedia(item.id);
+                          setActiveAttachmentModalItem(null);
+                        }}
+                        className="text-red-600 hover:underline font-bold cursor-pointer"
+                      >
+                        Delete permanently
+                      </button>
+                    </div>
+                  </div>
+
+                </form>
+
+              </div>
+
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ========================================================= */}
       {/* MODAL 1: ADD MEDIA & MEDIA LIBRARY SELECTOR (WORDPRESS STYLE) */}
