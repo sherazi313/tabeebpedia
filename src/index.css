@@ -6,7 +6,7 @@
   html {
     scroll-behavior: smooth;
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
   
   body {
@@ -15,7 +15,7 @@
     direction: rtl;
     -webkit-font-smoothing: antialiased;
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   /* Titles: Simple, Clean, Modern, Highly Legible Standard Urdu/Arabic Sans (Almarai / Segoe UI) */

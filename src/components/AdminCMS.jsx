@@ -3493,7 +3493,7 @@ export default function AdminCMS({
 
       {/* Admin Navbar */}
       {!isFullscreen && (
-        <header className="bg-white border-b border-slate-200/90 px-6 py-4 shadow-2xs sticky top-0 z-30">
+        <header className={`bg-white border-b border-slate-200/90 px-6 py-4 shadow-2xs ${adminTab === 'new-article' ? 'relative' : 'sticky top-0 z-30'}`}>
           <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
             
             <div className="flex items-center gap-3.5">
@@ -3887,7 +3887,7 @@ export default function AdminCMS({
                   <div className="border border-slate-200 bg-white rounded-2xl shadow-xs relative">
                   
                   {/* STICKY TOP TOOLBAR HEADER - Stays pinned to top when scrolling down */}
-                  <div className="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-md rounded-t-2xl border-b border-slate-200 shadow-xs">
+                  <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md rounded-t-2xl border-b border-slate-200 shadow-md">
                     
                     {/* Top Action Bar with Add Media, Add Form, Quick Save, and Visual/Code switches */}
                     <div className="flex flex-wrap items-center justify-between gap-1.5 p-1.5 px-3 border-b border-slate-200">
