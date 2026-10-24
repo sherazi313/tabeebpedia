@@ -30,6 +30,7 @@ import {
 import { CITIES, SPECIALTIES, TREATMENT_TYPES, DOCTORS } from '../data/mockData';
 import CityCombobox from './CityCombobox';
 import { compressImage, addMediaItemToLibrary } from '../utils/imageCompressor';
+import { uploadImageApi } from '../api';
 
 export default function DoctorAuthModal({ 
   isOpen, 
@@ -107,10 +108,18 @@ export default function DoctorAuthModal({
     setPhotoCompressionNotice('');
     try {
       const res = await compressImage(file, { maxDimension: 1280, quality: 0.82 });
-      setSignupForm(prev => ({ ...prev, image: res.dataUrl }));
+      
+      // Upload to server so file is saved to /uploads/ and added to media.json
+      const uploadedUrl = (await uploadImageApi(res.file, {
+        name: file.name,
+        attachedTo: `طبیب رجسٹریشن: ${signupForm.name || 'نیا طبیب'}`,
+        source: 'doctor_signup'
+      })) || res.dataUrl;
+
+      setSignupForm(prev => ({ ...prev, image: uploadedUrl }));
       
       await addMediaItemToLibrary({
-        url: res.dataUrl,
+        url: uploadedUrl,
         name: file.name,
         attachedTo: `طبیب رجسٹریشن: ${signupForm.name || 'نیا طبیب'}`
       });
@@ -315,7 +324,7 @@ export default function DoctorAuthModal({
       conditions: Array.isArray(signupForm.conditions) ? signupForm.conditions : ['معدے کی تیزابیت و السر', 'جوڑوں کا درد اور عرق النساء', 'دائمی قبض و آئی بی ایس'],
       phone: signupForm.phone.trim() || signupForm.whatsapp.trim() || '03001234567',
       whatsapp: signupForm.whatsapp.trim().replace(/[^0-9]/g, '') || signupForm.phone.trim().replace(/[^0-9]/g, '') || '923001234567',
-      image: '/images/default_doctor.webp',
+      image: (signupForm.image && signupForm.image !== '/images/default_doctor.webp') ? signupForm.image : '/images/default_doctor.webp',
       isVerified: false,
       emailVerified: false,
       isApproved: false, // ⚠️ Pending Admin Approval
@@ -335,6 +344,17 @@ export default function DoctorAuthModal({
       const updated = [newDoctor, ...current.filter(d => d.id !== newDoctor.id && d.email !== newDoctor.email)];
       localStorage.setItem('tabeeb_doctors_data_v1', JSON.stringify(updated));
     } catch (e) {}
+
+    if (newDoctor.image && newDoctor.image !== '/images/default_doctor.webp') {
+      try {
+        addMediaItemToLibrary({
+          url: newDoctor.image,
+          name: `${newDoctor.name} - پروفائل تصویر`,
+          attachedTo: `طبیب رجسٹریشن: ${newDoctor.name}`,
+          doctorId: newDoctor.id
+        });
+      } catch (err) {}
+    }
 
     if (onRegisterDoctor) {
       onRegisterDoctor(newDoctor);

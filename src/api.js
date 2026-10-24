@@ -160,7 +160,7 @@ export const saveSettingsApi = async (settings) => {
   }
 };
 
-export const uploadImageApi = async (file) => {
+export const uploadImageApi = async (file, metadata = {}) => {
   return new Promise((resolve) => {
     try {
       const reader = new FileReader();
@@ -170,7 +170,12 @@ export const uploadImageApi = async (file) => {
           let res = await fetch('/api/upload.php', {
             method: 'POST',
             headers: getAuthHeaders(),
-            body: JSON.stringify({ image: base64Data, filename: file.name || 'image' })
+            body: JSON.stringify({
+              image: base64Data,
+              filename: file.name || metadata.name || metadata.filename || 'image',
+              attachedTo: metadata.attachedTo || 'اپلوڈ شدہ تصویر',
+              source: metadata.source || 'api_upload'
+            })
           });
           if (res.ok) {
             const data = await res.json();

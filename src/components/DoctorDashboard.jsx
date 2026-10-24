@@ -178,7 +178,12 @@ export default function DoctorDashboard({
     if (file) {
       try {
         const res = await compressImage(file, { maxDimension: 1280, quality: 0.82 });
-        const finalUrl = (await uploadImageApi(res.file)) || res.dataUrl;
+        const finalUrl = (await uploadImageApi(res.file, {
+          name: file.name,
+          attachedTo: `طبیب: ${formData.name || doctor?.name || 'طبیب'}`,
+          doctorId: doctor?.id,
+          source: 'doctor_profile'
+        })) || res.dataUrl;
         if (finalUrl) {
           setFormData(prev => ({ ...prev, image: finalUrl }));
           
@@ -331,7 +336,12 @@ export default function DoctorDashboard({
       const uploadedUrls = [];
       for (const file of files) {
         const res = await compressImage(file, { maxDimension: 1280, quality: 0.82 });
-        const finalUrl = (await uploadImageApi(res.file)) || res.dataUrl;
+        const finalUrl = (await uploadImageApi(res.file, {
+          name: file.name,
+          attachedTo: `مطب/اسناد: ${formData.name || doctor?.name || 'طبیب'}`,
+          doctorId: doctor?.id,
+          source: 'doctor_gallery'
+        })) || res.dataUrl;
         if (finalUrl) {
           uploadedUrls.push(finalUrl);
           await addMediaItemToLibrary({

@@ -629,91 +629,141 @@ export default function AdminCMS({
     loadPagesFromDb();
   }, []);
 
-  // Fetch live media from database / media.json and synchronize with articles
+  // Fetch live media from database / media.json and synchronize with doctors, articles, and pages
   useEffect(() => {
     let isMounted = true;
     const loadMediaData = async () => {
+      let liveMedia = [];
       try {
-        const liveMedia = await fetchLiveMedia();
-        if (isMounted && Array.isArray(liveMedia) && liveMedia.length > 0) {
-          setMediaList(prev => {
-            const seen = new Set(liveMedia.map(m => m.url));
-            const customUploads = prev.filter(m => m && m.url && !seen.has(m.url));
-            return [...customUploads, ...liveMedia];
-          });
-          return;
-        }
+        const res = await fetchLiveMedia();
+        if (Array.isArray(res)) liveMedia = res;
       } catch (e) {
         console.warn('Live media load error:', e);
       }
 
-      // Fallback: extract from articlesList & pagesList
-      if (isMounted) {
-        const arts = propArticlesList || [];
-        const pgs = propPagesList || [];
-        if (arts.length > 0 || pgs.length > 0) {
-          setMediaList(prev => {
-            const seen = new Set(prev.map(p => p.url));
-            const extracted = [...prev];
-            
-            // Extract profile and gallery photos from doctors
-            (propDoctorsList || []).forEach(doc => {
-              if (doc.image && doc.image !== '/images/default_doctor.webp' && !seen.has(doc.image)) {
-                seen.add(doc.image);
-                extracted.push({
-                  id: 'media-doc-' + (doc.id || Math.random().toString(36).substr(2, 7)),
-                  url: doc.image,
-                  name: doc.name + ' - پروفائل تصویر',
-                  date: new Date().toISOString().split('T')[0].replace(/-/g, '/'),
-                  attachedTo: `طبیب: ${doc.name}`,
-                  doctorId: doc.id
-                });
-              }
-              if (Array.isArray(doc.gallery)) {
-                doc.gallery.forEach((galUrl, gIdx) => {
-                  if (galUrl && !seen.has(galUrl)) {
-                    seen.add(galUrl);
-                    extracted.push({
-                      id: 'media-gal-' + (doc.id || '') + '-' + gIdx,
-                      url: galUrl,
-                      name: `${doc.name} - مطب/اسناد #${gIdx + 1}`,
-                      date: new Date().toISOString().split('T')[0].replace(/-/g, '/'),
-                      attachedTo: `مطب/اسناد: ${doc.name}`,
-                      doctorId: doc.id
-                    });
-                  }
-                });
-              }
-            });
+      if (!isMounted) return;
 
-            arts.forEach(art => {
-              if (art.featuredImage && !seen.has(art.featuredImage)) {
-                seen.add(art.featuredImage);
-                let fn = '';
-                try {
-                  fn = decodeURIComponent(art.featuredImage.split('/').pop().split('?')[0]);
-                } catch {
-                  fn = art.featuredImage.split('/').pop().split('?')[0];
-                }
-                extracted.push({
-                  id: 'media-art-' + (art.id || Math.random().toString(36).substr(2, 7)),
-                  url: art.featuredImage,
-                  name: fn || (art.slug + '.jpg'),
-                  date: art.date ? art.date.replace(/-/g, '/') : '2024/09/24',
-                  attachedTo: art.title,
-                  articleId: art.id
+      setMediaList(prev => {
+        const combined = [];
+        const seen = new Set();
+
+        const addEntry = (item) => {
+          if (!item || !item.url) return;
+          const u = typeof item.url === 'string' ? item.url.trim() : '';
+          if (!u || u === '/images/default_doctor.webp' || u.includes('default_doctor.webp')) return;
+          if (!seen.has(u)) {
+            seen.add(u);
+            combined.push({
+              ...item,
+              url: u
+            });
+          }
+        };
+
+        // 1. Live media from server / media.json
+        liveMedia.forEach(m => addEntry(m));
+
+        // 2. Doctors: profile pictures & gallery images (from propDoctorsList or doctorsList)
+        const docs = (propDoctorsList && propDoctorsList.length > 0) ? propDoctorsList : (doctorsList || []);
+        docs.forEach(doc => {
+          if (doc.image) {
+            addEntry({
+              id: 'media-doc-' + (doc.id || Math.random().toString(36).substr(2, 7)),
+              url: doc.image,
+              name: `${doc.name || 'طبیب'} - پروفائل تصویر`,
+              date: doc.appliedDate ? new Date().toISOString().split('T')[0].replace(/-/g, '/') : (doc.date ? doc.date.replace(/-/g, '/') : '2026/04/24'),
+              attachedTo: `طبیب پروفائل: ${doc.name || 'طبیب'}`,
+              doctorId: doc.id,
+              source: 'doctor_profile'
+            });
+          }
+          if (Array.isArray(doc.gallery)) {
+            doc.gallery.forEach((galUrl, gIdx) => {
+              if (galUrl) {
+                addEntry({
+                  id: 'media-gal-' + (doc.id || '') + '-' + gIdx,
+                  url: galUrl,
+                  name: `${doc.name || 'طبیب'} - مطب/اسناد #${gIdx + 1}`,
+                  date: new Date().toISOString().split('T')[0].replace(/-/g, '/'),
+                  attachedTo: `مطب/اسناد: ${doc.name || 'طبیب'}`,
+                  doctorId: doc.id,
+                  source: 'doctor_gallery'
                 });
               }
             });
-            return extracted;
-          });
-        }
-      }
+          }
+        });
+
+        // 3. Articles: featured images (published AND drafts!)
+        const arts = (articlesList && articlesList.length > 0) ? articlesList : (propArticlesList || []);
+        arts.forEach(art => {
+          if (art.featuredImage) {
+            let fn = '';
+            try {
+              fn = decodeURIComponent(art.featuredImage.split('/').pop().split('?')[0]);
+            } catch {
+              fn = art.featuredImage.split('/').pop().split('?')[0];
+            }
+            addEntry({
+              id: 'media-art-' + (art.id || Math.random().toString(36).substr(2, 7)),
+              url: art.featuredImage,
+              name: fn || (art.title ? `${art.title}.jpg` : 'article-image.jpg'),
+              date: art.date ? art.date.replace(/-/g, '/') : '2026/04/24',
+              attachedTo: `مضمون: ${art.title || 'مضمون'}${art.status === 'private' ? ' (ڈرافٹ)' : ''}`,
+              articleId: art.id,
+              source: 'article_image'
+            });
+          }
+        });
+
+        // 4. Pages: featured images
+        const pgs = (pagesList && pagesList.length > 0) ? pagesList : (propPagesList || []);
+        pgs.forEach(pg => {
+          if (pg.featuredImage) {
+            addEntry({
+              id: 'media-pg-' + (pg.id || Math.random().toString(36).substr(2, 7)),
+              url: pg.featuredImage,
+              name: `${pg.title || 'صفحہ'}.jpg`,
+              date: new Date().toISOString().split('T')[0].replace(/-/g, '/'),
+              attachedTo: `صفحہ: ${pg.title || 'صفحہ'}`,
+              pageId: pg.id,
+              source: 'page_image'
+            });
+          }
+        });
+
+        // 5. Existing entries in state / localStorage
+        (prev || []).forEach(m => addEntry(m));
+
+        return combined;
+      });
     };
 
     loadMediaData();
-    return () => { isMounted = false; };
-  }, [propArticlesList, propPagesList]);
+
+    // Listen for cross-component media update events
+    const handleMediaUpdated = (e) => {
+      const newMedia = e?.detail;
+      if (newMedia && newMedia.url) {
+        setMediaList(prev => {
+          const exists = prev.some(m => m && m.url === newMedia.url);
+          if (exists) return prev;
+          const updated = [newMedia, ...prev];
+          try {
+            saveMediaApi(updated);
+            localStorage.setItem('tabeeb_media_library', JSON.stringify(updated.slice(0, 300)));
+          } catch (err) {}
+          return updated;
+        });
+      }
+    };
+
+    window.addEventListener('tabeeb:media-updated', handleMediaUpdated);
+    return () => {
+      isMounted = false;
+      window.removeEventListener('tabeeb:media-updated', handleMediaUpdated);
+    };
+  }, [propArticlesList, propDoctorsList, propPagesList, articlesList, doctorsList, pagesList]);
 
   useEffect(() => {
     if (mediaList && mediaList.length > 0) {
@@ -1089,8 +1139,12 @@ export default function AdminCMS({
   const [searchTerm, setSearchTerm] = useState('');
   const [replaceTerm, setReplaceTerm] = useState('');
 
-  // Media Modal state
-  const [mediaTab, setMediaTab] = useState('upload'); // 'upload', 'url', 'library'
+  // Media Modal state & selection
+  const [mediaTab, setMediaTab] = useState('library'); // 'library', 'upload', 'url', 'stock'
+  const [mediaModalTarget, setMediaModalTarget] = useState('editor'); // 'editor', 'featured_image', 'page_featured_image'
+  const [selectedMediaModalItem, setSelectedMediaModalItem] = useState(null);
+  const [mediaModalSearch, setMediaModalSearch] = useState('');
+  const [mediaModalFilter, setMediaModalFilter] = useState('all'); // 'all', 'articles', 'doctors', 'pages'
   const [mediaUrlInput, setMediaUrlInput] = useState('');
   const [mediaAlignment, setMediaAlignment] = useState('center'); // 'center', 'right', 'left', 'full'
   const [mediaCaption, setMediaCaption] = useState('');
@@ -1426,15 +1480,50 @@ export default function AdminCMS({
   const visualEditorRef = useRef(null);
   const pageVisualEditorRef = useRef(null);
   // Handle Featured Image Upload from Computer for Page
-  const handlePageFeaturedImageUpload = (e) => {
+  const handlePageFeaturedImageUpload = async (e) => {
     const file = e.target.files && e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        setPageForm(prev => ({ ...prev, featuredImage: uploadEvent.target.result }));
-        showNotification('صفحے کی نمایاں تصویر کامیابی سے اپلوڈ ہو گئی!');
+    if (!file) return;
+    showNotification('صفحے کی تصویر اپلوڈ کی جا رہی ہے...');
+    try {
+      const comp = await compressImage(file, { maxDimension: 1400, quality: 0.85 });
+      const uploadedUrl = (await uploadImageApi(comp.file, {
+        name: file.name,
+        attachedTo: `صفحہ: ${pageForm.title || 'صفحہ'}`,
+        source: 'page_thumbnail'
+      })) || comp.dataUrl;
+
+      setPageForm(prev => ({ ...prev, featuredImage: uploadedUrl }));
+
+      const newMedia = {
+        id: 'media-pg-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+        url: uploadedUrl,
+        name: file.name,
+        date: new Date().toISOString().split('T')[0].replace(/-/g, '/'),
+        attachedTo: `صفحہ: ${pageForm.title || 'صفحہ'}`,
+        source: 'page_thumbnail'
       };
-      reader.readAsDataURL(file);
+
+      setMediaList(prev => {
+        const seen = new Set(prev.map(m => m && m.url));
+        if (seen.has(uploadedUrl)) return prev;
+        const updated = [newMedia, ...prev];
+        saveMediaApi(updated);
+        try {
+          localStorage.setItem('tabeeb_media_library', JSON.stringify(updated.slice(0, 300)));
+        } catch (err) {}
+        return updated;
+      });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('tabeeb:media-updated', { detail: newMedia }));
+      }
+
+      showNotification('صفحے کی نمایاں تصویر کامیابی سے اپلوڈ ہو گئی اور میڈیا لائبریری میں شامل ہو گئی!');
+    } catch (err) {
+      console.error(err);
+      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا');
+    } finally {
+      if (e.target) e.target.value = '';
     }
   };
 
@@ -2230,6 +2319,31 @@ export default function AdminCMS({
       showNotification('نیا مضمون کامیابی کے ساتھ پبلش ہو گیا!');
     }
 
+    // Ensure featured image is added to media library immediately
+    if (articleForm.featuredImage && articleForm.featuredImage !== '/images/default_doctor.webp') {
+      const artMedia = {
+        id: 'media-art-' + Date.now(),
+        url: articleForm.featuredImage,
+        name: articleForm.title ? `${articleForm.title}.jpg` : 'article-image.jpg',
+        date: new Date().toISOString().split('T')[0].replace(/-/g, '/'),
+        attachedTo: `مضمون: ${articleForm.title || 'مضمون'}${articleForm.status === 'private' ? ' (ڈرافٹ)' : ''}`,
+        source: 'article_save'
+      };
+      setMediaList(prev => {
+        const seen = new Set(prev.map(m => m && m.url));
+        if (seen.has(articleForm.featuredImage)) return prev;
+        const updated = [artMedia, ...prev];
+        saveMediaApi(updated);
+        try {
+          localStorage.setItem('tabeeb_media_library', JSON.stringify(updated.slice(0, 300)));
+        } catch (e) {}
+        return updated;
+      });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('tabeeb:media-updated', { detail: artMedia }));
+      }
+    }
+
       setAdminTab('articles');
   };
 
@@ -2266,21 +2380,86 @@ export default function AdminCMS({
     showNotification(`نئی کیٹیگری شامل ہو گئی: ${newCat.name}`);
   };
 
-  // Local Thumbnail Upload Handler
-  const handleThumbnailUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        setArticleForm({
-          ...articleForm,
-          featuredImage: uploadEvent.target.result,
-          imageType: 'upload'
-        });
-        showNotification('تھمبنل تصویر کامیابی کے ساتھ لوڈ ہو گئی');
+  // Local Thumbnail Upload Handler (Auto-compress, Upload to Server & Save in Media Library)
+  const handleThumbnailUpload = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    showNotification('تصویر کمپریس اور اپلوڈ کی جا رہی ہے...');
+    try {
+      const comp = await compressImage(file, { maxDimension: 1400, quality: 0.85 });
+      const uploadedUrl = (await uploadImageApi(comp.file, {
+        name: file.name,
+        attachedTo: `مضمون: ${articleForm.title || 'ڈرافٹ مضمون'}`,
+        source: 'article_thumbnail'
+      })) || comp.dataUrl;
+
+      setArticleForm(prev => ({
+        ...prev,
+        featuredImage: uploadedUrl,
+        imageType: 'upload'
+      }));
+
+      const newMedia = {
+        id: 'media-art-thumb-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+        url: uploadedUrl,
+        name: file.name,
+        date: new Date().toISOString().split('T')[0].replace(/-/g, '/'),
+        attachedTo: `مضمون: ${articleForm.title || 'ڈرافٹ مضمون'}${articleForm.status === 'private' ? ' (ڈرافٹ)' : ''}`,
+        source: 'article_thumbnail'
       };
-      reader.readAsDataURL(file);
+
+      setMediaList(prev => {
+        const seen = new Set(prev.map(m => m && m.url));
+        if (seen.has(uploadedUrl)) return prev;
+        const updated = [newMedia, ...prev];
+        saveMediaApi(updated);
+        try {
+          localStorage.setItem('tabeeb_media_library', JSON.stringify(updated.slice(0, 300)));
+        } catch (err) {}
+        return updated;
+      });
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('tabeeb:media-updated', { detail: newMedia }));
+      }
+
+      showNotification('تصویر کامیابی کے ساتھ اپلوڈ ہو گئی اور میڈیا لائبریری میں شامل ہو گئی!');
+    } catch (err) {
+      console.error(err);
+      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا');
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
+  };
+
+  // Handle Selecting Image from Media Modal as Featured Image or Page Image
+  const handleSelectImageFromMediaModal = (imageUrl = null) => {
+    const finalUrl = imageUrl || (selectedMediaModalItem && selectedMediaModalItem.url) || mediaUrlInput;
+    if (!finalUrl) {
+      alert('براہ کرم پہلے کوئی تصویر منتخب کریں');
+      return;
+    }
+
+    if (mediaModalTarget === 'featured_image') {
+      setArticleForm(prev => ({
+        ...prev,
+        featuredImage: finalUrl,
+        imageType: 'url'
+      }));
+      showNotification('فیچرڈ تصویر میڈیا لائبریری سے کامیابی سے منتخب ہو گئی!');
+    } else if (mediaModalTarget === 'page_featured_image') {
+      setPageForm(prev => ({
+        ...prev,
+        featuredImage: finalUrl
+      }));
+      showNotification('صفحے کی نمایاں تصویر کامیابی سے منتخب ہو گئی!');
+    } else {
+      handleInsertMediaFromModal(finalUrl);
+      return;
+    }
+
+    setShowMediaModal(false);
+    setSelectedMediaModalItem(null);
   };
 
   // Logo File Upload Handler for Settings
@@ -2964,15 +3143,72 @@ export default function AdminCMS({
     showNotification('تصویر کرسر کے عین مقام پر شامل کر دی گئی!');
   };
 
-  // Media Modal: File Upload Handler
-  const handleModalFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        handleInsertMediaFromModal(uploadEvent.target.result);
+  // Media Modal: File Upload Handler (Auto-compress, Upload to Server & Sync)
+  const handleModalFileUpload = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    showNotification('تصویر کمپریس اور اپلوڈ کی جا رہی ہے...');
+    try {
+      const comp = await compressImage(file, { maxDimension: 1400, quality: 0.85 });
+      const attachedDescription = mediaModalTarget === 'featured_image'
+        ? `مضمون: ${articleForm.title || 'ڈرافٹ مضمون'}`
+        : (mediaModalTarget === 'page_featured_image' ? `صفحہ: ${pageForm.title || 'صفحہ'}` : 'مضمون مواد');
+
+      const uploadedUrl = (await uploadImageApi(comp.file, {
+        name: file.name,
+        attachedTo: attachedDescription,
+        source: 'modal_upload'
+      })) || comp.dataUrl;
+
+      const newMedia = {
+        id: 'media-modal-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
+        url: uploadedUrl,
+        name: file.name,
+        date: new Date().toISOString().split('T')[0].replace(/-/g, '/'),
+        attachedTo: attachedDescription,
+        source: 'modal_upload'
       };
-      reader.readAsDataURL(file);
+
+      setMediaList(prev => {
+        const seen = new Set(prev.map(m => m && m.url));
+        if (seen.has(uploadedUrl)) return prev;
+        const updated = [newMedia, ...prev];
+        saveMediaApi(updated);
+        try {
+          localStorage.setItem('tabeeb_media_library', JSON.stringify(updated.slice(0, 300)));
+        } catch (err) {}
+        return updated;
+      });
+
+      setSelectedMediaModalItem(newMedia);
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('tabeeb:media-updated', { detail: newMedia }));
+      }
+
+      if (mediaModalTarget === 'featured_image') {
+        setArticleForm(prev => ({
+          ...prev,
+          featuredImage: uploadedUrl,
+          imageType: 'upload'
+        }));
+        setShowMediaModal(false);
+        showNotification('تصویر کامیابی سے اپلوڈ ہو کر فیچرڈ تصویر مقرر ہو گئی اور میڈیا لائبریری میں شامل ہو گئی!');
+      } else if (mediaModalTarget === 'page_featured_image') {
+        setPageForm(prev => ({
+          ...prev,
+          featuredImage: uploadedUrl
+        }));
+        setShowMediaModal(false);
+        showNotification('تصویر کامیابی سے اپلوڈ ہو کر صفحہ کی تصویر مقرر ہو گئی!');
+      } else {
+        handleInsertMediaFromModal(uploadedUrl);
+      }
+    } catch (err) {
+      console.error('Modal file upload error:', err);
+      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا');
+    } finally {
+      if (mediaFileInputRef.current) mediaFileInputRef.current.value = '';
     }
   };
 
@@ -4606,7 +4842,16 @@ export default function AdminCMS({
 
                     <div className="space-y-2.5">
                       {/* Image Preview Box */}
-                      <div className="h-36 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden relative flex items-center justify-center group shadow-xs">
+                      <div 
+                        onClick={() => {
+                          if (!articleForm.featuredImage) {
+                            setMediaModalTarget('featured_image');
+                            setMediaTab('library');
+                            setShowMediaModal(true);
+                          }
+                        }}
+                        className={`h-36 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden relative flex items-center justify-center group shadow-xs ${!articleForm.featuredImage ? 'cursor-pointer hover:border-purple-400 hover:bg-purple-50/30 transition-all' : ''}`}
+                      >
                         {articleForm.featuredImage ? (
                           <>
                             <img
@@ -4614,33 +4859,59 @@ export default function AdminCMS({
                               alt="Featured preview"
                               className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
                             />
-                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-1.5 p-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setMediaModalTarget('featured_image');
+                                  setMediaTab('library');
+                                  setShowMediaModal(true);
+                                }}
+                                className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-bold rounded-lg shadow-md font-simple transition-colors"
+                              >
+                                میڈیا لائبریری
+                              </button>
                               <button
                                 type="button"
                                 onClick={() => fileInputRef.current?.click()}
-                                className="px-2.5 py-1 bg-blue-600 text-white text-[11px] font-bold rounded-lg shadow-md font-simple"
+                                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold rounded-lg shadow-md font-simple transition-colors"
                               >
-                                تصویر بدلیں
+                                کمپیوٹر سے
                               </button>
                               <button
                                 type="button"
                                 onClick={() => setArticleForm({...articleForm, featuredImage: ''})}
-                                className="px-2.5 py-1 bg-red-600 text-white text-[11px] font-bold rounded-lg shadow-md font-simple"
+                                className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold rounded-lg shadow-md font-simple transition-colors"
                               >
                                 ہٹائیں
                               </button>
                             </div>
                           </>
                         ) : (
-                          <div className="text-center text-slate-400 text-xs p-3">
-                            <ImageIcon className="w-8 h-8 mx-auto mb-1.5 opacity-40 text-slate-400" />
-                            <span className="block font-simple font-bold text-slate-600 text-xs">کوئی تصویر نہیں</span>
-                            <span className="text-[10px] text-slate-400">نیچے سے منتخب کریں</span>
+                          <div className="text-center text-slate-400 text-xs p-3 select-none">
+                            <ImageIcon className="w-8 h-8 mx-auto mb-1.5 opacity-40 text-purple-500" />
+                            <span className="block font-simple font-bold text-slate-700 text-xs">کوئی تصویر نہیں لگائی گئی</span>
+                            <span className="text-[10px] text-purple-600 font-bold block mt-0.5">میڈیا لائبریری سے منتخب کرنے کیلئے یہاں کلک کریں</span>
                           </div>
                         )}
                       </div>
 
-                      {/* Upload Options */}
+                      {/* Primary WordPress Button: Select from Media Library */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMediaModalTarget('featured_image');
+                          setMediaTab('library');
+                          setSelectedMediaModalItem(null);
+                          setShowMediaModal(true);
+                        }}
+                        className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all font-simple cursor-pointer"
+                      >
+                        <ImageIcon className="w-4 h-4" />
+                        <span>میڈیا لائبریری سے منتخب کریں</span>
+                      </button>
+
+                      {/* Quick Inline Upload Options */}
                       <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg text-xs font-simple border border-slate-200">
                         <button
                           type="button"
@@ -4670,10 +4941,11 @@ export default function AdminCMS({
                           <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="w-full border border-dashed border-slate-300 hover:border-blue-500 rounded-xl p-3 text-center text-xs text-slate-600 hover:text-slate-900 transition-all space-y-0.5 bg-slate-50"
+                            className="w-full border border-dashed border-slate-300 hover:border-blue-500 rounded-xl p-3 text-center text-xs text-slate-600 hover:text-slate-900 transition-all space-y-0.5 bg-slate-50 cursor-pointer"
                           >
                             <UploadCloud className="w-5 h-5 mx-auto text-blue-600" />
-                            <span className="font-bold block font-simple text-[11px]">کمپیوٹر سے تصویر منتخب کریں</span>
+                            <span className="font-bold block font-simple text-[11px]">کمپیوٹر سے نئی تصویر اپلوڈ کریں</span>
+                            <span className="text-[10px] text-slate-400 block">خودکار کمپریشن و میڈیا لائبریری میں شمولیت</span>
                           </button>
                         </div>
                       ) : (
@@ -8344,6 +8616,21 @@ export default function AdminCMS({
                         </button>
                       )}
                     </div>
+
+                    {/* Primary Button: Select from Media Library */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMediaModalTarget('page_featured_image');
+                        setMediaTab('library');
+                        setSelectedMediaModalItem(null);
+                        setShowMediaModal(true);
+                      }}
+                      className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all font-simple cursor-pointer"
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                      <span>میڈیا لائبریری سے منتخب کریں</span>
+                    </button>
 
                     {/* Upload from Computer Button */}
                     <label className="w-full py-2.5 px-3 bg-slate-50 hover:bg-slate-100 border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-xl cursor-pointer text-center flex flex-col items-center justify-center gap-1 transition-all">
@@ -12225,167 +12512,466 @@ export default function AdminCMS({
 
       </div>
 
-      {/* MODAL 1: ADD MEDIA (COMPUTER UPLOAD, URL, STOCK LIBRARY) */}
       {/* ========================================================= */}
-      {showMediaModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full p-6 space-y-6 shadow-2xl text-right animate-in zoom-in-95 duration-150">
-            
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3 font-simple">
-              <div className="flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-blue-600" />
-                <h3 className="text-lg font-bold text-slate-900">میڈیا مینیجر (Add Media)</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowMediaModal(false)}
-                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {/* MODAL 1: ADD MEDIA & MEDIA LIBRARY SELECTOR (WORDPRESS STYLE) */}
+      {/* ========================================================= */}
+      {showMediaModal && (() => {
+        const modalDisplayMedia = (mediaList || []).filter(item => {
+          if (!item || !item.url) return false;
+          if (item.url === '/images/default_doctor.webp' || item.url.includes('default_doctor.webp')) return false;
+          if (mediaModalSearch.trim()) {
+            const q = mediaModalSearch.toLowerCase();
+            const n = (item.name || '').toLowerCase();
+            const a = (item.attachedTo || '').toLowerCase();
+            if (!n.includes(q) && !a.includes(q)) return false;
+          }
+          if (mediaModalFilter === 'articles') {
+            return (item.attachedTo && item.attachedTo.includes('مضمون')) || item.articleId || item.source === 'article_image' || item.source === 'article_thumbnail';
+          }
+          if (mediaModalFilter === 'doctors') {
+            return (item.attachedTo && (item.attachedTo.includes('طبیب') || item.attachedTo.includes('مطب'))) || item.doctorId || item.source === 'doctor_profile' || item.source === 'doctor_gallery' || item.source === 'doctor_signup';
+          }
+          if (mediaModalFilter === 'uploads') {
+            return item.source === 'api_upload' || item.source === 'modal_upload' || (typeof item.id === 'string' && item.id.startsWith('media-up-'));
+          }
+          return true;
+        });
 
-            {/* Media Tabs */}
-            <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200 text-xs font-simple">
-              <button
-                type="button"
-                onClick={() => setMediaTab('upload')}
-                className={`flex-1 py-2 rounded-xl transition-all font-bold ${mediaTab === 'upload' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
-              >
-                کمپیوٹر سے اپلوڈ کریں
-              </button>
-              <button
-                type="button"
-                onClick={() => setMediaTab('url')}
-                className={`flex-1 py-2 rounded-xl transition-all font-bold ${mediaTab === 'url' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
-              >
-                ویب لنک (Image URL)
-              </button>
-              <button
-                type="button"
-                onClick={() => setMediaTab('library')}
-                className={`flex-1 py-2 rounded-xl transition-all font-bold ${mediaTab === 'library' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
-              >
-                طبی و ہربل گیلری لائبریری
-              </button>
-            </div>
+        const activeSelectedUrl = selectedMediaModalItem?.url || (mediaTab === 'url' ? mediaUrlInput : null);
 
-            {/* TAB 1: Local File Upload */}
-            {mediaTab === 'upload' && (
-              <div className="space-y-4">
-                <input
-                  type="file"
-                  ref={mediaFileInputRef}
-                  onChange={handleModalFileUpload}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <div
-                  onClick={() => mediaFileInputRef.current?.click()}
-                  className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-3xl p-10 text-center space-y-3 cursor-pointer transition-colors bg-slate-50"
-                >
-                  <UploadCloud className="w-10 h-10 text-blue-600 mx-auto" />
-                  <p className="text-sm font-bold text-slate-800 font-simple">کمپیوٹر سے فائل منتخب کریں</p>
-                  <span className="text-xs text-slate-500 block font-sans">JPG, PNG, GIF, WebP (کوئی بھی سائز)</span>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 2: Direct URL */}
-            {mediaTab === 'url' && (
-              <div className="space-y-4">
-                <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1 font-simple">تصویر کا براہ راست URL:</label>
-                  <input
-                    type="url"
-                    value={mediaUrlInput}
-                    onChange={(e) => setMediaUrlInput(e.target.value)}
-                    placeholder="https://images.unsplash.com/photo-..."
-                    className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:border-blue-500 font-sans shadow-xs"
-                  />
-                </div>
-                {mediaUrlInput && (
-                  <div className="h-40 rounded-2xl bg-slate-50 overflow-hidden border border-slate-200 flex items-center justify-center">
-                    <img src={mediaUrlInput} alt="Preview" className="h-full object-cover" />
+        return (
+          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
+            <div className="bg-white border border-slate-200 rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl text-right animate-in zoom-in-95 duration-150 overflow-hidden">
+              
+              {/* Modal Header */}
+              <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 font-simple bg-slate-50/70 shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-blue-100 text-blue-700 rounded-xl">
+                    <ImageIcon className="w-5 h-5 text-blue-600" />
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* TAB 3: Stock Library */}
-            {mediaTab === 'library' && (
-              <div className="grid grid-cols-3 gap-3 max-h-56 overflow-y-auto p-1">
-                {STOCK_MEDIA.map((item, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => handleInsertMediaFromModal(item.url)}
-                    className="group rounded-2xl overflow-hidden border border-slate-200 hover:border-blue-500 cursor-pointer bg-slate-50 transition-all space-y-1 p-1.5 hover:shadow-xs"
-                  >
-                    <img src={item.url} alt={item.title} className="w-full h-20 object-cover rounded-xl group-hover:scale-105 transition-transform" />
-                    <p className="text-[11px] font-bold text-slate-800 line-clamp-1 font-simple">{item.title}</p>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900">
+                      {mediaModalTarget === 'featured_image' 
+                        ? 'فیچرڈ تصویر منتخب کریں (Set Featured Image)' 
+                        : (mediaModalTarget === 'page_featured_image' ? 'صفحہ کی نمایاں تصویر منتخب کریں' : 'میڈیا مینیجر (Add Media)')}
+                    </h3>
+                    <p className="text-[11px] text-slate-500 font-sans">
+                      {mediaModalTarget === 'featured_image' 
+                        ? 'میڈیا لائبریری سے تصویر منتخب کریں یا اپنے کمپیوٹر سے نئی فائل اپلوڈ کریں' 
+                        : 'مضمون کیلئے تصاویر منتخب یا اپلوڈ کریں'}
+                    </p>
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* Common Image Options (Alignment, Caption, Width) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-200 font-simple text-xs">
-              <div>
-                <label className="block text-slate-700 mb-1">الائنمنٹ:</label>
-                <select
-                  value={mediaAlignment}
-                  onChange={(e) => setMediaAlignment(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-xl p-2 text-slate-800 shadow-xs"
-                >
-                  <option value="center">درمیان (Center)</option>
-                  <option value="right">دائیں لپٹا ہوا (Float Right)</option>
-                  <option value="left">بائیں لپٹا ہوا (Float Left)</option>
-                  <option value="full">مکمل چوڑائی (Full Width)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-700 mb-1">چوڑائی سائز:</label>
-                <select
-                  value={mediaWidth}
-                  onChange={(e) => setMediaWidth(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-xl p-2 text-slate-800 font-sans shadow-xs"
-                >
-                  <option value="100%">100% (بڑا)</option>
-                  <option value="75%">75% (درمیانہ)</option>
-                  <option value="50%">50% (نصف)</option>
-                  <option value="35%">35% (چھوٹا)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-700 mb-1">تصویر کا کیپشن (اختیاری):</label>
-                <input
-                  type="text"
-                  value={mediaCaption}
-                  onChange={(e) => setMediaCaption(e.target.value)}
-                  placeholder="تصویر کے نیچے تحریر..."
-                  className="w-full bg-white border border-slate-300 rounded-xl p-2 text-slate-800 shadow-xs"
-                />
-              </div>
-            </div>
-
-            {/* Insert Button */}
-            {mediaTab === 'url' && (
-              <div className="flex justify-end pt-2">
+                </div>
                 <button
                   type="button"
-                  onClick={() => handleInsertMediaFromModal()}
-                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-colors font-simple shadow-xs"
+                  onClick={() => {
+                    setShowMediaModal(false);
+                    setSelectedMediaModalItem(null);
+                  }}
+                  className="text-slate-400 hover:text-slate-700 p-1.5 rounded-xl hover:bg-slate-200/60 transition-colors"
                 >
-                  مضمون میں تصویر لگائیں
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-            )}
 
+              {/* Media Modal Navigation Tabs */}
+              <div className="flex items-center justify-between border-b border-slate-200 px-6 pt-3 bg-slate-50/40 shrink-0 font-simple text-xs">
+                <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto">
+                  <button
+                    type="button"
+                    onClick={() => setMediaTab('library')}
+                    className={`flex items-center gap-1.5 py-2.5 px-4 font-bold border-b-2 transition-all cursor-pointer ${
+                      mediaTab === 'library'
+                        ? 'border-blue-600 text-blue-600 bg-white rounded-t-xl shadow-xs'
+                        : 'border-transparent text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <FolderOpen className="w-4 h-4" />
+                    <span>میڈیا لائبریری ({mediaList.length})</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMediaTab('upload')}
+                    className={`flex items-center gap-1.5 py-2.5 px-4 font-bold border-b-2 transition-all cursor-pointer ${
+                      mediaTab === 'upload'
+                        ? 'border-blue-600 text-blue-600 bg-white rounded-t-xl shadow-xs'
+                        : 'border-transparent text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <UploadCloud className="w-4 h-4" />
+                    <span>کمپیوٹر سے اپلوڈ</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMediaTab('url')}
+                    className={`flex items-center gap-1.5 py-2.5 px-4 font-bold border-b-2 transition-all cursor-pointer ${
+                      mediaTab === 'url'
+                        ? 'border-blue-600 text-blue-600 bg-white rounded-t-xl shadow-xs'
+                        : 'border-transparent text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <LinkIcon className="w-4 h-4" />
+                    <span>آن لائن لنک (URL)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMediaTab('stock')}
+                    className={`flex items-center gap-1.5 py-2.5 px-4 font-bold border-b-2 transition-all cursor-pointer ${
+                      mediaTab === 'stock'
+                        ? 'border-blue-600 text-blue-600 bg-white rounded-t-xl shadow-xs'
+                        : 'border-transparent text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <Sparkles className="w-4 h-4 text-amber-500" />
+                    <span>اسٹاک تصاویر</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+                
+                {/* TAB 1: MEDIA LIBRARY GRID */}
+                {mediaTab === 'library' && (
+                  <div className="space-y-3.5">
+                    {/* Search & Filter Toolbar */}
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50 p-2.5 rounded-2xl border border-slate-200 text-xs font-simple">
+                      <div className="relative flex-1 w-full">
+                        <Search className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          value={mediaModalSearch}
+                          onChange={(e) => setMediaModalSearch(e.target.value)}
+                          placeholder="میڈیا میں تصویر یا عنوان تلاش کریں..."
+                          className="w-full bg-white border border-slate-200 rounded-xl pr-9 pl-3 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 shadow-xs"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0 w-full sm:w-auto overflow-x-auto">
+                        <button
+                          type="button"
+                          onClick={() => setMediaModalFilter('all')}
+                          className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${
+                            mediaModalFilter === 'all' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                          }`}
+                        >
+                          تمام ({mediaList.length})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setMediaModalFilter('articles')}
+                          className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${
+                            mediaModalFilter === 'articles' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                          }`}
+                        >
+                          مضامین
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setMediaModalFilter('doctors')}
+                          className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${
+                            mediaModalFilter === 'doctors' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                          }`}
+                        >
+                          اطباء / کلینک
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setMediaModalFilter('uploads')}
+                          className={`px-3 py-1.5 rounded-xl font-bold transition-colors ${
+                            mediaModalFilter === 'uploads' ? 'bg-blue-600 text-white shadow-xs' : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
+                          }`}
+                        >
+                          اپلوڈز
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Media Items Grid */}
+                    {modalDisplayMedia.length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 max-h-[46vh] overflow-y-auto p-1 custom-scrollbar">
+                        {modalDisplayMedia.map((item, idx) => {
+                          const isSelected = selectedMediaModalItem?.url === item.url;
+                          return (
+                            <div
+                              key={item.id || item.url || idx}
+                              onClick={() => setSelectedMediaModalItem(item)}
+                              onDoubleClick={() => {
+                                setSelectedMediaModalItem(item);
+                                if (mediaModalTarget === 'featured_image' || mediaModalTarget === 'page_featured_image') {
+                                  handleSelectImageFromMediaModal(item.url);
+                                } else {
+                                  handleInsertMediaFromModal(item.url);
+                                }
+                              }}
+                              className={`group relative rounded-2xl overflow-hidden border cursor-pointer transition-all bg-slate-50 aspect-square flex flex-col justify-end p-1.5 select-none ${
+                                isSelected
+                                  ? 'border-blue-600 ring-4 ring-blue-500/20 shadow-md scale-95'
+                                  : 'border-slate-200 hover:border-blue-400 hover:shadow-xs'
+                              }`}
+                            >
+                              <img
+                                src={item.url}
+                                alt={item.name || 'Media'}
+                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                loading="lazy"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
+                              
+                              {/* Selected Checkmark Badge */}
+                              {isSelected && (
+                                <div className="absolute top-2 right-2 bg-blue-600 text-white p-1 rounded-full shadow-md z-10 animate-in zoom-in-50 duration-150">
+                                  <Check className="w-3.5 h-3.5" />
+                                </div>
+                              )}
+
+                              {/* Title / Attached Info */}
+                              <div className="relative z-10 text-[10px] text-white space-y-0.5 pointer-events-none">
+                                <p className="font-bold truncate font-simple drop-shadow-sm">{item.name || 'تصویر'}</p>
+                                {item.attachedTo && (
+                                  <span className="block truncate text-[9px] text-emerald-300 drop-shadow-xs font-simple">
+                                    {item.attachedTo}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 text-slate-400 space-y-2 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
+                        <ImageIcon className="w-10 h-10 mx-auto opacity-30 text-slate-400" />
+                        <p className="font-bold text-xs text-slate-600 font-simple">کوئی تصویر نہیں ملی</p>
+                        <p className="text-[11px] text-slate-400 font-simple">کمپیوٹر سے نئی تصویر اپلوڈ کرنے کیلئے اگلا ٹیب استعمال کریں</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* TAB 2: LOCAL COMPUTER UPLOAD */}
+                {mediaTab === 'upload' && (
+                  <div className="space-y-4 py-4">
+                    <input
+                      type="file"
+                      ref={mediaFileInputRef}
+                      onChange={handleModalFileUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <div
+                      onClick={() => mediaFileInputRef.current?.click()}
+                      className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-3xl p-12 text-center space-y-3 cursor-pointer transition-all bg-slate-50 hover:bg-blue-50/30 group"
+                    >
+                      <div className="w-14 h-14 mx-auto rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
+                        <UploadCloud className="w-7 h-7 text-blue-600" />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-bold text-slate-800 font-simple">اپنے کمپیوٹر سے فائل منتخب کریں یا یہاں ڈریگ کریں</p>
+                        <p className="text-xs text-slate-500 font-simple">تصویر کا سائز خودکار طور پر کمپریس کر کے میڈیا لائبریری میں محفوظ کر لیا جائے گا</p>
+                        <span className="text-[11px] text-slate-400 block font-sans">JPG, PNG, WebP, GIF فارمیٹس سپورٹڈ ہیں</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="px-5 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold font-simple shadow-xs"
+                      >
+                        فائل منتخب کریں
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 3: DIRECT IMAGE URL */}
+                {mediaTab === 'url' && (
+                  <div className="space-y-4 py-2">
+                    <div>
+                      <label className="text-xs font-bold text-slate-700 block mb-1 font-simple">تصویر کا براہ راست آن لائن ویب لنک (Direct Image URL):</label>
+                      <input
+                        type="url"
+                        value={mediaUrlInput}
+                        onChange={(e) => setMediaUrlInput(e.target.value)}
+                        placeholder="https://images.unsplash.com/photo-... یا کوئی بھی تصویری لنک"
+                        className="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs text-slate-800 focus:outline-none focus:border-blue-500 font-sans shadow-xs text-left dir-ltr"
+                      />
+                    </div>
+                    {mediaUrlInput && (
+                      <div className="h-44 rounded-2xl bg-slate-50 overflow-hidden border border-slate-200 flex items-center justify-center shadow-xs">
+                        <img 
+                          src={mediaUrlInput} 
+                          alt="Preview" 
+                          className="h-full object-cover" 
+                          onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* TAB 4: CURATED STOCK PHOTOS */}
+                {mediaTab === 'stock' && (
+                  <div className="space-y-3">
+                    <p className="text-xs text-slate-500 font-simple">طب یونانی، قانون مفرد اعضاء اور ہربل میڈیسن کیلئے مخصوص معیاری اسٹاک تصاویر:</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[46vh] overflow-y-auto p-1 custom-scrollbar">
+                      {STOCK_MEDIA.map((item, idx) => {
+                        const isSelected = selectedMediaModalItem?.url === item.url;
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => setSelectedMediaModalItem({ url: item.url, name: item.title, attachedTo: 'اسٹاک تصویر' })}
+                            onDoubleClick={() => {
+                              if (mediaModalTarget === 'featured_image' || mediaModalTarget === 'page_featured_image') {
+                                handleSelectImageFromMediaModal(item.url);
+                              } else {
+                                handleInsertMediaFromModal(item.url);
+                              }
+                            }}
+                            className={`group relative rounded-2xl overflow-hidden border cursor-pointer bg-slate-50 transition-all p-2 space-y-1.5 ${
+                              isSelected ? 'border-blue-600 ring-4 ring-blue-500/20 shadow-md' : 'border-slate-200 hover:border-blue-400'
+                            }`}
+                          >
+                            <img src={item.url} alt={item.title} className="w-full h-24 object-cover rounded-xl group-hover:scale-105 transition-transform" />
+                            <p className="text-[11px] font-bold text-slate-800 line-clamp-1 font-simple">{item.title}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Common Alignment & Caption Options (Only for Editor Insertion) */}
+                {mediaModalTarget === 'editor' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-slate-200 font-simple text-xs">
+                    <div>
+                      <label className="block text-slate-700 mb-1">الائنمنٹ:</label>
+                      <select
+                        value={mediaAlignment}
+                        onChange={(e) => setMediaAlignment(e.target.value)}
+                        className="w-full bg-white border border-slate-300 rounded-xl p-2 text-slate-800 shadow-xs"
+                      >
+                        <option value="center">درمیان (Center)</option>
+                        <option value="right">دائیں لپٹا ہوا (Float Right)</option>
+                        <option value="left">بائیں لپٹا ہوا (Float Left)</option>
+                        <option value="full">مکمل چوڑائی (Full Width)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-700 mb-1">چوڑائی سائز:</label>
+                      <select
+                        value={mediaWidth}
+                        onChange={(e) => setMediaWidth(e.target.value)}
+                        className="w-full bg-white border border-slate-300 rounded-xl p-2 text-slate-800 font-sans shadow-xs"
+                      >
+                        <option value="100%">100% (بڑا)</option>
+                        <option value="75%">75% (درمیانہ)</option>
+                        <option value="50%">50% (نصف)</option>
+                        <option value="35%">35% (چھوٹا)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-slate-700 mb-1">تصویر کا کیپشن (اختیاری):</label>
+                      <input
+                        type="text"
+                        value={mediaCaption}
+                        onChange={(e) => setMediaCaption(e.target.value)}
+                        placeholder="تصویر کے نیچے تحریر..."
+                        className="w-full bg-white border border-slate-300 rounded-xl p-2 text-slate-800 shadow-xs"
+                      />
+                    </div>
+                  </div>
+                )}
+
+              </div>
+
+              {/* Modal Footer with WordPress Style Selection Details & Action Button */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-200 px-6 py-3.5 bg-slate-50 font-simple shrink-0">
+                
+                {/* Active Selection Info */}
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  {activeSelectedUrl ? (
+                    <div className="flex items-center gap-2.5">
+                      <img
+                        src={activeSelectedUrl}
+                        alt="Selected thumbnail"
+                        className="w-10 h-10 object-cover rounded-xl border border-blue-400 shadow-xs shrink-0"
+                      />
+                      <div className="text-right text-xs">
+                        <span className="font-bold text-slate-800 block truncate max-w-[200px]">
+                          {selectedMediaModalItem?.name || 'منتخب تصویر'}
+                        </span>
+                        <span className="text-[10px] text-emerald-600 block">
+                          {selectedMediaModalItem?.attachedTo || 'تصویر تیار ہے'}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-slate-400">کوئی تصویر منتخب نہیں کی گئی</span>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowMediaModal(false);
+                      setSelectedMediaModalItem(null);
+                    }}
+                    className="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold transition-colors"
+                  >
+                    منسوخ کریں
+                  </button>
+
+                  {mediaModalTarget === 'featured_image' ? (
+                    <button
+                      type="button"
+                      disabled={!activeSelectedUrl}
+                      onClick={() => handleSelectImageFromMediaModal(activeSelectedUrl)}
+                      className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 ${
+                        activeSelectedUrl
+                          ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-blue-500/20 cursor-pointer'
+                          : 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
+                      }`}
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>فیچرڈ تصویر مقرر کریں (Set Featured Image)</span>
+                    </button>
+                  ) : mediaModalTarget === 'page_featured_image' ? (
+                    <button
+                      type="button"
+                      disabled={!activeSelectedUrl}
+                      onClick={() => handleSelectImageFromMediaModal(activeSelectedUrl)}
+                      className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 ${
+                        activeSelectedUrl
+                          ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20 cursor-pointer'
+                          : 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
+                      }`}
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>صفحے کی نمایاں تصویر مقرر کریں</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={!activeSelectedUrl}
+                      onClick={() => handleInsertMediaFromModal(activeSelectedUrl)}
+                      className={`px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 ${
+                        activeSelectedUrl
+                          ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20 cursor-pointer'
+                          : 'bg-slate-300 text-slate-500 cursor-not-allowed shadow-none'
+                      }`}
+                    >
+                      <ImageIcon className="w-4 h-4" />
+                      <span>مضمون میں تصویر لگائیں (Insert into Post)</span>
+                    </button>
+                  )}
+                </div>
+
+              </div>
+
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ========================================================= */}
       {/* MODAL 2: ADD FORM (CONSULTATION, ORDER, QUESTION) */}
