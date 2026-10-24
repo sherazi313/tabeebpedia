@@ -2194,12 +2194,373 @@ export default function AdminCMS({
     saveCurrentSelection();
   };
 
+  // Universal MS Word / Office & Rich Text Sanitizer
+  const cleanWordHtml = (html) => {
+    if (!html) return '';
+    let cleaned = html;
+
+    // 1. Remove MS Word comments, XML namespaces, and style/meta blocks
+    cleaned = cleaned.replace(/<!--[\s\S]*?-->/gi, '');
+    cleaned = cleaned.replace(/<!\[if[\s\S]*?\]>[\s\S]*?<!\[endif\]>/gi, '');
+    cleaned = cleaned.replace(/<!\[if[\s\S]*?\]>/gi, '');
+    cleaned = cleaned.replace(/<!\[endif\]>/gi, '');
+    cleaned = cleaned.replace(/<\/?(xml|o:p|w:[^>]+)>/gi, '');
+    cleaned = cleaned.replace(/<style[\s\S]*?<\/style>/gi, '');
+    cleaned = cleaned.replace(/<link[\s\S]*?>/gi, '');
+    cleaned = cleaned.replace(/<meta[\s\S]*?>/gi, '');
+
+    // 2. Parse using DOMParser
+    const doc = new DOMParser().parseFromString(cleaned, 'text/html');
+    const body = doc.body;
+
+    // 3. Process and sanitize all elements
+    const allElements = Array.from(body.querySelectorAll('*'));
+    allElements.forEach(el => {
+      // Remove MSO classes
+      if (el.className) {
+        const newClass = el.className
+          .split(/\s+/)
+          .filter(c => !c.toLowerCase().startsWith('mso') && !c.toLowerCase().includes('wordsection'))
+          .join(' ');
+        if (newClass) {
+          el.className = newClass;
+        } else {
+          el.removeAttribute('class');
+        }
+      }
+
+      // Remove MSO attributes
+      Array.from(el.attributes).forEach(attr => {
+        const name = attr.name.toLowerCase();
+        if (name.startsWith('mso-') || name.startsWith('v:') || name.startsWith('w:')) {
+          el.removeAttribute(attr.name);
+        }
+      });
+
+      // Clean inline style
+      if (el.hasAttribute('style')) {
+        const style = el.style;
+        style.removeProperty('font-size');
+        style.removeProperty('font-family');
+        style.removeProperty('line-height');
+        style.removeProperty('margin');
+        style.removeProperty('margin-top');
+        style.removeProperty('margin-bottom');
+        style.removeProperty('margin-left');
+        style.removeProperty('margin-right');
+        style.removeProperty('text-indent');
+
+        let styleText = el.getAttribute('style') || '';
+        styleText = styleText
+          .split(';')
+          .filter(rule => {
+            const trimmed = rule.trim().toLowerCase();
+            if (!trimmed) return false;
+            if (trimmed.startsWith('mso-')) return false;
+            if (trimmed.startsWith('font-size')) return false;
+            if (trimmed.startsWith('font-family')) return false;
+            if (trimmed.startsWith('line-height')) return false;
+            if (trimmed.startsWith('margin')) return false;
+            if (trimmed.includes('windowtext')) return false;
+            return true;
+          })
+          .join('; ');
+
+        if (styleText.trim()) {
+          el.setAttribute('style', styleText);
+        } else {
+          el.removeAttribute('style');
+        }
+      }
+
+      // Unwrap <font> tags: replace with its children
+      if (el.tagName === 'FONT') {
+        const parent = el.parentNode;
+        if (parent) {
+          while (el.firstChild) {
+            parent.insertBefore(el.firstChild, el);
+          }
+          parent.removeChild(el);
+        }
+      }
+    });
+
+    // 4. Unwrap empty or styling-free <span> tags
+    const spans = Array.from(body.querySelectorAll('span'));
+    spans.forEach(sp => {
+      if (!sp.hasAttributes() || sp.getAttribute('style') === '') {
+        const parent = sp.parentNode;
+        if (parent) {
+          while (sp.firstChild) {
+            parent.insertBefore(sp.firstChild, sp);
+          }
+          parent.removeChild(sp);
+        }
+      }
+    });
+
+    return body.innerHTML;
+  };
+
+  // Strip child conflicting styles and unwrap <font> tags inside a container
+  const stripChildStyleAndFont = (root, styleProp) => {
+    if (!root) return;
+
+    const cssPropName = 
+      styleProp === 'fontFamily' ? 'font-family' : 
+      styleProp === 'fontSize' ? 'font-size' : 
+      styleProp === 'color' ? 'color' : 
+      styleProp === 'backgroundColor' ? 'background-color' : styleProp;
+
+    // 1. Unwrap or clean <font> tags
+    const fontTags = Array.from(root.querySelectorAll('font'));
+    fontTags.forEach(f => {
+      if (styleProp === 'fontSize') f.removeAttribute('size');
+      if (styleProp === 'fontFamily') f.removeAttribute('face');
+      if (styleProp === 'color') f.removeAttribute('color');
+
+      if (!f.hasAttributes()) {
+        const parent = f.parentNode;
+        if (parent) {
+          while (f.firstChild) {
+            parent.insertBefore(f.firstChild, f);
+          }
+          parent.removeChild(f);
+        }
+      }
+    });
+
+    // 2. Remove conflicting CSS property on all child elements
+    const descendants = Array.from(root.querySelectorAll('*'));
+    descendants.forEach(el => {
+      if (el.style) {
+        el.style.removeProperty(cssPropName);
+        if (styleProp === 'fontSize') {
+          el.removeAttribute('size');
+        }
+      }
+    });
+
+    // 3. Unwrap empty <span> elements
+    const spans = Array.from(root.querySelectorAll('span'));
+    spans.forEach(sp => {
+      if (!sp.hasAttributes() || sp.getAttribute('style') === '') {
+        const parent = sp.parentNode;
+        if (parent) {
+          while (sp.firstChild) {
+            parent.insertBefore(sp.firstChild, sp);
+          }
+          parent.removeChild(sp);
+        }
+      }
+    });
+  };
+
+  // Robust style applier across selections (single paragraph, multi-block, Ctrl+A, or inline)
+  const applyInlineStyle = (styleProp, styleVal) => {
+    const isPage = adminTab === 'new-page';
+    const currentMode = isPage ? pageEditorMode : editorMode;
+    if (currentMode !== 'visual') return;
+
+    const activeEl = getActiveEditorElement();
+    if (!activeEl) return;
+
+    restoreSelection();
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+
+    const syncContent = () => {
+      if (isPage) {
+        setPageForm(prev => ({ ...prev, content: activeEl.innerHTML }));
+      } else {
+        setArticleForm(prev => ({ ...prev, content: activeEl.innerHTML }));
+      }
+    };
+
+    // Case 1: Caret is collapsed (no selection, user clicked inside a block)
+    if (range.collapsed) {
+      let node = selection.anchorNode;
+      while (node && node !== activeEl) {
+        if (node.nodeType === 1) {
+          const tag = node.tagName.toUpperCase();
+          if (['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'DIV'].includes(tag)) {
+            node.style[styleProp] = styleVal;
+            stripChildStyleAndFont(node, styleProp);
+            syncContent();
+            saveCurrentSelection();
+            return;
+          }
+        }
+        node = node.parentNode;
+      }
+      return;
+    }
+
+    try {
+      const selectedText = range.toString().trim();
+      const editorText = activeEl.innerText.trim();
+      const isAllSelected = selectedText.length > 0 && (
+        selectedText === editorText || 
+        (range.commonAncestorContainer === activeEl && range.startOffset === 0)
+      );
+
+      // Case 2: Multi-block or Select All (Ctrl+A)
+      const allBlocks = Array.from(activeEl.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, blockquote, div.callout-box'));
+      const intersectingBlocks = allBlocks.filter(b => {
+        if (isAllSelected) return true;
+        try {
+          return range.intersectsNode ? range.intersectsNode(b) : false;
+        } catch (e) {
+          return false;
+        }
+      });
+
+      if (intersectingBlocks.length > 1 || (intersectingBlocks.length === 1 && isAllSelected)) {
+        intersectingBlocks.forEach(b => {
+          b.style[styleProp] = styleVal;
+          stripChildStyleAndFont(b, styleProp);
+        });
+
+        if (isAllSelected) {
+          Array.from(activeEl.children).forEach(ch => {
+            if (ch.nodeType === 1) {
+              ch.style[styleProp] = styleVal;
+              stripChildStyleAndFont(ch, styleProp);
+            }
+          });
+        }
+
+        syncContent();
+        saveCurrentSelection();
+        return;
+      }
+
+      // Case 3: Entire single block is selected
+      if (intersectingBlocks.length === 1) {
+        const singleBlock = intersectingBlocks[0];
+        if (selectedText === singleBlock.innerText.trim()) {
+          singleBlock.style[styleProp] = styleVal;
+          stripChildStyleAndFont(singleBlock, styleProp);
+          syncContent();
+          saveCurrentSelection();
+          return;
+        }
+      }
+
+      // Case 4: Partial inline selection within text
+      const fragment = range.extractContents();
+      const span = document.createElement('span');
+      span.style[styleProp] = styleVal;
+      span.appendChild(fragment);
+      stripChildStyleAndFont(span, styleProp);
+      range.insertNode(span);
+
+      // Re-select the span so the user keeps their selection
+      const newRange = document.createRange();
+      newRange.selectNodeContents(span);
+      selection.removeAllRanges();
+      selection.addRange(newRange);
+      savedSelectionRef.current = newRange.cloneRange();
+
+      syncContent();
+    } catch (err) {
+      console.error('Error in applyInlineStyle:', err);
+    }
+  };
+
   const applyTextColor = (color) => {
-    execUniversalCmd('foreColor', color);
+    applyInlineStyle('color', color);
+    showNotification('ٹیکسٹ رنگ تبدیل ہو گیا');
   };
 
   const applyBgColor = (color) => {
-    execUniversalCmd('hiliteColor', color);
+    applyInlineStyle('backgroundColor', color);
+    showNotification('ہائی لائٹ رنگ تبدیل ہو گیا');
+  };
+
+  // Apply Font Family to selected text
+  const applyFontFamily = (font) => {
+    setEditorFont(font);
+    setPageEditorFont(font);
+    let fontVal = '"Noto Nastaliq Urdu", serif';
+    if (font === 'tajawal') fontVal = '"Tajawal", sans-serif';
+    if (font === 'cairo') fontVal = '"Cairo", sans-serif';
+    if (font === 'almarai') fontVal = '"Almarai", sans-serif';
+    if (font === 'georgia') fontVal = 'Georgia, serif';
+    if (font === 'arial') fontVal = 'Arial, sans-serif';
+    if (font === 'times') fontVal = '"Times New Roman", serif';
+    if (font === 'segoe') fontVal = '"Segoe UI", sans-serif';
+
+    applyInlineStyle('fontFamily', fontVal);
+    showNotification(`منتخب متن کا فونٹ تبدیل ہو گیا`);
+  };
+
+  // Apply Font Size to selected text
+  const applyFontSize = (size) => {
+    setEditorFontSize(size);
+    setPageEditorFontSize(size);
+    applyInlineStyle('fontSize', size);
+    showNotification(`منتخب متن کا سائز: ${size}`);
+  };
+
+  // One-click Word / Office Formatting Sanitizer & Normalizer
+  const handleCleanFormatting = () => {
+    const activeEl = getActiveEditorElement();
+    if (!activeEl) return;
+
+    const isPage = adminTab === 'new-page';
+    restoreSelection();
+    const selection = window.getSelection();
+
+    if (selection && selection.rangeCount > 0 && !selection.getRangeAt(0).collapsed) {
+      const range = selection.getRangeAt(0);
+      const tempDiv = document.createElement('div');
+      tempDiv.appendChild(range.cloneContents());
+      const cleaned = cleanWordHtml(tempDiv.innerHTML);
+      document.execCommand('insertHTML', false, cleaned);
+      showNotification('منتخب متن سے مائیکروسافٹ آفس کا اضافی کوڈ اور خراب سائز صاف کر دیے گئے');
+    } else {
+      const rawContent = activeEl.innerHTML;
+      const cleanedContent = cleanWordHtml(rawContent);
+      activeEl.innerHTML = cleanedContent;
+      showNotification('پورے مضمون سے مائیکروسافٹ ورڈ کی فارمیٹنگ اور خراب سائز صاف کر کے یکساں کر دیے گئے');
+    }
+
+    if (isPage) {
+      setPageForm(prev => ({ ...prev, content: activeEl.innerHTML }));
+    } else {
+      setArticleForm(prev => ({ ...prev, content: activeEl.innerHTML }));
+    }
+    saveCurrentSelection();
+  };
+
+  // Intercept paste from MS Word / Office and clean on the fly
+  const handleEditorPaste = (e) => {
+    const clipboardData = e.clipboardData || window.clipboardData;
+    if (!clipboardData) return;
+
+    const html = clipboardData.getData('text/html');
+    const text = clipboardData.getData('text/plain');
+
+    if (html && (html.includes('Mso') || html.includes('mso-') || html.includes('urn:schemas-microsoft-com') || html.includes('<font') || html.includes('font-size:'))) {
+      e.preventDefault();
+      const cleanedHtml = cleanWordHtml(html);
+      document.execCommand('insertHTML', false, cleanedHtml);
+
+      const activeEl = getActiveEditorElement();
+      if (activeEl) {
+        if (adminTab === 'new-page') {
+          setPageForm(prev => ({ ...prev, content: activeEl.innerHTML }));
+        } else {
+          setArticleForm(prev => ({ ...prev, content: activeEl.innerHTML }));
+        }
+      }
+      saveCurrentSelection();
+      showNotification('متن مائیکروسافٹ آفس سے صاف اور درست سائز میں پیسٹ ہو گیا');
+    }
   };
 
   // Live calculation of words, characters, and reading time
@@ -2825,142 +3186,7 @@ export default function AdminCMS({
     }
   };
 
-  // Apply specific inline style (fontSize, fontFamily) to the user's selected text or active block element
-  const applyInlineStyle = (styleProp, styleVal) => {
-    const isPage = adminTab === 'new-page';
-    const currentMode = isPage ? pageEditorMode : editorMode;
-    if (currentMode !== 'visual') return;
 
-    const activeEl = getActiveEditorElement();
-    if (!activeEl) return;
-
-    restoreSelection();
-    
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-    
-    const range = selection.getRangeAt(0);
-
-    const syncContent = () => {
-      if (isPage) {
-        setPageForm(prev => ({ ...prev, content: activeEl.innerHTML }));
-      } else {
-        setArticleForm(prev => ({ ...prev, content: activeEl.innerHTML }));
-      }
-    };
-
-    const cssPropName = styleProp === 'fontFamily' ? 'font-family' : 'font-size';
-
-    // Helper to remove conflicting child style properties so the new style takes precedence
-    const clearDescendantStyles = (root) => {
-      if (!root) return;
-      if (root.nodeType === 1 && root.style) {
-        root.style.removeProperty(cssPropName);
-      }
-      if (root.querySelectorAll) {
-        const els = root.querySelectorAll('*');
-        els.forEach(el => {
-          if (el.style) el.style.removeProperty(cssPropName);
-        });
-      }
-    };
-
-    if (range.collapsed) {
-      // If cursor is inside a block element without dragging selection, apply style to the enclosing element
-      let node = selection.anchorNode;
-      while (node && node !== activeEl) {
-        if (node.nodeType === 1) {
-          const tag = node.tagName.toUpperCase();
-          if (['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'LI', 'BLOCKQUOTE', 'DIV', 'SPAN'].includes(tag)) {
-            node.style[styleProp] = styleVal;
-            clearDescendantStyles(node);
-            if (tag === 'DIV') {
-              const children = node.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, span');
-              children.forEach(ch => {
-                ch.style[styleProp] = styleVal;
-              });
-            }
-            syncContent();
-            saveCurrentSelection();
-            return;
-          }
-        }
-        node = node.parentNode;
-      }
-      return;
-    }
-
-    try {
-      const common = range.commonAncestorContainer;
-      const commonEl = common.nodeType === 1 ? common : common.parentNode;
-
-      // If selection is the entire content of an existing SPAN, update that SPAN directly
-      if (commonEl && commonEl.tagName === 'SPAN' && commonEl !== activeEl && range.toString().trim() === commonEl.textContent.trim()) {
-        commonEl.style[styleProp] = styleVal;
-        clearDescendantStyles(commonEl);
-        syncContent();
-        saveCurrentSelection();
-        return;
-      }
-
-      const fragment = range.extractContents();
-      const hasBlocks = fragment.querySelector && fragment.querySelector('h1, h2, h3, h4, h5, h6, p, li, div, blockquote') !== null;
-
-      if (hasBlocks) {
-        // Multi-block selection (e.g. across paragraphs or lists in a box)
-        const blocks = fragment.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li, div, blockquote');
-        blocks.forEach(b => {
-          b.style[styleProp] = styleVal;
-          clearDescendantStyles(b);
-        });
-        clearDescendantStyles(fragment);
-        range.insertNode(fragment);
-      } else {
-        // Inline selection
-        clearDescendantStyles(fragment);
-        const span = document.createElement('span');
-        span.style[styleProp] = styleVal;
-        span.appendChild(fragment);
-        range.insertNode(span);
-
-        // Re-select the modified span
-        const newRange = document.createRange();
-        newRange.selectNodeContents(span);
-        selection.removeAllRanges();
-        selection.addRange(newRange);
-        savedSelectionRef.current = newRange.cloneRange();
-      }
-
-      syncContent();
-    } catch (err) {
-      console.error('Error applying inline style:', err);
-    }
-  };
-
-  // Apply Font Family to selected text
-  const applyFontFamily = (font) => {
-    setEditorFont(font);
-    setPageEditorFont(font);
-    let fontVal = '"Noto Nastaliq Urdu", serif';
-    if (font === 'tajawal') fontVal = '"Tajawal", sans-serif';
-    if (font === 'cairo') fontVal = '"Cairo", sans-serif';
-    if (font === 'almarai') fontVal = '"Almarai", sans-serif';
-    if (font === 'georgia') fontVal = 'Georgia, serif';
-    if (font === 'arial') fontVal = 'Arial, sans-serif';
-    if (font === 'times') fontVal = '"Times New Roman", serif';
-    if (font === 'segoe') fontVal = '"Segoe UI", sans-serif';
-
-    applyInlineStyle('fontFamily', fontVal);
-    showNotification(`منتخب متن کا فونٹ تبدیل ہو گیا`);
-  };
-
-  // Apply Font Size to selected text
-  const applyFontSize = (size) => {
-    setEditorFontSize(size);
-    setPageEditorFontSize(size);
-    applyInlineStyle('fontSize', size);
-    showNotification(`منتخب متن کا سائز: ${size}`);
-  };
 
   // Text Direction Handler (RTL / LTR)
   const setDirection = (dir) => {
@@ -4262,7 +4488,8 @@ export default function AdminCMS({
                         <input
                           type="color"
                           defaultValue="#0f172a"
-                          onChange={(e) => execCmd('foreColor', e.target.value)}
+                          onMouseDown={() => saveCurrentSelection()}
+                          onChange={(e) => applyTextColor(e.target.value)}
                           className="w-3.5 h-3.5 bg-transparent border-0 cursor-pointer rounded"
                         />
                       </div>
@@ -4272,7 +4499,8 @@ export default function AdminCMS({
                         <input
                           type="color"
                           defaultValue="#fef08a"
-                          onChange={(e) => execCmd('hiliteColor', e.target.value)}
+                          onMouseDown={() => saveCurrentSelection()}
+                          onChange={(e) => applyBgColor(e.target.value)}
                           className="w-3.5 h-3.5 bg-transparent border-0 cursor-pointer rounded"
                         />
                       </div>
@@ -4600,11 +4828,11 @@ export default function AdminCMS({
                       {/* 9. Utilities: Clear Formatting, Undo, Redo, Find/Replace, Shortcuts, Fullscreen */}
                       <button
                         type="button"
-                        onClick={() => execCmd('removeFormat')}
-                        className="p-1 hover:bg-slate-200 rounded-md text-slate-600"
-                        title="فارمیٹنگ ختم کریں (Clear Formatting)"
+                        onClick={handleCleanFormatting}
+                        className="p-1 hover:bg-amber-100 rounded-md text-amber-600 transition-colors"
+                        title="مائیکروسافٹ ورڈ کی فارمیٹنگ اور سائز درست کریں (Clean Word/Office Formatting)"
                       >
-                        <Eraser className="w-3.5 h-3.5 text-amber-600" />
+                        <Eraser className="w-3.5 h-3.5" />
                       </button>
 
                       <button
@@ -4663,6 +4891,7 @@ export default function AdminCMS({
                         <div
                           ref={visualEditorRef}
                           contentEditable
+                          onPaste={handleEditorPaste}
                           onClick={handleEditorClick}
                           onInput={() => {
                             if (visualEditorRef.current) {
@@ -7980,6 +8209,7 @@ export default function AdminCMS({
                         <div
                           ref={pageVisualEditorRef}
                           contentEditable
+                          onPaste={handleEditorPaste}
                           onInput={() => {
                             if (pageVisualEditorRef.current) {
                               setPageForm(prev => ({ ...prev, content: pageVisualEditorRef.current.innerHTML }));
