@@ -109,7 +109,8 @@ import {
   ArrowUpRight,
   LogOut,
   Video,
-  Star
+  Star,
+  UserPlus
 } from 'lucide-react';
 import { ARTICLES, DOCTORS, CATEGORIES, SPECIALTIES } from '../data/mockData';
 import { 
@@ -1142,6 +1143,62 @@ export default function AdminCMS({
   const [newEduForm, setNewEduForm] = useState({ degree: '', institute: '', year: '' });
   const [newExpForm, setNewExpForm] = useState({ companyName: '', jobTitle: '', duration: '', description: '' });
   const [newAwardForm, setNewAwardForm] = useState({ title: '', year: '' });
+
+  const handleAddNewDoctor = () => {
+    const newId = Date.now();
+    setEditingDoctorId('new');
+    setDoctorForm({
+      id: newId,
+      name: '',
+      slug: '',
+      title: 'طبیب حاذق، ماہر نباض و معالج طب مفرد اعضاء و یونانی',
+      qualifications: 'فاضل طب والجراحت (FTJ)',
+      registrationNumber: '',
+      treatmentType: 'طب یونانی و قانون مفرد اعضاء',
+      clinicName: '',
+      city: 'lahore',
+      cityName: 'لاہور',
+      address: '',
+      timing: 'پیر تا ہفتہ: صبح 10:00 تا شام 7:00',
+      fee: 500,
+      onlineFee: 800,
+      waitTime: '15 منٹ سے کم',
+      experience: 10,
+      rating: 5.0,
+      reviewsCount: 0,
+      reviews: [],
+      phone: '',
+      whatsapp: '',
+      email: '',
+      password: 'password123',
+      image: '',
+      about: '',
+      isVerified: true,
+      isApproved: true,
+      status: 'active',
+      isFeatured: false,
+      appliedDate: new Date().toLocaleDateString('ur-PK', { year: 'numeric', month: 'long', day: 'numeric' }),
+      languages: ['اردو', 'پنجابی'],
+      memberships: ['قومی کونسل برائے طب (NCT)'],
+      conditions: ['معدے کی تیزابیت و السر', 'جوڑوں کا درد اور عرق النساء', 'دائمی قبض و آئی بی ایس'],
+      specialties: ['طب یونانی', 'قانون مفرد اعضاء'],
+      services: ['مطب معائنہ و تشخیص نبض', 'آن لائن طبی رہنمائی'],
+      education: [
+        { degree: 'فاضل طب والجراحت (FTJ)', institute: 'طبیہ کالج', year: '' }
+      ],
+      experiences: [],
+      awards: [],
+      gallery: []
+    });
+    setDoctorEditTab('basic');
+    setNewSpecialtyInput('');
+    setNewServiceInput('');
+    setNewConditionInput('');
+    setNewGalleryInput('');
+    setNewEduForm({ degree: '', institute: '', year: '' });
+    setNewExpForm({ companyName: '', jobTitle: '', duration: '', description: '' });
+    setNewAwardForm({ title: '', year: '' });
+  };
   const [passwordRequests, setPasswordRequests] = useState([]);
   
   useEffect(() => {
@@ -3832,9 +3889,19 @@ export default function AdminCMS({
               <div>
                 <div className="px-4 py-1.5 text-[11px] text-slate-400 font-bold uppercase tracking-wider">Directory & Tools</div>
                 <div className="space-y-1">
-                  <button onClick={() => setAdminTab('doctors')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'doctors' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                    <UserCheck className="w-4 h-4 text-slate-400" /> <span>اطباء و کلینکس</span>
-                  </button>
+                  <div className="flex items-center gap-1 group">
+                    <button onClick={() => setAdminTab('doctors')} className={`flex-1 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'doctors' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
+                      <UserCheck className="w-4 h-4 text-slate-400" /> <span>اطباء و کلینکس</span>
+                    </button>
+                    <button 
+                      type="button"
+                      onClick={() => { setAdminTab('doctors'); handleAddNewDoctor(); }}
+                      title="نیا اصلی طبیب شامل کریں"
+                      className="p-2 rounded-xl text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200/60 hover:border-emerald-300 transition-all shadow-xs"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                    </button>
+                  </div>
                   <button onClick={() => setAdminTab('calculator-presets')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'calculator-presets' ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
                     <Calculator className="w-4 h-4 text-emerald-600" /> <span>کیلکولیٹر نسخہ جات</span>
                   </button>
@@ -9641,14 +9708,39 @@ export default function AdminCMS({
 
             const handleSaveDoctor = async () => {
               if (!editingDoctorId || !doctorForm) return;
+              if (!doctorForm.name || !doctorForm.name.trim()) {
+                showNotification('براہ کرم طبیب کا نام لازمی درج کریں!', 'error');
+                return;
+              }
               try {
-                const updatedDocs = doctorsList.map(d => d.id === editingDoctorId ? { ...d, ...doctorForm } : d);
+                let updatedDocs;
+                const isNew = editingDoctorId === 'new' || !doctorsList.some(d => d.id === editingDoctorId);
+                
+                if (isNew) {
+                  const newDoc = {
+                    ...doctorForm,
+                    id: doctorForm.id || Date.now(),
+                    slug: (doctorForm.slug && doctorForm.slug.trim()) 
+                      ? doctorForm.slug.trim() 
+                      : (doctorForm.name.trim().toLowerCase().replace(/[\s\-_]+/g, '-') + '-' + Date.now().toString().slice(-4)),
+                    isApproved: true,
+                    status: 'active',
+                    isVerified: doctorForm.isVerified !== undefined ? doctorForm.isVerified : true,
+                    appliedDate: doctorForm.appliedDate || new Date().toLocaleDateString('ur-PK', { year: 'numeric', month: 'long', day: 'numeric' })
+                  };
+                  updatedDocs = [newDoc, ...doctorsList];
+                  showNotification(`طبیب "${doctorForm.name}" کامیابی سے شامل اور پبلش کر دیا گیا!`);
+                } else {
+                  updatedDocs = doctorsList.map(d => d.id === editingDoctorId ? { ...d, ...doctorForm } : d);
+                  showNotification(`طبیب "${doctorForm.name || ''}" کی تمام تفصیلات کامیابی سے اپڈیٹ اور محفوظ ہو گئیں!`);
+                }
+
                 setDoctorsList(updatedDocs);
                 await saveDoctorsApi(updatedDocs);
                 try {
                   localStorage.setItem('tabeeb_doctors_data_v1', JSON.stringify(updatedDocs));
                 } catch(e) {}
-                showNotification(`طبیب "${doctorForm.name || ''}" کی تمام تفصیلات کامیابی سے اپڈیٹ اور محفوظ ہو گئیں!`);
+                setDoctorTabFilter('all');
                 setEditingDoctorId(null);
                 setDoctorForm(null);
               } catch (error) {
@@ -9880,6 +9972,15 @@ export default function AdminCMS({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleAddNewDoctor}
+                      className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-sm hover:shadow-md shadow-emerald-600/20 active:scale-95 font-simple"
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      <span>+ نیا اصلی طبیب شامل کریں</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => {
@@ -10571,13 +10672,23 @@ export default function AdminCMS({
                           />
                           <div className="min-w-0 text-right">
                             <h3 className="text-base sm:text-lg font-bold text-slate-900 font-simple truncate">
-                              طبیب کا پروفائل ایڈٹ کریں: {doctorForm.name}
+                              {editingDoctorId === 'new' 
+                                ? (doctorForm.name ? `نیا اصلی طبیب: ${doctorForm.name}` : 'نیا اصلی طبیب شامل کریں') 
+                                : `طبیب کا پروفائل ایڈٹ کریں: ${doctorForm.name}`}
                             </h3>
                             <div className="flex items-center justify-end gap-2 text-xs text-slate-500 font-sans mt-0.5">
-                              {doctorForm.registrationNumber && (
-                                <span className="text-emerald-600 font-mono font-bold" dir="ltr">{doctorForm.registrationNumber}</span>
+                              {editingDoctorId === 'new' ? (
+                                <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-lg font-simple font-bold">
+                                  نیا اندراج (محفوظ کرنے پر فوراً پبلش اور ویب سائٹ پر لائیو)
+                                </span>
+                              ) : (
+                                <>
+                                  {doctorForm.registrationNumber && (
+                                    <span className="text-emerald-600 font-mono font-bold" dir="ltr">{doctorForm.registrationNumber}</span>
+                                  )}
+                                  <span>• آئی ڈی: #{doctorForm.id}</span>
+                                </>
                               )}
-                              <span>• آئی ڈی: #{doctorForm.id}</span>
                             </div>
                           </div>
                         </div>
@@ -11622,14 +11733,21 @@ export default function AdminCMS({
                       
                       {/* Modal Footer */}
                       <div className="p-4 border-t border-slate-200 bg-white flex flex-wrap items-center justify-between gap-3 shrink-0">
-                        <button 
-                          type="button" 
-                          onClick={() => handleDeleteDoctor(doctorForm.id)}
-                          className="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl font-bold transition-all text-xs flex items-center gap-1.5 shadow-xs"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          <span>طبیب کو مکمل ڈیلیٹ کریں</span>
-                        </button>
+                        {editingDoctorId !== 'new' ? (
+                          <button 
+                            type="button" 
+                            onClick={() => handleDeleteDoctor(doctorForm.id)}
+                            className="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl font-bold transition-all text-xs flex items-center gap-1.5 shadow-xs"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            <span>طبیب کو مکمل ڈیلیٹ کریں</span>
+                          </button>
+                        ) : (
+                          <div className="text-xs text-slate-500 font-simple flex items-center gap-1.5">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                            <span>طبیب کی تفصیلات درج کریں اور 'شامل اور شائع کریں' پر کلک کریں۔</span>
+                          </div>
+                        )}
 
                         <div className="flex items-center gap-2">
                           <button 
@@ -11642,10 +11760,19 @@ export default function AdminCMS({
                           <button 
                             type="button" 
                             onClick={handleSaveDoctor}
-                            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/20"
+                            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/20 active:scale-95"
                           >
-                            <Save className="w-4 h-4" />
-                            <span>تبدیلیاں محفوظ کریں</span>
+                            {editingDoctorId === 'new' ? (
+                              <>
+                                <UserPlus className="w-4 h-4" />
+                                <span>طبیب شامل اور شائع کریں</span>
+                              </>
+                            ) : (
+                              <>
+                                <Save className="w-4 h-4" />
+                                <span>تبدیلیاں محفوظ کریں</span>
+                              </>
+                            )}
                           </button>
                         </div>
                       </div>
