@@ -51,6 +51,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (@file_put_contents($dataFile, $input, LOCK_EX) !== false) {
             @chmod($dataFile, 0644);
+
+            // Auto Push Notification Trigger on Publish
+            $pushEngine = __DIR__ . '/../admin/notification_engine.php';
+            if (file_exists($pushEngine)) {
+                require_once $pushEngine;
+                if (is_array($decoded)) {
+                    foreach ($decoded as $art) {
+                        if (!empty($art['triggerPush']) && ($art['status'] ?? '') === 'published') {
+                            $artTitle = $art['title'] ?? 'نیا طبی مضمون';
+                            $artExcerpt = $art['excerpt'] ?? 'طبیب پیڈیا پر نیا مضمون شائع ہو گیا ہے، ابھی مطالعہ کریں۔';
+                            $artUrl = 'https://tabeebpedia.com/blog/' . ($art['slug'] ?? '');
+                            $artImage = $art['featuredImage'] ?? '';
+                            @send_onesignal_notification("طبیب پیڈیا: " . $artTitle, $artExcerpt, $artUrl, $artImage);
+                            break;
+                        }
+                    }
+                }
+            }
+
             echo json_encode(['status' => 'success', 'message' => 'Articles saved successfully']);
         } else {
             http_response_code(500);

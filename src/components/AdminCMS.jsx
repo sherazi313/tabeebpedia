@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { 
+  Bell,
   PlusCircle, 
   Hash, 
   Edit3, 
@@ -1270,6 +1271,7 @@ export default function AdminCMS({
     tags: 'طب یونانی, جڑی بوٹیاں, صحت',
     author: 'حکیم محمد طارق محمود',
     readingTime: '5 منٹ',
+    sendPushNotification: true,
   });
 
   // Editor styling states
@@ -2728,6 +2730,7 @@ export default function AdminCMS({
       tags: 'طب یونانی, جڑی بوٹیاں',
       author: 'حکیم محمد طارق محمود',
       readingTime: '5 منٹ',
+      sendPushNotification: true,
     });
     setEditorMode('visual');
     setAdminTab('new-article');
@@ -2868,6 +2871,20 @@ export default function AdminCMS({
       setArticlesList(updatedList);
       saveArticlesApi(updatedList);
       showNotification('نیا مضمون کامیابی کے ساتھ پبلش ہو گیا!');
+
+      // Automatic OneSignal + Local Database Hybrid Push Notification
+      if ((newArticle.status === 'published' || newArticle.status === 'publish') && articleForm.sendPushNotification !== false) {
+        fetch('/api/notify.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: `طبیب پیڈیا: ${newArticle.title}`,
+            message: newArticle.excerpt || 'طبیب پیڈیا پر نیا طبی مضمون شائع ہو گیا ہے، ابھی مطالعہ کریں۔',
+            url: `https://tabeebpedia.com/blog/${newArticle.slug}`,
+            image_url: newArticle.featuredImage
+          })
+        }).catch(() => {});
+      }
     }
 
     // Ensure featured image is added to media library immediately
@@ -3905,6 +3922,17 @@ export default function AdminCMS({
                   <button onClick={() => setAdminTab('calculator-presets')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'calculator-presets' ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
                     <Calculator className="w-4 h-4 text-emerald-600" /> <span>کیلکولیٹر نسخہ جات</span>
                   </button>
+                  <a 
+                    href="/admin/notifications.php" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-900 font-bold border border-emerald-200/80 shadow-xs"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Bell className="w-4 h-4 text-emerald-600" /> <span>Notifications 🔔</span>
+                    </div>
+                    <span className="px-1.5 py-0.5 rounded-full text-[9px] bg-emerald-600 text-white font-sans">v16 Pro</span>
+                  </a>
                   <button onClick={() => setAdminTab('settings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'settings' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
                     <Settings className="w-4 h-4 text-slate-400" /> <span>ویب سائٹ سیٹنگز</span>
                   </button>
@@ -5126,6 +5154,21 @@ export default function AdminCMS({
                           <option value="published">🌐 پبلک (لائیو شائع کریں)</option>
                           <option value="private">🔒 ڈرافٹ (محفوظ رکھیں)</option>
                         </select>
+                      </div>
+
+                      {/* Push Notification Checkbox (Requirement 5) */}
+                      <div className="pt-1.5 border-t border-slate-100">
+                        <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-emerald-50/70 border border-emerald-200/80 hover:bg-emerald-50 transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={articleForm.sendPushNotification !== false}
+                            onChange={(e) => setArticleForm({...articleForm, sendPushNotification: e.target.checked})}
+                            className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                          />
+                          <span className="text-[11px] font-bold text-emerald-900 select-none font-simple">
+                            🔔 تمام سبسکرائبرز کو پش نوٹیفکیشن بھیجیں
+                          </span>
+                        </label>
                       </div>
 
                       <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
