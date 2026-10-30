@@ -137,6 +137,7 @@ import {
 } from '../api';
 import { BOOKS_DATA } from './PdfBooksLibrary';
 import AdminSecurityTab from './AdminSecurityTab';
+import AdminNotificationsTab from './AdminNotificationsTab';
 import RichTextEditor from './RichTextEditor';
 
 // Helper to generate clean, high-contrast HTML for PDF Books library page
@@ -298,7 +299,14 @@ export default function AdminCMS({
   pdfBooksList: propPdfBooksList,
   setPdfBooksList: propSetPdfBooksList
 }) {
-  const [adminTab, setAdminTab] = useState(initialTab);
+  const [adminTab, setAdminTab] = useState(() => {
+    try {
+      const p = new URLSearchParams(window.location.search);
+      const t = p.get('tab');
+      if (t) return t;
+    } catch(e) {}
+    return initialTab || 'dashboard';
+  });
 
   const handleLogout = async () => {
     try {
@@ -3824,6 +3832,14 @@ export default function AdminCMS({
               </button>
               <button
                 type="button"
+                onClick={() => setAdminTab('notifications')}
+                className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all border shadow-xs cursor-pointer font-simple ${adminTab === 'notifications' ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white border-emerald-500 shadow-emerald-600/30' : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'}`}
+              >
+                <Bell className={`w-4 h-4 ${adminTab === 'notifications' ? 'text-white' : 'text-emerald-600'}`} />
+                <span>پش نوٹیفکیشنز 🔔</span>
+              </button>
+              <button
+                type="button"
                 onClick={handleLogout}
                 className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 active:scale-95 px-4 py-2.5 rounded-xl text-xs font-bold transition-all font-simple shadow-xs cursor-pointer"
                 title="ایڈمن سیشن ختم کریں اور لاگ آؤٹ ہوں"
@@ -3921,6 +3937,18 @@ export default function AdminCMS({
                   </div>
                   <button onClick={() => setAdminTab('calculator-presets')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'calculator-presets' ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
                     <Calculator className="w-4 h-4 text-emerald-600" /> <span>کیلکولیٹر نسخہ جات</span>
+                  </button>
+                  {/* Notifications Sidebar Button */}
+                  <button 
+                    type="button"
+                    onClick={() => setAdminTab('notifications')} 
+                    className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all ${adminTab === 'notifications' ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold shadow-md shadow-emerald-600/30' : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50/70 border border-slate-200/60'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Bell className={`w-4 h-4 ${adminTab === 'notifications' ? 'text-white' : 'text-emerald-600'}`} />
+                      <span className="font-bold">Notifications 🔔 (نوٹیفکیشنز)</span>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-sans ${adminTab === 'notifications' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800 font-bold'}`}>Live</span>
                   </button>
                   <button onClick={() => setAdminTab('settings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'settings' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
                     <Settings className="w-4 h-4 text-slate-400" /> <span>ویب سائٹ سیٹنگز</span>
@@ -11818,6 +11846,15 @@ export default function AdminCMS({
           })()}
 
           {/* ========================================================= */}
+          {/* VIEW: NOTIFICATIONS CONTROL ROOM */}
+          {adminTab === 'notifications' && (
+            <AdminNotificationsTab 
+              siteSettings={siteSettings}
+              setSiteSettings={setSiteSettings}
+              showNotification={showNotification}
+            />
+          )}
+
           {/* VIEW 4: COMPREHENSIVE WEBSITE SETTINGS (LOGO, HEADER, FOOTER, SECURITY) */}
           {/* ========================================================= */}
           {adminTab === 'settings' && (
