@@ -3922,17 +3922,6 @@ export default function AdminCMS({
                   <button onClick={() => setAdminTab('calculator-presets')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'calculator-presets' ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
                     <Calculator className="w-4 h-4 text-emerald-600" /> <span>کیلکولیٹر نسخہ جات</span>
                   </button>
-                  <a 
-                    href="/admin/notifications.php" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-900 font-bold border border-emerald-200/80 shadow-xs"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Bell className="w-4 h-4 text-emerald-600" /> <span>Notifications 🔔</span>
-                    </div>
-                    <span className="px-1.5 py-0.5 rounded-full text-[9px] bg-emerald-600 text-white font-sans">v16 Pro</span>
-                  </a>
                   <button onClick={() => setAdminTab('settings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'settings' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
                     <Settings className="w-4 h-4 text-slate-400" /> <span>ویب سائٹ سیٹنگز</span>
                   </button>

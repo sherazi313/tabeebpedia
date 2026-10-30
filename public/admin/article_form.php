@@ -90,12 +90,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         .urdu-text { font-family: 'Noto Nastaliq Urdu', 'Almarai', serif; line-height: 1.8; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex">
+<body class="bg-slate-950 text-slate-100 min-h-screen">
 
-    <!-- Admin Sidebar -->
-    <?php include __DIR__ . '/sidebar.php'; ?>
+    <!-- Top Header Navigation (No Sidebar) -->
+    <header class="bg-slate-900/90 backdrop-blur border-b border-slate-800 px-6 py-4 sticky top-0 z-30 shadow-md">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <img src="/logo1.png" alt="طبیب پیڈیا" class="w-10 h-10 object-contain rounded-xl bg-white/10 p-1" />
+                <div>
+                    <h1 class="text-base font-bold text-white tracking-wide">طبیب پیڈیا آرٹیکل ایڈیٹر</h1>
+                    <span class="text-[10px] text-emerald-400 font-sans">نیا مضمون و خودکار پش نوٹیفکیشن</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="/?admin=true" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition-all border border-slate-700">
+                    ← ایڈمن سی ایم ایس پورٹل
+                </a>
+                <a href="/admin/notifications.php" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition-all border border-slate-700 flex items-center gap-1.5">
+                    <span>🔔</span>
+                    <span>پش ڈیش بورڈ</span>
+                </a>
+                <a href="/" class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-xs font-bold text-white transition-all shadow-md shadow-emerald-900/30">
+                    🌐 لائیو سائٹ
+                </a>
+            </div>
+        </div>
+    </header>
 
-    <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+    <main class="p-6 md:p-8">
         <div class="max-w-5xl mx-auto space-y-6">
 
             <div class="flex items-center justify-between border-b border-slate-800 pb-4">
