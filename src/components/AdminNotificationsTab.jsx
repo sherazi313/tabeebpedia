@@ -107,9 +107,13 @@ export default function AdminNotificationsTab({ siteSettings, setSiteSettings, s
           imageUrl: 'https://tabeebpedia.com/og-banner.png'
         });
       } else {
+        let errMessage = data?.error || 'سرور سے رابطہ نہ ہو سکا';
+        if (typeof errMessage === 'string' && errMessage.toLowerCase().includes('all included players are not subscribed')) {
+          errMessage = 'ابھی تک کسی صارف نے نوٹیفکیشن کی اجازت (Allow / Subscribe) نہیں دی۔ برائے مہربانی پہلے ویب سائٹ (tabeebpedia.com) کھول کر نیچے دائیں کونے والی گھنٹی (🔔) پر کلک کریں اور "Allow" دبائیں تاکہ آپ کا براؤزر رجسٹر ہو سکے۔';
+        }
         setBroadcastResult({
           type: 'error',
-          message: `نوٹیفکیشن کی ترسیل میں مسئلہ: ${data?.error || 'سرور سے رابطہ نہ ہو سکا'}`
+          message: `نوٹیفکیشن کی ترسیل میں مسئلہ: ${errMessage}`
         });
       }
     } catch (err) {

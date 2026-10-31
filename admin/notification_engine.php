@@ -342,7 +342,12 @@ function send_onesignal_notification($title, $message, $url = '', $image_url = '
     } else {
         $errMsg = 'OneSignal Error';
         if (isset($resData['errors'])) {
-            $errMsg = is_array($resData['errors']) ? implode(', ', $resData['errors']) : $resData['errors'];
+            $rawErr = is_array($resData['errors']) ? implode(', ', $resData['errors']) : $resData['errors'];
+            if (stripos($rawErr, 'All included players are not subscribed') !== false) {
+                $errMsg = 'ابھی تک کسی صارف نے نوٹیفکیشن کی اجازت (Allow / Subscribe) نہیں دی۔ برائے مہربانی پہلے ویب سائٹ (tabeebpedia.com) کھول کر نیچے دائیں کونے والی گھنٹی (🔔) پر کلک کریں اور "Allow" دبائیں تاکہ آپ کا براؤزر رجسٹر ہو سکے۔';
+            } else {
+                $errMsg = $rawErr;
+            }
         }
         return [
             'success' => false,
