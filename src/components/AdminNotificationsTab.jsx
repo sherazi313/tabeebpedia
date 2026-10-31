@@ -205,15 +205,6 @@ export default function AdminNotificationsTab({ siteSettings, setSiteSettings, s
           >
             <RefreshCw className={`w-4 h-4 ${stats.loading ? 'animate-spin text-emerald-600' : ''}`} />
           </button>
-          <a
-            href="/admin/notifications.php"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-all font-simple cursor-pointer"
-          >
-            <span>مکمل ونڈو کھولیں</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
         </div>
       </div>
 

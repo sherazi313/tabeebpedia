@@ -289,7 +289,6 @@ function send_onesignal_notification($title, $message, $url = '', $image_url = '
             'ur' => $message
         ],
         'url' => $url,
-        'web_url' => $url,
     ];
 
     if (!empty($image_url)) {
