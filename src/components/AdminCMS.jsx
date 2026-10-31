@@ -301,9 +301,17 @@ export default function AdminCMS({
 }) {
   const [adminTab, setAdminTab] = useState(() => {
     try {
-      const p = new URLSearchParams(window.location.search);
-      const t = p.get('tab');
-      if (t) return t;
+      if (typeof window !== 'undefined') {
+        const p = new URLSearchParams(window.location.search);
+        const t = p.get('tab');
+        if (t) return t;
+        const hash = window.location.hash ? window.location.hash.replace(/^#/, '').trim() : '';
+        if (hash) return hash;
+        const sessionTab = sessionStorage.getItem('tabeeb_admin_active_tab');
+        if (sessionTab) return sessionTab;
+        const localTab = localStorage.getItem('tabeeb_admin_active_tab');
+        if (localTab) return localTab;
+      }
     } catch(e) {}
     return initialTab || 'dashboard';
   });
@@ -315,6 +323,9 @@ export default function AdminCMS({
     try {
       sessionStorage.removeItem('tabeeb_admin_token');
       sessionStorage.removeItem('tabeeb_admin_auth');
+      sessionStorage.removeItem('tabeeb_admin_active_tab');
+      sessionStorage.removeItem('tabeeb_admin_settings_subtab');
+      localStorage.removeItem('tabeeb_admin_active_tab');
     } catch (e) {}
     if (typeof window !== 'undefined') {
       window.history.replaceState(null, '', '/');
@@ -368,6 +379,41 @@ export default function AdminCMS({
       setAdminTab('settings');
       setSettingsSubTab('security');
     }
+  }, [adminTab]);
+
+  // Persist active admin tab across page refreshes and keep URL query parameter synced
+  useEffect(() => {
+    if (!adminTab) return;
+    try {
+      sessionStorage.setItem('tabeeb_admin_active_tab', adminTab);
+      localStorage.setItem('tabeeb_admin_active_tab', adminTab);
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        if (adminTab !== 'dashboard') {
+          url.searchParams.set('tab', adminTab);
+        } else {
+          url.searchParams.delete('tab');
+        }
+        window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+      }
+    } catch (e) {}
+  }, [adminTab]);
+
+  // Handle browser back/forward buttons seamlessly
+  useEffect(() => {
+    const handlePopState = () => {
+      try {
+        const p = new URLSearchParams(window.location.search);
+        const t = p.get('tab');
+        if (t && t !== adminTab) {
+          setAdminTab(t);
+        } else if (!t && adminTab !== 'dashboard') {
+          setAdminTab('dashboard');
+        }
+      } catch (e) {}
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, [adminTab]);
   const [showColorPalette, setShowColorPalette] = useState(false);
   const [showBgPalette, setShowBgPalette] = useState(false);
