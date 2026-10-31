@@ -32,11 +32,27 @@ jobs:
       - name: 🧹 Post-Build Data Verification
         run: node scripts/clean-all-data.js
 
+      - name: ⚙️ Sanitize FTP Configuration
+        run: |
+          RAW_SERVER="${{ secrets.FTP_SERVER }}"
+          CLEAN_SERVER=$(echo "$RAW_SERVER" | sed -e 's|^[a-zA-Z]*://||' -e 's|/.*$||' -e 's|:[0-9]*$||' | tr -d ' ')
+          if [ -z "$CLEAN_SERVER" ]; then
+            CLEAN_SERVER="82.197.83.21"
+          fi
+          echo "CLEAN_SERVER=$CLEAN_SERVER" >> $GITHUB_ENV
+
+          RAW_USER="${{ secrets.FTP_USERNAME }}"
+          CLEAN_USER=$(echo "$RAW_USER" | tr -d ' ')
+          if [ -z "$CLEAN_USER" ]; then
+            CLEAN_USER="u366197342"
+          fi
+          echo "CLEAN_USER=$CLEAN_USER" >> $GITHUB_ENV
+
       - name: 🚀 Deploy to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
+          server: ${{ env.CLEAN_SERVER }}
+          username: ${{ env.CLEAN_USER }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 21
           protocol: ftp
