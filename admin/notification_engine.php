@@ -202,7 +202,7 @@ function get_onesignal_live_stats() {
 
     if ($httpCode === 200 && is_array($data)) {
         $subscribers = $data['messageable_players'] ?? ($data['active_users'] ?? ($data['subscribers'] ?? 0));
-        $totalDevices = $data['total_players'] ?? ($data['total_users'] ?? 0);
+        $totalDevices = $data['total_players'] ?? ($data['total_users'] ?? $subscribers);
         return [
             'connected' => true,
             'active_subscribers' => intval($subscribers),
@@ -276,11 +276,10 @@ function send_onesignal_notification($title, $message, $url = '', $image_url = '
         $image_url = $domain . '/' . ltrim($image_url, '/');
     }
 
-    // Construct OneSignal payload
+    // Construct OneSignal payload (targets both Total Subscriptions and Subscribed Users)
     $fields = [
         'app_id' => $appId,
-        // MUST BE STRICTLY 'Subscribed Users'
-        'included_segments' => ['Subscribed Users'],
+        'included_segments' => ['Total Subscriptions', 'Subscribed Users'],
         'headings' => [
             'en' => $title,
             'ur' => $title
