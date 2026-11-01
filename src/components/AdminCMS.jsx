@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { 
+import {
+  Menu,
+  LayoutDashboard,
+  Pin,
   Bell,
   PlusCircle, 
   Hash, 
@@ -304,6 +307,11 @@ export default function AdminCMS({
   pdfBooksList: propPdfBooksList,
   setPdfBooksList: propSetPdfBooksList
 }) {
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [sidebarPostsOpen, setSidebarPostsOpen] = useState(true);
+  const [sidebarPagesOpen, setSidebarPagesOpen] = useState(false);
+  const [sidebarToolsOpen, setSidebarToolsOpen] = useState(false);
+  const [sidebarDoctorsOpen, setSidebarDoctorsOpen] = useState(false);
   const [adminTab, setAdminTab] = useState(() => {
     try {
       if (typeof window !== 'undefined') {
@@ -3868,11 +3876,11 @@ export default function AdminCMS({
   };
 
   return (
-    <div className={`min-h-screen bg-slate-50 text-slate-800 flex flex-col font-urdu text-right select-text ${isFullscreen ? 'fixed inset-0 z-50 overflow-y-auto bg-slate-900 text-slate-100' : ''}`} dir="rtl">
+    <div className={`min-h-screen bg-[#f0f0f1] text-slate-800 flex flex-col lg:flex-row select-text ${isFullscreen ? 'fixed inset-0 z-50 overflow-y-auto bg-slate-900 text-slate-100' : ''}`} dir="ltr">
       
       {/* Top Notification Toast */}
       {notification && (
-        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-2 text-sm font-bold animate-in fade-in-50 duration-200 font-simple">
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-2 text-sm font-bold animate-in fade-in-50 duration-200 font-simple" dir="rtl">
           <CheckCircle2 className="w-5 h-5 text-emerald-200" />
           <span>{notification}</span>
         </div>
@@ -3887,208 +3895,450 @@ export default function AdminCMS({
         className="hidden"
       />
 
-      {/* Admin Navbar */}
-      {!isFullscreen && (
-        <header className={`bg-white border-b border-slate-200/90 px-6 py-4 shadow-2xs ${adminTab === 'new-article' ? 'relative' : 'sticky top-0 z-30'}`}>
-          <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-            
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-slate-900 font-simple">طبیب پیڈیا ایڈمن CMS پورٹل</h1>
-                  <span className="text-[11px] bg-blue-50 text-blue-700 border border-blue-200 font-sans font-bold px-2.5 py-0.5 rounded-full shadow-2xs">
-                    v2.5 Pro Editor
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 font-sans mt-0.5">
-                  اردو رچ ایڈیٹر، ہوم پیج، لوگو، لائیو وزٹرز اینالیٹکس اور اطباء ترتیبات
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleBackToWebsite}
-                className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-slate-200/90 font-simple shadow-xs cursor-pointer"
-              >
-                <ArrowRight className="w-4 h-4 text-blue-600" />
-                <span>ویب سائٹ پر واپس جائیں</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setAdminTab('notifications')}
-                className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all border shadow-xs cursor-pointer font-simple ${adminTab === 'notifications' ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white border-emerald-500 shadow-emerald-600/30' : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'}`}
-              >
-                <Bell className={`w-4 h-4 ${adminTab === 'notifications' ? 'text-white' : 'text-emerald-600'}`} />
-                <span>پش نوٹیفکیشنز 🔔</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 active:scale-95 px-4 py-2.5 rounded-xl text-xs font-bold transition-all font-simple shadow-xs cursor-pointer"
-                title="ایڈمن سیشن ختم کریں اور لاگ آؤٹ ہوں"
-              >
-                <LogOut className="w-4 h-4 text-red-600" />
-                <span>لاگ آؤٹ</span>
-              </button>
-            </div>
-
-          </div>
-        </header>
+      {/* Mobile Sidebar Overlay */}
+      {isMobileSidebarOpen && !isFullscreen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-2xs transition-opacity"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
       )}
 
-      {/* Main Admin Layout */}
-      <div className={`flex-1 ${isFullscreen ? 'w-full p-4 max-w-7xl mx-auto' : adminTab === 'new-article' ? 'w-full max-w-[1920px] mx-auto px-2 sm:px-4 py-3' : 'max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start'}`}>
-        
-        {/* Sidebar Navigation */}
-        {!isFullscreen && adminTab !== 'new-article' && (
-          <aside className="lg:col-span-3 bg-white border border-slate-200/90 rounded-3xl p-4 space-y-6 sticky top-24 shadow-xs">
-
-            {/* WordPress-style Navigation Links */}
-            <div className="space-y-5 text-xs font-bold font-simple">
-              <div>
-                <button 
-                  onClick={() => setAdminTab('dashboard')} 
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all font-bold ${
-                    adminTab === 'dashboard' 
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' 
-                      : 'text-slate-700 hover:text-blue-600 hover:bg-blue-50/60 border border-slate-200/70 bg-slate-50/70'
-                  }`}
+      {/* ========================================================= */}
+      {/* WORDPRESS LEFT SIDEBAR (Classic WP #1d2327 Dark Navigation) */}
+      {/* ========================================================= */}
+      {!isFullscreen && (
+        <aside className={`fixed inset-y-0 left-0 z-50 lg:static lg:z-30 w-56 sm:w-60 bg-[#1d2327] text-[#f0f0f1] flex flex-col shrink-0 min-h-screen border-r border-[#2c3338] shadow-md transition-transform duration-200 ease-in-out font-sans ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+          <div className="h-screen sticky top-0 overflow-y-auto flex flex-col justify-between scrollbar-thin scrollbar-thumb-slate-700">
+            
+            {/* Top Brand & Site Link */}
+            <div>
+              <div className="h-14 flex items-center justify-between px-4 bg-[#1d2327] border-b border-[#2c3338]">
+                <button
+                  type="button"
+                  onClick={handleBackToWebsite}
+                  className="flex items-center gap-2.5 text-white hover:text-[#72aee6] transition-colors font-bold text-sm tracking-wide text-left cursor-pointer"
+                  title="ویب سائٹ وزٹ کریں (Live Site)"
                 >
-                  <div className="flex items-center gap-3">
-                    <Home className={`w-4 h-4 ${adminTab === 'dashboard' ? 'text-white' : 'text-blue-600'}`} />
-                    <span className="text-sm">ڈیش بورڈ (Dashboard)</span>
+                  <span className="w-7 h-7 rounded bg-[#2271b1] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    TP
+                  </span>
+                  <div className="flex flex-col text-left">
+                    <span className="font-bold text-[13px] leading-tight text-white">طبیب پیڈیا</span>
+                    <span className="text-[10px] text-[#a7aaad] leading-none">WordPress CMS</span>
                   </div>
-                  {analyticsData?.activeNow > 0 && (
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${adminTab === 'dashboard' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'}`}>
-                      {analyticsData.activeNow} آن لائن
-                    </span>
-                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileSidebarOpen(false)}
+                  className="lg:hidden text-slate-400 hover:text-white p-1"
+                >
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div>
-                <div className="px-4 py-1.5 text-[11px] text-slate-400 font-bold uppercase tracking-wider">Posts (مضامین)</div>
-                <div className="space-y-1">
-                  <button onClick={() => setAdminTab('articles')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'articles' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                    <FileText className="w-4 h-4 text-slate-400" /> <span>All Posts (آل پوسٹس)</span>
-                  </button>
-                  <button onClick={handleOpenNewArticle} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'new-article' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                    <PlusCircle className="w-4 h-4 text-slate-400" /> <span>Add New (نیا مضمون)</span>
-                  </button>
-                  <button onClick={() => setAdminTab('categories')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'categories' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                    <FolderOpen className="w-4 h-4 text-slate-400" /> <span>Categories (کیٹیگریز)</span>
-                  </button>
-                  <button onClick={() => setAdminTab('comments')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'comments' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                    <MessageCircle className="w-4 h-4 text-slate-400" /> <span>Comments</span>
-                  </button>
-                  <button onClick={() => setAdminTab('tags')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'tags' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                    <Hash className="w-4 h-4 text-slate-400" /> <span>Tags (ٹیگز)</span>
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <div className="px-4 py-1.5 text-[11px] text-slate-400 font-bold uppercase tracking-wider">Media & Pages</div>
-                <div className="space-y-1">
-                  <button onClick={() => setAdminTab('media')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'media' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                    <ImageIcon className="w-4 h-4 text-slate-400" /> <span>Media (میڈیا لائبریری)</span>
-                  </button>
-                  <button onClick={() => setAdminTab('pages')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'pages' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                    <BookOpen className="w-4 h-4 text-slate-400" /> <span>Pages (صفحات)</span>
-                  </button>
-                  <button onClick={() => setAdminTab('glossary')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'glossary' ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                    <BookOpen className="w-4 h-4 text-emerald-600" /> <span>فرہنگِ اطباء (Glossary)</span>
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <div className="px-4 py-1.5 text-[11px] text-slate-400 font-bold uppercase tracking-wider">Directory & Tools</div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-1 group">
-                    <button onClick={() => setAdminTab('doctors')} className={`flex-1 flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'doctors' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                      <UserCheck className="w-4 h-4 text-slate-400" /> <span>اطباء و کلینکس</span>
-                    </button>
-                    <button 
-                      type="button"
-                      onClick={() => { setAdminTab('doctors'); handleAddNewDoctor(); }}
-                      title="نیا اصلی طبیب شامل کریں"
-                      className="p-2 rounded-xl text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200/60 hover:border-emerald-300 transition-all shadow-xs"
-                    >
-                      <UserPlus className="w-4 h-4" />
-                    </button>
+              {/* WordPress Navigation Menu */}
+              <nav className="py-2 text-[13px] font-medium space-y-0.5">
+                
+                {/* 1. Dashboard */}
+                <button
+                  type="button"
+                  onClick={() => { setAdminTab('dashboard'); setIsMobileSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                    adminTab === 'dashboard'
+                      ? 'bg-[#2271b1] text-white font-semibold'
+                      : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <LayoutDashboard className={`w-4 h-4 ${adminTab === 'dashboard' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
+                    <span>Dashboard</span>
                   </div>
-                  <button onClick={() => setAdminTab('calculator-presets')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'calculator-presets' ? 'bg-emerald-50 text-emerald-800 font-bold border border-emerald-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                    <Calculator className="w-4 h-4 text-emerald-600" /> <span>کیلکولیٹر نسخہ جات</span>
-                  </button>
-                  {/* Notifications Sidebar Button */}
-                  <button 
+                  {analyticsData?.activeNow > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold bg-[#0073aa] text-white border border-blue-400/30">
+                      {analyticsData.activeNow}
+                    </span>
+                  )}
+                </button>
+
+                {/* 2. Posts */}
+                <div>
+                  <button
                     type="button"
-                    onClick={() => setAdminTab('notifications')} 
-                    className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl transition-all ${adminTab === 'notifications' ? 'bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-bold shadow-md shadow-emerald-600/30' : 'text-slate-700 hover:text-emerald-700 hover:bg-emerald-50/70 border border-slate-200/60'}`}
+                    onClick={() => { 
+                      setAdminTab('articles'); 
+                      setSidebarPostsOpen(true);
+                      setIsMobileSidebarOpen(false); 
+                    }}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                      ['articles', 'new-article', 'categories', 'tags'].includes(adminTab)
+                        ? 'bg-[#2271b1] text-white font-semibold'
+                        : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
+                    }`}
                   >
                     <div className="flex items-center gap-3">
-                      <Bell className={`w-4 h-4 ${adminTab === 'notifications' ? 'text-white' : 'text-emerald-600'}`} />
-                      <span className="font-bold">Notifications 🔔 (نوٹیفکیشنز)</span>
+                      <Pin className={`w-4 h-4 ${['articles', 'new-article', 'categories', 'tags'].includes(adminTab) ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
+                      <span>Posts</span>
                     </div>
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-sans ${adminTab === 'notifications' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800 font-bold'}`}>Live</span>
+                    <span 
+                      onClick={(e) => { e.stopPropagation(); setSidebarPostsOpen(!sidebarPostsOpen); }}
+                      className="p-1 text-[#a7aaad] hover:text-white"
+                    >
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${sidebarPostsOpen ? 'rotate-180' : ''}`} />
+                    </span>
                   </button>
-                  <button onClick={() => setAdminTab('settings')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'settings' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                    <Settings className="w-4 h-4 text-slate-400" /> <span>ویب سائٹ سیٹنگز</span>
+                  {sidebarPostsOpen && (
+                    <div className="bg-[#15191c] py-1 text-[12px] space-y-0.5 border-l-2 border-[#2271b1]/40 ml-3">
+                      <button
+                        type="button"
+                        onClick={() => { setAdminTab('articles'); setIsMobileSidebarOpen(false); }}
+                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'articles' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      >
+                        All Posts (تمام مضامین)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { handleOpenNewArticle(); setIsMobileSidebarOpen(false); }}
+                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'new-article' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      >
+                        Add New (نیا مضمون)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setAdminTab('categories'); setIsMobileSidebarOpen(false); }}
+                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'categories' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      >
+                        Categories (کیٹیگریز)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setAdminTab('tags'); setIsMobileSidebarOpen(false); }}
+                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'tags' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      >
+                        Tags (ٹیگز)
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Media */}
+                <button
+                  type="button"
+                  onClick={() => { setAdminTab('media'); setIsMobileSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                    adminTab === 'media'
+                      ? 'bg-[#2271b1] text-white font-semibold'
+                      : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <ImageIcon className={`w-4 h-4 ${adminTab === 'media' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
+                    <span>Media</span>
+                  </div>
+                </button>
+
+                {/* 4. Pages */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => { 
+                      setAdminTab('pages'); 
+                      setSidebarPagesOpen(true);
+                      setIsMobileSidebarOpen(false); 
+                    }}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                      ['pages', 'new-page'].includes(adminTab)
+                        ? 'bg-[#2271b1] text-white font-semibold'
+                        : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <BookOpen className={`w-4 h-4 ${['pages', 'new-page'].includes(adminTab) ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
+                      <span>Pages</span>
+                    </div>
+                    <span 
+                      onClick={(e) => { e.stopPropagation(); setSidebarPagesOpen(!sidebarPagesOpen); }}
+                      className="p-1 text-[#a7aaad] hover:text-white"
+                    >
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${sidebarPagesOpen ? 'rotate-180' : ''}`} />
+                    </span>
                   </button>
-                  <button onClick={() => setAdminTab('migration')} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${adminTab === 'migration' ? 'bg-blue-50 text-blue-700 font-bold border border-blue-200/80' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'}`}>
-                    <Database className="w-4 h-4 text-slate-400" /> <span>مائیگریشن ٹول</span>
+                  {sidebarPagesOpen && (
+                    <div className="bg-[#15191c] py-1 text-[12px] space-y-0.5 border-l-2 border-[#2271b1]/40 ml-3">
+                      <button
+                        type="button"
+                        onClick={() => { setAdminTab('pages'); setIsMobileSidebarOpen(false); }}
+                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'pages' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      >
+                        All Pages (تمام صفحات)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setAdminTab('new-page'); setIsMobileSidebarOpen(false); }}
+                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'new-page' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      >
+                        Add New (نیا صفحہ)
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* 5. Menus & Categories */}
+                <button
+                  type="button"
+                  onClick={() => { setAdminTab('categories'); setIsMobileSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                    adminTab === 'categories'
+                      ? 'bg-[#2271b1] text-white font-semibold'
+                      : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <FolderOpen className={`w-4 h-4 ${adminTab === 'categories' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
+                    <span>Menus</span>
+                  </div>
+                </button>
+
+                {/* 6. Doctors (اطباء و کلینکس) */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => { 
+                      setAdminTab('doctors'); 
+                      setSidebarDoctorsOpen(true);
+                      setIsMobileSidebarOpen(false); 
+                    }}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                      adminTab === 'doctors'
+                        ? 'bg-[#2271b1] text-white font-semibold'
+                        : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <UserCheck className={`w-4 h-4 ${adminTab === 'doctors' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
+                      <span>Doctors (اطباء)</span>
+                    </div>
+                    <span 
+                      onClick={(e) => { e.stopPropagation(); setSidebarDoctorsOpen(!sidebarDoctorsOpen); }}
+                      className="p-1 text-[#a7aaad] hover:text-white"
+                    >
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${sidebarDoctorsOpen ? 'rotate-180' : ''}`} />
+                    </span>
                   </button>
+                  {sidebarDoctorsOpen && (
+                    <div className="bg-[#15191c] py-1 text-[12px] space-y-0.5 border-l-2 border-[#2271b1]/40 ml-3">
+                      <button
+                        type="button"
+                        onClick={() => { setAdminTab('doctors'); setIsMobileSidebarOpen(false); }}
+                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'doctors' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      >
+                        All Doctors (اطباء لسٹ)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setAdminTab('doctors'); handleAddNewDoctor(); setIsMobileSidebarOpen(false); }}
+                        className="w-full text-left px-5 py-1.5 text-[#c3c4c7] hover:text-[#72aee6] transition-colors cursor-pointer"
+                      >
+                        Add Doctor (نیا طبیب)
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* 7. Comments */}
+                <button
+                  type="button"
+                  onClick={() => { setAdminTab('comments'); setIsMobileSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                    adminTab === 'comments'
+                      ? 'bg-[#2271b1] text-white font-semibold'
+                      : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <MessageCircle className={`w-4 h-4 ${adminTab === 'comments' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
+                    <span>Comments</span>
+                  </div>
+                </button>
+
+                {/* 8. Notifications */}
+                <button
+                  type="button"
+                  onClick={() => { setAdminTab('notifications'); setIsMobileSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                    adminTab === 'notifications'
+                      ? 'bg-[#2271b1] text-white font-semibold'
+                      : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Bell className={`w-4 h-4 ${adminTab === 'notifications' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
+                    <span>Notifications</span>
+                  </div>
+                  <span className="px-1.5 py-0.2 rounded text-[10px] bg-emerald-600/80 text-white font-bold">
+                    Live
+                  </span>
+                </button>
+
+                {/* 9. Tools */}
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => { 
+                      setSidebarToolsOpen(!sidebarToolsOpen); 
+                    }}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                      ['calculator-presets', 'glossary', 'migration'].includes(adminTab)
+                        ? 'bg-[#2271b1] text-white font-semibold'
+                        : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Calculator className={`w-4 h-4 ${['calculator-presets', 'glossary', 'migration'].includes(adminTab) ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
+                      <span>Tools</span>
+                    </div>
+                    <span className="p-1 text-[#a7aaad] hover:text-white">
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${sidebarToolsOpen ? 'rotate-180' : ''}`} />
+                    </span>
+                  </button>
+                  {sidebarToolsOpen && (
+                    <div className="bg-[#15191c] py-1 text-[12px] space-y-0.5 border-l-2 border-[#2271b1]/40 ml-3">
+                      <button
+                        type="button"
+                        onClick={() => { setAdminTab('calculator-presets'); setIsMobileSidebarOpen(false); }}
+                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'calculator-presets' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      >
+                        نسخہ کیلکولیٹر
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setAdminTab('glossary'); setIsMobileSidebarOpen(false); }}
+                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'glossary' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      >
+                        فرہنگِ اطباء (Glossary)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setAdminTab('migration'); setIsMobileSidebarOpen(false); }}
+                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'migration' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      >
+                        مائیگریشن ٹول
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* 10. Settings */}
+                <button
+                  type="button"
+                  onClick={() => { setAdminTab('settings'); setIsMobileSidebarOpen(false); }}
+                  className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                    adminTab === 'settings'
+                      ? 'bg-[#2271b1] text-white font-semibold'
+                      : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Settings className={`w-4 h-4 ${adminTab === 'settings' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
+                    <span>Settings</span>
+                  </div>
+                </button>
+
+              </nav>
+            </div>
+
+            {/* Bottom WordPress Stats & Logout */}
+            <div className="border-t border-[#2c3338] bg-[#161a1d] text-xs">
+              <div className="p-3 text-[11px] text-[#a7aaad] space-y-1">
+                <div className="flex items-center justify-between">
+                  <span>پبلک مضامین:</span>
+                  <span className="font-bold text-emerald-400 font-mono">{articlesList.filter(a => a.status !== 'private').length}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>منظور شدہ اطباء:</span>
+                  <span className="font-bold text-emerald-400 font-mono">{doctorsList.filter(d => d && (d.isApproved !== false && d.status !== 'pending')).length}</span>
                 </div>
               </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="pt-4 border-t border-slate-100 space-y-2.5 text-xs text-slate-600 font-simple">
-              <div className="flex items-center justify-between">
-                <span>پبلک مضامین:</span>
-                <strong className="text-emerald-700 font-sans font-bold">{articlesList.filter(a => a.status !== 'private').length}</strong>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>پرائیویٹ / ڈرافٹ:</span>
-                <strong className="text-amber-700 font-sans font-bold">{articlesList.filter(a => a.status === 'private').length}</strong>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>زیرِ جائزہ درخواستیں:</span>
-                <strong className="text-amber-700 font-sans font-bold">
-                  {doctorsList.filter(d => d && (d.isApproved === false || d.status === 'pending')).length}
-                </strong>
-              </div>
-              <div className="flex items-center justify-between">
-                <span>منظور شدہ اطباء:</span>
-                <strong className="text-emerald-700 font-sans font-bold">
-                  {doctorsList.filter(d => d && (d.isApproved !== false && d.status !== 'pending')).length}
-                </strong>
+              <div className="p-2 pt-0 border-t border-[#2c3338]/60">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[#c3c4c7] hover:text-red-400 hover:bg-[#23282d] rounded transition-colors text-left font-bold cursor-pointer"
+                  title="ایڈمن سیشن ختم کریں اور لاگ آؤٹ ہوں"
+                >
+                  <LogOut className="w-4 h-4 text-red-400" />
+                  <span>Logout (لاگ آؤٹ)</span>
+                </button>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-100">
+          </div>
+        </aside>
+      )}
+
+      {/* ========================================================= */}
+      {/* RIGHT MAIN CONTENT AREA (WordPress #f0f0f1 Light Grey Canvas) */}
+      {/* ========================================================= */}
+      <div className="flex-1 min-w-0 bg-[#f0f0f1] min-h-screen flex flex-col font-urdu" dir="rtl">
+        
+        {/* Top WordPress Admin Bar */}
+        {!isFullscreen && (
+          <header className="h-13 bg-white border-b border-slate-200/90 px-4 sm:px-6 flex items-center justify-between shadow-2xs sticky top-0 z-20">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsMobileSidebarOpen(true)}
+                className="lg:hidden p-2 text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg cursor-pointer"
+                title="مینیو کھولیں"
+              >
+                <Menu className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm sm:text-base font-bold text-slate-900 font-simple">طبیب پیڈیا ایڈمن CMS</h1>
+                <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-200 font-sans font-bold px-2 py-0.5 rounded-full hidden sm:inline-block">
+                  v2.5 Pro
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={handleBackToWebsite}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#2271b1] hover:bg-[#135e96] text-white rounded-lg text-xs font-bold transition-all font-simple cursor-pointer shadow-xs"
+              >
+                <Globe className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">ویب سائٹ وزٹ کریں</span>
+                <span className="sm:hidden">ویب سائٹ</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAdminTab('notifications')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border font-simple cursor-pointer ${
+                  adminTab === 'notifications'
+                    ? 'bg-emerald-600 text-white border-emerald-700'
+                    : 'bg-white text-emerald-800 border-emerald-300 hover:bg-emerald-50'
+                }`}
+                title="پش نوٹیفکیشنز پینل"
+              >
+                <Bell className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="hidden md:inline">نوٹیفکیشنز</span>
+              </button>
+
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl text-xs font-bold transition-all border border-red-200 cursor-pointer shadow-2xs"
-                title="ایڈمن سیشن ختم کریں اور لاگ آؤٹ ہوں"
+                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                title="لاگ آؤٹ"
               >
-                <LogOut className="w-4 h-4 text-red-600" />
-                <span>ایڈمن لاگ آؤٹ (Logout)</span>
+                <LogOut className="w-4 h-4" />
               </button>
             </div>
-
-          </aside>
+          </header>
         )}
 
         {/* Content Area */}
-        <main className={`${isFullscreen ? 'w-full' : adminTab === 'new-article' ? 'w-full' : 'lg:col-span-9'} space-y-4`}>
+        <main className={`flex-1 ${isFullscreen ? 'w-full p-4' : 'p-4 sm:p-6 lg:p-8'} space-y-6`}>
           
           {/* ========================================================= */}
           {/* VIEW 1: WORDPRESS / TINYMCE STYLE VISUAL WYSIWYG EDITOR */}
@@ -5782,52 +6032,47 @@ export default function AdminCMS({
           {adminTab === 'dashboard' && (
             <div className="space-y-7">
               
-              {/* Dashboard Welcome Header */}
-              <div className="bg-gradient-to-r from-blue-50 via-indigo-50/40 to-white border border-blue-200/90 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xs">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-blue-700 bg-white px-3 py-1 rounded-full border border-blue-200 shadow-2xs">
-                        ورڈپریس طرز ایڈمن کنٹرول سینٹر
-                      </span>
-                      <span className="text-xs text-slate-500 font-sans">
-                        TabeebPedia CMS v2.5
-                      </span>
-                    </div>
-                    <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-simple mt-2">
-                      ڈیش بورڈ (Dashboard)
-                    </h2>
-                    <p className="text-xs sm:text-sm text-slate-600 mt-1 font-sans">
-                      خوش آمدید، حکیم سید عبد الوہاب شاہ صاحب! یہاں آپ کی ویب سائٹ کی تمام اہم سرگرمیاں، رئیل ٹائم وزٹرز اور سمریز موجود ہیں۔
-                    </p>
+              {/* Dashboard Welcome Header (WordPress Style as in E-Islamic Books) */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-1">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-500 font-sans">
+                      Tabeeb Pedia CMS v2.5 / ورڈپریس طرز ایڈمن کنٹرول سینٹر
+                    </span>
                   </div>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-simple mt-1">
+                    ڈیش بورڈ (Dashboard)
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-600 mt-1 font-sans">
+                    خوش آمدید، حکیم سید عبد الوہاب شاہ صاحب! یہاں آپ کی ویب سائٹ کی تمام اہم سرگرمیاں، رئیل ٹائم وزٹرز اور سمریز موجود ہیں۔
+                  </p>
+                </div>
 
-                  <div className="flex flex-wrap items-center gap-2.5">
-                    <button
-                      type="button"
-                      onClick={onBackToWebsite}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 active:scale-95 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-500/20 transition-all font-simple"
-                    >
-                      <Globe className="w-4 h-4" />
-                      <span>ویب سائٹ وزٹ کریں (Visit Site)</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleOpenNewArticle}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 rounded-xl text-xs font-bold border border-slate-200 shadow-2xs transition-all font-simple"
-                    >
-                      <PlusCircle className="w-4 h-4 text-emerald-600" />
-                      <span>نیا مضمون لکھیں</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAdminTab('new-page')}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 rounded-xl text-xs font-bold border border-slate-200 shadow-2xs transition-all font-simple"
-                    >
-                      <BookOpen className="w-4 h-4 text-blue-600" />
-                      <span>نیا صفحہ بنائیں</span>
-                    </button>
-                  </div>
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleBackToWebsite}
+                    className="flex items-center gap-2 px-4 py-2 bg-[#2271b1] hover:bg-[#135e96] active:scale-95 text-white rounded-full text-xs font-bold shadow-xs transition-all font-simple cursor-pointer"
+                  >
+                    <Globe className="w-4 h-4" />
+                    <span>ویب سائٹ وزٹ کریں (Visit Site)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleOpenNewArticle}
+                    className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 rounded-full text-xs font-bold border border-slate-300 shadow-2xs transition-all font-simple cursor-pointer"
+                  >
+                    <PlusCircle className="w-4 h-4 text-emerald-600" />
+                    <span>نیا مضمون لکھیں</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminTab('new-page')}
+                    className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 rounded-full text-xs font-bold border border-slate-300 shadow-2xs transition-all font-simple cursor-pointer"
+                  >
+                    <BookOpen className="w-4 h-4 text-blue-600" />
+                    <span>نیا صفحہ بنائیں</span>
+                  </button>
                 </div>
               </div>
 
@@ -13307,9 +13552,6 @@ export default function AdminCMS({
         </main>
 
       </div>
-
-      {/* ========================================================= */}
-      {/* WORDPRESS ATTACHMENT DETAILS MODAL */}
       {/* ========================================================= */}
       {activeAttachmentModalItem && (() => {
         const item = activeAttachmentModalItem;
