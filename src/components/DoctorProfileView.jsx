@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { saveDoctorsApi } from '../api';
+import { isArticlePubliclyVisible } from '../utils/postVisibility';
 import { 
   ArrowRight,
   MapPin, 
@@ -250,6 +251,7 @@ export default function DoctorProfileView({
     if (!articlesList || articlesList.length === 0) return [];
     const cleanDocName = (doctor.name || '').replace(/حکیم|ڈاکٹر|پروفیسر/g, '').trim().toLowerCase();
     return articlesList.filter(a => {
+      if (!isArticlePubliclyVisible(a)) return false;
       if (a.authorId && a.authorId === doctor.id) return true;
       if (a.author && cleanDocName && a.author.toLowerCase().includes(cleanDocName)) return true;
       return false;

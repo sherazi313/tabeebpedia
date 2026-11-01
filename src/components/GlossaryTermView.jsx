@@ -14,6 +14,7 @@ import {
   Layers,
   Search
 } from 'lucide-react';
+import { isArticlePubliclyVisible } from '../utils/postVisibility';
 
 export default function GlossaryTermView({
   term,
@@ -32,7 +33,7 @@ export default function GlossaryTermView({
     if (!term || !term.term || !Array.isArray(articlesList)) return [];
     const termWord = term.term.trim();
     return articlesList.filter(art => {
-      if (!art) return false;
+      if (!art || !isArticlePubliclyVisible(art)) return false;
       const title = (art.title || '').toLowerCase();
       const content = (art.content || '').toLowerCase();
       const cats = (art.categories || []).join(' ').toLowerCase();

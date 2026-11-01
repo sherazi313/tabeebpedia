@@ -14,10 +14,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $dataFile = __DIR__ . '/../data/articles.json';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $articles = [];
     if (file_exists($dataFile)) {
-        echo file_get_contents($dataFile);
+        $raw = @file_get_contents($dataFile);
+        $articles = json_decode($raw, true) ?: [];
+    }
+
+    $now = time();
+    $needsSave = false;
+    $pushEngine = __DIR__ . '/../admin/notification_engine.php';
+    $hasPush = file_exists($pushEngine);
+
+    // Virtual Cron: Check any scheduled post whose time has arrived
+    foreach ($articles as &$art) {
+        if (!isset($art['status'])) continue;
+        if ($art['status'] === 'scheduled' && !empty($art['scheduledAt'])) {
+            $targetTime = strtotime($art['scheduledAt']);
+            if ($targetTime && $targetTime <= $now) {
+                $art['status'] = 'published';
+                $art['publishedAt'] = date('Y-m-d H:i:s', $targetTime);
+                $art['date'] = date('Y-m-d', $targetTime);
+                $needsSave = true;
+
+                if ($hasPush && !empty($art['sendPushNotification'])) {
+                    require_once $pushEngine;
+                    $targetUrl = 'https://tabeebpedia.com/blog/' . ($art['slug'] ?? '');
+                    @send_onesignal_notification(
+                        "طبیب پیڈیا: " . ($art['title'] ?? ''),
+                        $art['excerpt'] ?? "طبیب پیڈیا پر نیا طبی مضمون شائع ہو گیا ہے، ابھی مطالعہ کریں۔",
+                        $targetUrl,
+                        $art['featuredImage'] ?? ''
+                    );
+                }
+            }
+        }
+    }
+    unset($art);
+
+    if ($needsSave) {
+        @file_put_contents($dataFile, json_encode($articles, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+    }
+
+    // Check if requester is logged in as Admin
+    $isAdmin = checkIsAdminApiRequest();
+    if ($isAdmin) {
+        echo json_encode($articles, JSON_UNESCAPED_UNICODE);
     } else {
-        echo json_encode([]);
+        // Filter out drafts, private, and future scheduled posts for public visitors
+        $publicArticles = array_values(array_filter($articles, function($a) use ($now) {
+            if (!is_array($a)) return false;
+            $status = $a['status'] ?? 'published';
+            if ($status === 'draft' || $status === 'private' || $status === 'trash') {
+                return false;
+            }
+            if ($status === 'scheduled') {
+                if (empty($a['scheduledAt'])) return false;
+                $t = strtotime($a['scheduledAt']);
+                return ($t && $t <= $now);
+            }
+            if ($status === 'published' || $status === 'publish') {
+                if (!empty($a['scheduledAt'])) {
+                    $t = strtotime($a['scheduledAt']);
+                    if ($t && $t > $now) return false;
+                }
+                return true;
+            }
+            return false;
+        }));
+        echo json_encode($publicArticles, JSON_UNESCAPED_UNICODE);
     }
     exit;
 }

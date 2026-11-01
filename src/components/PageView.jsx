@@ -27,6 +27,7 @@ import {
   Star
 } from 'lucide-react';
 import { ARTICLES, DOCTORS } from '../data/mockData';
+import { isArticlePubliclyVisible } from '../utils/postVisibility';
 import PdfBooksLibrary from './PdfBooksLibrary';
 
 export default function PageView({ 
@@ -119,7 +120,8 @@ export default function PageView({
   ];
 
   // Articles & Doctors data
-  const allArticles = articlesList && articlesList.length > 0 ? articlesList : ARTICLES;
+  const rawArticles = articlesList && articlesList.length > 0 ? articlesList : ARTICLES;
+  const allArticles = rawArticles.filter(a => isArticlePubliclyVisible(a));
   const allDoctors = doctorsList && doctorsList.length > 0 ? doctorsList : DOCTORS;
 
   // Recent 4 posts

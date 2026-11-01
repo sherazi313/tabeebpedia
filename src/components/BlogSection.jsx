@@ -14,6 +14,7 @@ import {
   Share2
 } from 'lucide-react';
 import { CATEGORIES, ARTICLES } from '../data/mockData';
+import { isArticlePubliclyVisible } from '../utils/postVisibility';
 
 export default function BlogSection({ 
   onSelectArticle, 
@@ -37,7 +38,7 @@ export default function BlogSection({
 
   const allArticles = React.useMemo(() => {
     const raw = (articlesList && articlesList.length > 0) ? articlesList : ARTICLES;
-    const list = raw.filter(a => a && a.status !== 'draft' && a.status !== 'trash' && a.status !== 'private');
+    const list = raw.filter(a => isArticlePubliclyVisible(a));
     
     const getScore = (item) => {
       if (!item) return 0;

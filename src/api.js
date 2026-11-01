@@ -53,7 +53,9 @@ export const saveDoctorsApi = async (doctors) => {
 };
 
 export const fetchLiveArticles = async () => {
-  let data = await apiFetch(`/api/articles.php?v=${Date.now()}`);
+  let data = await apiFetch(`/api/articles.php?v=${Date.now()}`, {
+    headers: getAuthHeaders()
+  });
   if (!data || !Array.isArray(data) || data.length === 0) {
     data = await apiFetch(`/data/articles.json?v=${Date.now()}`);
   }

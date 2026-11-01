@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { HERBS_DATA } from '../data/mockData';
 import { BOOKS_DATA } from './PdfBooksLibrary';
+import { isArticlePubliclyVisible } from '../utils/postVisibility';
 
 export default function GlobalSearchModal({
   isOpen,
@@ -70,7 +71,7 @@ export default function GlobalSearchModal({
     // 1. Search Articles (مضامین)
     if (filterType === 'all' || filterType === 'articles') {
       articlesList.forEach(art => {
-        if (!art || art.status === 'private') return;
+        if (!art || !isArticlePubliclyVisible(art)) return;
         const title = (art.title || '').toLowerCase();
         const content = (art.content || '').toLowerCase();
         const excerpt = (art.excerpt || '').toLowerCase();

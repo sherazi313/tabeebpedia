@@ -138,6 +138,11 @@ import {
 import { BOOKS_DATA } from './PdfBooksLibrary';
 import AdminSecurityTab from './AdminSecurityTab';
 import AdminNotificationsTab from './AdminNotificationsTab';
+import { 
+  getArticleStatusMeta, 
+  formatForDateTimeInput, 
+  formatScheduledDateUrdu 
+} from '../utils/postVisibility';
 import RichTextEditor from './RichTextEditor';
 
 // Helper to generate clean, high-contrast HTML for PDF Books library page
@@ -1317,7 +1322,9 @@ export default function AdminCMS({
     title: '',
     slug: '',
     category: 'tibb-unani',
-    status: 'published', // 'published', 'private'
+    status: 'published', // 'published', 'scheduled', 'draft', 'private'
+    scheduledAt: '',
+    publishedAt: '',
     excerpt: '',
     content: '',
     featuredImage: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80',
@@ -2114,6 +2121,8 @@ export default function AdminCMS({
       slug: '',
       content: '<p>یہاں اپنے صفحے کا تفصیلی مواد تحریر کریں...</p>',
       status: 'published',
+      scheduledAt: '',
+      publishedAt: '',
       author: 'حکیم سید عبدالوہاب شاہ',
       date: '2026/09/25',
       featuredImage: ''
@@ -2777,6 +2786,8 @@ export default function AdminCMS({
       slug: '',
       category: 'tibb-unani',
       status: 'published',
+      scheduledAt: '',
+      publishedAt: '',
       excerpt: '',
       content: '<p>یہاں اپنا تفصیلی اردو طبی مضمون تحریر کریں...</p>',
       featuredImage: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80',
@@ -2808,6 +2819,8 @@ export default function AdminCMS({
       category: art.category || artCategories[0] || 'tibb-unani',
       categories: artCategories,
       status: art.status || 'published',
+      scheduledAt: art.scheduledAt ? formatForDateTimeInput(art.scheduledAt) : '',
+      publishedAt: art.publishedAt || art.date || '',
       excerpt: art.excerpt || '',
       content: art.content || '<p></p>',
       featuredImage: art.featuredImage || '',
@@ -2883,6 +2896,14 @@ export default function AdminCMS({
       ? articleForm.categories 
       : [categoryName];
 
+    const targetStatus = articleForm.status || 'published';
+    const isScheduled = targetStatus === 'scheduled';
+    let finalScheduledAt = articleForm.scheduledAt || '';
+    if (isScheduled && !finalScheduledAt) {
+      const tomorrow = new Date(Date.now() + 86400000);
+      finalScheduledAt = formatForDateTimeInput(tomorrow);
+    }
+
     let updatedList;
     if (editingArticleId) {
       updatedList = articlesList.map(a => {
@@ -2890,6 +2911,9 @@ export default function AdminCMS({
           return {
             ...a,
             ...articleForm,
+            status: targetStatus,
+            scheduledAt: isScheduled ? finalScheduledAt : (targetStatus === 'published' ? null : a.scheduledAt),
+            publishedAt: isScheduled ? finalScheduledAt : (articleForm.publishedAt || a.publishedAt || new Date().toISOString().split('T')[0]),
             content: finalContent,
             categoryName,
             categories: finalCategories,
@@ -2902,21 +2926,30 @@ export default function AdminCMS({
       });
       setArticlesList(updatedList);
       saveArticlesApi(updatedList);
-      showNotification('مضمون کی تمام تبدیلیاں کامیابی سے محفوظ ہو گئیں!');
+      if (isScheduled) {
+        showNotification('مضمون کامیابی سے شیڈول ہو گیا! ⏰');
+      } else if (targetStatus === 'draft') {
+        showNotification('ڈرافٹ کامیابی سے محفوظ ہو گیا! 📝');
+      } else if (targetStatus === 'private') {
+        showNotification('پرائیویٹ مضمون کامیابی سے محفوظ ہو گیا! 🔒');
+      } else {
+        showNotification('مضمون کی تمام تبدیلیاں کامیابی سے محفوظ ہو گئیں! ✅');
+      }
     } else {
       const todayStr = new Date().toISOString().split('T')[0];
       const newArticle = {
         id: Date.now(),
         ...articleForm,
+        status: targetStatus,
+        scheduledAt: isScheduled ? finalScheduledAt : null,
+        publishedAt: isScheduled ? finalScheduledAt : (articleForm.publishedAt || todayStr),
         content: finalContent,
         slug: articleForm.slug || generateSlugFromTitle(articleForm.title),
         categoryName,
         categories: finalCategories,
         readingTime: `${stats.readingTime} منٹ`,
-        date: articleForm.date || todayStr,
-        publishedAt: articleForm.publishedAt || articleForm.date || todayStr,
+        date: isScheduled ? finalScheduledAt.split('T')[0] : (articleForm.date || todayStr),
         createdAt: new Date().toISOString(),
-        status: articleForm.status || 'published',
         views: 1,
         authorImage: '/images/author-photo.jpg',
         tags: typeof articleForm.tags === 'string' ? articleForm.tags.split(',').map(t => t.trim()).filter(Boolean) : articleForm.tags,
@@ -2924,10 +2957,19 @@ export default function AdminCMS({
       updatedList = [newArticle, ...articlesList];
       setArticlesList(updatedList);
       saveArticlesApi(updatedList);
-      showNotification('نیا مضمون کامیابی کے ساتھ پبلش ہو گیا!');
 
-      // Automatic OneSignal + Local Database Hybrid Push Notification
-      if ((newArticle.status === 'published' || newArticle.status === 'publish') && articleForm.sendPushNotification !== false) {
+      if (isScheduled) {
+        showNotification('نیا مضمون مقررہ وقت کے لیے کامیابی سے شیڈول ہو گیا! ⏰');
+      } else if (targetStatus === 'draft') {
+        showNotification('ڈرافٹ محفوظ ہو گیا! 📝');
+      } else if (targetStatus === 'private') {
+        showNotification('پرائیویٹ مضمون محفوظ ہو گیا! 🔒');
+      } else {
+        showNotification('نیا مضمون کامیابی کے ساتھ پبلش ہو گیا! 🌐');
+      }
+
+      // Automatic OneSignal + Local Database Hybrid Push Notification ONLY on Live Publish
+      if (targetStatus === 'published' && articleForm.sendPushNotification !== false) {
         fetch('/api/notify.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -4096,21 +4138,50 @@ export default function AdminCMS({
                   <button
                     type="button"
                     onClick={() => {
-                      setArticleForm(prev => ({ ...prev, status: 'private' }));
-                      handleSaveArticle();
+                      setArticleForm(prev => ({ ...prev, status: 'draft' }));
+                      setTimeout(() => handleSaveArticle(), 10);
                     }}
-                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors font-simple border border-slate-200"
+                    className="px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl text-xs font-bold transition-colors font-simple border border-amber-200 flex items-center gap-1.5 shadow-xs"
+                    title="مضمون بطور ڈرافٹ محفوظ کریں (غیر شائع شدہ)"
                   >
-                    ڈرافٹ محفوظ کریں
+                    <FileText className="w-3.5 h-3.5 text-amber-600" />
+                    <span>ڈرافٹ محفوظ کریں</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={handleSaveArticle}
-                    className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl text-xs font-bold shadow-md shadow-blue-600/20 transition-all font-simple"
+                    className={`flex items-center gap-2 px-6 py-2 text-white rounded-xl text-xs font-bold shadow-md transition-all font-simple ${
+                      articleForm.status === 'scheduled'
+                        ? 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 shadow-blue-600/20'
+                        : articleForm.status === 'draft'
+                        ? 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 shadow-amber-600/20'
+                        : articleForm.status === 'private'
+                        ? 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 shadow-slate-600/20'
+                        : 'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 shadow-emerald-600/20'
+                    }`}
                   >
-                    <Save className="w-4 h-4" />
-                    <span>{editingArticleId ? 'تبدیلیاں محفوظ کریں (Update)' : 'پبلش کریں (Publish)'}</span>
+                    {articleForm.status === 'scheduled' ? (
+                      <>
+                        <Clock className="w-4 h-4" />
+                        <span>{editingArticleId ? 'شیڈول اپ ڈیٹ کریں (Update Schedule)' : 'شیڈول کریں (Schedule Post)'}</span>
+                      </>
+                    ) : articleForm.status === 'draft' ? (
+                      <>
+                        <FileText className="w-4 h-4" />
+                        <span>ڈرافٹ محفوظ کریں (Save Draft)</span>
+                      </>
+                    ) : articleForm.status === 'private' ? (
+                      <>
+                        <Lock className="w-4 h-4" />
+                        <span>پرائیویٹ محفوظ کریں (Save Private)</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4" />
+                        <span>{editingArticleId ? 'تبدیلیاں محفوظ کریں (Update)' : 'پبلش کریں (Publish Live)'}</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -5201,38 +5272,96 @@ export default function AdminCMS({
                         <Sparkles className="w-3.5 h-3.5 text-blue-600" />
                         <span>پبلش و اسٹیٹس (Publish)</span>
                       </h3>
-                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded font-sans ${articleForm.status === 'published' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200'}`}>
-                        {articleForm.status === 'published' ? 'پبلک' : 'پرائیویٹ'}
-                      </span>
+                      {(() => {
+                        const meta = getArticleStatusMeta(articleForm);
+                        return (
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded border font-sans ${meta.bg}`}>
+                            {meta.label}
+                          </span>
+                        );
+                      })()}
                     </div>
 
-                    <div className="space-y-2 text-xs font-simple">
+                    <div className="space-y-3 text-xs font-simple">
                       <div>
-                        <label className="text-slate-600 block mb-1 text-[11px]">پبلشنگ اسٹیٹس:</label>
+                        <label className="text-slate-700 block mb-1 text-[11px] font-bold">پبلشنگ اسٹیٹس (Status):</label>
                         <select
                           value={articleForm.status}
-                          onChange={(e) => setArticleForm({...articleForm, status: e.target.value})}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setArticleForm(prev => {
+                              const update = { ...prev, status: val };
+                              if (val === 'scheduled' && !prev.scheduledAt) {
+                                const tomorrow = new Date(Date.now() + 86400000);
+                                update.scheduledAt = formatForDateTimeInput(tomorrow);
+                              }
+                              return update;
+                            });
+                          }}
                           className="w-full bg-white border border-slate-300 rounded-lg p-2 text-xs text-slate-800 focus:ring-2 focus:ring-blue-500 focus:outline-none font-bold shadow-xs"
                         >
                           <option value="published">🌐 پبلک (لائیو شائع کریں)</option>
-                          <option value="private">🔒 ڈرافٹ (محفوظ رکھیں)</option>
+                          <option value="scheduled">⏰ شیڈول (مقررہ تاریخ و وقت پر لائیو کریں)</option>
+                          <option value="draft">📝 ڈرافٹ (غیر شائع شدہ - نامکمل)</option>
+                          <option value="private">🔒 پرائیویٹ (صرف ایڈمن کے لیے)</option>
                         </select>
                       </div>
 
-                      {/* Push Notification Checkbox (Requirement 5) */}
-                      <div className="pt-1.5 border-t border-slate-100">
-                        <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-emerald-50/70 border border-emerald-200/80 hover:bg-emerald-50 transition-colors">
+                      {/* Scheduled Date & Time Picker (WordPress Style) */}
+                      {articleForm.status === 'scheduled' && (
+                        <div className="p-2.5 bg-blue-50/80 border border-blue-200 rounded-xl space-y-1.5 animate-fadeIn">
+                          <label className="text-blue-900 font-bold block text-[11px] flex items-center gap-1">
+                            <Clock className="w-3.5 h-3.5 text-blue-600" />
+                            <span>شیڈول کی تاریخ اور وقت منتخب کریں:</span>
+                          </label>
                           <input
-                            type="checkbox"
-                            checked={articleForm.sendPushNotification !== false}
-                            onChange={(e) => setArticleForm({...articleForm, sendPushNotification: e.target.checked})}
-                            className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                            type="datetime-local"
+                            value={articleForm.scheduledAt || ''}
+                            onChange={(e) => setArticleForm(prev => ({ ...prev, scheduledAt: e.target.value }))}
+                            className="w-full bg-white border border-blue-300 rounded-lg px-2.5 py-1.5 text-xs text-blue-900 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-xs"
                           />
-                          <span className="text-[11px] font-bold text-emerald-900 select-none font-simple">
-                            🔔 تمام سبسکرائبرز کو پش نوٹیفکیشن بھیجیں
-                          </span>
-                        </label>
-                      </div>
+                          <p className="text-[10px] text-blue-700 font-sans leading-tight">
+                            📅 مقررہ وقت آنے پر یہ مضمون خودکار طور پر لائیو شائع ہو جائے گا۔
+                            {articleForm.scheduledAt && (
+                              <span className="block mt-1 font-bold text-blue-950 font-simple">
+                                شیڈول: {formatScheduledDateUrdu(articleForm.scheduledAt)}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Push Notification Checkbox */}
+                      {articleForm.status === 'published' && (
+                        <div className="pt-1.5 border-t border-slate-100">
+                          <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-emerald-50/70 border border-emerald-200/80 hover:bg-emerald-50 transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={articleForm.sendPushNotification !== false}
+                              onChange={(e) => setArticleForm({...articleForm, sendPushNotification: e.target.checked})}
+                              className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                            />
+                            <span className="text-[11px] font-bold text-emerald-900 select-none font-simple">
+                              🔔 تمام سبسکرائبرز کو پش نوٹیفکیشن بھیجیں
+                            </span>
+                          </label>
+                        </div>
+                      )}
+                      {articleForm.status === 'scheduled' && (
+                        <div className="pt-1.5 border-t border-slate-100">
+                          <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-blue-50/60 border border-blue-200/70">
+                            <input
+                              type="checkbox"
+                              checked={articleForm.sendPushNotification !== false}
+                              onChange={(e) => setArticleForm({...articleForm, sendPushNotification: e.target.checked})}
+                              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 cursor-pointer"
+                            />
+                            <span className="text-[11px] font-bold text-blue-900 select-none font-simple">
+                              🔔 شیڈول وقت پر پش نوٹیفکیشن خودکار بھیجیں
+                            </span>
+                          </label>
+                        </div>
+                      )}
 
                       <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
                         <span>مطالعہ کا دورانیہ:</span>
@@ -5253,10 +5382,37 @@ export default function AdminCMS({
 
                       <button
                         type="submit"
-                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-lg text-xs font-bold shadow-xs transition-all font-simple"
+                        className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-white rounded-lg text-xs font-bold shadow-xs transition-all font-simple ${
+                          articleForm.status === 'scheduled'
+                            ? 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800'
+                            : articleForm.status === 'draft'
+                            ? 'bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800'
+                            : articleForm.status === 'private'
+                            ? 'bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800'
+                            : 'bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800'
+                        }`}
                       >
-                        <Save className="w-3.5 h-3.5" />
-                        <span>{editingArticleId ? 'محفوظ کریں' : 'پبلش کریں'}</span>
+                        {articleForm.status === 'scheduled' ? (
+                          <>
+                            <Clock className="w-3.5 h-3.5" />
+                            <span>{editingArticleId ? 'شیڈول اپ ڈیٹ کریں' : 'شیڈول کریں'}</span>
+                          </>
+                        ) : articleForm.status === 'draft' ? (
+                          <>
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>ڈرافٹ محفوظ کریں</span>
+                          </>
+                        ) : articleForm.status === 'private' ? (
+                          <>
+                            <Lock className="w-3.5 h-3.5" />
+                            <span>پرائیویٹ محفوظ کریں</span>
+                          </>
+                        ) : (
+                          <>
+                            <Save className="w-3.5 h-3.5" />
+                            <span>{editingArticleId ? 'تبدیلیاں محفوظ کریں' : 'پبلش کریں'}</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -6410,9 +6566,11 @@ export default function AdminCMS({
                       onChange={(e) => setStatusFilter(e.target.value)}
                       className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs text-slate-800 focus:outline-none cursor-pointer font-sans font-bold shadow-xs"
                     >
-                      <option value="all">تمام مضامین</option>
-                      <option value="published">صرف پبلک (Live)</option>
-                      <option value="private">صرف پرائیویٹ (Draft)</option>
+                      <option value="all">تمام مضامین ({articlesList.length})</option>
+                      <option value="published">شائع شدہ (Live)</option>
+                      <option value="scheduled">شیڈول شدہ (Scheduled)</option>
+                      <option value="draft">ڈرافٹس (Drafts)</option>
+                      <option value="private">پرائیویٹ (Private)</option>
                     </select>
                   </div>
 
@@ -6577,7 +6735,22 @@ export default function AdminCMS({
                               <img src={art.featuredImage || siteSettings?.defaultArticleImage} alt="" className="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0" />
                               <div>
                                 <span onClick={() => handleEditArticle(art)} className="font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-h2 text-base">
-                                  {art.title} {art.status === 'private' ? '— Draft' : ''}
+                                  {art.title}
+                                  {art.status === 'scheduled' && (
+                                    <span className="mr-2 text-xs font-sans text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                                      ⏰ شیڈول: {formatScheduledDateUrdu(art.scheduledAt || art.publishedAt)}
+                                    </span>
+                                  )}
+                                  {art.status === 'draft' && (
+                                    <span className="mr-2 text-xs font-sans text-amber-600 font-bold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                      — ڈرافٹ
+                                    </span>
+                                  )}
+                                  {art.status === 'private' && (
+                                    <span className="mr-2 text-xs font-sans text-slate-600 font-bold bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                                      — پرائیویٹ
+                                    </span>
+                                  )}
                                 </span>
                                 <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
                                   <span onClick={() => handleEditArticle(art)} className="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline">Edit</span>
@@ -6601,11 +6774,18 @@ export default function AdminCMS({
                               : (art.tags || '—')}
                           </td>
                           <td className="px-4 py-4 text-xs">
-                            <span className={art.status === 'published' ? 'text-emerald-700 font-bold' : 'text-amber-700 font-medium'}>
-                              {art.status === 'published' ? 'Published' : 'Draft'}
-                            </span><br />
-                            <span className="font-mono text-[11px] text-slate-500">
-                              {art.publishedAt || art.date || '2024/09/24'}
+                            {(() => {
+                              const meta = getArticleStatusMeta(art);
+                              return (
+                                <span className={`inline-block text-[11px] font-bold px-2 py-0.5 rounded font-sans border ${meta.bg}`}>
+                                  {meta.label}
+                                </span>
+                              );
+                            })()}<br />
+                            <span className="font-mono text-[11px] text-slate-500 mt-1 inline-block">
+                              {art.status === 'scheduled' && art.scheduledAt
+                                ? formatScheduledDateUrdu(art.scheduledAt)
+                                : (art.publishedAt || art.date || '2024/09/24')}
                             </span>
                           </td>
                         </tr>

@@ -23,6 +23,7 @@ import GlossaryTermView from './components/GlossaryTermView';
 import glossaryInitialData from './data/glossaryData.json';
 import { fetchLiveDoctors, fetchLiveArticles, fetchSettingsApi, fetchCategoriesApi, saveArticlesApi, saveDoctorsApi, fetchLivePages, savePagesApi, fetchLiveGlossary, saveGlossaryApi, fetchLivePdfBooks, trackPageView, sendAnalyticsHeartbeat } from './api';
 import { BOOKS_DATA } from './components/PdfBooksLibrary';
+import { isArticlePubliclyVisible, isArticleAccessible, checkIsAdminLoggedIn } from './utils/postVisibility';
 
 import { 
   SPECIALTIES, 
@@ -1488,13 +1489,19 @@ export default function App() {
           return false;
         });
         if (found) {
-          setSelectedArticle(found);
-          setSelectedPage(null);
-          setSelectedDoctor(null);
-          setSelectedGlossaryTerm(null);
-          setActiveTab('article-detail');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          return;
+          const isAdmin = checkIsAdminLoggedIn();
+          if (isArticleAccessible(found, isAdmin)) {
+            setSelectedArticle(found);
+            setSelectedPage(null);
+            setSelectedDoctor(null);
+            setSelectedGlossaryTerm(null);
+            setActiveTab('article-detail');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+          } else {
+            setActiveTab('blog');
+            return;
+          }
         }
       }
 
@@ -1991,7 +1998,7 @@ export default function App() {
       return numId;
     };
 
-    let homeArticles = articlesList.filter(a => a && a.status !== 'draft' && a.status !== 'trash' && a.status !== 'private');
+    let homeArticles = articlesList.filter(a => isArticlePubliclyVisible(a));
     if (siteSettings?.articleBlockSort === 'oldest') {
       homeArticles = [...homeArticles].sort((a, b) => {
         const diff = getArticleScore(a) - getArticleScore(b);

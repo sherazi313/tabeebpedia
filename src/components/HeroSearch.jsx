@@ -19,6 +19,7 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { CITIES, SPECIALTIES, DOCTORS, ARTICLES, HERBS_DATA } from '../data/mockData';
+import { isArticlePubliclyVisible } from '../utils/postVisibility';
 
 export default function HeroSearch({ 
   onSelectDoctor, 
@@ -54,7 +55,7 @@ export default function HeroSearch({
   ];
 
   const matchedHerbs = (allArticles || []).filter(art => {
-    if (!art) return false;
+    if (!art || !isArticlePubliclyVisible(art)) return false;
     const cats = Array.isArray(art.categories) 
       ? art.categories 
       : (art.category ? [art.category] : []);
@@ -102,7 +103,7 @@ export default function HeroSearch({
   }).slice(0, 3);
 
   const filteredArticles = (allArticles || []).filter(art => {
-    if (!art) return false;
+    if (!art || !isArticlePubliclyVisible(art)) return false;
     return !searchQuery.trim() ||
       (art.title && typeof art.title === 'string' && art.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (art.category && typeof art.category === 'string' && art.category.toLowerCase().includes(searchQuery.toLowerCase())) ||

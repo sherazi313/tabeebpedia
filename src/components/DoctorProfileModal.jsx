@@ -33,6 +33,7 @@ import {
   ThumbsUp,
   AlertCircle
 } from 'lucide-react';
+import { isArticlePubliclyVisible } from '../utils/postVisibility';
 
 // Helper to render doctor bio (HTML if formatted, clean paragraphs if text)
 function renderDoctorBioHtml(bio, doctorName) {
@@ -244,6 +245,7 @@ export default function DoctorProfileModal({
     if (!articlesList || articlesList.length === 0) return [];
     const cleanDocName = (doctor.name || '').replace(/حکیم|ڈاکٹر|پروفیسر/g, '').trim().toLowerCase();
     return articlesList.filter(a => {
+      if (!isArticlePubliclyVisible(a)) return false;
       if (a.authorId && a.authorId === doctor.id) return true;
       if (a.author && cleanDocName && a.author.toLowerCase().includes(cleanDocName)) return true;
       return false;

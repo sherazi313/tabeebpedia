@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { ARTICLES, DOCTORS } from '../data/mockData';
 import { injectGlossaryTooltips } from '../utils/glossaryParser';
+import { isArticlePubliclyVisible } from '../utils/postVisibility';
 
 export default function ArticleDetailView({ 
   article, 
@@ -128,7 +129,7 @@ export default function ArticleDetailView({
   }, [currentArticle, currentCategories, siteSettings, doctorsList]);
 
   // Related articles in same category
-  const allArticles = articlesList || ARTICLES;
+  const allArticles = (articlesList || ARTICLES).filter(a => isArticlePubliclyVisible(a));
 
   const relatedArticles = allArticles.filter(a => {
     if (a.id === currentArticle.id) return false;
