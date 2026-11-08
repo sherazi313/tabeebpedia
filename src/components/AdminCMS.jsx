@@ -349,12 +349,73 @@ export default function AdminCMS({
     else if (onBackToWebsite) onBackToWebsite();
   };
 
+  // Safe navigation handler: normal left click switches SPA tab; right-click / middle-click / ctrl-click lets browser open in new tab natively
+  const handleNavClick = (e, tab, extraAction) => {
+    if (!e) return;
+    if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) {
+      return; // allow browser native navigation (open in new tab / new window)
+    }
+    e.preventDefault();
+    if (extraAction) {
+      extraAction();
+    }
+    if (tab) {
+      setAdminTab(tab);
+    }
+    setIsMobileSidebarOpen(false);
+  };
+
   const handleBackToWebsite = () => {
     if (typeof window !== 'undefined') {
       window.history.replaceState(null, '', '/');
     }
     if (onBackToWebsite) onBackToWebsite();
   };
+
+  // Listen for edit query param if page opened in new tab with ?tab=new-article&edit=123
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const p = new URLSearchParams(window.location.search);
+      const editId = p.get('edit');
+      if (editId && articlesList && articlesList.length > 0) {
+        const found = articlesList.find(a => String(a.id) === String(editId) || a.slug === editId);
+        if (found && editingArticleId !== found.id) {
+          handleEditArticle(found);
+        }
+      }
+    } catch (e) {}
+  }, [articlesList]);
+
+  // Listen for edit page query param if page opened in new tab with ?tab=new-page&editPage=123
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const p = new URLSearchParams(window.location.search);
+      const editPageId = p.get('editPage');
+      if (editPageId && pagesList && pagesList.length > 0) {
+        const found = pagesList.find(pg => String(pg.id) === String(editPageId) || pg.slug === editPageId);
+        if (found && editingPageId !== found.id) {
+          handleEditPage(found);
+        }
+      }
+    } catch (e) {}
+  }, [pagesList]);
+
+  // Listen for edit doctor query param if opened in new tab with ?tab=doctors&editDoctor=123
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const p = new URLSearchParams(window.location.search);
+      const editDoctorId = p.get('editDoctor');
+      if (editDoctorId && doctorsList && doctorsList.length > 0) {
+        const found = doctorsList.find(d => String(d.id) === String(editDoctorId) || d.slug === editDoctorId);
+        if (found && editingDoctorId !== found.id) {
+          handleEditDoctor(found);
+        }
+      }
+    } catch (e) {}
+  }, [doctorsList]);
 
   // Real-Time Visitor & Page Views Analytics State
   const [analyticsData, setAnalyticsData] = useState(null);
@@ -405,8 +466,14 @@ export default function AdminCMS({
         const url = new URL(window.location.href);
         if (adminTab !== 'dashboard') {
           url.searchParams.set('tab', adminTab);
+          if (adminTab === 'new-article' && editingArticleId) {
+            url.searchParams.set('edit', editingArticleId);
+          } else {
+            url.searchParams.delete('edit');
+          }
         } else {
           url.searchParams.delete('tab');
+          url.searchParams.delete('edit');
         }
         window.history.replaceState(null, '', url.pathname + url.search + url.hash);
       }
@@ -3924,9 +3991,10 @@ export default function AdminCMS({
             {/* Top Brand & Site Link */}
             <div>
               <div className="h-14 flex items-center justify-between px-4 bg-[#1d2327] border-b border-[#2c3338]">
-                <button
-                  type="button"
-                  onClick={handleBackToWebsite}
+                <a
+                  href="/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center gap-2.5 text-white hover:text-[#72aee6] transition-colors font-bold text-sm tracking-wide text-left cursor-pointer"
                   title="ویب سائٹ وزٹ کریں (Live Site)"
                 >
@@ -3937,7 +4005,7 @@ export default function AdminCMS({
                     <span className="font-bold text-[13px] leading-tight text-white">طبیب پیڈیا</span>
                     <span className="text-[10px] text-[#a7aaad] leading-none">WordPress CMS</span>
                   </div>
-                </button>
+                </a>
                 <button
                   type="button"
                   onClick={() => setIsMobileSidebarOpen(false)}
@@ -3951,9 +4019,9 @@ export default function AdminCMS({
               <nav className="py-2 text-[13px] font-medium space-y-0.5">
                 
                 {/* 1. Dashboard */}
-                <button
-                  type="button"
-                  onClick={() => { setAdminTab('dashboard'); setIsMobileSidebarOpen(false); }}
+                <a
+                  href="?tab=dashboard"
+                  onClick={(e) => handleNavClick(e, 'dashboard')}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
                     adminTab === 'dashboard'
                       ? 'bg-[#2271b1] text-white font-semibold'
@@ -3969,72 +4037,72 @@ export default function AdminCMS({
                       {analyticsData.activeNow}
                     </span>
                   )}
-                </button>
+                </a>
 
                 {/* 2. Posts */}
                 <div>
-                  <button
-                    type="button"
-                    onClick={() => { 
-                      setAdminTab('articles'); 
-                      setSidebarPostsOpen(true);
-                      setIsMobileSidebarOpen(false); 
-                    }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                  <div
+                    className={`w-full flex items-center justify-between transition-colors cursor-pointer group ${
                       ['articles', 'new-article', 'categories', 'tags'].includes(adminTab)
                         ? 'bg-[#2271b1] text-white font-semibold'
                         : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <a
+                      href="?tab=articles"
+                      onClick={(e) => handleNavClick(e, 'articles', () => setSidebarPostsOpen(true))}
+                      className="flex-1 flex items-center gap-3 px-3.5 py-2.5 text-left"
+                    >
                       <Pin className={`w-4 h-4 ${['articles', 'new-article', 'categories', 'tags'].includes(adminTab) ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
                       <span>Posts</span>
-                    </div>
-                    <span 
-                      onClick={(e) => { e.stopPropagation(); setSidebarPostsOpen(!sidebarPostsOpen); }}
-                      className="p-1 text-[#a7aaad] hover:text-white"
+                    </a>
+                    <button 
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSidebarPostsOpen(!sidebarPostsOpen); }}
+                      className="p-2.5 text-[#a7aaad] hover:text-white cursor-pointer"
+                      title="سب مینیو کھولیں/بند کریں"
                     >
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${sidebarPostsOpen ? 'rotate-180' : ''}`} />
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                   {sidebarPostsOpen && (
                     <div className="bg-[#15191c] py-1 text-[12px] space-y-0.5 border-l-2 border-[#2271b1]/40 ml-3">
-                      <button
-                        type="button"
-                        onClick={() => { setAdminTab('articles'); setIsMobileSidebarOpen(false); }}
-                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'articles' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      <a
+                        href="?tab=articles"
+                        onClick={(e) => handleNavClick(e, 'articles')}
+                        className={`block w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'articles' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
                       >
                         All Posts (تمام مضامین)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { handleOpenNewArticle(); setIsMobileSidebarOpen(false); }}
-                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'new-article' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      </a>
+                      <a
+                        href="?tab=new-article"
+                        onClick={(e) => handleNavClick(e, 'new-article', handleOpenNewArticle)}
+                        className={`block w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'new-article' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
                       >
                         Add New (نیا مضمون)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setAdminTab('categories'); setIsMobileSidebarOpen(false); }}
-                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'categories' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      </a>
+                      <a
+                        href="?tab=categories"
+                        onClick={(e) => handleNavClick(e, 'categories')}
+                        className={`block w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'categories' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
                       >
                         Categories (کیٹیگریز)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setAdminTab('tags'); setIsMobileSidebarOpen(false); }}
-                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'tags' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      </a>
+                      <a
+                        href="?tab=tags"
+                        onClick={(e) => handleNavClick(e, 'tags')}
+                        className={`block w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'tags' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
                       >
                         Tags (ٹیگز)
-                      </button>
+                      </a>
                     </div>
                   )}
                 </div>
 
                 {/* 3. Media */}
-                <button
-                  type="button"
-                  onClick={() => { setAdminTab('media'); setIsMobileSidebarOpen(false); }}
+                <a
+                  href="?tab=media"
+                  onClick={(e) => handleNavClick(e, 'media')}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
                     adminTab === 'media'
                       ? 'bg-[#2271b1] text-white font-semibold'
@@ -4045,58 +4113,58 @@ export default function AdminCMS({
                     <ImageIcon className={`w-4 h-4 ${adminTab === 'media' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
                     <span>Media</span>
                   </div>
-                </button>
+                </a>
 
                 {/* 4. Pages */}
                 <div>
-                  <button
-                    type="button"
-                    onClick={() => { 
-                      setAdminTab('pages'); 
-                      setSidebarPagesOpen(true);
-                      setIsMobileSidebarOpen(false); 
-                    }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                  <div
+                    className={`w-full flex items-center justify-between transition-colors cursor-pointer group ${
                       ['pages', 'new-page'].includes(adminTab)
                         ? 'bg-[#2271b1] text-white font-semibold'
                         : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <a
+                      href="?tab=pages"
+                      onClick={(e) => handleNavClick(e, 'pages', () => setSidebarPagesOpen(true))}
+                      className="flex-1 flex items-center gap-3 px-3.5 py-2.5 text-left"
+                    >
                       <BookOpen className={`w-4 h-4 ${['pages', 'new-page'].includes(adminTab) ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
                       <span>Pages</span>
-                    </div>
-                    <span 
-                      onClick={(e) => { e.stopPropagation(); setSidebarPagesOpen(!sidebarPagesOpen); }}
-                      className="p-1 text-[#a7aaad] hover:text-white"
+                    </a>
+                    <button 
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSidebarPagesOpen(!sidebarPagesOpen); }}
+                      className="p-2.5 text-[#a7aaad] hover:text-white cursor-pointer"
+                      title="سب مینیو کھولیں/بند کریں"
                     >
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${sidebarPagesOpen ? 'rotate-180' : ''}`} />
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                   {sidebarPagesOpen && (
                     <div className="bg-[#15191c] py-1 text-[12px] space-y-0.5 border-l-2 border-[#2271b1]/40 ml-3">
-                      <button
-                        type="button"
-                        onClick={() => { setAdminTab('pages'); setIsMobileSidebarOpen(false); }}
-                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'pages' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      <a
+                        href="?tab=pages"
+                        onClick={(e) => handleNavClick(e, 'pages')}
+                        className={`block w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'pages' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
                       >
                         All Pages (تمام صفحات)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setAdminTab('new-page'); setIsMobileSidebarOpen(false); }}
-                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'new-page' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      </a>
+                      <a
+                        href="?tab=new-page"
+                        onClick={(e) => handleNavClick(e, 'new-page')}
+                        className={`block w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'new-page' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
                       >
                         Add New (نیا صفحہ)
-                      </button>
+                      </a>
                     </div>
                   )}
                 </div>
 
                 {/* 5. Menus & Categories */}
-                <button
-                  type="button"
-                  onClick={() => { setAdminTab('categories'); setIsMobileSidebarOpen(false); }}
+                <a
+                  href="?tab=categories"
+                  onClick={(e) => handleNavClick(e, 'categories')}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
                     adminTab === 'categories'
                       ? 'bg-[#2271b1] text-white font-semibold'
@@ -4107,58 +4175,58 @@ export default function AdminCMS({
                     <FolderOpen className={`w-4 h-4 ${adminTab === 'categories' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
                     <span>Menus</span>
                   </div>
-                </button>
+                </a>
 
                 {/* 6. Doctors (اطباء و کلینکس) */}
                 <div>
-                  <button
-                    type="button"
-                    onClick={() => { 
-                      setAdminTab('doctors'); 
-                      setSidebarDoctorsOpen(true);
-                      setIsMobileSidebarOpen(false); 
-                    }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                  <div
+                    className={`w-full flex items-center justify-between transition-colors cursor-pointer group ${
                       adminTab === 'doctors'
                         ? 'bg-[#2271b1] text-white font-semibold'
                         : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <a
+                      href="?tab=doctors"
+                      onClick={(e) => handleNavClick(e, 'doctors', () => setSidebarDoctorsOpen(true))}
+                      className="flex-1 flex items-center gap-3 px-3.5 py-2.5 text-left"
+                    >
                       <UserCheck className={`w-4 h-4 ${adminTab === 'doctors' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
                       <span>Doctors (اطباء)</span>
-                    </div>
-                    <span 
-                      onClick={(e) => { e.stopPropagation(); setSidebarDoctorsOpen(!sidebarDoctorsOpen); }}
-                      className="p-1 text-[#a7aaad] hover:text-white"
+                    </a>
+                    <button 
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSidebarDoctorsOpen(!sidebarDoctorsOpen); }}
+                      className="p-2.5 text-[#a7aaad] hover:text-white cursor-pointer"
+                      title="سب مینیو کھولیں/بند کریں"
                     >
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${sidebarDoctorsOpen ? 'rotate-180' : ''}`} />
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                   {sidebarDoctorsOpen && (
                     <div className="bg-[#15191c] py-1 text-[12px] space-y-0.5 border-l-2 border-[#2271b1]/40 ml-3">
-                      <button
-                        type="button"
-                        onClick={() => { setAdminTab('doctors'); setIsMobileSidebarOpen(false); }}
-                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'doctors' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      <a
+                        href="?tab=doctors"
+                        onClick={(e) => handleNavClick(e, 'doctors')}
+                        className={`block w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'doctors' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
                       >
                         All Doctors (اطباء لسٹ)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setAdminTab('doctors'); handleAddNewDoctor(); setIsMobileSidebarOpen(false); }}
-                        className="w-full text-left px-5 py-1.5 text-[#c3c4c7] hover:text-[#72aee6] transition-colors cursor-pointer"
+                      </a>
+                      <a
+                        href="?tab=doctors"
+                        onClick={(e) => handleNavClick(e, 'doctors', handleAddNewDoctor)}
+                        className="block w-full text-left px-5 py-1.5 text-[#c3c4c7] hover:text-[#72aee6] transition-colors cursor-pointer"
                       >
                         Add Doctor (نیا طبیب)
-                      </button>
+                      </a>
                     </div>
                   )}
                 </div>
 
                 {/* 7. Comments */}
-                <button
-                  type="button"
-                  onClick={() => { setAdminTab('comments'); setIsMobileSidebarOpen(false); }}
+                <a
+                  href="?tab=comments"
+                  onClick={(e) => handleNavClick(e, 'comments')}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
                     adminTab === 'comments'
                       ? 'bg-[#2271b1] text-white font-semibold'
@@ -4169,12 +4237,12 @@ export default function AdminCMS({
                     <MessageCircle className={`w-4 h-4 ${adminTab === 'comments' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
                     <span>Comments</span>
                   </div>
-                </button>
+                </a>
 
                 {/* 8. Notifications */}
-                <button
-                  type="button"
-                  onClick={() => { setAdminTab('notifications'); setIsMobileSidebarOpen(false); }}
+                <a
+                  href="?tab=notifications"
+                  onClick={(e) => handleNavClick(e, 'notifications')}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
                     adminTab === 'notifications'
                       ? 'bg-[#2271b1] text-white font-semibold'
@@ -4188,60 +4256,65 @@ export default function AdminCMS({
                   <span className="px-1.5 py-0.2 rounded text-[10px] bg-emerald-600/80 text-white font-bold">
                     Live
                   </span>
-                </button>
+                </a>
 
                 {/* 9. Tools */}
                 <div>
-                  <button
-                    type="button"
-                    onClick={() => { 
-                      setSidebarToolsOpen(!sidebarToolsOpen); 
-                    }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
+                  <div
+                    className={`w-full flex items-center justify-between transition-colors cursor-pointer group ${
                       ['calculator-presets', 'glossary', 'migration'].includes(adminTab)
                         ? 'bg-[#2271b1] text-white font-semibold'
                         : 'text-[#f0f0f1] hover:bg-[#135e96] hover:text-[#72aee6]'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <a
+                      href="?tab=calculator-presets"
+                      onClick={(e) => handleNavClick(e, 'calculator-presets', () => setSidebarToolsOpen(true))}
+                      className="flex-1 flex items-center gap-3 px-3.5 py-2.5 text-left"
+                    >
                       <Calculator className={`w-4 h-4 ${['calculator-presets', 'glossary', 'migration'].includes(adminTab) ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
                       <span>Tools</span>
-                    </div>
-                    <span className="p-1 text-[#a7aaad] hover:text-white">
+                    </a>
+                    <button 
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setSidebarToolsOpen(!sidebarToolsOpen); }}
+                      className="p-2.5 text-[#a7aaad] hover:text-white cursor-pointer"
+                      title="سب مینیو کھولیں/بند کریں"
+                    >
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${sidebarToolsOpen ? 'rotate-180' : ''}`} />
-                    </span>
-                  </button>
+                    </button>
+                  </div>
                   {sidebarToolsOpen && (
                     <div className="bg-[#15191c] py-1 text-[12px] space-y-0.5 border-l-2 border-[#2271b1]/40 ml-3">
-                      <button
-                        type="button"
-                        onClick={() => { setAdminTab('calculator-presets'); setIsMobileSidebarOpen(false); }}
-                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'calculator-presets' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      <a
+                        href="?tab=calculator-presets"
+                        onClick={(e) => handleNavClick(e, 'calculator-presets')}
+                        className={`block w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'calculator-presets' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
                       >
                         نسخہ کیلکولیٹر
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setAdminTab('glossary'); setIsMobileSidebarOpen(false); }}
-                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'glossary' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      </a>
+                      <a
+                        href="?tab=glossary"
+                        onClick={(e) => handleNavClick(e, 'glossary')}
+                        className={`block w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'glossary' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
                       >
                         فرہنگِ اطباء (Glossary)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { setAdminTab('migration'); setIsMobileSidebarOpen(false); }}
-                        className={`w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'migration' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
+                      </a>
+                      <a
+                        href="?tab=migration"
+                        onClick={(e) => handleNavClick(e, 'migration')}
+                        className={`block w-full text-left px-5 py-1.5 transition-colors cursor-pointer ${adminTab === 'migration' ? 'text-white font-bold bg-[#1d2327]' : 'text-[#c3c4c7] hover:text-[#72aee6]'}`}
                       >
                         مائیگریشن ٹول
-                      </button>
+                      </a>
                     </div>
                   )}
                 </div>
 
                 {/* 10. Settings */}
-                <button
-                  type="button"
-                  onClick={() => { setAdminTab('settings'); setIsMobileSidebarOpen(false); }}
+                <a
+                  href="?tab=settings"
+                  onClick={(e) => handleNavClick(e, 'settings')}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-colors cursor-pointer group ${
                     adminTab === 'settings'
                       ? 'bg-[#2271b1] text-white font-semibold'
@@ -4252,7 +4325,7 @@ export default function AdminCMS({
                     <Settings className={`w-4 h-4 ${adminTab === 'settings' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
                     <span>Settings</span>
                   </div>
-                </button>
+                </a>
 
               </nav>
             </div>
@@ -4312,19 +4385,20 @@ export default function AdminCMS({
             </div>
 
             <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={handleBackToWebsite}
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#2271b1] hover:bg-[#135e96] text-white rounded-lg text-xs font-bold transition-all font-simple cursor-pointer shadow-xs"
               >
                 <Globe className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">ویب سائٹ وزٹ کریں</span>
                 <span className="sm:hidden">ویب سائٹ</span>
-              </button>
+              </a>
 
-              <button
-                type="button"
-                onClick={() => setAdminTab('notifications')}
+              <a
+                href="?tab=notifications"
+                onClick={(e) => handleNavClick(e, 'notifications')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border font-simple cursor-pointer ${
                   adminTab === 'notifications'
                     ? 'bg-emerald-600 text-white border-emerald-700'
@@ -4334,7 +4408,7 @@ export default function AdminCMS({
               >
                 <Bell className="w-3.5 h-3.5 text-emerald-600" />
                 <span className="hidden md:inline">نوٹیفکیشنز</span>
-              </button>
+              </a>
 
               <button
                 type="button"
@@ -6060,39 +6134,41 @@ export default function AdminCMS({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <button
-                    type="button"
-                    onClick={handleBackToWebsite}
+                  <a
+                    href="/"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 bg-[#2271b1] hover:bg-[#135e96] active:scale-95 text-white rounded-full text-xs font-bold shadow-xs transition-all font-simple cursor-pointer"
                   >
                     <Globe className="w-4 h-4" />
                     <span>ویب سائٹ وزٹ کریں (Visit Site)</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleOpenNewArticle}
+                  </a>
+                  <a
+                    href="?tab=new-article"
+                    onClick={(e) => handleNavClick(e, 'new-article', handleOpenNewArticle)}
                     className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 rounded-full text-xs font-bold border border-slate-300 shadow-2xs transition-all font-simple cursor-pointer"
                   >
                     <PlusCircle className="w-4 h-4 text-emerald-600" />
                     <span>نیا مضمون لکھیں</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAdminTab('new-page')}
+                  </a>
+                  <a
+                    href="?tab=new-page"
+                    onClick={(e) => handleNavClick(e, 'new-page')}
                     className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 rounded-full text-xs font-bold border border-slate-300 shadow-2xs transition-all font-simple cursor-pointer"
                   >
                     <BookOpen className="w-4 h-4 text-blue-600" />
                     <span>نیا صفحہ بنائیں</span>
-                  </button>
+                  </a>
                 </div>
               </div>
 
               {/* At a Glance (ایک نظر میں - WordPress Style Primary Widgets) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* 1. Posts */}
-                <div 
-                  onClick={() => setAdminTab('articles')}
-                  className="bg-white border border-slate-200/90 hover:border-blue-400 p-5 rounded-2xl shadow-xs hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 group"
+                <a 
+                  href="?tab=articles"
+                  onClick={(e) => handleNavClick(e, 'articles')}
+                  className="block bg-white border border-slate-200/90 hover:border-blue-400 p-5 rounded-2xl shadow-xs hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 group"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-500 font-sans">شائع شدہ مضامین</span>
@@ -6110,12 +6186,13 @@ export default function AdminCMS({
                     <span className="text-blue-600 group-hover:underline">تمام مضامین دیکھیں &larr;</span>
                     <span className="text-amber-600 font-mono">{articlesList.filter(a => a.status === 'private').length} ڈرافٹ</span>
                   </div>
-                </div>
+                </a>
 
                 {/* 2. Pages */}
-                <div 
-                  onClick={() => setAdminTab('pages')}
-                  className="bg-white border border-slate-200/90 hover:border-purple-400 p-5 rounded-2xl shadow-xs hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 group"
+                <a 
+                  href="?tab=pages"
+                  onClick={(e) => handleNavClick(e, 'pages')}
+                  className="block bg-white border border-slate-200/90 hover:border-purple-400 p-5 rounded-2xl shadow-xs hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 group"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-500 font-sans">ویب سائٹ صفحات</span>
@@ -6131,12 +6208,13 @@ export default function AdminCMS({
                     <span className="text-purple-600 group-hover:underline">صفحات کا انتظام &larr;</span>
                     <span>جامع ہربل صفحات</span>
                   </div>
-                </div>
+                </a>
 
                 {/* 3. Doctors */}
-                <div 
-                  onClick={() => setAdminTab('doctors')}
-                  className="bg-white border border-slate-200/90 hover:border-emerald-400 p-5 rounded-2xl shadow-xs hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 group"
+                <a 
+                  href="?tab=doctors"
+                  onClick={(e) => handleNavClick(e, 'doctors')}
+                  className="block bg-white border border-slate-200/90 hover:border-emerald-400 p-5 rounded-2xl shadow-xs hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 group"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-500 font-sans">اطباء و ماہرین ڈائریکٹری</span>
@@ -6154,12 +6232,13 @@ export default function AdminCMS({
                       {doctorsList.filter(d => d && (d.isApproved === false || d.status === 'pending')).length} زیرِ التواء
                     </span>
                   </div>
-                </div>
+                </a>
 
                 {/* 4. Categories */}
-                <div 
-                  onClick={() => setAdminTab('categories')}
-                  className="bg-white border border-slate-200/90 hover:border-amber-400 p-5 rounded-2xl shadow-xs hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 group"
+                <a 
+                  href="?tab=categories"
+                  onClick={(e) => handleNavClick(e, 'categories')}
+                  className="block bg-white border border-slate-200/90 hover:border-amber-400 p-5 rounded-2xl shadow-xs hover:shadow-md cursor-pointer transition-all hover:-translate-y-0.5 group"
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-500 font-sans">زمرہ جات و کیٹیگریز</span>
@@ -6175,7 +6254,7 @@ export default function AdminCMS({
                     <span className="text-amber-600 group-hover:underline">کیٹیگریز دیکھیں &larr;</span>
                     <span>الف بائی و موضوعاتی</span>
                   </div>
-                </div>
+                </a>
               </div>
 
               {/* ========================================================= */}
@@ -6612,13 +6691,13 @@ export default function AdminCMS({
                         </div>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => setAdminTab('articles')}
-                        className="text-xs text-blue-600 hover:text-blue-700 font-bold hover:underline"
+                      <a
+                        href="?tab=articles"
+                        onClick={(e) => handleNavClick(e, 'articles')}
+                        className="text-xs text-blue-600 hover:text-blue-700 font-bold hover:underline cursor-pointer"
                       >
                         تمام مضامین دیکھیں ({articlesList.length}) &larr;
-                      </button>
+                      </a>
                     </div>
 
                     <div className="divide-y divide-slate-100">
@@ -6631,12 +6710,13 @@ export default function AdminCMS({
                               className="w-11 h-11 rounded-xl object-cover border border-slate-200 shrink-0" 
                             />
                             <div className="min-w-0">
-                              <h4 
-                                onClick={() => handleEditArticle(art)}
-                                className="text-xs font-bold text-slate-800 group-hover:text-blue-600 truncate cursor-pointer font-h2"
+                              <a 
+                                href={`?tab=new-article&edit=${art.id}`}
+                                onClick={(e) => handleNavClick(e, 'new-article', () => handleEditArticle(art))}
+                                className="text-xs font-bold text-slate-800 group-hover:text-blue-600 truncate cursor-pointer font-h2 block"
                               >
                                 {art.title}
-                              </h4>
+                              </a>
                               <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
                                 <span className="text-blue-600">{Array.isArray(art.categories) ? art.categories.slice(0, 2).join('، ') : art.category}</span>
                                 <span>•</span>
@@ -6646,14 +6726,14 @@ export default function AdminCMS({
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => handleEditArticle(art)}
-                              className="p-1.5 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 border border-slate-200 transition-colors"
+                            <a
+                              href={`?tab=new-article&edit=${art.id}`}
+                              onClick={(e) => handleNavClick(e, 'new-article', () => handleEditArticle(art))}
+                              className="p-1.5 rounded-lg bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-600 border border-slate-200 transition-colors inline-flex items-center justify-center cursor-pointer"
                               title="ترمیم کریں"
                             >
                               <Edit3 className="w-3.5 h-3.5" />
-                            </button>
+                            </a>
                             <a
                               href={`/${art.slug || art.id}`}
                               target="_blank"
@@ -6725,45 +6805,45 @@ export default function AdminCMS({
                     </h3>
 
                     <div className="grid grid-cols-2 gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => setAdminTab('settings')}
-                        className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-blue-400 text-right transition-all group"
+                      <a
+                        href="?tab=settings"
+                        onClick={(e) => handleNavClick(e, 'settings')}
+                        className="block p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-blue-400 text-right transition-all group cursor-pointer"
                       >
                         <Settings className="w-4 h-4 text-blue-600 mb-1.5 group-hover:scale-110 transition-transform" />
                         <span className="block text-xs font-bold text-slate-800">ویب سائٹ ترتیبات</span>
                         <span className="text-[10px] text-slate-500">لوگو، ہوم پیج، اشتہارات</span>
-                      </button>
+                      </a>
 
-                      <button
-                        type="button"
-                        onClick={() => setAdminTab('media')}
-                        className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-purple-400 text-right transition-all group"
+                      <a
+                        href="?tab=media"
+                        onClick={(e) => handleNavClick(e, 'media')}
+                        className="block p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-purple-400 text-right transition-all group cursor-pointer"
                       >
                         <ImageIcon className="w-4 h-4 text-purple-600 mb-1.5 group-hover:scale-110 transition-transform" />
                         <span className="block text-xs font-bold text-slate-800">میڈیا لائبریری</span>
                         <span className="text-[10px] text-slate-500">تصاویر اپلوڈ اور انتظام</span>
-                      </button>
+                      </a>
 
-                      <button
-                        type="button"
-                        onClick={() => setAdminTab('doctors')}
-                        className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-emerald-400 text-right transition-all group"
+                      <a
+                        href="?tab=doctors"
+                        onClick={(e) => handleNavClick(e, 'doctors')}
+                        className="block p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-emerald-400 text-right transition-all group cursor-pointer"
                       >
                         <UserCheck className="w-4 h-4 text-emerald-600 mb-1.5 group-hover:scale-110 transition-transform" />
                         <span className="block text-xs font-bold text-slate-800">اطباء کا جائزہ</span>
                         <span className="text-[10px] text-slate-500">نئی درخواستیں منظور کریں</span>
-                      </button>
+                      </a>
 
-                      <button
-                        type="button"
-                        onClick={() => setAdminTab('migration')}
-                        className="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-amber-400 text-right transition-all group"
+                      <a
+                        href="?tab=migration"
+                        onClick={(e) => handleNavClick(e, 'migration')}
+                        className="block p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-amber-400 text-right transition-all group cursor-pointer"
                       >
                         <Database className="w-4 h-4 text-amber-600 mb-1.5 group-hover:scale-110 transition-transform" />
                         <span className="block text-xs font-bold text-slate-800">مائیگریشن ٹول</span>
                         <span className="text-[10px] text-slate-500">ورڈپریس ڈیٹا بیک اپ</span>
-                      </button>
+                      </a>
                     </div>
                   </div>
 
@@ -6790,13 +6870,14 @@ export default function AdminCMS({
                   </p>
                 </div>
 
-                <button
-                  onClick={handleOpenNewArticle}
-                  className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md font-simple"
+                <a
+                  href="?tab=new-article"
+                  onClick={(e) => handleNavClick(e, 'new-article', handleOpenNewArticle)}
+                  className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md font-simple cursor-pointer"
                 >
                   <PlusCircle className="w-4 h-4" />
                   <span>نیا مضمون لکھیں</span>
-                </button>
+                </a>
               </div>
 
               {/* Filters & WordPress-Style Pagination Bar (Top) */}
@@ -6990,7 +7071,7 @@ export default function AdminCMS({
                             <div className="flex items-center gap-3">
                               <img src={art.featuredImage || siteSettings?.defaultArticleImage} alt="" className="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0" />
                               <div>
-                                <span onClick={() => handleEditArticle(art)} className="font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-h2 text-base">
+                                <a href={`?tab=new-article&edit=${art.id}`} onClick={(e) => handleNavClick(e, 'new-article', () => handleEditArticle(art))} className="font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-h2 text-base inline-block">
                                   {art.title}
                                   {art.status === 'scheduled' && (
                                     <span className="mr-2 text-xs font-sans text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
@@ -7007,9 +7088,9 @@ export default function AdminCMS({
                                       — پرائیویٹ
                                     </span>
                                   )}
-                                </span>
+                                </a>
                                 <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
-                                  <span onClick={() => handleEditArticle(art)} className="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline">Edit</span>
+                                  <a href={`?tab=new-article&edit=${art.id}`} onClick={(e) => handleNavClick(e, 'new-article', () => handleEditArticle(art))} className="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline">Edit</a>
                                   <span onClick={() => handleDeleteArticle(art.id)} className="text-red-600 hover:text-red-800 cursor-pointer hover:underline">Trash</span>
                                   <a href={`/${art.slug || art.id}`} target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-800 hover:underline">View</a>
                                 </div>
@@ -9666,13 +9747,14 @@ export default function AdminCMS({
                   </p>
                 </div>
 
-                <button
-                  onClick={handleOpenNewPage}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md font-simple"
+                <a
+                  href="?tab=new-page"
+                  onClick={(e) => handleNavClick(e, 'new-page', handleOpenNewPage)}
+                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all shadow-md font-simple cursor-pointer"
                 >
                   <PlusCircle className="w-4 h-4" />
                   <span>نیا صفحہ بنائیں (Add New Page)</span>
-                </button>
+                </a>
               </div>
 
               {/* Pages WordPress Style Table */}
@@ -9694,11 +9776,11 @@ export default function AdminCMS({
                           <input type="checkbox" className="rounded border-slate-300 bg-white text-blue-600" />
                         </td>
                         <td className="px-4 py-4">
-                          <span onClick={() => handleEditPage(page)} className="font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-h2 text-base">
+                          <a href={`?tab=new-page&editPage=${page.id}`} onClick={(e) => handleNavClick(e, 'new-page', () => handleEditPage(page))} className="font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-h2 text-base inline-block">
                             {page.level === 2 ? '— — ' : page.level === 1 ? '— ' : ''}{page.title}
-                          </span>
+                          </a>
                           <div className="flex items-center gap-3 text-[11px] text-slate-500 mt-1 opacity-0 group-hover:opacity-100 transition-opacity font-bold">
-                            <span onClick={() => handleEditPage(page)} className="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline">Edit</span>
+                            <a href={`?tab=new-page&editPage=${page.id}`} onClick={(e) => handleNavClick(e, 'new-page', () => handleEditPage(page))} className="text-blue-600 hover:text-blue-800 cursor-pointer hover:underline">Edit</a>
                             <span onClick={() => {
                               if (window.confirm('کیا آپ واقعی یہ صفحہ ڈیلیٹ کرنا چاہتے ہیں؟')) {
                                 const nextPages = pagesList.filter(p => p.id !== page.id);
