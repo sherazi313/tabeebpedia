@@ -147,6 +147,7 @@ import {
   formatScheduledDateUrdu 
 } from '../utils/postVisibility';
 import RichTextEditor from './RichTextEditor';
+import { compressImage } from '../utils/imageCompressor';
 
 // Helper to generate clean, high-contrast HTML for PDF Books library page
 export const generatePdfBooksPageHtml = (books = []) => {
