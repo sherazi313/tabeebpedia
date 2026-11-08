@@ -4032,11 +4032,6 @@ export default function AdminCMS({
                     <LayoutDashboard className={`w-4 h-4 ${adminTab === 'dashboard' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
                     <span>Dashboard</span>
                   </div>
-                  {analyticsData?.activeNow > 0 && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold bg-[#0073aa] text-white border border-blue-400/30">
-                      {analyticsData.activeNow}
-                    </span>
-                  )}
                 </a>
 
                 {/* 2. Posts */}
@@ -4401,6 +4396,16 @@ export default function AdminCMS({
             </div>
 
             <div className="flex items-center gap-2.5">
+              {/* Live Visitors Proper Badge in Header */}
+              <div 
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-bold font-sans shadow-2xs"
+                title="اس وقت ویب سائٹ پر لائیو موجود وزٹرز"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+                <span>لائیو وزٹرز:</span>
+                <span className="font-mono font-bold text-emerald-700">{analyticsData?.activeNow || 1}</span>
+              </div>
+
               <a
                 href="/"
                 target="_blank"
