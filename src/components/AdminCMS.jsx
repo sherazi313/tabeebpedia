@@ -4237,6 +4237,22 @@ export default function AdminCMS({
                     <MessageCircle className={`w-4 h-4 ${adminTab === 'comments' ? 'text-white' : 'text-[#a7aaad] group-hover:text-white'}`} />
                     <span>Comments</span>
                   </div>
+                  {(() => {
+                    let pendingCount = 0;
+                    (articlesList || []).forEach(a => {
+                      if (Array.isArray(a.comments)) {
+                        pendingCount += a.comments.filter(c => c.status === 'pending').length;
+                      }
+                    });
+                    if (pendingCount > 0) {
+                      return (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold bg-amber-500 text-white" title="${pendingCount} نئے تبصرے منظوری کے منتظر ہیں">
+                          {pendingCount}
+                        </span>
+                      );
+                    }
+                    return null;
+                  })()}
                 </a>
 
                 {/* 8. Notifications */}
@@ -7526,26 +7542,36 @@ export default function AdminCMS({
                 if (a.id === articleId) {
                   return {
                     ...a,
-                    comments: a.comments.map(c => c.id === commentId ? { ...c, status: 'approved' } : c)
+                    comments: (a.comments || []).map(c => c.id === commentId ? { ...c, status: 'approved' } : c)
                   };
                 }
                 return a;
               });
               setArticlesList(updatedArticles);
+              try {
+                localStorage.setItem('tabeeb_articles', JSON.stringify(updatedArticles));
+                saveArticlesApi(updatedArticles);
+              } catch(e) {}
+              showNotification('تبصرہ منظور کر لیا گیا ہے اور آرٹیکل پر لائیو کر دیا گیا ہے!');
             };
 
             const handleReject = (commentId, articleId) => {
-              if(!confirm('Are you sure you want to delete this comment?')) return;
+              if(!confirm('کیا آپ واقعی یہ تبصرہ حذف کرنا چاہتے ہیں؟')) return;
               const updatedArticles = articlesList.map(a => {
                 if (a.id === articleId) {
                   return {
                     ...a,
-                    comments: a.comments.filter(c => c.id !== commentId)
+                    comments: (a.comments || []).filter(c => c.id !== commentId)
                   };
                 }
                 return a;
               });
               setArticlesList(updatedArticles);
+              try {
+                localStorage.setItem('tabeeb_articles', JSON.stringify(updatedArticles));
+                saveArticlesApi(updatedArticles);
+              } catch(e) {}
+              showNotification('تبصرہ کامیابی سے حذف کر دیا گیا!');
             };
 
             return (
