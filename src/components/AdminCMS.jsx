@@ -840,7 +840,7 @@ export default function AdminCMS({
         setMediaList(prev => {
           const exists = prev.some(m => m && m.url === newMedia.url);
           if (exists) return prev;
-          const updated = [newMedia, ...prev];
+          const updated = [newMedia, ...safePrev];
           try {
             saveMediaApi(updated);
             localStorage.setItem('tabeeb_media_library', JSON.stringify(updated.slice(0, 300)));
@@ -883,7 +883,11 @@ export default function AdminCMS({
     for (const file of files) {
       try {
         const comp = await compressImage(file, { maxDimension: 1400, quality: 0.82 });
-        const uploadedUrl = (await uploadImageApi(comp.file)) || comp.dataUrl;
+        const uploadedUrl = (await uploadImageApi(comp.file || comp.dataUrl, {
+          name: file.name,
+          attachedTo: 'میڈیا لائبریری',
+          source: 'media_tab'
+        })) || comp.dataUrl;
         if (uploadedUrl) {
           uploadedItems.push({
             id: 'media-up-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
@@ -901,7 +905,8 @@ export default function AdminCMS({
 
     if (uploadedItems.length > 0) {
       setMediaList(prev => {
-        const updated = [...uploadedItems, ...prev];
+        const safePrev = Array.isArray(prev) ? prev : [];
+        const updated = [...uploadedItems, ...safePrev];
         saveMediaApi(updated);
         return updated;
       });
@@ -1747,7 +1752,7 @@ export default function AdminCMS({
     showNotification('صفحے کی تصویر اپلوڈ کی جا رہی ہے...');
     try {
       const comp = await compressImage(file, { maxDimension: 1400, quality: 0.85 });
-      const uploadedUrl = (await uploadImageApi(comp.file, {
+      const uploadedUrl = (await uploadImageApi(comp.file || comp.dataUrl, {
         name: file.name,
         attachedTo: `صفحہ: ${pageForm.title || 'صفحہ'}`,
         source: 'page_thumbnail'
@@ -1765,9 +1770,10 @@ export default function AdminCMS({
       };
 
       setMediaList(prev => {
-        const seen = new Set(prev.map(m => m && m.url));
-        if (seen.has(uploadedUrl)) return prev;
-        const updated = [newMedia, ...prev];
+        const safePrev = Array.isArray(prev) ? prev : [];
+        const seen = new Set(safePrev.map(m => m && m.url));
+        if (seen.has(uploadedUrl)) return safePrev;
+        const updated = [newMedia, ...safePrev];
         saveMediaApi(updated);
         try {
           localStorage.setItem('tabeeb_media_library', JSON.stringify(updated.slice(0, 300)));
@@ -3002,7 +3008,8 @@ export default function AdminCMS({
         source: 'article_save'
       };
       setMediaList(prev => {
-        const seen = new Set(prev.map(m => m && m.url));
+        const safePrev = Array.isArray(prev) ? prev : [];
+        const seen = new Set(safePrev.map(m => m && m.url));
         if (seen.has(articleForm.featuredImage)) return prev;
         const updated = [artMedia, ...prev];
         saveMediaApi(updated);
@@ -3059,7 +3066,7 @@ export default function AdminCMS({
     showNotification('تصویر کمپریس اور اپلوڈ کی جا رہی ہے...');
     try {
       const comp = await compressImage(file, { maxDimension: 1400, quality: 0.85 });
-      const uploadedUrl = (await uploadImageApi(comp.file, {
+      const uploadedUrl = (await uploadImageApi(comp.file || comp.dataUrl, {
         name: file.name,
         attachedTo: `مضمون: ${articleForm.title || 'ڈرافٹ مضمون'}`,
         source: 'article_thumbnail'
@@ -3081,9 +3088,10 @@ export default function AdminCMS({
       };
 
       setMediaList(prev => {
-        const seen = new Set(prev.map(m => m && m.url));
-        if (seen.has(uploadedUrl)) return prev;
-        const updated = [newMedia, ...prev];
+        const safePrev = Array.isArray(prev) ? prev : [];
+        const seen = new Set(safePrev.map(m => m && m.url));
+        if (seen.has(uploadedUrl)) return safePrev;
+        const updated = [newMedia, ...safePrev];
         saveMediaApi(updated);
         try {
           localStorage.setItem('tabeeb_media_library', JSON.stringify(updated.slice(0, 300)));
@@ -3691,7 +3699,7 @@ export default function AdminCMS({
         ? `مضمون: ${articleForm.title || 'ڈرافٹ مضمون'}`
         : (mediaModalTarget === 'page_featured_image' ? `صفحہ: ${pageForm.title || 'صفحہ'}` : 'مضمون مواد');
 
-      const uploadedUrl = (await uploadImageApi(comp.file, {
+      const uploadedUrl = (await uploadImageApi(comp.file || comp.dataUrl, {
         name: file.name,
         attachedTo: attachedDescription,
         source: 'modal_upload'
@@ -3707,9 +3715,10 @@ export default function AdminCMS({
       };
 
       setMediaList(prev => {
-        const seen = new Set(prev.map(m => m && m.url));
-        if (seen.has(uploadedUrl)) return prev;
-        const updated = [newMedia, ...prev];
+        const safePrev = Array.isArray(prev) ? prev : [];
+        const seen = new Set(safePrev.map(m => m && m.url));
+        if (seen.has(uploadedUrl)) return safePrev;
+        const updated = [newMedia, ...safePrev];
         saveMediaApi(updated);
         try {
           localStorage.setItem('tabeeb_media_library', JSON.stringify(updated.slice(0, 300)));

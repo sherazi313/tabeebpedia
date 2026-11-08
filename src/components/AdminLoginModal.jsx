@@ -103,6 +103,8 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess, siteS
         if (res.token) {
           sessionStorage.setItem('tabeeb_admin_token', res.token);
           sessionStorage.setItem('tabeeb_admin_auth', 'true');
+          localStorage.setItem('tabeeb_admin_token', res.token);
+          localStorage.setItem('tabeeb_admin_auth', 'true');
         }
         if (onLoginSuccess) {
           onLoginSuccess(res);
@@ -141,6 +143,8 @@ export default function AdminLoginModal({ isOpen, onClose, onLoginSuccess, siteS
         if (res.token) {
           sessionStorage.setItem('tabeeb_admin_token', res.token);
           sessionStorage.setItem('tabeeb_admin_auth', 'true');
+          localStorage.setItem('tabeeb_admin_token', res.token);
+          localStorage.setItem('tabeeb_admin_auth', 'true');
         }
         if (res.device_token) {
           localStorage.setItem('tabeeb_2fa_device_token', res.device_token);

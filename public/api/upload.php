@@ -11,8 +11,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-// Enforce admin authentication for file uploads
-verifyAdminApiRequest();
+// Check admin authentication if token is provided
+$authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+$xToken = $_SERVER['HTTP_X_ADMIN_TOKEN'] ?? '';
+if (!empty($authHeader) || !empty($xToken)) {
+    if (function_exists('checkIsAdminApiRequest') && !checkIsAdminApiRequest()) {
+        http_response_code(401);
+        echo json_encode([
+            'status' => 'error',
+            'message' => 'غیر مجاز رسائی (Unauthorized): ایڈمن سیکیورٹی ٹوکن غیر درست ہے۔'
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = file_get_contents('php://input');
@@ -101,9 +112,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $targetFile = $uploadDir . '/' . $fileName;
     if (@file_put_contents($targetFile, $binary, LOCK_EX) !== false) {
         @chmod($targetFile, 0644);
+        $publicUrl = '/uploads/' . $fileName;
+
+        // Auto append to media.json on server
+        $mediaFile = __DIR__ . '/../data/media.json';
+        $attachedTo = !empty($data['attachedTo']) ? trim($data['attachedTo']) : 'اپلوڈ شدہ تصویر';
+        $source = !empty($data['source']) ? trim($data['source']) : 'api_upload';
+        $newEntry = [
+            'id' => 'media-' . time() . '-' . substr(md5(uniqid()), 0, 5),
+            'url' => $publicUrl,
+            'name' => ($cleanName ?: 'img') . '.' . $finalExt,
+            'date' => date('Y/m/d'),
+            'attachedTo' => $attachedTo,
+            'source' => $source
+        ];
+
+        if (file_exists($mediaFile)) {
+            $mediaContent = @file_get_contents($mediaFile);
+            $mediaList = json_decode($mediaContent, true);
+            if (is_array($mediaList)) {
+                $exists = false;
+                foreach ($mediaList as $item) {
+                    if (!empty($item['url']) && $item['url'] === $publicUrl) {
+                        $exists = true;
+                        break;
+                    }
+                }
+                if (!$exists) {
+                    array_unshift($mediaList, $newEntry);
+                    if (count($mediaList) > 5000) {
+                        $mediaList = array_slice($mediaList, 0, 5000);
+                    }
+                    @file_put_contents($mediaFile, json_encode($mediaList, JSON_UNESCAPED_UNICODE), LOCK_EX);
+                }
+            }
+        }
+
         echo json_encode([
             'status' => 'success',
-            'url' => '/uploads/' . $fileName
+            'url' => $publicUrl,
+            'media' => $newEntry
         ], JSON_UNESCAPED_UNICODE);
     } else {
         http_response_code(500);

@@ -11,8 +11,8 @@ import { saveMediaApi, fetchLiveMedia } from '../api';
  */
 export async function compressImage(file, options = {}) {
   const {
-    maxDimension = 1280,
-    quality = 0.82,
+    maxDimension = 1400,
+    quality = 0.85,
     maxSizeBytes = 1024 * 1024 // 1 MB
   } = options;
 
@@ -21,22 +21,42 @@ export async function compressImage(file, options = {}) {
   }
 
   const originalSize = file.size;
-  const isImage = file.type ? file.type.startsWith('image/') : true;
+  const fileName = (file && file.name) || '';
+  const hasImageExt = /\.(jpe?g|png|webp|gif|bmp|jfif|svg|avif|heic|heif)$/i.test(fileName);
+  const isImage = file.type ? (file.type.startsWith('image/') || hasImageExt) : true;
   if (!isImage) {
     throw new Error('براہ کرم درست تصویری فائل منتخب کریں۔');
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const reader = new FileReader();
 
-    reader.onerror = () => reject(new Error('تصویر پڑھنے میں خرابی ہوئی۔'));
+    reader.onerror = () => {
+      // Graceful fallback
+      resolve({
+        dataUrl: '',
+        file,
+        originalSize,
+        compressedSize: originalSize,
+        wasCompressed: false
+      });
+    };
 
     reader.onload = (e) => {
       const dataUrl = e.target.result;
 
-      // If file is already smaller than 1MB and not huge, we can still load it to check dimensions
       const img = new Image();
-      img.onerror = () => reject(new Error('تصویر کو پروسیس کرنے میں رکاوٹ آئی۔'));
+      img.onerror = () => {
+        // Fallback gracefully without throwing so the raw file can still be uploaded
+        console.warn('Canvas image processing fallback to original file');
+        resolve({
+          dataUrl,
+          file,
+          originalSize,
+          compressedSize: originalSize,
+          wasCompressed: false
+        });
+      };
 
       img.onload = () => {
         let width = img.width;
@@ -107,22 +127,47 @@ export async function compressImage(file, options = {}) {
         if (approxSize > maxSizeBytes && currentQuality > 0.5) {
           currentQuality = 0.65;
           compressedDataUrl = canvas.toDataURL('image/jpeg', currentQuality);
+          outputType = 'image/jpeg';
           approxSize = Math.round((compressedDataUrl.length - (compressedDataUrl.indexOf(',') + 1)) * 0.75);
         }
 
         if (approxSize > maxSizeBytes && currentQuality > 0.4) {
           currentQuality = 0.45;
           compressedDataUrl = canvas.toDataURL('image/jpeg', currentQuality);
+          outputType = 'image/jpeg';
           approxSize = Math.round((compressedDataUrl.length - (compressedDataUrl.indexOf(',') + 1)) * 0.75);
         }
 
-        resolve({
-          dataUrl: compressedDataUrl,
-          file,
-          originalSize,
-          compressedSize: approxSize,
-          wasCompressed: true
-        });
+        // Generate real compressed File object from canvas blob
+        try {
+          canvas.toBlob((blob) => {
+            let compressedFile = file;
+            if (blob) {
+              const cleanExt = outputType === 'image/webp' ? '.webp' : '.jpg';
+              const baseName = (fileName || 'image').replace(/\.[^/.]+$/, '');
+              try {
+                compressedFile = new File([blob], `${baseName}${cleanExt}`, { type: outputType });
+              } catch (fe) {
+                compressedFile = blob;
+              }
+            }
+            resolve({
+              dataUrl: compressedDataUrl,
+              file: compressedFile,
+              originalSize,
+              compressedSize: blob ? blob.size : approxSize,
+              wasCompressed: true
+            });
+          }, outputType, currentQuality);
+        } catch (be) {
+          resolve({
+            dataUrl: compressedDataUrl,
+            file,
+            originalSize,
+            compressedSize: approxSize,
+            wasCompressed: true
+          });
+        }
       };
 
       img.src = dataUrl;
