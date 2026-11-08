@@ -1345,7 +1345,7 @@ export default function AdminCMS({
     featuredImage: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80',
     imageType: 'url', // 'url' or 'upload'
     tags: 'طب یونانی, جڑی بوٹیاں, صحت',
-    author: 'حکیم محمد طارق محمود',
+    author: 'حکیم سید عبدالوہاب شاہ',
     readingTime: '5 منٹ',
     sendPushNotification: true,
   });
@@ -2809,7 +2809,7 @@ export default function AdminCMS({
       featuredImage: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&w=800&q=80',
       imageType: 'url',
       tags: 'طب یونانی, جڑی بوٹیاں',
-      author: 'حکیم محمد طارق محمود',
+      author: 'حکیم سید عبدالوہاب شاہ',
       readingTime: '5 منٹ',
       sendPushNotification: true,
     });
@@ -2842,7 +2842,7 @@ export default function AdminCMS({
       featuredImage: art.featuredImage || '',
       imageType: 'url',
       tags: Array.isArray(art.tags) ? art.tags.join(', ') : (art.tags || ''),
-      author: art.author || 'حکیم محمد طارق محمود',
+      author: art.author || 'حکیم سید عبدالوہاب شاہ',
       readingTime: art.readingTime || '5 منٹ',
     });
     setEditorMode('visual');
