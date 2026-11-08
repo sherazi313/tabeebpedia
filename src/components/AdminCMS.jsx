@@ -371,51 +371,6 @@ export default function AdminCMS({
     if (onBackToWebsite) onBackToWebsite();
   };
 
-  // Listen for edit query param if page opened in new tab with ?tab=new-article&edit=123
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const p = new URLSearchParams(window.location.search);
-      const editId = p.get('edit');
-      if (editId && articlesList && articlesList.length > 0) {
-        const found = articlesList.find(a => String(a.id) === String(editId) || a.slug === editId);
-        if (found && editingArticleId !== found.id) {
-          handleEditArticle(found);
-        }
-      }
-    } catch (e) {}
-  }, [articlesList]);
-
-  // Listen for edit page query param if page opened in new tab with ?tab=new-page&editPage=123
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const p = new URLSearchParams(window.location.search);
-      const editPageId = p.get('editPage');
-      if (editPageId && pagesList && pagesList.length > 0) {
-        const found = pagesList.find(pg => String(pg.id) === String(editPageId) || pg.slug === editPageId);
-        if (found && editingPageId !== found.id) {
-          handleEditPage(found);
-        }
-      }
-    } catch (e) {}
-  }, [pagesList]);
-
-  // Listen for edit doctor query param if opened in new tab with ?tab=doctors&editDoctor=123
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const p = new URLSearchParams(window.location.search);
-      const editDoctorId = p.get('editDoctor');
-      if (editDoctorId && doctorsList && doctorsList.length > 0) {
-        const found = doctorsList.find(d => String(d.id) === String(editDoctorId) || d.slug === editDoctorId);
-        if (found && editingDoctorId !== found.id) {
-          handleEditDoctor(found);
-        }
-      }
-    } catch (e) {}
-  }, [doctorsList]);
-
   // Real-Time Visitor & Page Views Analytics State
   const [analyticsData, setAnalyticsData] = useState(null);
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
@@ -466,14 +421,8 @@ export default function AdminCMS({
         const url = new URL(window.location.href);
         if (adminTab !== 'dashboard') {
           url.searchParams.set('tab', adminTab);
-          if (adminTab === 'new-article' && editingArticleId) {
-            url.searchParams.set('edit', editingArticleId);
-          } else {
-            url.searchParams.delete('edit');
-          }
         } else {
           url.searchParams.delete('tab');
-          url.searchParams.delete('edit');
         }
         window.history.replaceState(null, '', url.pathname + url.search + url.hash);
       }
