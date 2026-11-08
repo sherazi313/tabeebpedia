@@ -4395,32 +4395,57 @@ export default function AdminCMS({
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5">
-              {/* Live Visitors Proper Badge in Header */}
-              <div 
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-bold font-sans shadow-2xs"
-                title="اس وقت ویب سائٹ پر لائیو موجود وزٹرز"
+            <div className="flex items-center gap-2 sm:gap-2.5 flex-nowrap">
+              {/* 1. New Article Action Link */}
+              <a
+                href="?tab=new-article"
+                onClick={(e) => handleNavClick(e, 'new-article', handleOpenNewArticle)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border font-simple cursor-pointer shadow-2xs shrink-0 ${
+                  adminTab === 'new-article'
+                    ? 'bg-emerald-600 text-white border-emerald-700'
+                    : 'bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border-slate-300'
+                }`}
+                title="نیا مضمون تحریر کریں"
               >
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
-                <span>لائیو وزٹرز:</span>
-                <span className="font-mono font-bold text-emerald-700">{analyticsData?.activeNow || 1}</span>
-              </div>
+                <PlusCircle className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="hidden sm:inline">نیا مضمون لکھیں</span>
+                <span className="sm:hidden">مضمون +</span>
+              </a>
 
+              {/* 2. New Page Action Link */}
+              <a
+                href="?tab=new-page"
+                onClick={(e) => handleNavClick(e, 'new-page')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border font-simple cursor-pointer shadow-2xs shrink-0 ${
+                  adminTab === 'new-page'
+                    ? 'bg-blue-600 text-white border-blue-700'
+                    : 'bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 border-slate-300'
+                }`}
+                title="نیا صفحہ بنائیں"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-blue-600" />
+                <span className="hidden sm:inline">نیا صفحہ بنائیں</span>
+                <span className="sm:hidden">صفحہ +</span>
+              </a>
+
+              {/* 3. Visit Live Website */}
               <a
                 href="/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#2271b1] hover:bg-[#135e96] text-white rounded-lg text-xs font-bold transition-all font-simple cursor-pointer shadow-xs"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2271b1] hover:bg-[#135e96] text-white rounded-lg text-xs font-bold transition-all font-simple cursor-pointer shadow-xs shrink-0"
+                title="ویب سائٹ وزٹ کریں (Live Site)"
               >
                 <Globe className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">ویب سائٹ وزٹ کریں</span>
                 <span className="sm:hidden">ویب سائٹ</span>
               </a>
 
+              {/* 4. Notifications */}
               <a
                 href="?tab=notifications"
                 onClick={(e) => handleNavClick(e, 'notifications')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border font-simple cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border font-simple cursor-pointer shrink-0 ${
                   adminTab === 'notifications'
                     ? 'bg-emerald-600 text-white border-emerald-700'
                     : 'bg-white text-emerald-800 border-emerald-300 hover:bg-emerald-50'
@@ -4430,6 +4455,16 @@ export default function AdminCMS({
                 <Bell className="w-3.5 h-3.5 text-emerald-600" />
                 <span className="hidden md:inline">نوٹیفکیشنز</span>
               </a>
+
+              {/* 5. Live Online Visitors Badge */}
+              <div 
+                className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-bold font-sans shadow-2xs shrink-0"
+                title="اس وقت ویب سائٹ پر لائیو موجود وزٹرز"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+                <span>لائیو:</span>
+                <span className="font-mono font-bold text-emerald-700">{analyticsData?.activeNow || 1}</span>
+              </div>
 
               <button
                 type="button"
@@ -6139,48 +6174,18 @@ export default function AdminCMS({
             <div className="space-y-7">
               
               {/* Dashboard Welcome Header (WordPress Style as in E-Islamic Books) */}
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-1">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500 font-sans">
-                      Tabeeb Pedia CMS v2.5 / ورڈپریس طرز ایڈمن کنٹرول سینٹر
-                    </span>
-                  </div>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-simple mt-1">
-                    ڈیش بورڈ (Dashboard)
-                  </h2>
-                  <p className="text-xs sm:text-sm text-slate-600 mt-1 font-sans">
-                    خوش آمدید، حکیم سید عبد الوہاب شاہ صاحب! یہاں آپ کی ویب سائٹ کی تمام اہم سرگرمیاں، رئیل ٹائم وزٹرز اور سمریز موجود ہیں۔
-                  </p>
+              <div className="pb-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-500 font-sans">
+                    Tabeeb Pedia CMS v2.5 / ورڈپریس طرز ایڈمن کنٹرول سینٹر
+                  </span>
                 </div>
-
-                <div className="flex flex-wrap items-center gap-2.5">
-                  <a
-                    href="/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2 bg-[#2271b1] hover:bg-[#135e96] active:scale-95 text-white rounded-full text-xs font-bold shadow-xs transition-all font-simple cursor-pointer"
-                  >
-                    <Globe className="w-4 h-4" />
-                    <span>ویب سائٹ وزٹ کریں (Visit Site)</span>
-                  </a>
-                  <a
-                    href="?tab=new-article"
-                    onClick={(e) => handleNavClick(e, 'new-article', handleOpenNewArticle)}
-                    className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 rounded-full text-xs font-bold border border-slate-300 shadow-2xs transition-all font-simple cursor-pointer"
-                  >
-                    <PlusCircle className="w-4 h-4 text-emerald-600" />
-                    <span>نیا مضمون لکھیں</span>
-                  </a>
-                  <a
-                    href="?tab=new-page"
-                    onClick={(e) => handleNavClick(e, 'new-page')}
-                    className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 rounded-full text-xs font-bold border border-slate-300 shadow-2xs transition-all font-simple cursor-pointer"
-                  >
-                    <BookOpen className="w-4 h-4 text-blue-600" />
-                    <span>نیا صفحہ بنائیں</span>
-                  </a>
-                </div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 font-simple mt-1">
+                  ڈیش بورڈ (Dashboard)
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 mt-1 font-sans">
+                  خوش آمدید، حکیم سید عبد الوہاب شاہ صاحب! یہاں آپ کی ویب سائٹ کی تمام اہم سرگرمیاں، رئیل ٹائم وزٹرز اور سمریز موجود ہیں۔
+                </p>
               </div>
 
               {/* At a Glance (ایک نظر میں - WordPress Style Primary Widgets) */}
