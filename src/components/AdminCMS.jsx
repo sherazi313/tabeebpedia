@@ -838,8 +838,9 @@ export default function AdminCMS({
       const newMedia = e?.detail;
       if (newMedia && newMedia.url) {
         setMediaList(prev => {
-          const exists = prev.some(m => m && m.url === newMedia.url);
-          if (exists) return prev;
+          const safePrev = Array.isArray(prev) ? prev : [];
+          const exists = safePrev.some(m => m && m.url === newMedia.url);
+          if (exists) return safePrev;
           const updated = [newMedia, ...safePrev];
           try {
             saveMediaApi(updated);
@@ -883,7 +884,7 @@ export default function AdminCMS({
     for (const file of files) {
       try {
         const comp = await compressImage(file, { maxDimension: 1400, quality: 0.82 });
-        const uploadedUrl = (await uploadImageApi(comp.file || comp.dataUrl, {
+        const uploadedUrl = (await uploadImageApi(comp.dataUrl || comp.file, {
           name: file.name,
           attachedTo: 'میڈیا لائبریری',
           source: 'media_tab'
@@ -1184,7 +1185,7 @@ export default function AdminCMS({
       }
     } catch (err) {
       console.error(err);
-      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا');
+      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا: ' + (err?.message || 'دوبارہ کوشش کریں'));
     } finally {
       setIsAdminUploadingGallery(false);
       if (adminDoctorGalleryFileRef.current) adminDoctorGalleryFileRef.current.value = '';
@@ -1206,7 +1207,7 @@ export default function AdminCMS({
       }
     } catch (err) {
       console.error(err);
-      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا');
+      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا: ' + (err?.message || 'دوبارہ کوشش کریں'));
     } finally {
       setIsAdminUploadingAvatar(false);
       if (adminDoctorAvatarFileRef.current) adminDoctorAvatarFileRef.current.value = '';
@@ -1752,7 +1753,7 @@ export default function AdminCMS({
     showNotification('صفحے کی تصویر اپلوڈ کی جا رہی ہے...');
     try {
       const comp = await compressImage(file, { maxDimension: 1400, quality: 0.85 });
-      const uploadedUrl = (await uploadImageApi(comp.file || comp.dataUrl, {
+      const uploadedUrl = (await uploadImageApi(comp.dataUrl || comp.file, {
         name: file.name,
         attachedTo: `صفحہ: ${pageForm.title || 'صفحہ'}`,
         source: 'page_thumbnail'
@@ -1788,7 +1789,7 @@ export default function AdminCMS({
       showNotification('صفحے کی نمایاں تصویر کامیابی سے اپلوڈ ہو گئی اور میڈیا لائبریری میں شامل ہو گئی!');
     } catch (err) {
       console.error(err);
-      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا');
+      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا: ' + (err?.message || 'دوبارہ کوشش کریں'));
     } finally {
       if (e.target) e.target.value = '';
     }
@@ -3066,7 +3067,7 @@ export default function AdminCMS({
     showNotification('تصویر کمپریس اور اپلوڈ کی جا رہی ہے...');
     try {
       const comp = await compressImage(file, { maxDimension: 1400, quality: 0.85 });
-      const uploadedUrl = (await uploadImageApi(comp.file || comp.dataUrl, {
+      const uploadedUrl = (await uploadImageApi(comp.dataUrl || comp.file, {
         name: file.name,
         attachedTo: `مضمون: ${articleForm.title || 'ڈرافٹ مضمون'}`,
         source: 'article_thumbnail'
@@ -3106,7 +3107,7 @@ export default function AdminCMS({
       showNotification('تصویر کامیابی کے ساتھ اپلوڈ ہو گئی اور میڈیا لائبریری میں شامل ہو گئی!');
     } catch (err) {
       console.error(err);
-      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا');
+      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا: ' + (err?.message || 'دوبارہ کوشش کریں'));
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
@@ -3699,7 +3700,7 @@ export default function AdminCMS({
         ? `مضمون: ${articleForm.title || 'ڈرافٹ مضمون'}`
         : (mediaModalTarget === 'page_featured_image' ? `صفحہ: ${pageForm.title || 'صفحہ'}` : 'مضمون مواد');
 
-      const uploadedUrl = (await uploadImageApi(comp.file || comp.dataUrl, {
+      const uploadedUrl = (await uploadImageApi(comp.dataUrl || comp.file, {
         name: file.name,
         attachedTo: attachedDescription,
         source: 'modal_upload'
@@ -3752,7 +3753,7 @@ export default function AdminCMS({
       }
     } catch (err) {
       console.error('Modal file upload error:', err);
-      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا');
+      showNotification('تصویر اپلوڈ کرنے میں مسئلہ آیا: ' + (err?.message || 'دوبارہ کوشش کریں'));
     } finally {
       if (mediaFileInputRef.current) mediaFileInputRef.current.value = '';
     }
