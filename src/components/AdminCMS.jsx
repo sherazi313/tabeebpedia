@@ -321,10 +321,9 @@ export default function AdminCMS({
         if (t) return t;
         const hash = window.location.hash ? window.location.hash.replace(/^#/, '').trim() : '';
         if (hash) return hash;
-        const sessionTab = sessionStorage.getItem('tabeeb_admin_active_tab');
-        if (sessionTab) return sessionTab;
-        const localTab = localStorage.getItem('tabeeb_admin_active_tab');
-        if (localTab) return localTab;
+        // Do not restore stale tab from storage across browser sessions; clean up legacy keys
+        localStorage.removeItem('tabeeb_admin_active_tab');
+        sessionStorage.removeItem('tabeeb_admin_active_tab');
       }
     } catch(e) {}
     return initialTab || 'dashboard';
@@ -460,8 +459,9 @@ export default function AdminCMS({
   useEffect(() => {
     if (!adminTab) return;
     try {
-      sessionStorage.setItem('tabeeb_admin_active_tab', adminTab);
-      localStorage.setItem('tabeeb_admin_active_tab', adminTab);
+      // Persist solely via URL search parameter (?tab=...) so closing browser doesn't bleed into next login
+      localStorage.removeItem('tabeeb_admin_active_tab');
+      sessionStorage.removeItem('tabeeb_admin_active_tab');
       if (typeof window !== 'undefined') {
         const url = new URL(window.location.href);
         if (adminTab !== 'dashboard') {

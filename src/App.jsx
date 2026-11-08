@@ -788,6 +788,14 @@ export default function App() {
     setActiveTab('admin');
     try {
       localStorage.setItem('tabeeb_active_tab', 'admin');
+      // Always reset to main dashboard on fresh login unless an explicit ?tab= was provided in URL
+      if (typeof window !== 'undefined') {
+        const p = new URLSearchParams(window.location.search);
+        if (!p.get('tab')) {
+          localStorage.removeItem('tabeeb_admin_active_tab');
+          sessionStorage.removeItem('tabeeb_admin_active_tab');
+        }
+      }
     } catch(e) {}
   };
 
